@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="./lib/docsify/lib/themes/vue.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      name: '',
+      repo: 'https://github.com/xzh-net/xzh-net.github.io',
+      loadNavbar: true,//右上菜单
+      loadSidebar: true,//目录
+      coverpage: true,//封面
+      auto2top: true,
+      maxLevel: 4,
+      subMaxLevel: 3,
+      mergeNavbar: true,
+      search: {
+        placeholder: '搜索',
+        noData: '找不到结果!',
+        depth: 3
+      },
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md',//防止意外回退
+        '/.*/_navbar.md': '/_navbar.md'
+      },
+      plugins: [
+        function(hook) {
+          var header = [
+            '<p>',
+            '<a target="_blank" href="https://www.aliyun.com/daily-act/ecs/activity_selection?userCode=nd6h19av">',
+            '<img src="/_images/aliyun_sale.png" alt="阿里云">',
+            '</a>',
+            '</p>'
+          ].join('');
+          var footer = [
+            '<hr/>',
+            '<footer style="text-align: center">',
+            '<span><a href="https://beian.miit.gov.cn" target="_blank">辽ICP备2021012844号</a></span>',
+            '</footer>'
+          ].join('');
+          hook.afterEach(function (html) {
+            var isReadme = window.location.href.indexOf("README");
+            if(isReadme===-1){
+              return html + header + footer;
+            }else{
+              return html + footer;
+            }
+          });
+        }
+      ]
+    }
+  </script>
+  <script src="./lib/docsify/lib/docsify.min.js"></script>
+  
+  <script src="./lib/docsify/lib/plugins/search.min.js"></script>
+  <script src="./lib/docsify/lib/plugins/zoom-image.min.js"></script>
+  <script src="./lib/docsify/lib/plugins/docsify-pagination.min.js"></script>
+  <script src="./lib/docsify/lib/plugins/docsify-copy-code.min.js"></script>
+
+  <script src="./lib/prismjs/components/prism-bash.min.js"></script>
+  <script src="./lib/prismjs/components/prism-java.min.js"></script>
+  <script src="./lib/prismjs/components/prism-sql.min.js"></script>
+  <script src="./lib/prismjs/components/prism-yaml.min.js"></script>
+</body>
+</html>
