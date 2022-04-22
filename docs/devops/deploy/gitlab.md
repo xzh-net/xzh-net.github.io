@@ -1,55 +1,22 @@
 # GitLab仓库搭建
 
-> GitLab是一款使用MIT许可证的基于网络的Git仓库管理工具，我们可以使用它来搭建自己的Git仓库，本文将介绍如何使用Gitlab在Linux下快速搭建Git仓库。
+## 1. 安装
 
-
-## 1. Gitlab服务端搭建
-
-### 1.1 下载Gitlab的Docker镜像
 
 ```bash
 docker pull gitlab/gitlab-ce
-```
+mkdir -p /mydata/gitlab/{config,logs,data}
 
-### 1.2 运行如下命令来启动Gitlab
-
-> 需要注意的是我们的Gitlab的http服务运行在宿主机的1080端口上，这里我们将Gitlab的配置，日志以及数据目录映射到了宿主机的指定文件夹下，防止我们在重新创建容器后丢失数据。
-
-```bash
-docker run --detach \
-  --publish 10443:443 --publish 1080:80 --publish 1022:22 \
-  --name gitlab \
+docker run -d --name gitlab\
+  -p 10443:443 -p 1080:80 -p 1022:22 \
   --restart always \
-  --volume /mydata/gitlab/config:/etc/gitlab \
-  --volume /mydata/gitlab/logs:/var/log/gitlab \
-  --volume /mydata/gitlab/data:/var/opt/gitlab \
+  -v /mydata/gitlab/config:/etc/gitlab \
+  -v /mydata/gitlab/logs:/var/log/gitlab \
+  -v /mydata/gitlab/data:/var/opt/gitlab \
   gitlab/gitlab-ce:latest
 ```
 
-### 1.3 开启防火墙的指定端口
-
-> 由于Gitlab运行在1080端口上，所以我们需要开放该端口，注意千万不要直接关闭防火墙，否则Gitlab会无法启动。
-
-```bash
-# 开启1080端口
-firewall-cmd --zone=public --add-port=1080/tcp --permanent 
-# 重启防火墙才能生效
-systemctl restart firewalld
-# 查看已经开放的端口
-firewall-cmd --list-ports
-```
-
-### 1.4 访问Gitlab
-- 访问地址：[http://192.168.3.200:1080/](http://192.168.3.200:1080/)
-- 由于Gitlab启动比较慢，需要耐心等待10分钟左右，如果Gitlab没有启动完成访问，会出现如下错误。
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_04.png)
-- 可以通过docker命令动态查看容器启动日志来知道gitlab是否已经启动完成。
-```bash
-docker logs gitlab -f
-```
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_05.png)
+?> http://192.168.3.200:1080/ 重置root账号
 
 
 ## 2. Gitlab的使用
