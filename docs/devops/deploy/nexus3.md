@@ -26,6 +26,21 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 
 ## 2. 配置
 
+
+默认仓库
+- maven-central：maven中央库，默认https://repo1.maven.org/maven2
+- maven-releases：私库发行版，首次安装请将Deployment policy设置为Allow redeploy
+- maven-snapshots：私库快照版本
+- maven-public：仓库组
+
+Nexus仓库类型
+- hosted：本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。
+- proxy：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
+- group：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
+```
+
+![](../../_images/devops/deploy/nexus3/repository_types.png)
+
 ### 2.1 创建Blob Stores
 
 ![](../../_images/devops/deploy/nexus3/create_blob.png)
@@ -33,8 +48,6 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 ![](../../_images/devops/deploy/nexus3/blob_list.png)
 
 ### 2.2 创建托管仓库
-
-![](../../_images/devops/deploy/nexus3/repository_types.png)
 
 ![](../../_images/devops/deploy/nexus3/repository_list.png)
 
@@ -58,7 +71,7 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 
 ![](../../_images/devops/deploy/nexus3/group_repository.png)
 
-### 2.5 Maven配置
+### 2.5 settings配置
 
 修改Maven的settings.xml文件，加入认证机制
 
@@ -66,22 +79,22 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 <!--nexus服务器,id为组仓库name-->
   <servers>  
     <server>  
-        <id>xzh_group</id>  
+        <id>xzh-group</id>  
         <username>admin</username>  
         <password>admin</password>  
     </server>
     <server>  
-        <id>xzh_hosted</id>  
+        <id>xzh-hosted</id>  
         <username>admin</username>  
         <password>admin</password>  
     </server>
     <server>  
-        <id>xzh_snapshots</id>  
+        <id>xzh-snapshots</id>  
         <username>admin</username>  
         <password>admin</password>  
     </server>
     <server>  
-        <id>xzh_releases</id>  
+        <id>xzh-releases</id>  
         <username>admin</username>  
         <password>admin</password>  
     </server>   
@@ -91,7 +104,7 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
     <mirror>  
         <id>xzh_group</id>  
         <name>xzh_group</name>  
-        <url>http://172.17.17.200:8081/repository/xzh_group/</url>  
+        <url>http://172.17.17.200:8081/repository/xzh-group/</url>  
         <mirrorOf>central</mirrorOf>  
     </mirror>     
   </mirrors>
@@ -109,7 +122,7 @@ mvn install:install-file -Dfile=D:\paoding-analysis.jar -DgroupId=net.paoding -D
 mvn install:install-file -Dfile=D:\ojdbc6.jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=10.2.0.5.0 -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true  
 mvn install:install-file -Dfile=D:/iTextAsian.jar -DgroupId=com.lowagie -DartifactId=itextasian -Dversion=1.0 -Dpackaging=jar 
 mvn install:install-file -Dfile=D:/tools.jar -DgroupId=com.sun2 -DartifactId=tools -Dversion=1.6.0 -Dpackaging=jar
-mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversion=2.3.0.RELEASE -Dpackaging=jar -Dfile=spring-boot-email-2.3.0.RELEASE.jar -Durl=http://172.17.17.200:8081/repository/xzh_hosted/ -DrepositoryId=xzh_hosted
+mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversion=2.3.0.RELEASE -Dpackaging=jar -Dfile=spring-boot-email-2.3.0.RELEASE.jar -Durl=http://172.17.17.200:8081/repository/xzh-hosted/ -DrepositoryId=xzh-hosted
 ```
 
 指令说明
@@ -123,47 +136,20 @@ mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversio
 - -DrepositoryId：仓库名称
 
 
-### 2.7 Idea上传本地项目至私有库
+### 2.7 Idea上传至私有库
 
 pom文件添加本地仓库的配置
 
 ```xml
-<repositories>
-    <repository>
-        <id>nexus</id>
-        <name>Nexus Repository</name>
-        <url>http://192.168.3.200:8181/repository/maven-public/</url>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-    </repository>
-</repositories>
-<pluginRepositories>
-    <pluginRepository>
-        <id>nexus</id>
-        <name>Nexus Plugin Repository</name>
-        <url>http://192.168.3.200:8181/repository/maven-public/</url>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-    </pluginRepository>
-</pluginRepositories>
+<!-- 配置资源上传的仓库地址，与settings.xml中  -->
 <distributionManagement>
     <repository>
-        <id>nexus-releases</id>
-        <name>Nexus Release Repository</name>
-        <url>http://192.168.3.200:8181/repository/maven-releases/</url>
+        <id>xzh-release</id>
+        <url>http://172.17.17.200:8081/repository/xzh-release/</url>
     </repository>
     <snapshotRepository>
-        <id>nexus-snapshots</id>
-        <name>Nexus Snapshot Repository</name>
-        <url>http://192.168.3.200:8181/repository/maven-snapshots/</url>
+        <id>xzh-snapshots</id>
+        <url>http://172.17.17.200:8081/repository/xzh-snapshots/</url>
     </snapshotRepository>
 </distributionManagement>
 ```
