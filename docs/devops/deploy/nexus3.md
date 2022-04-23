@@ -37,7 +37,7 @@ Nexus仓库类型
 - hosted：本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。
 - proxy：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
 - group：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
-```
+
 
 ![](../../_images/devops/deploy/nexus3/repository_types.png)
 
@@ -102,8 +102,8 @@ Nexus仓库类型
 <!--仓库组的url地址，id和name可以写组仓库name，mirrorOf的值设置为central-->  
   <mirrors>     
     <mirror>  
-        <id>xzh_group</id>  
-        <name>xzh_group</name>  
+        <id>xzh-group</id>  
+        <name>xzh-group</name>  
         <url>http://172.17.17.200:8081/repository/xzh-group/</url>  
         <mirrorOf>central</mirrorOf>  
     </mirror>     
