@@ -163,7 +163,7 @@ rabbitmqctl -n rabbit-1 set_policy ha-all "^" '{"ha-mode":"all"}'
 
 ### 3.3 高可用
 
-- [HAProxy安装](linux/deploy/haproxy)
-- [HAProxy配置](linux/deploy/haproxy?id=_101-rabbitmq)
-- [KeepAlived安装](linux/deploy/keepalived)
-- [KeepAlived配置](linux/deploy/keepalived.md?id=_22-haproxy)
+- [HAProxy安装](devops/deploy/haproxy)
+- [HAProxy配置](devops/deploy/haproxy?id=_101-rabbitmq)
+- [KeepAlived安装](devops/deploy/keepalived)
+- [KeepAlived配置](devops/deploy/keepalived.md?id=_22-haproxy)
