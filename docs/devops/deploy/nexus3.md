@@ -38,7 +38,6 @@ Nexus仓库类型
 - proxy：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
 - group：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
 
-
 ![](../../_images/devops/deploy/nexus3/repository_types.png)
 
 ### 2.1 创建Blob Stores
@@ -58,6 +57,13 @@ Nexus仓库类型
 ![](../../_images/devops/deploy/nexus3/hosted_releases.png)
 
 ![](../../_images/devops/deploy/nexus3/hosted_snapshots.png)
+
+Hosted选项
+- Allow redeploy：允许同一个版本号下重复提交代码, nexus以时间区分
+- Disable redeploy：不允许同一个版本号下重复提交代码
+- Read-Only：不允许提交任何版本
+- 原生的maven-releases库是Disable redeploy设置， maven-snapshots是Allow redeploy。
+
 
 ### 2.3 创建代理仓库
 
