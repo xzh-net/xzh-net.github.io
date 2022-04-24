@@ -27,6 +27,8 @@ MAVEN_HOME
 D:\java\apache-maven-3.6.0
 GRADLE_HOME
 D:\java\gradle-6.8.3
+GRADLE_USER_HOME
+D:\Repositories\Maven
 PATH
 %JAVA_HOME%\bin
 %MAVEN_HOME%\bin
