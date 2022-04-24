@@ -49,11 +49,12 @@ gitlab-ctl restart
 
 ![](../../_images/devops/deploy/gitlab/group_add_user.png)
 
-- Guest - 访客
-- Reporter - 报告者
-- Developer - 开发者
-- Master - 主人
-- Owner - 拥有者
+1) Guest - 访客
+2) Reporter - 报告者
+3) Developer - 开发者
+4) Master - 主人
+5) Owner - 拥有者
+
 
 - 新用户身份登录创建项目
 

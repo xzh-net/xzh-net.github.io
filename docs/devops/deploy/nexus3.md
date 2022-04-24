@@ -12,7 +12,7 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 使用默认管理员身份登录，帐号：**admin**，密码：`cat /nexus-data/admin.password`
 
 
-?> 为什么要搭建私有仓库
+!> 为什么要搭建私有仓库
 
 ![](../../_images/devops/deploy/nexus3/maven.png)
 
@@ -51,9 +51,15 @@ Nexus仓库类型
 
 ![](../../_images/devops/deploy/nexus3/hosted_repository.png)
 
+三方混合托管库
+
 ![](../../_images/devops/deploy/nexus3/hosted_mixed.png)
 
+二方发布托管库
+
 ![](../../_images/devops/deploy/nexus3/hosted_releases.png)
+
+二方快照托管库
 
 ![](../../_images/devops/deploy/nexus3/hosted_snapshots.png)
 
@@ -113,11 +119,6 @@ Hosted选项
         <mirrorOf>central</mirrorOf>  
     </mirror>     
   </mirrors>
-```
-
-```bash
-mvn deploy              # 编译上传
-mvn clean compile -U    # 更新拉取资源使用以下指令(强制刷新)
 ```
 
 6. 命令上传三方jar包
