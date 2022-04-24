@@ -26,7 +26,6 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 
 ## 2. 配置
 
-
 默认仓库
 - maven-central：maven中央库，默认https://repo1.maven.org/maven2
 - maven-releases：私库发行版，首次安装请将Deployment policy设置为Allow redeploy
@@ -40,13 +39,13 @@ Nexus仓库类型
 
 ![](../../_images/devops/deploy/nexus3/repository_types.png)
 
-### 2.1 创建Blob Stores
+1. 创建Blob Stores
 
 ![](../../_images/devops/deploy/nexus3/create_blob.png)
 
 ![](../../_images/devops/deploy/nexus3/blob_list.png)
 
-### 2.2 创建托管仓库
+2. 创建托管仓库
 
 ![](../../_images/devops/deploy/nexus3/repository_list.png)
 
@@ -65,7 +64,7 @@ Hosted选项
 - 原生的maven-releases库是Disable redeploy设置， maven-snapshots是Allow redeploy。
 
 
-### 2.3 创建代理仓库
+3. 创建代理仓库
 
 ![](../../_images/devops/deploy/nexus3/proxy_repository.png)
 
@@ -73,11 +72,11 @@ Hosted选项
 
 ?> 阿里云的maven中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
 
-### 2.4 创建仓库组
+4. 创建仓库组
 
 ![](../../_images/devops/deploy/nexus3/group_repository.png)
 
-### 2.5 settings配置
+5. settings配置
 
 修改Maven的settings.xml文件，加入认证机制
 
@@ -121,7 +120,7 @@ mvn deploy              # 编译上传
 mvn clean compile -U    # 更新拉取资源使用以下指令(强制刷新)
 ```
 
-### 2.6 命令上传三方jar包
+6. 命令上传三方jar包
 
 ```
 mvn install:install-file -Dfile=D:\paoding-analysis.jar -DgroupId=net.paoding -DartifactId=paoding-analysis -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true 
@@ -142,7 +141,7 @@ mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversio
 - -DrepositoryId：仓库名称
 
 
-### 2.7 Idea上传至私有库
+7. Idea上传至私有库
 
 pom文件添加本地仓库的配置
 

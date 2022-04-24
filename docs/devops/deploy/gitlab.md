@@ -1,160 +1,132 @@
-# GitLab仓库搭建
+# Gitlab代码托管服务器安装
 
 ## 1. 安装
 
-
 ```bash
-docker pull gitlab/gitlab-ce
-mkdir -p /mydata/gitlab/{config,logs,data}
+# 安装相关依赖
+yum -y install policycoreutils openssh-server openssh-clients postfix
+# 启动ssh服务&设置为开机启动
+systemctl enable sshd && sudo systemctl start sshd
+# 设置postfix开机自启，并启动，postfix支持gitlab发信功能
+systemctl enable postfix && systemctl start postfix
+# 开放ssh以及http服务，然后重新加载防火墙列表
+firewall-cmd --add-service=ssh --permanent
+firewall-cmd --add-service=http --permanent
+firewall-cmd --reload
+# 下载gitlab
+wget https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el6/gitlab-ce-12.4.2-ce.0.el6.x86_64.rpm --no-check-certificate
+# 安装
+rpm -i gitlab-ce-12.4.2-ce.0.el6.x86_64.rpm --force --nodeps
 
-docker run -d --name gitlab\
-  -p 10443:443 -p 1080:80 -p 1022:22 \
-  --restart always \
-  -v /mydata/gitlab/config:/etc/gitlab \
-  -v /mydata/gitlab/logs:/var/log/gitlab \
-  -v /mydata/gitlab/data:/var/opt/gitlab \
-  gitlab/gitlab-ce:latest
+# 修改gitlab配置
+vi /etc/gitlab/gitlab.rb
+external_url 'http://172.17.17.200:82'
+nginx['listen_port'] = 82
+
+# 重载配置及启动gitlab
+gitlab-ctl reconfigure
+gitlab-ctl restart
 ```
 
-?> http://192.168.3.200:1080/ 重置root账号
+## 2. 配置
+
+?> http://192.168.3.200:82/ 首次进入重置root账号密码
+
+- 添加组
+
+![](../../_images/devops/deploy/gitlab/create_group.png)
+
+- 创建用户
+
+![](../../_images/devops/deploy/gitlab/create_user.png)
+
+- 修改密码
+
+![](../../_images/devops/deploy/gitlab/update_user.png)
 
 
-## 2. Gitlab的使用
+- 用户添加到组中
 
-### 2.1 Gitlab启动完成后第一次访问，会让你重置root帐号的密码
-![](../../_images/devops/deploy/gitlab/gitlab_screen_06.png)
+![](../../_images/devops/deploy/gitlab/group_add_user.png)
 
-### 2.2 重置完成后输入帐号密码登录
-![](../../_images/devops/deploy/gitlab/gitlab_screen_07.png)
+- Guest - 访客
+- Reporter - 报告者
+- Developer - 开发者
+- Master - 主人
+- Owner - 拥有者
 
-### 2.3 选择创建项目、创建组织、创建帐号
-![](../../_images/devops/deploy/gitlab/gitlab_screen_08.png)
+- 新用户身份登录创建项目
 
-### 2.4 创建组织
-首先我们需要创建一个组织，然后在这个组织下分别创建用户和项目，这样同组织的用户就可以使用该组织下的项目了。
-![](../../_images/devops/deploy/gitlab/gitlab_screen_09.png)
+![](../../_images/devops/deploy/gitlab/create_project.png)
 
-### 2.5 创建用户并修改密码
 
-#### 2.5.1 找到添加用户的按钮
+## 3. 客户端
 
-![](../../_images/devops/deploy/gitlab/gitlab_screen_10.png)
+- 下载
 
-#### 2.5.2 输入用户名密码添加用户
+https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2.23.0-64-bit.exe
 
-![](../../_images/devops/deploy/gitlab/gitlab_screen_11.png)
+- 项目Clone
 
-#### 2.5.3 在编辑界面中修改用户密码
+![](../../_images/devops/deploy/gitlab/project_clone.png)
 
-![](../../_images/devops/deploy/gitlab/gitlab_screen_12.png)
 
-![](../../_images/devops/deploy/gitlab/gitlab_screen_13.png)
-
-### 2.6 创建项目并添加README文件
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_14.png)
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_15.png)
-
-### 2.7 将用户分配到组织
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_16.png)
-
-## 3. Git客户端安装及使用
-
-### 3.1 下载Git客户端并安装
-
-- 下载地址：https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2.23.0-64-bit.exe
-- 下载完成后，一路点击Next安装即可。
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_01.png)
-
-### 3.2 clone项目
-
-- 找到项目clone的地址：
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_17.png)
-- 打开Git命令行工具：
+- 打开Git命令行
   
-![](../../_images/devops/deploy/gitlab/gitlab_screen_18.png)
-- 执行以下命令clone项目到本地：
+![](../../_images/devops/deploy/gitlab/gitlab_base_cmd.png)
 
 ```bash
-
 git credential-manager uninstall # 清除掉缓存在git中的用户名和密码
-
-git clone http://192.168.3.200:1080/xuzhihao/hello.git
+git clone http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
 ```
 
-### 3.3 提交代码
-
-进入项目目录，修改一下README.md并提交：
-```bash
-# 进入项目工程目录
-cd hello/
-# 将当前修改的文件添加到暂存区
-git add .
-# 提交代码
-git commit -m "first commit"
-```
-
-### 3.4 推送到远程仓库
-```bash
-git push
-```
-![](../../_images/devops/deploy/gitlab/gitlab_screen_19.png)
-
-### 3.5 拉取远程仓库代码
-
-- 在Gitlab上修改readme中的文件内容：
-
-![](../../_images/devops/deploy/gitlab/gitlab_screen_20.png)
-- 拉取代码：
- ```bash
-git pull
-```
-
-### 3.6 本地创建并提交分支
+- 提交代码
 
 ```bash
-# 切换并从当前分支创建一个dev分支
-git checkout -b dev
-# 将新创建的dev分支推送到远程仓库
-git push origin dev
+cd xzh-spring-boot/           # 进入项目工程目录
+git add .                     # 将当前修改的文件添加到暂存区
+git commit -m "first commit"  # 提交代码
+git push                      # 推送到远程仓库
+git pull                      # 拉取代码
+git checkout -b dev           # 切换并从当前分支创建一个dev分支
+git push origin dev           # 将新创建的dev分支推送到远程仓库
 ```
-![](../../_images/devops/deploy/gitlab/gitlab_screen_21.png)
 
-### 3.7 其他常用命令
+## 4. git命令
 
 1. Git全局设置
 ```bash
-git config --global user.name "zhangsan"
+git config --global user.name "xuzhihao"
 git config --global user.email "xcg992224@163.com"
 ```
 
 2. 创建仓库
 ```bash
-git clone http://172.17.17.50:82/vjsp/web_demo.git
-cd web_demo
+git clone http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
+cd xzh-spring-boot
 touch README.md
 git add README.md
 git commit -m "add README"
+git push -u origin master
 ```
 
 3. 推送现有文件夹
 ```bash
 cd existing_folder
 git init
-git remote add origin http://172.17.17.50:82/vjsp/web_demo.git
+git remote add origin http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
 git add .
 git commit -m "Initial commit"
+git push -u origin master
 ```
 
 4. 本地代码推送到仓库
 ```bash
 cd existing_repo
 git remote rename origin old-origin
-git remote add origin http://172.17.17.50:82/vjsp/web_demo.git
+git remote add origin http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
+git push -u origin --all
+git push -u origin --tags
 ```
 
 5. 其他
