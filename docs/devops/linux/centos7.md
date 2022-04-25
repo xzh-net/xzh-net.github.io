@@ -164,7 +164,7 @@ netstat -anp | grep 17010pos
 
 # 输出每个ip的连接数，以及总的各个状态的连接数
 netstat -n | awk '/^tcp/ {n=split($(NF-1),array,":");if(n<=2)++S[array[(1)]];else++S[array[(4)]];++s[$NF];++N} END {for(a in S){printf("%-20s %s\n", a, S[a]);++I}printf("%-20s %s\n","TOTAL_IP",I);for(a in s) printf("%-20s %s\n",a, s[a]);printf("%-20s %s\n","TOTAL_LINK",N);}'
-# 统计所有连接状态, 
+# 统计所有连接状态
 # CLOSED：无连接是活动的或正在进行
 # LISTEN：服务器在等待进入呼叫
 # SYN_RECV：一个连接请求已经到达，等待确认
@@ -188,9 +188,10 @@ traceroute -p 8080 192.168.10.11    # 加上端口跟踪
 2. TCP调试
 
 ```bash
-nc 192.168.0.11 8000 < data.txt # 给某一个endpoint发送TCP请求,就将data的内容发送到对端
-nc -l 8000 > received_data      # nc可以当做服务器，监听某个端口号,把某一次请求的内容存储到received_data里
-nc -lk 8000                     # 上边只监听一次，如果多次可以加上-k参数
+nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok
+nc -v -w 10 -z 192.168.20.183 7443
+nc -v -w 2 -z 127.0.0.1 7000-7500
+
 ```
 
 3. 流量监控
