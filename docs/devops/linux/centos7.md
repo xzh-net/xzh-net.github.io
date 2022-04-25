@@ -270,10 +270,10 @@ vim /etc/vsftpd/ftpusers    # 连接黑名单，总是生效
 vim /etc/vsftpd/user_list   # 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
 
 cat /etc/passwd       # 查看用户
-useradd xhz -g root -d /opt/xzh.webapp -s /sbin/nologin
-passwd xhz
+useradd xzh -g xzh -d /opt/xzh.webapp -s /sbin/nologin
+passwd xzh
 chmod -R 777 /opt/xzh.webapp
-userdel xhz
+userdel xzh
 
 # -s /sbin/nologin 无法登录需要修改
 vim /etc/shells
