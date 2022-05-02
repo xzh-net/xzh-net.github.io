@@ -34,20 +34,20 @@ gitlab-ctl restart
 
 - 添加组
 
-![](../../_images/devops/deploy/gitlab/create_group.png)
+![](../../assets/_images/devops/deploy/gitlab/create_group.png)
 
 - 创建用户
 
-![](../../_images/devops/deploy/gitlab/create_user.png)
+![](../../assets/_images/devops/deploy/gitlab/create_user.png)
 
 - 修改密码
 
-![](../../_images/devops/deploy/gitlab/update_user.png)
+![](../../assets/_images/devops/deploy/gitlab/update_user.png)
 
 
 - 用户添加到组中
 
-![](../../_images/devops/deploy/gitlab/group_add_user.png)
+![](../../assets/_images/devops/deploy/gitlab/group_add_user.png)
 
 1) Guest - 访客
 2) Reporter - 报告者
@@ -58,7 +58,7 @@ gitlab-ctl restart
 
 - 新用户身份登录创建项目
 
-![](../../_images/devops/deploy/gitlab/create_project.png)
+![](../../assets/_images/devops/deploy/gitlab/create_project.png)
 
 
 ## 3. 客户端
@@ -69,12 +69,12 @@ https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2
 
 - 项目Clone
 
-![](../../_images/devops/deploy/gitlab/project_clone.png)
+![](../../assets/_images/devops/deploy/gitlab/project_clone.png)
 
 
 - 打开Git命令行
   
-![](../../_images/devops/deploy/gitlab/gitlab_base_cmd.png)
+![](../../assets/_images/devops/deploy/gitlab/gitlab_base_cmd.png)
 
 ```bash
 git credential-manager uninstall # 清除掉缓存在git中的用户名和密码

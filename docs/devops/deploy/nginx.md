@@ -965,7 +965,7 @@ openssl req -new -x509 -key server.key -out server.crt -days 3650
 
 - 阿里云上可以申请的免费证书目前只有支持单个域名的DV级SSL证书。比如说你有`blog.xuzhihao.net`和`api.xuzhihao.net`两个二级域名需要使用HTTPS，就需要申请两个SSL证书。
 
-![](../../_images/devops/deploy/nginx/nginx_https_start_05.png)
+![](../../assets/_images/devops/deploy/nginx/nginx_https_start_05.png)
 
 ```
 #SSL配置
@@ -977,14 +977,14 @@ ssl_certificate_key  /usr/share/nginx/html/ssl/blog/blog.xuzhihao.net.key; # 配
 
 https://freessl.cn/
 
-![](../../_images/devops/deploy/nginx/nginx_https_start_08.png)
+![](../../assets/_images/devops/deploy/nginx/nginx_https_start_08.png)
 
 
 ### 4.4 自动申请
 
 - `acme.sh`脚本实现了`acme`协议, 可以从`letsencrypt`生成免费的证书。一般我们申请的证书有效期都是1年，过期就要重新申请了，使用`acme.sh`脚本可以实现到期自动申请，再也不用担心证书过期了！
 
-![](../../_images/devops/deploy/nginx/nginx_https_start_09.png)
+![](../../assets/_images/devops/deploy/nginx/nginx_https_start_09.png)
 
 - 附上官网地址：https://github.com/acmesh-official/acme.sh
 
