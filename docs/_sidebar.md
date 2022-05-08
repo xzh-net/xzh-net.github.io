@@ -33,7 +33,7 @@
   - [RabbitMQ](devops/deploy/rabbitmq)
   - [RocketMQ](devops/deploy/rocketmq)
   - [Kafka](devops/deploy/kafka)
-  - [Jenkins](devops/deploy/jenkins)
+
 
 - JAVA笔记
   - [解决方案](java/project/scheme)

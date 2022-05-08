@@ -1,16 +1,12 @@
-# Gitlab代码托管服务器安装
+# Gitlab 12.4.2 代码托管服务器
 
 ## 1. 安装
 
 ```bash
-# 安装相关依赖
-yum -y install policycoreutils openssh-server openssh-clients postfix
-# 启动ssh服务&设置为开机启动
-systemctl enable sshd && sudo systemctl start sshd
-# 设置postfix开机自启，并启动，postfix支持gitlab发信功能
-systemctl enable postfix && systemctl start postfix
-# 开放ssh以及http服务，然后重新加载防火墙列表
-firewall-cmd --add-service=ssh --permanent
+yum -y install policycoreutils openssh-server openssh-clients postfix   # 安装相关依赖
+systemctl enable sshd && sudo systemctl start sshd                      # 启动ssh服务&设置为开机启动
+systemctl enable postfix && systemctl start postfix                     # 设置postfix开机自启，并启动，postfix支持gitlab发信功能
+firewall-cmd --add-service=ssh --permanent                              # 开放ssh以及http服务，然后重新加载防火墙列表
 firewall-cmd --add-service=http --permanent
 firewall-cmd --reload
 # 下载gitlab
@@ -20,7 +16,7 @@ rpm -i gitlab-ce-12.4.2-ce.0.el6.x86_64.rpm --force --nodeps
 
 # 修改gitlab配置
 vi /etc/gitlab/gitlab.rb
-external_url 'http://172.17.17.200:82'
+external_url 'http://192.168.3.200:82'
 nginx['listen_port'] = 82
 
 # 重载配置及启动gitlab
@@ -78,13 +74,13 @@ https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2
 
 ```bash
 git credential-manager uninstall # 清除掉缓存在git中的用户名和密码
-git clone http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
+git clone http://192.168.3.200:82/xzh-group/xzh-spring-boot.git
 ```
 
 - 提交代码
 
 ```bash
-cd xzh-spring-boot/           # 进入项目工程目录
+cd xzh-spring-boot            # 进入项目工程目录
 git add .                     # 将当前修改的文件添加到暂存区
 git commit -m "first commit"  # 提交代码
 git push                      # 推送到远程仓库
@@ -98,7 +94,7 @@ git push origin dev           # 将新创建的dev分支推送到远程仓库
 1. Git全局设置
 ```bash
 git config --global user.name "xuzhihao"
-git config --global user.email "xcg992224@163.com"
+git config --global user.email "xuzhihao@163.com"
 ```
 
 2. 创建仓库
