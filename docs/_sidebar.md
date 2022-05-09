@@ -23,6 +23,7 @@
   - [Minikube](devops/deploy/minikube)
   - [Nexus3](devops/deploy/nexus3)
   - [Gitlab](devops/deploy/gitlab)
+  - [Jenkins](devops/deploy/jenkins)
   - [Zabbix](devops/deploy/zabbix)
   - [Prometheus](devops/deploy/prometheus)
   - [Zookeeper](devops/deploy/zookeeper)
