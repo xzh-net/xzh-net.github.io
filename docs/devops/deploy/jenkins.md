@@ -1,4 +1,4 @@
-# Jenkins-2.332-1.1
+# Jenkins-2.332
 
 ## 1. Jenkins安装和持续集成环境配置
 

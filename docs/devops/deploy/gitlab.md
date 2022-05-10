@@ -36,6 +36,9 @@ gitlab-ctl restart
 
 ![](../../assets/_images/devops/deploy/gitlab/create_user.png)
 
+
+![](../../assets/_images/devops/deploy/gitlab/create_user2.png)
+
 - 修改密码
 
 ![](../../assets/_images/devops/deploy/gitlab/update_user.png)
@@ -44,12 +47,6 @@ gitlab-ctl restart
 - 用户添加到组中
 
 ![](../../assets/_images/devops/deploy/gitlab/group_add_user.png)
-
-1) Guest - 访客
-2) Reporter - 报告者
-3) Developer - 开发者
-4) Master - 主人
-5) Owner - 拥有者
 
 
 - 新用户身份登录创建项目

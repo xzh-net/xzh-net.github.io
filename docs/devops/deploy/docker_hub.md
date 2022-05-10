@@ -998,43 +998,39 @@ docker run --name kibana -p 5601:5601 \
 
 ## 9. DevOps
 
+### GitLab
+
+```bash
+docker pull gitlab/gitlab-ce:12.4.2-ce.0
+mkdir -p /home/gitlab/{config,logs,data}  # 创建目录
+
+docker run -d  \
+-p 443:443 \
+-p 80:80 \
+-p 222:22 \
+--name gitlab \
+--restart always \
+-v /home/gitlab/config:/etc/gitlab \
+-v /home/gitlab/logs:/var/log/gitlab \
+-v /home/gitlab/data:/var/opt/gitlab \
+gitlab/gitlab-ce:12.4.2-ce.0
+
+# 修改配置，gitlab.rb文件内容默认全是注释
+vi /home/gitlab/config/gitlab.rb
+# 配置ssh协议所使用的访问地址和端口
+gitlab_rails['gitlab_ssh_host'] = '172.17.17.196'
+gitlab_rails['gitlab_shell_ssh_port'] = 222
+
+docker restart gitlab
+```
+
+
 ### Nexus3
 
 ```bash
 docker pull sonatype/nexus3:3.36.0
-
 mkdir -p /home/mvn/nexus-data  && chown -R 200 /home/mvn/nexus-data
-
 docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sonatype/nexus3:3.36.0
-```
-
-
-### Registry 
-
-修改Docker Daemon的配置文件，文件位置为/etc/docker/daemon.json，由于Docker默认使用HTTPS推送镜像，而我们的镜像仓库没有支持，所以需要添加如下配置，改为使用HTTP推送
-
-```
-{
-  "insecure-registries": ["192.168.3.200:5000"]
-}
-```
-
-REGISTRY_STORAGE_DELETE_ENABLED=true 开启删除镜像的功能
-
-```bash
-docker run -p 5000:5000 --name registry2 \
---restart=always \
--e REGISTRY_STORAGE_DELETE_ENABLED="true" \
--d registry:2
-```
-
-```bash
-docker run -p 8280:80 --name registry-ui \
---link registry2:registry2 \
--e REGISTRY_URL="http://registry2:5000" \
--e DELETE_IMAGES="true" \
--e REGISTRY_TITLE="Registry2" \
--d joxit/docker-registry-ui:static
 ```
 
 ### Harbor
@@ -1476,7 +1472,6 @@ docker run -d \
 
 ```bash
 mkdir -p /data/zbox
-
 docker run -d -p 8080:80 -p 3316:3306 -e USER="admin" -e PASSWD="admin" -e BIND_ADDRESS="false" -e SMTP_HOST="163.177.90.125 smtp.exmail.qq.com" -v /data/zbox/:/opt/zbox/ --name zentao-server idoop/zentao:latest 
 ```
 
@@ -1513,16 +1508,4 @@ chown -R 1000:1000 /mydata/
 docker run -it -d -p 3000:3000 -v "/mydata/theia:/home/project:cached" theiaide/theia
 docker run -it -d -p 3000:3000 -v "/mydata/theia-java:/home/project:cached" theiaide/theia-java
 docker run -it -d --init -p 3000:3000 -v "/mydata/theia-full:/home/project:cached" theiaide/theia-full
-```
-
-### svnWebUI
-
-```bash
-docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
-```
-
-### nginxWebUI
-
-```bash
-docker run -itd -v /home/nginxWebUI:/home/nginxWebUI -e BOOT_OPTIONS="--server.port=8080" --privileged=true --net=host cym1102/nginxwebui:latest
 ```
