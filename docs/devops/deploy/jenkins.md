@@ -2,6 +2,12 @@
 
 ## 1. Jenkins安装和持续集成环境配置
 
+| 名称 | IP地址 | 安装的软件 |
+| :---------- | :---------- | :---------------------------------- |
+| 代码托管服务器    | 172.17.17.196 | Gitlab-12.4.2 |
+| 持续集成服务器    | 172.17.17.200 | Jenkins-2.190.3，JDK1.8，Maven3.6.2，Git，SonarQube |
+| 应用测试服务器    | 172.17.17.196 | JDK1.8，Tomcat8.5 |
+
 ### 1.1 Gitlab安装
 
 [Gitlab](devops/deploy/gitlab)
@@ -33,7 +39,7 @@ systemctl daemon-reload
 systemctl start jenkins
 ```
 
-?>访问地址：http://192.168.3.200:8888/
+?>访问地址：http://172.17.17.200:8888/
 
 - 跳过插件
 
@@ -70,7 +76,7 @@ sed -i 's/http:\/\/updates.jenkinsci.org\/download/https:\/\/mirrors.tuna.tsingh
 sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ```
 
-?>重启服务：http://192.168.3.200:8888/restart
+?>重启服务：http://172.17.17.200:8888/restart
 
 
 2. 汉化插件
@@ -84,7 +90,6 @@ https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/skip-certificate-check
 ### 1.4 Jenkins用户权限管理
 
 #### 1.4.1 忘记密码
-
 
 1. 修改密码
    
@@ -104,96 +109,195 @@ vim /var/lib/jenkins/config.xml
 systemctl restart jenkins
 ```
 
-#### 1.4.1 权限设置
+#### 1.4.2 权限设置
 
-安装Role-based Authorization Strategy插件，开启权限全局安全配置，授权策略切换为"Role-Based Strategy"，创建角色
+- 安装Role-based Authorization Strategy插件来管理Jenkins用户权限
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_role.png)
+
+- 开启权限全局安全配置
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_set.png)
+
+授权策略切换为"Role-Based Strategy"
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_set2.png)
+
+- 创建角色
+
+在系统管理页面进入 Manage and Assign Roles
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_role.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_role2.png)
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_role1.png)
 
+添加以下三个角色：
+- baseRole：该角色为全局角色。这个角色需要绑定Overall下面的Read权限，是为了给所有用户绑定最基本的Jenkins访问权限。注意：如果不给后续用户绑定这个角色，会报错误：用户名 is
+missing the Overall/Read permission
+- role1：该角色为项目角色。使用正则表达式绑定"xuzhihao.*"，意思是只能操作xuzhihao开头的项目。
+- role2：该角色也为项目角色。绑定"xzh.*"，意思是只能操作xzh开头的项目。
+
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_role2.png)
+
+- 创建用户
+
+在系统管理页面进入 Manage Users
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user2.png)
+
+系统管理页面进入Manage and Assign Roles，点击Assign Roles，绑定规则如下：
+- zhangsan用户分别绑定baseRole和role1角色(xuzhihao)
+- lisi用户分别绑定baseRole和role2角色(xzh)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user3.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user_role.png)
+
+- 创建项目测试权限
+
+以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
 
 ### 1.5 Jenkins凭证管理
 
+凭据可以用来存储需要密文保护的数据库密码、Gitlab密码信息、Docker私有仓库密码等，以便Jenkins可以和这些第三方的应用进行交互
+
 #### 1.5.1 安装Credentials Binding插件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_secret.png)
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials2.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials3.png)
+
+安装插件后，左边多了"凭证"菜单，在这里管理所有凭证
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials4.png)
+
+可以添加的凭证有5种：
+- Username with password：用户名和密码
+- SSH Username with private key： 使用SSH用户和密钥
+- Secret file：需要保密的文本文件，使用时Jenkins会将文件复制到一个临时目录中，再将文件路径设置到一个变量中，等构建结束后，所复制的Secret file就会被删除。
+- Secret text：需要保存的一个加密的文本串，如钉钉机器人或Github的api token
+- Certificate：通过上传证书文件的方式
+
+常用的凭证类型有：`Username with password（用户密码）`和`SSH Username with private key（SSH密钥）`
+
 
 #### 1.5.2 安装Git插件和Git工具
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_git.png)
+为了让Jenkins支持从Gitlab拉取源码，需要安装Git插件以及在CentOS7上安装Git工具。
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_git.png)
 
 ```bash
-yum install git -y
+yum install git -y #安装
+git --version #安装后查看版本
 ```
 
 #### 1.5.3 用户密码类型凭证
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_git2.png)
+- 创建凭证
 
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_git2.png)
 
-代码的构建目录
-> /var/lib/jenkins/workspace
+选择"Username with password"，输入Gitlab的用户名和密码，点击"确定"
+
+- 测试凭证是否可用
+
+创建一个FreeStyle项目：新建Item->FreeStyle Project->确定
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_project.png)
+
+找到"源码管理"->"Git"，在Repository URL复制Gitlab中的项目URL，选择刚才创建的凭证就不会报错
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_clone_project.png)
+
+保存配置后，点击构建”Build Now“ 开始构建项目
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_project_bulid.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_project_bulid_console.png)
+
+?> 代码的构建目录:/var/lib/jenkins/workspace
 
 #### 1.5.4 SSH密钥类型凭证
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_ssh.png)
+![](../../assets/_images/devops/deploy/jenkins/jenkins_ssh_rsa.png)
 
-1. gitlab服务器使用root用户生成公钥和私钥在/root/.ssh/目录
+- gitlab服务器使用root用户生成公钥和私钥在/root/.ssh/目录
 
-> ssh-keygen -t rsa
+```bash
+ssh-keygen -t rsa
+```
 
-id_rsa：私钥文件
+- 把生成的公钥放在Gitlab中
 
-id_rsa.pub：公钥文件
-
-2. 把生成的公钥放在Gitlab中
+以root账户登录->点击头像->Settings->SSH Public Keys->复制刚才id_rsa.pub文件的内容到这里，点击"Add Key"
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_secret.png)
 
-3. 在Jenkins中添加凭证，配置私钥
+- 在Jenkins中添加凭证，配置私钥
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh.png)
 
+- 测试凭证是否可用
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh_test.png)
+
 ### 1.6 Maven安装和配置
 
-#### 1.6.1 Maven安装
+- Maven安装
 
+上传Maven上传到持续集成服务器172.17.17.200
 ```bash
-tar -xzf apache-maven-3.6.2-bin.tar.gz #解压
-mkdir -p /opt/maven #创建目录
-mv apache-maven-3.6.2/* /opt/maven #移动文件
+tar -xzf apache-maven-3.6.2-bin.tar.gz # 解压
+mkdir -p /opt/maven                    # 创建目录
+mv apache-maven-3.6.2/* /opt/maven     # 移动文件
 
 vi /etc/profile
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
 export MAVEN_HOME=/opt/maven
 export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin
 
-source /etc/profile #配置生效
-mvn -v #查找Maven版本
+source /etc/profile                   # 配置生效
+mvn -v                                # 查找Maven版本
 ```
 
-#### 1.6.2 全局工具配置关联
+- 全局工具配置关联JDK和Maven
 
-JDK配置
+
+Jenkins->Global Tool Configuration->JDK->新增JDK，配置如下：
+
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_jdk.png)
 
-Maven配置
+Jenkins->Global Tool Configuration->Maven->新增Maven，配置如下：
+
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_maven.png)
 
-添加Jenkins全局变量
+- 添加Jenkins全局变量
+
+Manage Jenkins->Configure System->Global Properties ，添加三个全局变量JAVA_HOME、M2_HOME、PATH+EXTRA
+
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_env.png)
 
-修改Maven的settings.xml
+- 修改Maven的settings.xml
 
 ```bash
-mkdir /root/repo #仓库目录
+mkdir /root/repo # 仓库目录
 vi /opt/maven/conf/settings.xml
 ```
 
+本地仓库改为：/root/repo/
+
+添加阿里云私服地址：http://maven.aliyun.com/nexus/content/groups/public
+
 ```xml
 <localRepository>/root/repo/</localRepository>
-
 <mirrors>
     <mirror>
             <id>nexus-aliyun</id>
@@ -204,25 +308,29 @@ vi /opt/maven/conf/settings.xml
 </mirrors>
 ```
 
-测试Maven是否配置成功
+- 测试Maven是否配置成功
 
-> mvn clean package
+使用之前的gitlab密码测试项目，修改配置，构建->增加构建步骤->Execute Shell
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_mvn_build.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mvn_suc.png)
+![](../../assets/_images/devops/deploy/jenkins/jenkins_mvn_build2.png)
+
+?> 输入命令：mvn clean package
 
 
 ### 1.7 Tomcat安装和配置
 
-#### 1.7.1 安装Tomcat8.5.47
+#### 1.7.1 安装Tomcat8.5
+
+上传tomcat上传到应用服务器172.17.17.196
 
 ```bash
-yum install java-1.8.0-openjdk* -y #安装JDK
-tar -xzf apache-tomcat-8.5.47.tar.gz #解压
-mkdir -p /opt/tomcat 创建目录
-mv /root/apache-tomcat-8.5.47/* /opt/tomcat #移动
-/opt/tomcat/bin/startup.sh #启动
+yum install java-1.8.0-openjdk* -y          # 安装JDK（已完成）
+tar -xzf apache-tomcat-8.5.47.tar.gz        # 解压
+mkdir -p /opt/tomcat                        # 创建目录
+mv /root/apache-tomcat-8.5.47/* /opt/tomcat # 移动
+/opt/tomcat/bin/startup.sh                  # 启动
 ```
 
 #### 1.7.2 配置Tomcat用户角色权限
@@ -578,7 +686,7 @@ vi harbor.yml
 ```yml
 #修改配置文件(如果不用https就注释掉https的几项，我是用的http就注释掉了https的，其他几项修改为自己的信息)
 ···
-hostname: 192.168.3.200
+hostname: 172.17.17.200
 ···
 # http related config
 http:
@@ -615,22 +723,22 @@ docker-compose restart #重新启动
 #### 3.3.3 把镜像上传到Harbor
 
 ```bash
-docker tag eureka:v0.0.1 192.168.3.200:88/test/eureka:v0.0.1
+docker tag eureka:v0.0.1 172.17.17.200:88/test/eureka:v0.0.1
 
-docker push 192.168.3.200:88/test/eureka:v0.0.1
+docker push 172.17.17.200:88/test/eureka:v0.0.1
 
 vi /etc/docker/daemon.json
 
 {
 "registry-mirrors": ["xxx.xxx.xxx.xxx"],
-"insecure-registries": ["192.168.3.200:88"]
+"insecure-registries": ["172.17.17.200:88"]
 }
 
 sudo systemctl daemon-reload
 sudo systemctl restart docker 
 
 
-docker login -u 用户名 -p 密码 192.168.3.200:88
+docker login -u 用户名 -p 密码 172.17.17.200:88
 
 ```
 
@@ -642,12 +750,12 @@ vi /etc/docker/daemon.json
 
 {
 "registry-mirrors": ["xxx.xxx.xxx.xxx"],
-"insecure-registries": ["192.168.3.200:88"]
+"insecure-registries": ["172.17.17.200:88"]
 }
 
-docker login -u 用户名 -p 密码 192.168.3.200:88
+docker login -u 用户名 -p 密码 172.17.17.200:88
 
-docker pull 192.168.3.200:88/test/eureka:v0.0.1
+docker pull 172.17.17.200:88/test/eureka:v0.0.1
 
 ```
 
@@ -661,7 +769,7 @@ docker pull 192.168.3.200:88/test/eureka:v0.0.1
 ```bash
 cd /root/.ssh/
 ssh-keygen
-ssh-copy-id 192.168.3.200
+ssh-copy-id 172.17.17.200
 ```
 系统配置->添加远程服务器
 
