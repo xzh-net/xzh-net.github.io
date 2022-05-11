@@ -333,32 +333,43 @@ mv /root/apache-tomcat-8.5.47/* /opt/tomcat # 移动
 /opt/tomcat/bin/startup.sh                  # 启动
 ```
 
-#### 1.7.2 配置Tomcat用户角色权限
+?> 地址为：http://172.17.17.196/8080
 
-> vi /opt/tomcat/conf/tomcat-users.xml
+![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat.png)
 
-```xml
+默认情况下Tomcat是没有配置用户角色权限的，后续Jenkins部署项目到Tomcat服务器，需要用到Tomcat的用户，所以修改tomcat以下配置，添加用户及权限
+
+```bash
+vi /opt/tomcat/conf/tomcat-users.xml
+
 <tomcat-users>
-    <role rolename="tomcat"/>
-    <role rolename="role1"/>
-    <role rolename="manager-script"/>
-    <role rolename="manager-gui"/>
-    <role rolename="manager-status"/>
-    <role rolename="admin-gui"/>
-    <role rolename="admin-script"/>
-    <user username="tomcat" password="tomcat" roles="manager-gui,manager-script,tomcat,admin-gui,admin-script"/>
+<role rolename="tomcat"/>
+<role rolename="role1"/>
+<role rolename="manager-script"/>
+<role rolename="manager-gui"/>
+<role rolename="manager-status"/>
+<role rolename="admin-gui"/>
+<role rolename="admin-script"/>
+<user username="tomcat" password="tomcat" roles="manager-gui,managerscript,tomcat,admin-gui,admin-script"/>
 </tomcat-users>
 ```
 
-> vi /opt/tomcat/webapps/manager/META-INF/context.xml
+用户和密码都是：tomcat，为了能够刚才配置的用户登录到Tomcat，还需要修改以下配置
+```bash
+vi /opt/tomcat/webapps/manager/META-INF/context.xml
 
-掉注释
-```xml
 <!--
 <Valve className="org.apache.catalina.valves.RemoteAddrValve"
 allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 -->
 ```
+
+把上面这行注释掉，重启
+
+?> 访问： http://192.168.66.102:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat2.png)
+
 
 ## 2. Jenkins构建Maven项目
 
