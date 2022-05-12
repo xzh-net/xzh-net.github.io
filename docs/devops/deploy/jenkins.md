@@ -350,7 +350,7 @@ vi /opt/tomcat/conf/tomcat-users.xml
 <role rolename="manager-status"/>
 <role rolename="admin-gui"/>
 <role rolename="admin-script"/>
-<user username="tomcat" password="tomcat" roles="manager-gui,managerscript,tomcat,admin-gui,admin-script"/>
+<user username="tomcat" password="tomcat" roles="manager-gui,manager-script,tomcat,admin-gui,admin-script"/>
 </tomcat-users>
 ```
 
@@ -373,9 +373,18 @@ allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 
 ## 2. Jenkins构建Maven项目
 
-### 2.1 自由风格软件项目（FreeStyle Project）
+Jenkins中自动构建项目的类型有很多，常用的有以下三种：
+- 自由风格软件项目（FreeStyle Project）
+- Maven项目（Maven Project）
+- 流水线项目（Pipeline Project）
 
-> 拉取代码->编译->打包->部署
+推荐使用流水线类型，因为灵活度非常高
+
+### 2.1 自由风格项目构建
+
+- 拉取代码
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_create_project.png)
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_free_build.png)
 
@@ -385,11 +394,32 @@ mvn clean package
 echo "编译和打包结束"
 ```
 
-安装 Deploy to container插件
+- 部署
+
+把项目部署到远程的Tomcat里面
+
+1）安装 Deploy to container插件
+
+Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to container插件实现
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_deploy.png)
+
+2）添加Tomcat用户凭证
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_auth.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_build.png)
+3）添加构建后操作
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy2.png)
+
+点击"Build Now"，开始构建过程
+
+4）部署成功后，访问项目
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy3.png)
+
 
 ### 2.2 Maven项目（Maven Project）
 
