@@ -251,7 +251,7 @@ ssh-keygen -t rsa
 
 ### 1.6 Maven安装和配置
 
-- Maven安装
+#### 1.6.1 Maven安装
 
 上传Maven上传到持续集成服务器172.17.17.200
 ```bash
@@ -268,8 +268,7 @@ source /etc/profile                   # 配置生效
 mvn -v                                # 查找Maven版本
 ```
 
-- 全局工具配置关联JDK和Maven
-
+#### 1.6.2 全局工具配置关联JDK和Maven
 
 Jenkins->Global Tool Configuration->JDK->新增JDK，配置如下：
 
@@ -279,7 +278,7 @@ Jenkins->Global Tool Configuration->Maven->新增Maven，配置如下：
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_maven.png)
 
-- 添加Jenkins全局变量
+#### 1.6.3 添加Jenkins全局变量
 
 Manage Jenkins->Configure System->Global Properties ，添加三个全局变量JAVA_HOME、M2_HOME、PATH+EXTRA
 
@@ -308,7 +307,7 @@ vi /opt/maven/conf/settings.xml
 </mirrors>
 ```
 
-- 测试Maven是否配置成功
+#### 1.6.4 测试Maven是否配置成功
 
 使用之前的gitlab密码测试项目，修改配置，构建->增加构建步骤->Execute Shell
 
@@ -382,7 +381,7 @@ Jenkins中自动构建项目的类型有很多，常用的有以下三种：
 
 ### 2.1 自由风格项目构建
 
-- 拉取代码
+#### 2.1.1 拉取代码
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_create_project.png)
 
@@ -394,7 +393,7 @@ mvn clean package
 echo "编译和打包结束"
 ```
 
-- 部署
+#### 2.1.2 部署
 
 把项目部署到远程的Tomcat里面
 
@@ -408,7 +407,7 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to 
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_auth.png)
 
-3）添加构建后操作
+#### 2.1.3 添加构建后操作
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy.png)
 
@@ -416,32 +415,53 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to 
 
 点击"Build Now"，开始构建过程
 
-4）部署成功后，访问项目
+#### 2.1.4 部署成功后，访问项目
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy3.png)
 
+![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy4.png)
 
-### 2.2 Maven项目（Maven Project）
 
-安装Maven Integration插件
+### 2.2 Maven项目
+
+#### 2.2.1 安装Maven Integration插件
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_maven.png)
+
+#### 2.2.2 创建Maven项目
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_project_maven.png)
+
+#### 2.2.3 配置项目
 
 拉取代码和远程部署的过程和自由风格项目一样，只是"构建"部分不同
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_maven_build.png)
 
 
-### 2.3 流水线项目（Pipeline Project）
+### 2.3 流水线项目
 
 - Pipeline 脚本是由 Groovy 语言实现的
 - Pipeline 支持两种语法：Declarative(声明式)和 Scripted Pipeline(脚本式)语法
 - Pipeline 也有两种创建方法：可以直接在 Jenkins 的 Web UI 界面中输入脚本；也可以通过创建一个 Jenkinsfile 脚本文件放入项目源码库中（一般我们都推荐在 Jenkins 中直接从源代码控制(SCM)中直接载入 Jenkinsfile Pipeline 这种方法）。
 
-#### 2.3.1 Declarative声明式-Pipeline
 
-安装 Pipeline 插件
+#### 2.3.1 安装 Pipeline 插件
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_pipeline.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_project_pipeline.png)
+
+
+#### 2.3.2 Pipeline语法快速入门
+
+- Declarative声明式-Pipeline
+  - stages：代表整个流水线的所有执行阶段。通常stages只有1个，里面包含多个stage
+  - stage：代表流水线中的某个阶段，可能出现n个。一般分为拉取代码，编译构建，部署等阶段。
+  - steps：代表一个阶段内需要执行的逻辑。steps里面是shell脚本，git拉取代码，ssh远程发布等任意内容。
 
 > 流水线->选择HelloWorld模板
-
+> 
 ```shell
 pipeline {
    agent any
@@ -449,32 +469,32 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '282b054d-d655-471e-96af-e7231c2386e3', url: 'git@172.17.17.50:vjsp/web_demo.git']]])
+            echo '代码拉取'
          }
       }
       stage('编译构建') {
          steps {
-            sh 'mvn clean package'
+            echo '编译构建'
          }
       }
       stage('项目部署') {
          steps {
-            deploy adapters: [tomcat8(credentialsId: 'f303f062-1ef0-4a1c-969b-972bb57244a2', path: '', url: 'http://172.17.17.80:8080')], contextPath: '/cms003_p01', war: 'target/*.war'
+            echo '项目部署'
          }
       }
    }
 }
 ```
 
-stages：代表整个流水线的所有执行阶段。通常stages只有1个，里面包含多个stage
+![](../../assets/_images/devops/deploy/jenkins/jenkins_pipeline_declarative.png)
 
-stage：代表流水线中的某个阶段，可能出现n个。一般分为拉取代码，编译构建，部署等阶段。
+点击构建，可以看到整个构建过程
 
-steps：代表一个阶段内需要执行的逻辑。steps里面是shell脚本，git拉取代码，ssh远程发布等任意内容。
-
-
-
-#### 2.3.2 Scripted Pipeline脚本式-Pipeline
+- Pipeline脚本式-Pipeline
+  - Node：节点，一个 Node 就是一个 Jenkins 节点，Master 或者 Agent，是执行 Step 的具体运行环境，后续讲到Jenkins的Master-Slave架构的时候用到。
+  - Stage：阶段，一个 Pipeline 可以划分为若干个 Stage，每个 Stage 代表一组操作，比如：Build、Test、Deploy，Stage 是一个逻辑分组的概念。
+  - Step：步骤，Step 是最基本的操作单元，可以是打印一句话，也可以是构建一个 Docker 镜像，由各类 Jenkins 插件提供，比如命令：sh ‘make’，就相当于我们平时 shell 终端中执行 make 命令
+一样。
 
 ```shell
 node {
@@ -490,17 +510,82 @@ node {
     }
 }
 ```
-Node：节点，一个 Node 就是一个 Jenkins 节点，Master 或者 Agent，是执行 Step 的具体运行环境，后续讲到Jenkins的Master-Slave架构的时候用到。
 
-Stage：阶段，一个 Pipeline 可以划分为若干个 Stage，每个 Stage 代表一组操作，比如：Build、Test、Deploy，Stage 是一个逻辑分组的概念。
+![](../../assets/_images/devops/deploy/jenkins/jenkins_pipeline_script.png)
 
-Step：步骤，Step 是最基本的操作单元，可以是打印一句话，也可以是构建一个 Docker 镜像，由各类 Jenkins 插件提供，比如命令：sh ‘make’，就相当于我们平时 shell 终端中执行 make 命令
-一样。
+构建结果和声明式一样！
 
 
-#### 2.3.3 Pipeline Script from SCM
+#### 2.3.3 拉取代码
 
-在项目根目录建立Jenkinsfile文件，把内容复制到该文件中并上传到Gitlab
+使用语法生成器
+
+```
+pipeline {
+   agent any
+
+   stages {
+      stage('代码拉取') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+         }
+      }
+   }
+}
+```
+
+#### 2.3.4 编译打包
+
+```
+pipeline {
+   agent any
+
+   stages {
+      stage('代码拉取') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+         }
+      }
+      stage('编译构建') {
+         steps {
+            sh 'mvn clean package'
+         }
+      }
+   }
+}
+```
+
+#### 2.3.5 部署
+
+```
+pipeline {
+   agent any
+
+   stages {
+      stage('代码拉取') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+         }
+      }
+      stage('编译构建') {
+         steps {
+            sh 'mvn clean package'
+         }
+      }
+      stage('项目部署') {
+         steps {
+            deploy adapters: [tomcat8(credentialsId: '9cfdcd8f-7b51-428d-ae79-25d64e70455a', path: '', url: 'http://172.17.17.196:8080')], contextPath: '/ddd', war: 'target/*.war'
+         }
+      }
+   }
+}
+```
+
+构建后查看结果
+
+#### 2.3.6 Pipeline Script from SCM
+
+刚才我们都是直接在Jenkins的UI界面编写Pipeline代码，这样不方便脚本维护，建议把Pipeline脚本放在项目中（一起进行版本控制）,在项目根目录建立Jenkinsfile文件，把内容复制到该文件中并上传到Gitlab
 
 ```shell
 pipeline {
@@ -509,21 +594,9 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '282b054d-d655-471e-96af-e7231c2386e3', url: 'git@172.17.17.50:vjsp/web_demo.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
          }
       }
-	  stage('code checking') {
-         steps {
-            script {
-                 //引入SonarQubeScanner工具
-                scannerHome = tool 'sonarqube-scanner'
-            }
-            //引入SonarQube的服务器环境
-            withSonarQubeEnv('sonarqube6.7.4') {
-                sh "${scannerHome}/bin/sonar-scanner"
-            }
-         }
-      }  
       stage('编译构建') {
          steps {
             sh 'mvn clean package'
@@ -531,26 +604,28 @@ pipeline {
       }
       stage('项目部署') {
          steps {
-            deploy adapters: [tomcat8(credentialsId: 'f303f062-1ef0-4a1c-969b-972bb57244a2', path: '', url: 'http://172.17.17.80:8080')], contextPath: '/cms003S', war: 'target/*.war'
+            deploy adapters: [tomcat8(credentialsId: '9cfdcd8f-7b51-428d-ae79-25d64e70455a', path: '', url: 'http://172.17.17.196:8080')], contextPath: '/ddd', war: 'target/*.war'
          }
       }
-   }
-   post {
-         always {
-            emailext(
-               subject: '构建通知：${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!',
-               body: '${FILE,path="email.html"}',
-               to: 'xcg992224@163.com'
-            )
-         }
    }
 }
 ```
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_scm.png)
+在项目中引用该文件
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_scm1.png)
+
+![](../../assets/_images/devops/deploy/jenkins/jenkins_scm2.png)
 
 
 ### 2.4 常用的构建触发器
+
+Jenkins内置4种构建触发器：
+- 触发远程构建
+- 其他工程构建后触发（Build after other projects are build）
+- 定时构建（Build periodically）
+- 轮询SCM（Poll SCM）
+
 
 #### 2.4.1 触发远程构建
 
