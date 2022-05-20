@@ -307,8 +307,8 @@ pg_restore --help
 ```bash
 pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R # 备份base和pg_wal
 cd /data/pg_backup/
-# rm -rf /data/pgdata/12/data/*      # 清空数据库
-# rm -rf /data/pgdata/12/archive/*   # 清空wal 
+rm -rf /data/pgdata/12/data/*      # 清空数据库
+rm -rf /data/pgdata/12/archive/*   # 清空wal 
 tar xf base.tar -C $PGDATA
 tar xf pg_wal.tar -C /data/pgdata/12/archive/
 
