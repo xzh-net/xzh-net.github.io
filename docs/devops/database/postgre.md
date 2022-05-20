@@ -288,14 +288,15 @@ select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 
 - 逻辑备份
 
 ```bash
-psql -h localhost -U postgres -d sonardb -a -f oauth_client_details.sql             # sql备份
-psql -h localhost -U postgres < /data/backup/oauth_client_details.sql sonardb       # sql还原
+# 单表导出sql语句，多表使用-t sys_user -t sys_menu
+pg_dump -h localhost -U postgres -p 5432 -W oauth_center -t oauth_client_details --column-inserts > oauth_client_details.sql
+psql -h localhost -U postgres < /home/oauth_client_details.sql oauth_center    # sql还原
 
-pg_dump -h localhost -p 5432 -U postgres -d sonardb -F t -f sonardb.bak    # 备份
-pg_restore -h localhost -U postgres -d sonardb -v sonardb.bak              # 还原
+pg_dump -h localhost -p 5432 -U postgres -d oauth_center -F t -f oauth_center.sql       # 导出copy语句
+pg_restore -h localhost -U postgres -d oauth_center -v oauth_center.sql                 # 还原copy语句
 
-pg_dump -h localhost -U postgres -F c -f /opt/DB/sonardb.dump sonardb      # 二进制备份
-pg_restore -h localhost -U postgres -d  sonardb  /opt/DB/sonardb.dump      # 二进制还原
+pg_dump -h localhost -U postgres -F c -f /home/postgres/oauth_center.dump oauth_center  # 二进制备份
+pg_restore -h localhost -U postgres -d  oauth_center  /home/postgres/oauth_center.dump  # 二进制还原
 
 pg_dump --help
 pg_restore --help
