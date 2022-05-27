@@ -290,7 +290,7 @@ select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 
 ```bash
 # 单表导出sql语句，多表使用-t sys_user -t sys_menu
 pg_dump -h localhost -U postgres -p 5432 -W oauth_center -t oauth_client_details --column-inserts > oauth_client_details.sql
-psql -h localhost -U postgres < /home/oauth_client_details.sql oauth_center    # sql还原
+psql -h localhost -U postgres < /home/postgres/oauth_client_details.sql oauth_center    # sql还原
 
 pg_dump -h localhost -p 5432 -U postgres -d oauth_center -F t -f oauth_center.sql       # 导出copy语句
 pg_restore -h localhost -U postgres -d oauth_center -v oauth_center.sql                 # 还原copy语句

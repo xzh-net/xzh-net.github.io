@@ -32,7 +32,7 @@ spring:
                   rule-type: flow
 ```
 
-### 1.1 @SentinelResource注解参数
+### 1.1 @SentinelResource注解
 
 通过@SentinelResource来指定出现异常时的处理策略。用于定义资源，并提供可选的异常处理和 fallback 配置项
 
@@ -50,83 +50,23 @@ spring:
 
 本地资源加载配置文件见`RuleConstant.java`
 
-### 1.2 自定义降级限流
+### 1.2 自定义限流
+
+1. 按资源名，在本类中使用`blockHandler`指定限流逻辑（可以自定义消息，推荐）
+2. 按url，默认限流逻辑，无须指定（提示信息不友好，不推荐使用）
+3. 自定义限流处理，使用`blockHandlerClass`和`blockHandler`，指定全局限流逻辑类和方法（建议使用）
+
+### 1.3 自定义降级
+
+1. 按资源名，在本类中使用`handleFallback`指定降级逻辑，也叫兜底异常类
+2. 兜底异常不需要配合sentinel-dashboard降级参数使用，即每次调用产生的异常都通过兜底类进行显示，当该资源设置了降级参数后，触发熔断指定定时间窗内所有调用全部抛出`DegradeException`异常，此时调用不会进入逻辑方法中，实现了保护资源的目的，建议此处配合全局异常进行熔断信息的友好提示
+
+### 1.4 @Feign整合
+
+1. fallback方式
 
 ```java
-package com.xuzhihao.sentinel.fallback;
-
-import com.alibaba.csp.sentinel.slots.block.BlockException;
-
-//对应的BlockException处理的类
-/**
- * 测试超出流量限制的部分是否会进入到blockHandler的方法。
- */
-public class CustomBlockHandler {
-	public static String blockHandler(String id, BlockException e) {
-		return id+"自定义限流信息";
-	}
-}
-```
-
-```java
-package com.xuzhihao.sentinel.fallback;
-
-//对应的Throwable处理的类
-/**
- * sentinel定义的失败调用或限制调用，若本次访问被限流或服务降级，则调用blockHandler指定的接口。
- */
-public class CustomFallback {
-
-	// fallback
-	// 要求:
-	// 1 当前方法的返回值和参数要跟原方法一致
-	// 2 但是允许在参数列表的最后加入一个参数BlockException, 用来接收原方法中发生的异常
-	public static String fallback( String id, Throwable e) {
-		return id+"出现异常呗服务降级";
-	}
-}
-```
-
-```java
-package com.xuzhihao.sentinel.service.impl;
-
-import org.springframework.stereotype.Component;
-
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.xuzhihao.sentinel.fallback.CustomBlockHandler;
-import com.xuzhihao.sentinel.fallback.CustomFallback;
-import com.xuzhihao.sentinel.service.UserService;
-
-@Component
-public class UserServiceImpl implements UserService {
-
-	int i = 0;
-
-	@SentinelResource(value = "create", 
-			blockHandlerClass = CustomBlockHandler.class, 
-			blockHandler = "blockHandler", 
-			fallbackClass = CustomFallback.class, 
-			fallback = "fallback")
-	@Override
-	public String create(String id) {
-		i++;
-        if (i % 3 == 0) {
-            throw new RuntimeException();
-        }
-		return id;
-	}
-
-}
-```
-
-
-### 1.3 @Feign整合
-
-fallback方式
-
-```java
-@FeignClient(
-value = "service-product",fallback = ProductServiceFallBack.class)
+@FeignClient(value = "service-product",fallback = ProductServiceFallBack.class)
 public interface ProductService {
 	@RequestMapping("/product/{pid}")
 	Product findByPid(@PathVariable Integer pid);
@@ -147,15 +87,16 @@ public class ProductServiceFallback implements ProductService {
 }
 ```
 
-fallbackFactory方式
+2. fallbackFactory方式
+
 ```java
-@FeignClient(
-value = "service-product",fallbackFactory = ProductServiceFallbackFactory.class)
+@FeignClient(value = "service-product",fallbackFactory = ProductServiceFallbackFactory.class)
 public interface ProductService {
 	@RequestMapping("/product/{pid}")
 	Product findByPid(@PathVariable Integer pid);
 }
 ```
+
 ```java
 
 import org.slf4j.Logger;
