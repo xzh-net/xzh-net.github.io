@@ -3,7 +3,7 @@
 ## 1. Sentinel分布式系统流量防卫兵
 
 ```bash
-java -Dserver.port=8858 -Dcsp.sentinel.dashboard.server=localhost:8858 -Dproject.name=sentinel-dashboard -jar sentinel-dashboard-1.7.0.jar
+nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 ```
 
 ```yml
