@@ -11,6 +11,7 @@
   - [Redis](devops/database/redis)
   - [MongoDB](devops/database/mongodb)
   - [HBase](devops/database/hbase)
+  - [ClickHouse](devops/database/clickhouse)
 
 - 部署
   - [Nginx](devops/deploy/nginx)
