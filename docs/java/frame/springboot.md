@@ -34,6 +34,15 @@
 java -jar xxxx.jar --spring.config.location=D:/kawa/application.yml
 
 
+!> 从springboot 2.4以后，就默认不加载bootstrap配置文件了，解决办法：添加依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bootstrap</artifactId>
+</dependency>
+```
+
 ## 2. 属性注入
 
 ```yml
