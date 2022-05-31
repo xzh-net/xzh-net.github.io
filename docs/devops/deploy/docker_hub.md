@@ -606,6 +606,13 @@ docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone \
 --restart=always nacos/nacos-server:2.0.1
 ```
 
+### Consul
+
+```
+docker run -d -p 8500:8500 --restart=always --name=consul consul:1.12.1 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
+```
+
+
 ### Seata
 
 ```bash
