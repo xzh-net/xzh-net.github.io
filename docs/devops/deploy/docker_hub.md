@@ -709,6 +709,26 @@ chenchuxin/dubbo-admin
 docker run -d -p 2181:2181 --name some-zookeeper --restart always -d zookeeper:3.7.0
 ```
 
+```
+docker pull zookeeper:3.7.0
+
+mkdir /mydata/zookeeper/conf/ -p
+cd /mydata/zookeeper/conf/
+touch zoo.cfg
+
+# 设置心跳时间，单位毫秒
+tickTime=2000
+# 存储内存数据库快照的文件夹
+dataDir=/tmp/zookeeper
+# 监听客户端连接的端口
+clientPort=2181
+
+docker run -p 2181:2181 --name zookeeper \
+-v /mydata/zookeeper/conf/zoo.cfg:/conf/zoo.cfg \
+-d zookeeper:3.7.0
+```
+
+
 ### Zipkin 
 
 ```bash

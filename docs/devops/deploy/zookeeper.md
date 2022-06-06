@@ -111,3 +111,7 @@ echo 1 > /opt/apache-zookeeper-3.7.0/data/myid
 scp -r  /opt/apache-zookeeper-3.7.0 node02:/opt/
 scp -r  /opt/apache-zookeeper-3.7.0 node03:/opt/
 ```
+
+## 4. 可视化
+
+PrettyZoo的安装包，下载地址：https://github.com/vran-dev/PrettyZoo/releases
