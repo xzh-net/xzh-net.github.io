@@ -975,7 +975,7 @@ ssl_certificate_key  /usr/share/nginx/html/ssl/blog/blog.xuzhihao.net.key; # 配
 
 ### 4.3 FreeSSL
 
-https://freessl.cn/ 选择双域名一键生成
+https://freessl.cn/ 选择双域名离线生成
 
 ![](../../assets/_images/devops/deploy/nginx/nginx_https_start_08.png)
 
