@@ -16,7 +16,10 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 
 ```bash
 vim /usr/lib/systemd/system/docker.service #编辑文件
-ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock #修改参数
+# 添加配置文件内容
+ExecStart= xxx -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+xxx是代表原有的参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+
 systemctl daemon-reload #加载docker守护线程
 systemctl restart docker #重启docker
 ```
