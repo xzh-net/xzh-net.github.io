@@ -68,8 +68,7 @@ oracle	soft	nproc	2047
 oracle	hard	nproc	16384
 oracle	soft	nofile	1024
 oracle	hard	nofile	65536
-oracle	soft	stack	10240 # 此行会与 * soft	stack 1024 冲突导致无效
-oracle	hard	stack	10240
+oracle	soft	stack	10240
 ```
 
 - 修改/etc/pam.d/login文件
@@ -161,18 +160,11 @@ cd /data/u01/software/database/
 
 执行结果
 ```lua
-[oracle@oracledb database]$ ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 正在启动 Oracle Universal Installer...
 
 检查临时空间: 必须大于 120 MB。   实际为 41029 MB    通过
 检查交换空间: 必须大于 150 MB。   实际为 3967 MB    通过
-准备从以下地址启动 Oracle Universal Installer /tmp/OraInstall2022-06-09_04-14-01PM. 请稍候...[oracle@oracledb database]$ [WARNING] [INS-32055] 主产品清单位于 Oracle 基目录中。
-   原因: 主产品清单位于 Oracle 基目录中。
-   操作: Oracle 建议将此主产品清单放置在 Oracle 基目录之外的位置中。
-[WARNING] [INS-32055] 主产品清单位于 Oracle 基目录中。
-   原因: 主产品清单位于 Oracle 基目录中。
-   操作: Oracle 建议将此主产品清单放置在 Oracle 基目录之外的位置中。
-可以在以下位置找到本次安装会话的日志:
+...
  /data/u01/app/oracle/inventory/logs/installActions2022-06-09_04-14-01PM.log
 以下配置脚本需要以 "root" 用户的身份执行。
  #!/bin/sh 
@@ -192,6 +184,7 @@ Successfully Setup Software.
 `以root登录`
 ```bash
 su - root
+source .bash_profile
 sh /data/u01/app/oracle/inventory/orainstRoot.sh
 sh /data/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
 ```
@@ -200,6 +193,7 @@ sh /data/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
 
 ```bash
 su - oracle
+source .bash_profile
 netca /silent /responsefile /home/oracle/response/netca.rsp
 ```
 
@@ -210,13 +204,9 @@ su - root
 vim /home/oracle/response/dbca.rsp # 编辑应答文件
 ```
 ```bash
-# 设置以下参数
+# 设置CREATEDATABASE以下参数
 GDBNAME = "orcl"
 SID = "orcl"
-SYSPASSWORD = "oracle"
-SYSTEMPASSWORD = "oracle"
-SYSMANPASSWORD = "oracle"
-DBSNMPPASSWORD = "oracle"
 DATAFILEDESTINATION =/data/u01/app/oracle/oradata
 RECOVERYAREADESTINATION=/data/u01/app/oracle/fast_recovery_area
 CHARACTERSET = "AL32UTF8"
@@ -235,37 +225,18 @@ dbca -silent -responseFile /data/u01/software/database/response/dbca.rsp
 ```
 执行完后会先清屏，清屏之后没有提示，直接输入oracle用户的密码，回车，再输入一次，再回车。稍等一会，会开始自动创建
 
-- 登录及启动数据库
-
-```bash
-sqlplus / as sysdba
-SQL> startup
-ORA-00845: MEMORY_TARGET not supported on this system
-```
-如果startup报错的话，那么需要复制一个instorcl文件到相对应的路径下
-
-- 配置开机自动启动监听、启动oracle
-
-```bash
-su - root # 切换到root用户
-vim /etc/oratab
-# 编辑
-orcl:/home/oracle/oracle92:Y
-```
-```bash
-vim /etc/rc.local
-# 在文件末尾增加：
-su - oracle -c 'dbstart'su - oracle -c 'lsnrctl start'
-```
-
-- 查看监听状态
+- 登录数据库
 
 ```bash 
 su - oracle
 sqlplus / as sysdba
 startup
+# shutdown immediate
+select status from v$instance;
 
-/data/u01/app/oracle/product/11.2.0/dbhome_1/dbs
+create user xuzhihao identified by 123456;
+grant connect,resource to xuzhihao;
+grant dba to xuzhihao;
 
 lsnrctl start
 lsnrctl status
