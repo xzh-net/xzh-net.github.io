@@ -2,7 +2,7 @@
   - [CentOS-7](devops/linux/centos7)
   - [Rocky-8.5](devops/linux/rocky85)
   - [debian-11](devops/linux/debian11)
-  - [Windows_10](devops/windows/windows10)
+  - [Windows 10](devops/windows/windows10)
 
 - 数据库
   - [Oracle](devops/database/oracle)

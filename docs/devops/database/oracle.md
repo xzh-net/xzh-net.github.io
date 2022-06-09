@@ -2,6 +2,284 @@
 
 ## 1. 安装
 
+### 1.1 静默安装
+
+?> 版本 linux.x64_11gR2 11.2.0.1.0
+
+- 安装依赖
+
+```bash
+yum -y install gcc gcc-c++ make binutils compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel elfutils-libelf-devel-static glibc glibc-common glibc-devel ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel numactl-devel sysstat unixODBC unixODBC-devel kernelheaders pdksh pcre-devel readline rlwrap
+```
+
+- 创建用户和组
+
+```bash
+groupadd oinstall && groupadd dba && useradd -g oinstall -G dba oracle
+passwd oracle
+```
+
+- 创建安装包存放目录
+
+```bash
+mkdir -p /data/u01/software # 上传安装文件
+```
+
+- 解压安装包
+
+```bash
+cd /data/u01/software
+unzip linux.x64_11gR2_database_1of2.zip && unzip linux.x64_11gR2_database_2of2.zip
+```
+
+- 创建oracle目录，并授权文件夹目录权限给oracle
+
+```bash
+mkdir -p /data/u01/app/oracle/product/11.2.0/dbhome_1
+mkdir /data/u01/app/oracle/{oradata,inventory,fast_recovery_area}
+chown -R oracle:oinstall /data/u01/app/oracle
+chmod -R 775 /data/u01/app/oracle
+```
+
+- 修改内核参数
+
+vim /etc/sysctl.conf
+```bash
+fs.aio-max-nr=1048576
+fs.file-max=6815744
+kernel.shmall=2097152
+kernel.shmmni=4096
+kernel.shmmax = 536870912
+kernel.sem=250 32000 100 128
+net.ipv4.ip_local_port_range=9000 65500
+net.core.rmem_default=262144
+net.core.rmem_max=4194304
+net.core.wmem_default=262144
+net.core.wmem_max=1048586
+# 使内核新配置生效
+sysctl -p
+```
+
+- 修改用户限制
+
+vim /etc/security/limits.conf
+```bash
+oracle	soft	nproc	2047
+oracle	hard	nproc	16384
+oracle	soft	nofile	1024
+oracle	hard	nofile	65536
+oracle	soft	stack	10240 # 此行会与 * soft	stack 1024 冲突导致无效
+oracle	hard	stack	10240
+```
+
+- 修改/etc/pam.d/login文件
+
+vim /etc/pam.d/login
+```bash
+# 找到这一行：        
+session required pam_namespace.so 
+# 在其下一行添加： 
+session required /lib64/security/pam_limits.so
+session required pam_limits.so
+```
+
+- 修改/etc/profile文件
+
+vim /etc/profile
+```bash
+# 添加以下内容
+if [ $USER = "oracle" ]; 
+then if [ $SHELL = "/bin/ksh" ]; 
+then
+ulimit -p 16384
+ulimit -n 65536
+else
+ulimit -u 16384 -n 65536
+fi
+fi
+```
+
+- 设置oracle用户环境变量
+
+需要切换到oracle用户
+```bash
+su - oracle
+vim .bash_profile
+```
+```bash
+export ORACLE_BASE=/data/u01/app/oracle
+export ORACLE_HOME=/data/u01/app/oracle/product/11.2.0/dbhome_1
+export ORACLE_SID=orcl
+export ORACLE_UNQNAME=$ORACLE_SID
+export PATH=$ORACLE_HOME/bin:$PATH
+export NLS_LANG=american_america.AL32UTF8
+```
+```bash
+# 生效
+source .bash_profile
+```
+
+- 添加主机名与ip对应记录
+
+```bash
+su - root 
+hostnamectl set-hostname oracledb 
+vim /etc/hosts
+# 172.17.17.201 oracledb
+```
+
+- 编辑静默安装响应文件
+
+```bash
+su - oracle
+cp -R /data/u01/software/database/response/ . && cd response/
+vim db_install.rsp
+```
+
+```bash
+# 设置以下内容
+oracle.install.option=INSTALL_DB_SWONLY
+ORACLE_HOSTNAME=oracledb # 主机名
+UNIX_GROUP_NAME=oinstall
+INVENTORY_LOCATION=/data/u01/app/oracle/inventory
+SELECTED_LANGUAGES=en,zh_CN
+ORACLE_HOME=/data/u01/app/oracle/product/11.2.0/dbhome_1
+ORACLE_BASE=/data/u01/app/oracle
+oracle.install.db.InstallEdition=EE
+oracle.install.db.DBA_GROUP=dba
+oracle.install.db.OPER_GROUP=dba
+DECLINE_SECURITY_UPDATES=true
+```
+
+- 安装
+
+```bash
+cd /data/u01/software/database/
+./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
+```
+等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示以 root 用户执行脚本
+
+执行结果
+```lua
+[oracle@oracledb database]$ ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
+正在启动 Oracle Universal Installer...
+
+检查临时空间: 必须大于 120 MB。   实际为 41029 MB    通过
+检查交换空间: 必须大于 150 MB。   实际为 3967 MB    通过
+准备从以下地址启动 Oracle Universal Installer /tmp/OraInstall2022-06-09_04-14-01PM. 请稍候...[oracle@oracledb database]$ [WARNING] [INS-32055] 主产品清单位于 Oracle 基目录中。
+   原因: 主产品清单位于 Oracle 基目录中。
+   操作: Oracle 建议将此主产品清单放置在 Oracle 基目录之外的位置中。
+[WARNING] [INS-32055] 主产品清单位于 Oracle 基目录中。
+   原因: 主产品清单位于 Oracle 基目录中。
+   操作: Oracle 建议将此主产品清单放置在 Oracle 基目录之外的位置中。
+可以在以下位置找到本次安装会话的日志:
+ /data/u01/app/oracle/inventory/logs/installActions2022-06-09_04-14-01PM.log
+以下配置脚本需要以 "root" 用户的身份执行。
+ #!/bin/sh 
+ #要运行的 Root 脚本
+
+/data/u01/app/oracle/inventory/orainstRoot.sh
+/data/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
+要执行配置脚本, 请执行以下操作:
+	 1. 打开一个终端窗口
+	 2. 以 "root" 身份登录
+	 3. 运行脚本
+	 4. 返回此窗口并按 "Enter" 键继续
+
+Successfully Setup Software.
+
+```
+`以root登录`
+```bash
+su - root
+sh /data/u01/app/oracle/inventory/orainstRoot.sh
+sh /data/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
+```
+
+- 以静默方式配置监听
+
+```bash
+su - oracle
+netca /silent /responsefile /home/oracle/response/netca.rsp
+```
+
+- 以静默方式建立新库和实例
+
+```bash
+su - root
+vim /home/oracle/response/dbca.rsp # 编辑应答文件
+```
+```bash
+# 设置以下参数
+GDBNAME = "orcl"
+SID = "orcl"
+SYSPASSWORD = "oracle"
+SYSTEMPASSWORD = "oracle"
+SYSMANPASSWORD = "oracle"
+DBSNMPPASSWORD = "oracle"
+DATAFILEDESTINATION =/data/u01/app/oracle/oradata
+RECOVERYAREADESTINATION=/data/u01/app/oracle/fast_recovery_area
+CHARACTERSET = "AL32UTF8"
+TOTALMEMORY = "4096"
+```
+查看建库相应文件配置信息
+```bash
+egrep -v "(^#|^$)" /home/oracle/response/dbca.rsp
+```
+
+- 启用配置，静默建库和实例
+
+```bash
+su - oracle
+dbca -silent -responseFile /data/u01/software/database/response/dbca.rsp
+```
+执行完后会先清屏，清屏之后没有提示，直接输入oracle用户的密码，回车，再输入一次，再回车。稍等一会，会开始自动创建
+
+- 登录及启动数据库
+
+```bash
+sqlplus / as sysdba
+SQL> startup
+ORA-00845: MEMORY_TARGET not supported on this system
+```
+如果startup报错的话，那么需要复制一个instorcl文件到相对应的路径下
+
+- 配置开机自动启动监听、启动oracle
+
+```bash
+su - root # 切换到root用户
+vim /etc/oratab
+# 编辑
+orcl:/home/oracle/oracle92:Y
+```
+```bash
+vim /etc/rc.local
+# 在文件末尾增加：
+su - oracle -c 'dbstart'su - oracle -c 'lsnrctl start'
+```
+
+- 查看监听状态
+
+```bash 
+su - oracle
+sqlplus / as sysdba
+startup
+
+/data/u01/app/oracle/product/11.2.0/dbhome_1/dbs
+
+lsnrctl start
+lsnrctl status
+netstat -tunlp|grep 1521
+ps -ef | grep ora_ | grep -v grep
+# 查看监听器配置文件 listener.ora
+cat $ORACLE_HOME/network/admin/listener.ora
+# 查看监听服务名配置文件 tnsnames.ora，创建实例以后才可以查看
+cat $ORACLE_HOME/network/admin/tnsnames.ora
+```
+
+
+### 1.2 图形化安装
+
 ## 2. 库操作
 
 ### 2.1 重启
