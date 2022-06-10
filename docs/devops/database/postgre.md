@@ -92,7 +92,6 @@ vi /etc/security/limits.conf
 
 ```bash
 su - postgres
-cd ~
 vi .bash_profile
 
 export PGHOME=/usr/local/pgsql
