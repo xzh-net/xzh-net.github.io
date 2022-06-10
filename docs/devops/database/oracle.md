@@ -1,4 +1,4 @@
-# Oracle
+# Oracle 11g R2
 
 ## 1. 安装
 
