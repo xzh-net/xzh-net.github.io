@@ -127,17 +127,16 @@ sys: oracle
 docker exec -it oracle-xe-11g /bin/bash
 
 cd /u01/app/oracle
-mkdir xuzhihao
-chmod 777 xuzhihao
+mkdir oradata
+chmod 777 oradata
 su oracle
 cd $ORACLE_HOME
 bin/sqlplus / as sysdba
 
-create tablespace xuzhihao datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 100M;
-create user xuzhihao identified by 123456 default tablespace xuzhihao;
-grant connect,resource to xuzhihao;
-grant dba to xuzhihao;  #  授予dba权限后，这个用户能操作所有用户的表
-
+create tablespace xzh datafile '/u01/app/oracle/oradata/xzh.dbf' size 100M;
+create user xzh0610 identified by 123456 default tablespace xzh;
+grant connect,resource to xzh0610;
+grant dba to xzh0610;  #  授予dba权限后，这个用户能操作所有用户的表
 ```
 
 ## 3. NoSQL
