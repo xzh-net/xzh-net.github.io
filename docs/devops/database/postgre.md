@@ -58,8 +58,9 @@ chown postgres /data/pg_backup
 
 5. 系统参数优化
 
+vi /etc/sysctl.conf
+
 ```conf
-# vi /etc/sysctl.conf
 kernel.shmmax = 68719476736
 kernel.shmall = 4294967296
 kernel.shmmni = 4096
@@ -70,8 +71,13 @@ net.core.rmem_default = 1048576
 net.core.rmem_max = 4194304
 net.core.wmem_default = 262144
 net.core.wmem_max = 1048576
-# sysctl -p
-# vi /etc/security/limits.conf
+
+sysctl -p
+```
+
+vi /etc/security/limits.conf
+
+```conf
 * soft nofile 131072
 * hard nofile 131072
 * soft nproc 131072
