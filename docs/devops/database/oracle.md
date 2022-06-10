@@ -346,7 +346,7 @@ create user xzh0610 identified by 123456
   password  expire;
 
 grant connect,resource to xzh0610;
-GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610; 
+grant read,write ON DIRECTORY oradmp to xzh0610; 
 grant dba to xzh0610;
 drop user xzh0610 cascade;
 ```
@@ -358,7 +358,7 @@ drop user xzh0610 cascade;
 SELECT * FROM DBA_DIRECTORIES;                          --查看目录
 CREATE DIRECTORY oradmp AS '/data/u01/app/oracle/oradmp'; -- 创建目录
 DROP DIRECTORY oradmp;                                    -- 删除目录
-GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;              --将EXP_DIR目录的赋给用户
+GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;              --将oradmp目录的赋给用户
 ```
 
 ### 2.5 备份恢复
