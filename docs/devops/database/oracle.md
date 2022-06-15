@@ -22,23 +22,23 @@ passwd oracle
 - 创建安装包存放目录
 
 ```bash
-mkdir -p /data/u01/software # 上传安装文件
+mkdir -p /u01/software # 上传安装文件
 ```
 
 - 解压安装包
 
 ```bash
-cd /data/u01/software
+cd /u01/software
 unzip linux.x64_11gR2_database_1of2.zip && unzip linux.x64_11gR2_database_2of2.zip
 ```
 
 - 创建oracle目录，并授权文件夹目录权限给oracle
 
 ```bash
-mkdir -p /data/u01/app/oracle/product/11.2.0/dbhome_1
-mkdir /data/u01/app/oracle/{oradata,inventory,fast_recovery_area,oradmp}
-chown -R oracle:oinstall /data/u01/app/oracle/
-chmod -R 775 /data/u01/app/oracle
+mkdir -p /u01/app/oracle/product/11.2.0/dbhome_1
+mkdir /u01/app/oracle/{oradata,inventory,fast_recovery_area,oradmp}
+chown -R oracle:oinstall /u01/app/oracle/
+chmod -R 775 /u01/app/oracle
 ```
 
 - 修改内核参数
@@ -110,7 +110,7 @@ su - oracle
 vim .bash_profile
 ```
 ```bash
-export ORACLE_BASE=/data/u01/app/oracle
+export ORACLE_BASE=/u01/app/oracle
 export ORACLE_HOME=$ORACLE_BASE/product/11.2.0/dbhome_1
 export ORACLE_SID=orcl
 export ORACLE_UNQNAME=$ORACLE_SID
@@ -135,7 +135,7 @@ vim /etc/hosts
 
 ```bash
 su - oracle
-cp -R /data/u01/software/database/response/ . && cd response/
+cp -R /u01/software/database/response/ . && cd response/
 vim db_install.rsp
 ```
 
@@ -144,10 +144,10 @@ vim db_install.rsp
 oracle.install.option=INSTALL_DB_SWONLY
 ORACLE_HOSTNAME=oracledb # 主机名
 UNIX_GROUP_NAME=oinstall
-INVENTORY_LOCATION=/data/u01/app/oracle/inventory
+INVENTORY_LOCATION=/u01/app/oracle/inventory
 SELECTED_LANGUAGES=en,zh_CN
-ORACLE_HOME=/data/u01/app/oracle/product/11.2.0/dbhome_1
-ORACLE_BASE=/data/u01/app/oracle
+ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1
+ORACLE_BASE=/u01/app/oracle
 oracle.install.db.InstallEdition=EE
 oracle.install.db.DBA_GROUP=dba
 oracle.install.db.OPER_GROUP=dba
@@ -157,7 +157,7 @@ DECLINE_SECURITY_UPDATES=true
 - 安装
 
 ```bash
-cd /data/u01/software/database/
+cd /u01/software/database/
 ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 ```
 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
@@ -167,13 +167,13 @@ cd /data/u01/software/database/
 检查临时空间: 必须大于 120 MB。   实际为 41029 MB    通过
 检查交换空间: 必须大于 150 MB。   实际为 3967 MB    通过
 ...
- /data/u01/app/oracle/inventory/logs/installActions2022-06-09_04-14-01PM.log
+ /u01/app/oracle/inventory/logs/installActions2022-06-09_04-14-01PM.log
 以下配置脚本需要以 "root" 用户的身份执行。
  #!/bin/sh 
  #要运行的 Root 脚本
 
-/data/u01/app/oracle/inventory/orainstRoot.sh
-/data/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
+/u01/app/oracle/inventory/orainstRoot.sh
+/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
 要执行配置脚本, 请执行以下操作:
 	 1. 打开一个终端窗口
 	 2. 以 "root" 身份登录
@@ -186,8 +186,8 @@ Successfully Setup Software.
 `以root登录`
 ```bash
 su - root
-sh /data/u01/app/oracle/inventory/orainstRoot.sh
-sh /data/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
+sh /u01/app/oracle/inventory/orainstRoot.sh
+sh /u01/app/oracle/product/11.2.0/dbhome_1/root.sh
 ```
 
 - 以静默方式配置监听
@@ -197,7 +197,7 @@ su - oracle
 source .bash_profile
 netca /silent /responsefile /home/oracle/response/netca.rsp
 ```
-成功运行后，在 `/data/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/` 中生成`listener.ora`和`sqlnet.ora`
+成功运行后，在 `/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/` 中生成`listener.ora`和`sqlnet.ora`
 ```bash
 cat $ORACLE_HOME/network/admin/listener.ora     # 查看监听器配置文件
 cat $ORACLE_HOME/network/admin/sqlnet.ora       # 查看监听服务名配置文件
@@ -216,8 +216,8 @@ vim /home/oracle/response/dbca.rsp # 编辑应答文件
 # 设置CREATEDATABASE以下参数
 GDBNAME = "orcl"
 SID = "orcl"
-DATAFILEDESTINATION =/data/u01/app/oracle/oradata
-RECOVERYAREADESTINATION=/data/u01/app/oracle/fast_recovery_area
+DATAFILEDESTINATION =/u01/app/oracle/oradata
+RECOVERYAREADESTINATION=/u01/app/oracle/fast_recovery_area
 CHARACTERSET = "AL32UTF8"
 TOTALMEMORY = "4096"
 ```
@@ -256,9 +256,9 @@ sqlplus / as sysdba
 shutdown immediate
 exit
 lsnrctl stop
-cd /data/u01/app/oracle/product/11.2.0/dbhome_1/deinstall
+cd /u01/app/oracle/product/11.2.0/dbhome_1/deinstall
 ./deinstall
-rm -rf /data/u01/app
+rm -rf /u01/app
 ```
 
 ## 2. 库操作
@@ -297,7 +297,7 @@ nohup sh /data/oracle_restart.sh &     # 后台执行
 表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
 ```bash
 create temporary tablespace xzh_temp
-tempfile '/data/u01/app/oracle/oradata/xzh_temp.dbf' 
+tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' 
 size 50m
 autoextend on 
 next 50m maxsize 20480m 
@@ -306,11 +306,11 @@ extent management local;
 
 ```bash
 select tablespace_name,file_name,bytes/1024/1024 file_size,autoextensible from dba_temp_files;        # 查询临时表空间
-create temporary tablespace xzh_temp tempfile '/data/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;   # 创建临时表空间
-alter database tempfile '/data/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                      # 调整临时表空间大小
-alter tablespace xzh_temp add tempfile '/data/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;              # 向临时表空间中添加数据文件： 
-alter database tempfile '/data/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited; # 将临时数据文件设为自动扩展
-alter database tempfile '/data/u01/app/oracle/oradata/xzh_temp.dbf' drop;                             # 删除临时表空间的一个数据文件
+create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;   # 创建临时表空间
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                      # 调整临时表空间大小
+alter tablespace xzh_temp add tempfile '/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;              # 向临时表空间中添加数据文件： 
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited; # 将临时数据文件设为自动扩展
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                             # 删除临时表空间的一个数据文件
 drop tablespace xzh_temp including contents and datafiles cascade constraints;                        # 删除临时表空间(彻底删除)
 ```
 
@@ -319,7 +319,7 @@ drop tablespace xzh_temp including contents and datafiles cascade constraints;  
 ```bash
 create tablespace xzh
 logging 
-datafile '/data/u01/app/oracle/oradata/xzh.dbf' 
+datafile '/u01/app/oracle/oradata/xzh.dbf' 
 size 50m 
 autoextend on 
 next 50m maxsize 20480m 
@@ -328,12 +328,12 @@ extent management local;
 
 ```bash
 select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;                 # 查询表空间
-create tablespace xuzhihao datafile '/data/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 100M;                # 创建表空间
-alter tablespace xuzhihao add datafile '/data/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 5m;               # 增加表空间数据文件
+create tablespace xuzhihao datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 100M;                # 创建表空间
+alter tablespace xuzhihao add datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 5m;               # 增加表空间数据文件
 drop tablespace xuzhihao including contents;                                                               # 删除表空间
 drop tablespace xuzhihao including contents and datafiles;                                                 # 删除表空间和数据文件
-alter database datafile '/data/u01/app/oracle/xuzhihao/xuzhihao.dbf' resize 50m;                           # 扩展表空间
-alter database datafile '/data/u01/app/oracle/xuzhihao/xuzhihao.dbf' autoextend on next 50m maxsize 500m;  # 表空间自动增长
+alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' resize 50m;                           # 扩展表空间
+alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' autoextend on next 50m maxsize 500m;  # 表空间自动增长
 ```
 
 ### 2.3 创建用户授权
@@ -356,7 +356,7 @@ drop user xzh0610 cascade;
 
 ```sql
 SELECT * FROM DBA_DIRECTORIES;                          --查看目录
-CREATE DIRECTORY oradmp AS '/data/u01/app/oracle/oradmp'; -- 创建目录
+CREATE DIRECTORY oradmp AS '/u01/app/oracle/oradmp'; -- 创建目录
 DROP DIRECTORY oradmp;                                    -- 删除目录
 GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;              --将oradmp目录的赋给用户
 ```
