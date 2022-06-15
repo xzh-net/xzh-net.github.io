@@ -6,33 +6,33 @@
 
 ?> 版本 linux.x64_11gR2 11.2.0.1.0
 
-- 安装依赖
+1. 安装依赖
 
 ```bash
 yum -y install gcc gcc-c++ make binutils compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel elfutils-libelf-devel-static glibc glibc-common glibc-devel ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel numactl-devel sysstat unixODBC unixODBC-devel kernelheaders pdksh pcre-devel readline rlwrap
 ```
 
-- 创建用户和组
+2. 创建用户和组
 
 ```bash
 groupadd oinstall && groupadd dba && useradd -g oinstall -G dba oracle
 passwd oracle
 ```
 
-- 创建安装包存放目录
+3. 创建安装包存放目录
 
 ```bash
 mkdir -p /u01/software # 上传安装文件
 ```
 
-- 解压安装包
+4. 解压安装包
 
 ```bash
 cd /u01/software
 unzip linux.x64_11gR2_database_1of2.zip && unzip linux.x64_11gR2_database_2of2.zip
 ```
 
-- 创建oracle目录，并授权文件夹目录权限给oracle
+5. 创建oracle目录，并授权文件夹目录权限给oracle
 
 ```bash
 mkdir -p /u01/app/oracle/product/11.2.0/dbhome_1
@@ -41,12 +41,13 @@ chown -R oracle:oinstall /u01/app/oracle/
 chmod -R 775 /u01/app/oracle
 ```
 
-- 修改内核参数
+6. 修改内核参数
 
   kernel.shmmax官方建议值：
-  - 32位linux系统：可取最大值为 4GB （ 4294967296bytes ） -1byte ，即 4294967295 。建议值为多于内存的一半，所以如果是 32 为系统，一般可取值为 4294967295 。 32 位系统对 SGA 大小有限制，所以 SGA 肯定可以包含在单个共享内存段中。
-  - 64位linux系统：可取的最大值为物理内存值 -1byte ，建议值为多于物理内存的一半，一般取值大于 SGA_MAX_SIZE 即可，可以取物理内存 -1byte 。  
-  内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
+    - 32位linux系统：可取最大值为 4GB （ 4294967296bytes ） -1byte ，即 4294967295 。建议值为多于内存的一半，所以如果是 32 为系统，一般可取值为 4294967295 。 32 位系统对 SGA 大小有限制，所以 SGA 肯定可以包含在单个共享内存段中。
+    - 64位linux系统：可取的最大值为物理内存值 -1byte ，建议值为多于物理内存的一半，一般取值大于 SGA_MAX_SIZE 即可，可以取物理内存 -1byte 。  
+
+  ?> 内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
 
 vim /etc/sysctl.conf
 ```bash
@@ -65,7 +66,7 @@ net.core.wmem_max=1048586
 sysctl -p
 ```
 
-- 修改用户限制
+7. 修改用户限制
 
 vim /etc/security/limits.conf
 ```bash
@@ -76,7 +77,7 @@ oracle	hard	nofile	65536
 oracle	soft	stack	10240
 ```
 
-- 修改/etc/pam.d/login文件
+8. 修改/etc/pam.d/login文件
 
 vim /etc/pam.d/login
 ```bash
@@ -87,7 +88,7 @@ session required /lib64/security/pam_limits.so
 session required pam_limits.so
 ```
 
-- 修改/etc/profile文件
+9. 修改/etc/profile文件
 
 vim /etc/profile
 ```bash
@@ -102,9 +103,8 @@ if [ $USER = "oracle" ]; then
 fi
 ```
 
-- 设置oracle用户环境变量
+10. 设置oracle用户环境变量
 
-需要切换到oracle用户
 ```bash
 su - oracle
 vim .bash_profile
@@ -122,7 +122,7 @@ export NLS_LANG=american_america.AL32UTF8
 source .bash_profile
 ```
 
-- 添加主机名与ip对应记录
+11. 添加主机名与ip对应记录
 
 ```bash
 su - root 
@@ -131,7 +131,7 @@ vim /etc/hosts
 127.0.0.1 oracledb
 ```
 
-- 编辑静默安装响应文件
+12. 编辑静默安装响应文件
 
 ```bash
 su - oracle
@@ -154,13 +154,13 @@ oracle.install.db.OPER_GROUP=dba
 DECLINE_SECURITY_UPDATES=true
 ```
 
-- 安装
+13. 安装
 
 ```bash
 cd /u01/software/database/
 ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 ```
-等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
+!> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
 ```lua
 正在启动 Oracle Universal Installer...
 
@@ -183,14 +183,14 @@ cd /u01/software/database/
 Successfully Setup Software.
 
 ```
-`以root登录`
+
 ```bash
 su - root
 sh /u01/app/oracle/inventory/orainstRoot.sh
 sh /u01/app/oracle/product/11.2.0/dbhome_1/root.sh
 ```
 
-- 以静默方式配置监听
+14. 以静默方式配置监听
 
 ```bash
 su - oracle
@@ -206,7 +206,7 @@ netstat -tunlp|grep 1521
 ```
 
 
-- 以静默方式建立新库，同时也建立一个对应的实例
+15. 以静默方式建立新库，同时也建立一个对应的实例
 
 ```bash
 su - oracle
@@ -231,7 +231,7 @@ dbca -silent -responseFile /home/oracle/response/dbca.rsp
 ps -ef | grep ora_ | grep -v grep
 ```
 
-- 登录数据库
+16. 登录数据库
 
 ```bash 
 su - oracle
@@ -306,12 +306,12 @@ extent management local;
 
 ```bash
 select tablespace_name,file_name,bytes/1024/1024 file_size,autoextensible from dba_temp_files;        # 查询临时表空间
-create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;   # 创建临时表空间
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                      # 调整临时表空间大小
+create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;        # 创建临时表空间
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                           # 调整临时表空间大小
 alter tablespace xzh_temp add tempfile '/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;              # 向临时表空间中添加数据文件： 
 alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited; # 将临时数据文件设为自动扩展
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                             # 删除临时表空间的一个数据文件
-drop tablespace xzh_temp including contents and datafiles cascade constraints;                        # 删除临时表空间(彻底删除)
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                                    # 删除临时表空间的一个数据文件
+drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
 ```
 
 - 数据表空间
@@ -327,11 +327,11 @@ extent management local;
 ```
 
 ```bash
-select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;                 # 查询表空间
+select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;            # 查询表空间
 create tablespace xuzhihao datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 100M;                # 创建表空间
 alter tablespace xuzhihao add datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 5m;               # 增加表空间数据文件
-drop tablespace xuzhihao including contents;                                                               # 删除表空间
-drop tablespace xuzhihao including contents and datafiles;                                                 # 删除表空间和数据文件
+drop tablespace xuzhihao including contents;                                                          # 删除表空间
+drop tablespace xuzhihao including contents and datafiles;                                            # 删除表空间和数据文件
 alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' resize 50m;                           # 扩展表空间
 alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' autoextend on next 50m maxsize 500m;  # 表空间自动增长
 ```
@@ -356,9 +356,9 @@ drop user xzh0610 cascade;
 
 ```sql
 SELECT * FROM DBA_DIRECTORIES;                          --查看目录
-CREATE DIRECTORY oradmp AS '/u01/app/oracle/oradmp'; -- 创建目录
-DROP DIRECTORY oradmp;                                    -- 删除目录
-GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;              --将oradmp目录的赋给用户
+CREATE DIRECTORY oradmp AS '/u01/app/oracle/oradmp';    -- 创建目录
+DROP DIRECTORY oradmp;                                  -- 删除目录
+GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        --将oradmp目录的赋给用户
 ```
 
 ### 2.5 备份恢复
@@ -962,3 +962,16 @@ END;
 ```bash
 nohup sh /data/proc-debug.sh &     # 后台执行
 ```
+
+## 5. 高可用
+
+### 5.1 RAC
+
+- 网络配置
+- 主机及host配置
+- 生成共享磁盘
+- RAC_ASM磁盘挂载
+- 用户变量及互信
+- 集群安装
+- 安装数据库
+- 建库
