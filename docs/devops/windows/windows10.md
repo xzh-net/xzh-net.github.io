@@ -1,4 +1,4 @@
-# Windows_10
+# Windows 10
 
 ## 1. VirtualBox
 
@@ -18,7 +18,7 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
 
 ## 3. 开发环境
 
-### 3.1 Java
+1. Java
 
 ```java
 JAVA_HOME
@@ -35,7 +35,7 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
-### 3.2 Golang
+2. Golang
 
 https://golang.google.cn/dl/
 

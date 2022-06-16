@@ -1,86 +1,6 @@
-# CentOS-7
+# CentOS 7
 
-## 1. 安装
-
-![](../../assets/_images/devops/linux/centos7/1.png)
-![](../../assets/_images/devops/linux/centos7/2.png)
-![](../../assets/_images/devops/linux/centos7/3.png)
-![](../../assets/_images/devops/linux/centos7/4.png)
-![](../../assets/_images/devops/linux/centos7/5.png)
-![](../../assets/_images/devops/linux/centos7/6.png)
-![](../../assets/_images/devops/linux/centos7/7.png)
-![](../../assets/_images/devops/linux/centos7/8.png)
-![](../../assets/_images/devops/linux/centos7/10.png)
-
-进入一站式安装界面，在此界面，只需把所有带感叹号的内容全部消除，便可进行安装
-
-![](../../assets/_images/devops/linux/centos7/11.png)
-
-时区选择，选择日期和时间 中国范围内建议选择上海，并选择24小时制，设置完成，单击完成按钮
-
-![](../../assets/_images/devops/linux/centos7/12.png)
-
-选择安装源
-
-![](../../assets/_images/devops/linux/centos7/13.png)
-
-单击验证，验证光盘或镜像是否完整，防止安装过程出现软件包不完整，导致无法安装
-
-![](../../assets/_images/devops/linux/centos7/14.png)
-
-验证界面如下
-
-![](../../assets/_images/devops/linux/centos7/15.png)
-
-选择额外软件仓库，可以在安装时检测是否有更新的软件包，进行更新安装，如果没有也可以手动添加新的网络仓库，然后单击完成按钮
-
-![](../../assets/_images/devops/linux/centos7/16.png)
-
-软件选择，这里使用最小化安装
-
-![](../../assets/_images/devops/linux/centos7/17.png)
-
-![](../../assets/_images/devops/linux/centos7/18.png)
-
-安装位置
-
-![](../../assets/_images/devops/linux/centos7/19.png)
-
-选择-Other Storage Options-Partitoning-I will configure partitioning，点左上角的`Done`
-
-![](../../assets/_images/devops/linux/centos7/20.png)
-
-```lua
-进入下面的界面，在分区方案有标准分区，btrfs，LVM，
-LVM简单配置，这里默认LVM就可以，然后单击创建新的分区，
-新挂载点使用以下分区方案：标准Standard Partition
-分区提前规划好，一般swap分区为物理内存的1.5~2倍，
-/boot分区10GB，/分区50GB，
-挂载点：swap，期望容量：4096，添加挂载点，如下图所示，继续点左下角的+号，
-挂载点：/ ，期望容量：留空 
-
-实际工作中可以创建数据分区，生产服务器建议单独再划分一个/data分区存放数据，一般把数据和系统分开
-```
-
-![](../../assets/_images/devops/linux/centos7/21.png)
-
-点左上角的`Done`，进入下面的界面
-
-![](../../assets/_images/devops/linux/centos7/22.png)
-
-接受更改Accept Changes，进入下面的界面
-
-![](../../assets/_images/devops/linux/centos7/11.png)
-
-开始安装Begin Installation，进入下面的界面
-
-![](../../assets/_images/devops/linux/centos7/23.png)
-
-选择-用户设置USER SETTINGS-ROOT密码，进入下面的界面
-
-![](../../assets/_images/devops/linux/centos7/24.png)
-
-等待系统重启
+## 1. 虚拟机
 
 1. 初始化
 
@@ -422,7 +342,7 @@ gcc --version
 
 7. 应用
 
-1. 启动
+- 启动命令
 
 ```bash
 # solr
@@ -438,7 +358,7 @@ nohup ./openfire.sh >/dev/null 2>&1 &
 nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 ```
 
-2. FTP安装
+- FTP安装
 
 ```bash
 yum install vsftpd                  # 安装
