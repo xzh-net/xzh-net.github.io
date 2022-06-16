@@ -1,8 +1,188 @@
 # CentOS-7
 
-## 1. 命令
+## 1. 安装
 
-### 1.1 系统
+![](../../assets/_images/devops/linux/centos7/1.png)
+![](../../assets/_images/devops/linux/centos7/2.png)
+![](../../assets/_images/devops/linux/centos7/3.png)
+![](../../assets/_images/devops/linux/centos7/4.png)
+![](../../assets/_images/devops/linux/centos7/5.png)
+![](../../assets/_images/devops/linux/centos7/6.png)
+![](../../assets/_images/devops/linux/centos7/7.png)
+![](../../assets/_images/devops/linux/centos7/8.png)
+![](../../assets/_images/devops/linux/centos7/10.png)
+
+进入一站式安装界面，在此界面，只需把所有带感叹号的内容全部消除，便可进行安装
+
+![](../../assets/_images/devops/linux/centos7/11.png)
+
+时区选择，选择日期和时间 中国范围内建议选择上海，并选择24小时制，设置完成，单击完成按钮
+
+![](../../assets/_images/devops/linux/centos7/12.png)
+
+选择安装源
+
+![](../../assets/_images/devops/linux/centos7/13.png)
+
+单击验证，验证光盘或镜像是否完整，防止安装过程出现软件包不完整，导致无法安装
+
+![](../../assets/_images/devops/linux/centos7/14.png)
+
+验证界面如下
+
+![](../../assets/_images/devops/linux/centos7/15.png)
+
+选择额外软件仓库，可以在安装时检测是否有更新的软件包，进行更新安装，如果没有也可以手动添加新的网络仓库，然后单击完成按钮
+
+![](../../assets/_images/devops/linux/centos7/16.png)
+
+软件选择，这里使用最小化安装
+
+![](../../assets/_images/devops/linux/centos7/17.png)
+
+![](../../assets/_images/devops/linux/centos7/18.png)
+
+安装位置
+
+![](../../assets/_images/devops/linux/centos7/19.png)
+
+选择-Other Storage Options-Partitoning-I will configure partitioning，点左上角的`Done`
+
+![](../../assets/_images/devops/linux/centos7/20.png)
+
+```lua
+进入下面的界面，在分区方案有标准分区，btrfs，LVM，
+LVM简单配置，这里默认LVM就可以，然后单击创建新的分区，
+新挂载点使用以下分区方案：标准Standard Partition
+分区提前规划好，一般swap分区为物理内存的1.5~2倍，
+/boot分区10GB，/分区50GB，
+挂载点：swap，期望容量：4096，添加挂载点，如下图所示，继续点左下角的+号，
+挂载点：/ ，期望容量：留空 
+
+实际工作中可以创建数据分区，生产服务器建议单独再划分一个/data分区存放数据，一般把数据和系统分开
+```
+
+![](../../assets/_images/devops/linux/centos7/21.png)
+
+点左上角的`Done`，进入下面的界面
+
+![](../../assets/_images/devops/linux/centos7/22.png)
+
+接受更改Accept Changes，进入下面的界面
+
+![](../../assets/_images/devops/linux/centos7/11.png)
+
+开始安装Begin Installation，进入下面的界面
+
+![](../../assets/_images/devops/linux/centos7/23.png)
+
+选择-用户设置USER SETTINGS-ROOT密码，进入下面的界面
+
+![](../../assets/_images/devops/linux/centos7/24.png)
+
+等待系统重启
+
+1. 初始化
+
+```bash
+yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
+
+service iptables status
+systemctl disable iptables.service  # 关闭
+systemctl stop firewalld.service
+systemctl disable firewalld.service # 关闭
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+```
+
+2. OpenSSH
+
+```bash
+vi /etc/ssh/sshd_config
+
+# 配置文件
+Port 22
+ListenAddress 0.0.0.0
+ListenAddress ::
+PermitRootLogin yes # 允许远程登录
+PasswordAuthentication yes  # 开启用户名和密码来验证
+
+# 重启
+service sshd start
+systemctl enable sshd
+```
+
+3. 网络
+
+```bash
+vi /etc/hosts                                  # hosts
+vi /etc/resolv.conf  nameserver 192.168.0.1    # dns
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # ip
+hostnamectl set-hostname xuzhihao              # 修改主机名
+```
+
+```conf
+TYPE="Ethernet"
+PROXY_METHOD="none"
+BROWSER_ONLY="no"
+BOOTPROTO="static" # dhcp 
+DEFROUTE="yes"
+IPV4_FAILURE_FATAL="no"
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+IPV6_DEFROUTE="yes"
+IPV6_FAILURE_FATAL="no"
+IPV6_ADDR_GEN_MODE="stable-privacy"
+NAME="enp0s3"
+UUID="e66600c1-35a8-4a09-9bbe-aeafe7ded9b0"
+DEVICE="enp0s3"
+ONBOOT="yes"
+IPV6_PRIVACY="no"
+IPADDR=192.168.3.200
+NETMASK=255.255.255.0
+GATEWAY=192.168.3.1
+DNS1=114.114.114.114
+```
+
+```
+systemctl restart network
+```
+
+4. yum更换
+
+```bash
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
+yum makecache # 更新yum缓存
+yum repolist  # 查看当前yum源
+```
+
+5. 卸载
+
+```bash
+rpm -qa | grep mariadb
+rpm -e --nodeps mariadb-libs-5.5.64-1.el7.x86_64
+```
+
+6. vim编辑器
+
+```bash
+yum -y install vim*
+vi /etc/vimrc  # 添加 colorscheme murphy
+vi /etc/profile    # 添加 alias vi=vim
+source /etc/profile 
+```
+
+```bash
+:set nu                 # 显示行号:set nonu
+vim +3 /etc/passwd      # 定位到第三行
+vim +/sssd /etc/passwd  # 定位到sssd所在的行
+```
+
+## 2. 命令
+
+1. 系统
 
 ```bash
 uname -a                    # 内核信息
@@ -28,7 +208,7 @@ shutdown -h now # 关机
 shutdown -r now # 重启
 ```
 
-### 1.2 文件
+2. 文件
 
 ```bash
 
@@ -66,9 +246,9 @@ find /doc \( -name 'ja*' -o- -name 'ma*' \) –print  # 会从/doc目录开始�
 find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
 ```
 
-### 1.3 防火墙
+3. 防火墙
 
-1. iptables
+- iptables
 
 ```bash
 service iptables status # 查看iptables状态
@@ -88,7 +268,7 @@ iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
 iptables -I INPUT -s 39.105.58.136 -p TCP –dport 80 -j ACCEPT   # 只允许39.105.58.136访问80端口
 ```
 
-2. firewalld
+- firewalld
 
 ```bash
 systemctl start firewalld.service     # 启动firewall
@@ -106,9 +286,9 @@ firewall-cmd --reload                                    # 重启防火墙
 ```
 
 
-### 1.4 磁盘
+4. 磁盘
 
-1. 挂载
+- 挂载
 
 ```bash
 du -H -h    # 查看目录及子目录大小
@@ -125,7 +305,7 @@ sudo vim /etc/fstab        # 自动挂载
 /dev/sdb1 /data ext4 errors=remount-ro 0 1
 ```
 
-2. 监控
+- 监控
 
 ```bash
 yum install sysstat iotop -y
@@ -151,9 +331,9 @@ svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位�
 %util： 在统计时间内所有处理IO时间，除以总共统计时间。例如，如果统计间隔1秒，该设备有0.8秒在处理IO，而0.2秒闲置，那么该设备的%util = 0.8/1 = 80%，所以该参数暗示了设备的繁忙程度。一般地，如果该参数是100%表示设备已经接近满负荷运行了（当然如果是多磁盘，即使%util是100%，因为磁盘的并发能力，所以磁盘使用未必就到了瓶颈）。
 ```
 
-### 1.5 网络
+5. 网络
 
-1. 进程
+- 进程
 
 ```bash
 ps -aux | grep redis          # 查看启动进程参数
@@ -185,7 +365,7 @@ traceroute -M 3 www.163.com         # 从ttl第3跳跟踪
 traceroute -p 8080 192.168.10.11    # 加上端口跟踪
 ```
 
-2. TCP调试
+- TCP调试
 
 ```bash
 nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok
@@ -194,7 +374,7 @@ nc -v -w 2 -z 127.0.0.1 7000-7500
 
 ```
 
-3. 流量监控
+- 流量监控
 
 ```bash
 wget http://gael.roualland.free.fr/ifstat/ifstat-1.1.tar.gz # 下载
@@ -225,9 +405,9 @@ ifstat -tT
 -d 指定一个驱动来收集状态信息
 ```
 
-### 1.6 环境 
+6. 环境 
 
-1. gcc
+- gcc
 
 ```bash
 yum -y install centos-release-scl
@@ -240,7 +420,7 @@ which gcc
 gcc --version
 ```
 
-### 1.7 应用
+7. 应用
 
 1. 启动
 
@@ -281,7 +461,7 @@ vim /etc/shells
 /sbin/nologin
 ```
 
-## 2. 快捷键
+## 3. 快捷键
 
 ```bash
 ctrl + z / fg                       # 挂起
@@ -292,109 +472,9 @@ Ctrl + Shift + c                    # 复制
 Ctrl + Shift + v                    # 粘贴    
 ```
 
-## 3. 虚拟机
-
-### 3.1 初始化
-
-```bash
-yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
-yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
-
-service iptables status
-systemctl disable iptables.service  # 关闭
-systemctl stop firewalld.service
-systemctl disable firewalld.service # 关闭
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
-```
-
-### 3.2 OpenSSH
-
-```bash
-vi /etc/ssh/sshd_config
-
-# 配置文件
-Port 22
-ListenAddress 0.0.0.0
-ListenAddress ::
-PermitRootLogin yes # 允许远程登录
-PasswordAuthentication yes  # 开启用户名和密码来验证
-
-# 重启
-service sshd start
-systemctl enable sshd
-```
-
-### 3.3 网络
-
-```bash
-vi /etc/hosts                                  # hosts
-vi /etc/resolv.conf  nameserver 192.168.0.1    # dns
-vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # ip
-hostnamectl set-hostname xuzhihao              # 修改主机名
-```
-
-```conf
-TYPE="Ethernet"
-PROXY_METHOD="none"
-BROWSER_ONLY="no"
-BOOTPROTO="static" # dhcp 
-DEFROUTE="yes"
-IPV4_FAILURE_FATAL="no"
-IPV6INIT="yes"
-IPV6_AUTOCONF="yes"
-IPV6_DEFROUTE="yes"
-IPV6_FAILURE_FATAL="no"
-IPV6_ADDR_GEN_MODE="stable-privacy"
-NAME="enp0s3"
-UUID="e66600c1-35a8-4a09-9bbe-aeafe7ded9b0"
-DEVICE="enp0s3"
-ONBOOT="yes"
-IPV6_PRIVACY="no"
-IPADDR=192.168.3.200
-NETMASK=255.255.255.0
-GATEWAY=192.168.3.1
-DNS1=114.114.114.114
-```
-
-```
-systemctl restart network
-```
-
-### 3.4 yum更换
-
-```bash
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
-yum makecache # 更新yum缓存
-yum repolist  # 查看当前yum源
-```
-
-### 3.5 卸载
-
-```bash
-rpm -qa | grep mariadb
-rpm -e --nodeps mariadb-libs-5.5.64-1.el7.x86_64
-```
-
-### 3.6 vim编辑器
-
-```bash
-yum -y install vim*
-vi /etc/vimrc  # 添加 colorscheme murphy
-vi /etc/profile    # 添加 alias vi=vim
-source /etc/profile 
-```
-
-```bash
-:set nu                 # 显示行号:set nonu
-vim +3 /etc/passwd      # 定位到第三行
-vim +/sssd /etc/passwd  # 定位到sssd所在的行
-```
-
 ## 4. 开发环境
 
-### 4.1 Java
+1. Java
 
 ```bash
 # jdk
@@ -447,7 +527,7 @@ mvn -v                # 查找Maven版本
 ```
 
 
-### 4.2 Node
+2. Node
 
 ```bash
 yum install -y git
@@ -476,7 +556,7 @@ forever start -l forever.log -o out.log -e err.log app.js #日志输出
 ```
 
 
-### 4.3 Npm
+3. Npm
 
 ```bash
 npm -v #查看npm安装的版本
@@ -501,7 +581,7 @@ npm list                #查看当前目录下已安装的node包
 npm list parseable=true #以目录的形式来展现当前安装的所有node包
 ```
 
-### 4.4 TypeScript
+4. TypeScript
 
 ```bash
 npm init -y                     # 生成package.json配置文件
@@ -512,7 +592,7 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-### 4.5 Golang
+5. Golang
 
 ```bash
 wget  https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
@@ -533,7 +613,7 @@ go env
 
 ## 5. Shell
 
-### 5.1 Tomcat 
+1. Tomcat 
 
 - 重启
 
@@ -559,7 +639,7 @@ cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
 sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
 ```
 
-### 5.2 Spring Boot
+2. Spring Boot
 
 启动run.sh
 
@@ -593,7 +673,7 @@ fi
 sed -i 's/\r$//' run.sh  
 ```
 
-### 5.3 Jdk1.8
+3. Jdk1.8
 
 ```bash
 vim /etc/hosts

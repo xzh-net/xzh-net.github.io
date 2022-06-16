@@ -1,7 +1,8 @@
-- 服务器
-  - [CentOS-7](devops/linux/centos7)
-  - [Rocky-8.5](devops/linux/rocky85)
-  - [debian-11](devops/linux/debian11)
+- 操作系统
+  - [CentOS 7](devops/linux/centos7)
+  - [Redhat 7](devops/linux/rhel7)
+  - [Rocky 8.5](devops/linux/rocky85)
+  - [debian 11](devops/linux/debian11)
   - [Windows 10](devops/windows/windows10)
 
 - 数据库
@@ -13,7 +14,7 @@
   - [HBase](devops/database/hbase)
   - [ClickHouse](devops/database/clickhouse)
 
-- 部署
+- 应用部署
   - [Nginx](devops/deploy/nginx)
   - [Keepalived](devops/deploy/keepalived)
   - [HAProxy](devops/deploy/haproxy)
@@ -37,7 +38,7 @@
   - [Kafka](devops/deploy/kafka)
 
 
-- JAVA笔记
+- 学习笔记
   - [解决方案](java/project/scheme)
   - [设计模式](java/designpattern/model)
   - [基础算法函数](java/jvm/function)
