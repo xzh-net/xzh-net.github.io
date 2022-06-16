@@ -2,7 +2,7 @@
 
 ## 1. 虚拟机
 
-1. 初始化
+### 1.1 初始化
 
 ```bash
 yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
@@ -16,7 +16,7 @@ systemctl disable firewalld.service # 关闭
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-2. OpenSSH
+### 1.2 OpenSSH
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -33,7 +33,7 @@ service sshd start
 systemctl enable sshd
 ```
 
-3. 网络
+### 1.3 网络
 
 ```bash
 vi /etc/hosts                                  # hosts
@@ -69,7 +69,7 @@ DNS1=114.114.114.114
 systemctl restart network
 ```
 
-4. yum更换
+### 1.4 yum更换
 
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
@@ -78,14 +78,14 @@ yum makecache # 更新yum缓存
 yum repolist  # 查看当前yum源
 ```
 
-5. 卸载
+### 1.5 卸载
 
 ```bash
 rpm -qa | grep mariadb
 rpm -e --nodeps mariadb-libs-5.5.64-1.el7.x86_64
 ```
 
-6. vim编辑器
+### 1.6 vim编辑器
 
 ```bash
 yum -y install vim*
@@ -102,7 +102,7 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 
 ## 2. 命令
 
-1. 系统
+### 2.1 系统
 
 ```bash
 uname -a                    # 内核信息
@@ -128,7 +128,7 @@ shutdown -h now # 关机
 shutdown -r now # 重启
 ```
 
-2. 文件
+### 2.2 文件
 
 ```bash
 
@@ -166,9 +166,9 @@ find /doc \( -name 'ja*' -o- -name 'ma*' \) –print  # 会从/doc目录开始�
 find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
 ```
 
-3. 防火墙
+### 2.3 防火墙
 
-- iptables
+1. iptables
 
 ```bash
 service iptables status # 查看iptables状态
@@ -188,7 +188,7 @@ iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
 iptables -I INPUT -s 39.105.58.136 -p TCP –dport 80 -j ACCEPT   # 只允许39.105.58.136访问80端口
 ```
 
-- firewalld
+2. firewalld
 
 ```bash
 systemctl start firewalld.service     # 启动firewall
@@ -206,9 +206,9 @@ firewall-cmd --reload                                    # 重启防火墙
 ```
 
 
-4. 磁盘
+### 2.4 磁盘
 
-- 挂载
+1. 挂载
 
 ```bash
 du -H -h    # 查看目录及子目录大小
@@ -225,7 +225,7 @@ sudo vim /etc/fstab        # 自动挂载
 /dev/sdb1 /data ext4 errors=remount-ro 0 1
 ```
 
-- 监控
+2. 监控
 
 ```bash
 yum install sysstat iotop -y
@@ -251,9 +251,9 @@ svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位�
 %util： 在统计时间内所有处理IO时间，除以总共统计时间。例如，如果统计间隔1秒，该设备有0.8秒在处理IO，而0.2秒闲置，那么该设备的%util = 0.8/1 = 80%，所以该参数暗示了设备的繁忙程度。一般地，如果该参数是100%表示设备已经接近满负荷运行了（当然如果是多磁盘，即使%util是100%，因为磁盘的并发能力，所以磁盘使用未必就到了瓶颈）。
 ```
 
-5. 网络
+### 2.5 网络
 
-- 进程
+1. 进程
 
 ```bash
 ps -aux | grep redis          # 查看启动进程参数
@@ -285,7 +285,7 @@ traceroute -M 3 www.163.com         # 从ttl第3跳跟踪
 traceroute -p 8080 192.168.10.11    # 加上端口跟踪
 ```
 
-- TCP调试
+2. TCP调试
 
 ```bash
 nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok
@@ -294,7 +294,7 @@ nc -v -w 2 -z 127.0.0.1 7000-7500
 
 ```
 
-- 流量监控
+3. 流量监控
 
 ```bash
 wget http://gael.roualland.free.fr/ifstat/ifstat-1.1.tar.gz # 下载
@@ -325,9 +325,9 @@ ifstat -tT
 -d 指定一个驱动来收集状态信息
 ```
 
-6. 环境 
+### 2.6 环境 
 
-- gcc
+1. gcc
 
 ```bash
 yum -y install centos-release-scl
@@ -340,9 +340,9 @@ which gcc
 gcc --version
 ```
 
-7. 应用
+### 2.7 应用
 
-- 启动命令
+1. 启动命令
 
 ```bash
 # solr
@@ -358,7 +358,7 @@ nohup ./openfire.sh >/dev/null 2>&1 &
 nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 ```
 
-- FTP安装
+2. FTP安装
 
 ```bash
 yum install vsftpd                  # 安装
@@ -394,7 +394,7 @@ Ctrl + Shift + v                    # 粘贴
 
 ## 4. 开发环境
 
-1. Java
+### 4.1 Java
 
 ```bash
 # jdk
@@ -447,7 +447,7 @@ mvn -v                # 查找Maven版本
 ```
 
 
-2. Node
+### 4.2 Node
 
 ```bash
 yum install -y git
@@ -476,7 +476,7 @@ forever start -l forever.log -o out.log -e err.log app.js #日志输出
 ```
 
 
-3. Npm
+### 4.3 Npm
 
 ```bash
 npm -v #查看npm安装的版本
@@ -501,7 +501,7 @@ npm list                #查看当前目录下已安装的node包
 npm list parseable=true #以目录的形式来展现当前安装的所有node包
 ```
 
-4. TypeScript
+### 4.4 TypeScript
 
 ```bash
 npm init -y                     # 生成package.json配置文件
@@ -512,7 +512,7 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-5. Golang
+### 4.5 Golang
 
 ```bash
 wget  https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
@@ -533,9 +533,9 @@ go env
 
 ## 5. Shell
 
-1. Tomcat 
+### 5.1 Tomcat监控 
 
-- 重启
+1. 重启
 
 restart_3001.sh
 ```bash
@@ -546,7 +546,7 @@ sleep 1s
 sh /data/tomcat_webapp_3001/bin/startup.sh;tail -f /data/tomcat_webapp_3001/logs/catalina.out
 ```
 
-- war部署
+2. war部署
 
 deploy.sh
 ```bash
@@ -559,7 +559,7 @@ cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
 sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
 ```
 
-2. Spring Boot
+### 5.2 Spring Boot启动
 
 启动run.sh
 
@@ -593,7 +593,7 @@ fi
 sed -i 's/\r$//' run.sh  
 ```
 
-3. Jdk1.8
+### 5.3 Jdk批量
 
 ```bash
 vim /etc/hosts

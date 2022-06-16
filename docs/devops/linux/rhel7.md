@@ -118,3 +118,56 @@ KDUMP设置
 ![](../../assets/_images/devops/linux/rhel7/32.png)
 ![](../../assets/_images/devops/linux/rhel7/33.png)
 
+
+## 3. 虚拟机
+
+```
+rpm -qa | grep yum
+rpm -e yum-rhn-plugin-2.0.1-10.el7.noarch --nodeps
+
+wget http://mirrors.163.com/centos/7/os/x86_64/Packages/PackageKit-yum-1.1.10-2.el7.centos.x86_64.rpm
+wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-3.4.3-168.el7.centos.noarch.rpm
+wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-langpacks-0.4.2-7.el7.noarch.rpm
+wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-metadata-parser-1.1.4-10.el7.x86_64.rpm
+wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-rhn-plugin-2.0.1-10.el7.noarch.rpm
+wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-utils-1.1.31-54.el7_8.noarch.rpm
+
+rpm -ivh *.rpm --force --nodeps
+cd /etc/yum.repos.d/
+vi CentOS-Base.repo
+```
+
+```conf
+[base]
+name=CentOS-$7 - Base - 163.com
+baseurl=http://mirrors.163.com/centos/7/os/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+
+[updates]
+name=CentOS-$7 - Updates - 163.com
+baseurl=http://mirrors.163.com/centos/7/updates/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+
+
+[extras]
+name=CentOS-$7 - Extras - 163.com
+baseurl=http://mirrors.163.com/centos/7/extras/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+
+[centosplus]
+name=CentOS-$7 - Plus - 163.com
+baseurl=http://mirrors.163.com/centos/7/centosplus/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+```
+
+```
+yum clean all
+
+vi /etc/sysconfig/network-scripts/ifcfg-ens33
+vi /etc/sysconfig/network
+```
