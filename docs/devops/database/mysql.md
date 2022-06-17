@@ -125,7 +125,7 @@ lower_case_table_names=1
 service mysql restart
 ```
 
-### 2.3 开启慢查询日志
+### 2.3 慢查询日志
 
 
 ```bash
@@ -147,6 +147,21 @@ mysqldump -uroot -proot --databases db1 --tables a1 --where='id=1'  >/tmp/a1.sql
 mysqldump -uroot -proot --no-data --databases db1 >/tmp/db1.sql                     # 只导指定库的表结构
 mysqldump --set-gtid-purged=OFF -h 127.0.0.1 -u root -p 123456 dbname --ignore-table=dbname.tb1 --ignore-table=dbname.tb2 > /tmp/all.sql   # 忽略表
 mysql -uroot -proot -h 127.0.0.1 -P 3306 sonar</tmp/all.sql                         # 导入
+```
+
+### 2.5 binlog
+
+```bash
+vi /etc/my.cnf
+
+server_id=1
+log_bin=mysql-bin
+binlog_format=ROW
+```
+
+登录mysql验证
+```bash
+mysql -uroot -p1q2w3e4r -e "show variables like 'log_bin%'";
 ```
 
 ## 3. 表操作
