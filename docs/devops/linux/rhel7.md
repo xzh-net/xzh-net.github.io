@@ -14,23 +14,20 @@
 
 ![](../../assets/_images/devops/linux/rhel7/Vm8.png)
 
-?> 桥接模式，必须手动选择宿主机对应的网卡，同时确认VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选
+?> 桥接模式，必须手动选择宿主机对应的网卡，同时确认宿主机VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选，防火墙关闭。宿主机与虚拟机相同级别，都可连接外网
 
 ![](../../assets/_images/devops/linux/rhel7/Vm9.png)
 
 ![](../../assets/_images/devops/linux/rhel7/Vm10.png)
 
-?>将默认的 VMnet8 （NET模式） 网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet8 ，可以实现虚拟机 linux与外网通讯
+?>将默认的VMnet8 （NET模式）网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为VMnet8 ，可以实现虚拟机linux与外网通讯，手动设置虚拟机IP地址需要注意将dns设置为网关地址，总结：虚拟机可以连接宿主机所在局域网的其他机器，但是局域网机器不能连接虚拟机，因为虚拟dhcp服务器在宿主机上，宿主机是虚拟机的上级
 
 ![](../../assets/_images/devops/linux/rhel7/Vm11.png)
 
-
-?>将默认的 VMnet1 （仅主机模式） 网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
+?>将默认的VMnet1 （仅主机模式）网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
 
 ![](../../assets/_images/devops/linux/rhel7/Vm12.png)
 
-
-![](../../assets/_images/devops/linux/rhel7/Vm13.png)
 
 ## 2. 安装
 
