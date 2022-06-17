@@ -1,6 +1,6 @@
 # Redhat 7
 
-## 1. VMware安装
+## 1. VMware 12
 
 ![](../../assets/_images/devops/linux/rhel7/Vm1.png)
 ![](../../assets/_images/devops/linux/rhel7/Vm2.png)
@@ -14,17 +14,25 @@
 
 ![](../../assets/_images/devops/linux/rhel7/Vm8.png)
 
-?>将默认的 VMnet8 （NET模式） 网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet8 ，可以实现虚拟机 linux与外网通讯
+?> 桥接模式，必须手动选择宿主机对应的网卡，同时确认VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选
 
 ![](../../assets/_images/devops/linux/rhel7/Vm9.png)
 
+![](../../assets/_images/devops/linux/rhel7/Vm9_win.png)
 
-?>将默认的 VMnet1 （仅主机模式） 网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
+?>将默认的 VMnet8 （NET模式） 网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet8 ，可以实现虚拟机 linux与外网通讯
 
 ![](../../assets/_images/devops/linux/rhel7/Vm10.png)
 
 
-## 2. 系统安装
+?>将默认的 VMnet1 （仅主机模式） 网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
+
+![](../../assets/_images/devops/linux/rhel7/Vm11.png)
+
+
+![](../../assets/_images/devops/linux/rhel7/Vm-net.png)
+
+## 2. 安装
 
 创建虚拟机
 
@@ -70,10 +78,10 @@
 ![](../../assets/_images/devops/linux/rhel7/17.png)
 
 接受更改Accept Changes，进入下面的界面
-
+    
 ![](../../assets/_images/devops/linux/rhel7/18.png)
 
-选择-SOFTWARE-软件选择SOFTWARE SELECTION，我们使用的是Infrastructure server版本。
+选择-SOFTWARE-软件选择SOFTWARE SELECTION，我们使用的是基础设置服务器。
 
 ![](../../assets/_images/devops/linux/rhel7/19.png)
 
@@ -121,41 +129,53 @@ KDUMP设置
 
 ## 3. 虚拟机
 
-```
-rpm -qa | grep yum
-rpm -e yum-rhn-plugin-2.0.1-10.el7.noarch --nodeps
+### 3.1 yum更换
 
+```bash
+rpm -qa | grep yum
+echo `rpm -qa | grep yum` > aa
+# 删除yum程序
+rpm -e yum-langpacks-0.4.2-7.el7.noarch --nodeps
+rpm -e yum-3.4.3-168.el7.noarch --nodeps
+rpm -e yum-metadata-parser-1.1.4-10.el7.x86_64 --nodeps
+rpm -e yum-rhn-plugin-2.0.1-10.el7.noarch --nodeps
+rpm -e yum-utils-1.1.31-54.el7_8.noarch --nodeps
+# 下载yum安装包
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/PackageKit-yum-1.1.10-2.el7.centos.x86_64.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-3.4.3-168.el7.centos.noarch.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-langpacks-0.4.2-7.el7.noarch.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-metadata-parser-1.1.4-10.el7.x86_64.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-rhn-plugin-2.0.1-10.el7.noarch.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-utils-1.1.31-54.el7_8.noarch.rpm
-
+# 安装并设置yum源地址
 rpm -ivh *.rpm --force --nodeps
-cd /etc/yum.repos.d/
-vi CentOS-Base.repo
+vi /etc/yum.repos.d/CentOS-Base.repo
 ```
 
 ```conf
 [base]
 name=CentOS-$7 - Base - 163.com
+#mirrorlist=http://mirrorlist.centos.org/?release=$7&arch=$basearch&repo=os
 baseurl=http://mirrors.163.com/centos/7/os/$basearch/
 gpgcheck=1
 gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+#released updates
 
 [updates]
 name=CentOS-$7 - Updates - 163.com
+#mirrorlist=http://mirrorlist.centos.org/?release=$7&arch=$basearch&repo=updates
 baseurl=http://mirrors.163.com/centos/7/updates/$basearch/
 gpgcheck=1
 gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
-
+#additional packages that may be useful
 
 [extras]
 name=CentOS-$7 - Extras - 163.com
+#mirrorlist=http://mirrorlist.centos.org/?release=$7&arch=$basearch&repo=extras
 baseurl=http://mirrors.163.com/centos/7/extras/$basearch/
 gpgcheck=1
 gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+#additional packages that extend functionality of existing packages
 
 [centosplus]
 name=CentOS-$7 - Plus - 163.com
@@ -167,7 +187,12 @@ gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
 
 ```
 yum clean all
+```
 
-vi /etc/sysconfig/network-scripts/ifcfg-ens33
-vi /etc/sysconfig/network
+### 3.1 网络设置
+
+```bash
+vi /etc/sysconfig/network-scripts/ifcfg-ens33   
+systemctl restart NetworkManager    # 重启网络
+ifdown ens33; ifup ens33
 ```

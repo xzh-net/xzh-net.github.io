@@ -36,9 +36,10 @@ systemctl enable sshd
 ### 1.3 网络
 
 ```bash
-vi /etc/hosts                                  # hosts
-vi /etc/resolv.conf  nameserver 192.168.0.1    # dns
-vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # ip
+vi /etc/hosts
+vi /etc/resolv.conf  nameserver 192.168.0.1    # DNS
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # IP地址
+vi /etc/sysconfig/network                      # 默认网关
 hostnamectl set-hostname xuzhihao              # 修改主机名
 ```
 
@@ -283,6 +284,7 @@ netstat -n|grep TIME_WAIT|awk '{print $5}'|sort|uniq -c|sort -rn|head -n20
 traceroute -I www.163.com           # traceroute默认使用udp方式, 如果是-I则改成icmp方式
 traceroute -M 3 www.163.com         # 从ttl第3跳跟踪
 traceroute -p 8080 192.168.10.11    # 加上端口跟踪
+route add default gw 192.168.3.1    # 添加临时网关 route -n
 ```
 
 2. TCP调试
@@ -537,7 +539,6 @@ go env
 
 1. 重启
 
-restart_3001.sh
 ```bash
 sh /data/tomcat_webapp_3001/bin/shutdown.sh
 sleep 2s
@@ -548,7 +549,6 @@ sh /data/tomcat_webapp_3001/bin/startup.sh;tail -f /data/tomcat_webapp_3001/logs
 
 2. war部署
 
-deploy.sh
 ```bash
 sh /opt/tomcat/bin/shutdown.sh
 sleep 2s
@@ -560,8 +560,6 @@ sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
 ```
 
 ### 5.2 Spring Boot启动
-
-启动run.sh
 
 ```bash
 #!/bin/bash

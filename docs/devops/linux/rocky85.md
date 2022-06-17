@@ -2,7 +2,7 @@
 
 ## 1. 虚拟机
 
-1. 初始化
+### 1.1 初始化
 
 ```bash
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
@@ -10,7 +10,7 @@ systemctl stop firewalld.service
 systemctl disable firewalld.service # 关闭
 ```
 
-2. 网络设置
+### 1.2 网络设置
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
@@ -45,7 +45,7 @@ ifdown enp0s3; ifup enp0s3
 ```
 
 
-3. yum更换
+### 1.3 yum更换
 
 ```bash
 sed -e 's|^mirrorlist=|#mirrorlist=|g' \
