@@ -2,77 +2,97 @@
 
 ## 1. 安装
 
-### 1.1 yum安装
+### 1.1 单机
+
+1. 上传解压
 
 ```bash
-yum  install  mysql  mysql-server  mysql-devel
-/etc/init.d/mysqld start
-/usr/bin/mysql_secure_installation  # 安全配置向导
+cd /opt/software/
+mkdir -p mysql
+tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
+```
+
+2. 安装
+
+```bash
+# 卸载版本
+rpm -qa|grep mariadb
+rpm -qa | grep -i mysql
+rpm -e mysql-community-server-5.7.29-1.el7.x86_64 --nodeps
+
+yum -y install libaio
+cd /opt/software/mysql
+rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm mysql-community-libs-5.7.29-1.el7.x86_64.rpm mysql-community-client-5.7.29-1.el7.x86_64.rpm mysql-community-server-5.7.29-1.el7.x86_64.rpm
+```
+
+3. 修改配置
+
+```bash
+vim /etc/my.cnf
+
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+```
+
+3. 初始化
+
+```bash
+mysqld --initialize 					# 初始化mysql
+chown mysql:mysql /var/lib/mysql -R 	# 更改所属组
+cat /var/log/mysqld.log | grep password	# 初始密码
+systemctl start mysqld.service      	# 启动mysql
+```
+
+4. 登录数据库
+
+```bash
 mysql -u root -p
-grant all privileges on *.* to 'root'@'%' identified by '123456' with grant option;
+set password = password('123456');
+grant all privileges on *.* to 'root' @'%' identified by '123456';
 flush privileges;
 ```
 
-
-### 1.2 rpm安装
+5. 启动服务
 
 ```bash
-# 卸载Centos7自带mariadb
-rpm -qa|grep mariadb
-mariadb-libs-5.5.64-1.el7.x86_64
-rpm -e mariadb-libs-5.5.64-1.el7.x86_64 --nodeps
-
-mkdir -p /home/mysql
-# 上传
-tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /home/mysql
-# 执行安装
-yum -y install libaio
-rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm mysql-community-libs-5.7.29-1.el7.x86_64.rpm mysql-community-client-5.7.29-1.el7.x86_64.rpm mysql-community-server-5.7.29-1.el7.x86_64.rpm
-
-mysqld --initialize                 # 初始化mysql
-chown mysql:mysql /var/lib/mysql -R # 更改所属组
-systemctl start mysqld.service      # 启动mysql
-cat  /var/log/mysqld.lo             # 查看生成的临时root密码
-mysql -u root -p
-use mysql
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-```
-
-启动关闭
-```bash
+systemctl start mysqld
 systemctl stop mysqld
 systemctl status mysqld
-systemctl start mysqld
 systemctl enable  mysqld    # 设置自启动成功
 ps aux | grep mysqld        # 查看是否已经
 ```
 
-### 1.3 卸载
+### 1.2 卸载
+
+1. 停止服务
 
 ```bash
-# 关闭mysql服务
 systemctl stop mysqld.service
+```
 
-rpm -qa | grep -i mysql      
-mysql-community-libs-5.7.29-1.el7.x86_64
-mysql-community-common-5.7.29-1.el7.x86_64
-mysql-community-client-5.7.29-1.el7.x86_64
-mysql-community-server-5.7.29-1.el7.x86_64
+2. 删除依赖
 
+```bash
+rpm -qa | grep -i mysql 
 yum remove -y mysql-community-libs-5.7.29-1.el7.x86_64 mysql-community-common-5.7.29-1.el7.x86_64 mysql-community-client-5.7.29-1.el7.x86_64 mysql-community-server-5.7.29-1.el7.x86_64
 
 rpm -qa | grep -i mysql
-find / -name mysql
+```
 
-/var/lib/mysql
-/var/lib/mysql/mysql
-/usr/share/mysql
+3. 删除配置
+
+```bash
+find / -name mysql
 
 rm -rf /var/lib/mysql
 rm -rf /var/lib/mysql/mysql
 rm -rf /usr/share/mysql
-rm -rf /etc/my.cnf 				# 删除默认配置 日志
+rm -rf /etc/my.cnf
 rm -rf /var/log/mysqld.log
 ```
 
