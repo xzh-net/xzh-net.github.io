@@ -383,6 +383,13 @@ vim /etc/shells
 /sbin/nologin
 ```
 
+3. xsync
+
+```bash
+yum install -y rsync
+```
+
+
 ## 3. 快捷键
 
 ```bash
@@ -610,19 +617,21 @@ sed -i 's/\r$//' run.sh
 
 ```bash
 vim /etc/hosts
-192.168.3.200 node01 node01.hadoop.com
-192.168.3.201 node02 node02.hadoop.com
-192.168.3.202 node03 node03.hadoop.com
+192.168.3.201 node01 node01.hadoop.com
+192.168.3.202 node02 node02.hadoop.com
+192.168.3.203 node03 node03.hadoop.com
 ```
 
 ```bash
-# A机器执行
-cd /root/.ssh
+# 三台机器分别执行
 ssh-keygen -t rsa
-scp /root/.ssh/id_rsa.pub root@192.168.3.201:/root/.ssh/authorized_keys
-scp /root/.ssh/id_rsa.pub root@192.168.3.202:/root/.ssh/authorized_keys
 
-# BC机器执行
+# 192.168.3.201机器执行
+cd /root/.ssh
+scp /root/.ssh/id_rsa.pub root@192.168.3.202:/root/.ssh/authorized_keys
+scp /root/.ssh/id_rsa.pub root@192.168.3.203:/root/.ssh/authorized_keys
+
+# 192.168.3.202,192.168.3.203 机器执行
 cd /root/.ssh
 cat id_rsa.pub >>authorized_keys
 chmod 600 authorized_keys
