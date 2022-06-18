@@ -104,7 +104,7 @@ scp /etc/profile node03:/etc/profile
 source /etc/profile
 ```
 
-3. 启动服务器
+5. 启动服务器
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
