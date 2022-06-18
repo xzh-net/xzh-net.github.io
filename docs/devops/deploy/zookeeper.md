@@ -74,9 +74,11 @@ vi /etc/hosts
 
 2. 配置文件
 
-其中2888为集群通信端口，3888为选举端口
+其中2888为集群通信端口，3888为选举端口，三台进行集群配置
 
-```
+```bash
+vi /opt/apache-zookeeper-3.7.0/conf/zoo.cfg
+
 tickTime=2000
 initLimit=10
 syncLimit=5
