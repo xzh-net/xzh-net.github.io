@@ -1,11 +1,141 @@
 # Zookeeper 3.7.0
 
-- https://zookeeper.apache.org/releases.html
-- https://downloads.apache.org/zookeeper/zookeeper-3.7.0/
+官方网站：https://zookeeper.apache.org/releases.html
 
-## 1. 配置
+下载地址：https://archive.apache.org/dist/zookeeper/
+
+## 1. 安装
+
+### 1.1 单机
+
+1. 上传解压
+
+```bash
+cd /opt/software
+tar -xzf apache-zookeeper-3.7.0-bin.tar.gz -C /opt/
+sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0-bin # 非root启动
+```
+
+2. 设置环境变量
+
+```bash
+vi /etc/profile
+export ZK_HOME=/opt/apache-zookeeper-3.7.0-bin
+export PATH=$PATH:$ZK_HOME/bin
+source /etc/profile
+```
+
+3. 修改配置
+
+```bash
+mkdir -p /opt/apache-zookeeper-3.7.0-bin/data /opt/apache-zookeeper-3.7.0-bin/logs
+cd /opt/apache-zookeeper-3.7.0-bin/conf
+cp zoo_sample.cfg zoo.cfg
+vi zoo.cfg
+```
 
 ```conf
+tickTime=2000
+initLimit=10
+syncLimit=5
+dataDir=/opt/apache-zookeeper-3.7.0-bin/data
+dataLogDir=/opt/apache-zookeeper-3.7.0-bin/logs
+clientPort=2181
+```
+
+4. 启动
+
+```bash
+zkServer.sh start
+jps
+```
+
+### 1.2 集群
+
+1. 环境变量
+
+将192.168.3.201单机复制三台，每台机器设置hostname
+
+```bash
+hostnamectl set-hostname node01 # 192.168.3.201 
+hostnamectl set-hostname node02 # 192.168.3.202
+hostnamectl set-hostname node03 # 192.168.3.203 
+```
+
+三台机器配置host
+
+```bash
+vi /etc/hosts
+192.168.3.201 node01
+192.168.3.202 node02
+192.168.3.203 node03
+```
+
+2. 配置文件
+
+其中2888为集群通信端口，3888为选举端口
+
+```
+tickTime=2000
+initLimit=10
+syncLimit=5
+dataDir=/opt/apache-zookeeper-3.7.0-bin/data
+dataLogDir=/opt/apache-zookeeper-3.7.0-bin/logs
+clientPort=2181
+server.1=node01:2888:3888
+server.2=node02:2888:3888
+server.3=node03:2888:3888
+```
+
+每台机器设置各自myid
+```bash 
+touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 1 > /opt/apache-zookeeper-3.7.0-bin/data/myid    # 192.168.3.201 
+touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 2 > /opt/apache-zookeeper-3.7.0-bin/data/myid    # 192.168.3.202 
+touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0-bin/data/myid    # 192.168.3.203 
+```
+
+3. 启动
+
+启动集群就是分别启动每个实例。
+
+```shell
+/opt/apache-zookeeper-3.7.0-bin/bin/zkServer.sh start
+/opt/apache-zookeeper-3.7.0-bin/bin/zkServer.sh status  # 检测节点状态
+```
+
+4. 测试
+
+PrettyZoo
+
+下载地址：https://github.com/vran-dev/PrettyZoo/releases
+
+
+## 2. 命令
+
+```bash
+# 服务端命令
+zkServer.sh start   # 启动命令
+zkServer.sh stop    # 停止命令
+zkServer.sh restart # 重启命令
+zkServer.sh status  # 查看集群节点状态
+
+# 客户端命令
+zkCli.sh            # 启动客户端
+ls /                # 查看节点
+get /test           # 查看节点数据
+ls2 /test           # 查看该节点的子节点信息和属性信息
+create /app1 hello              # 创建普通节点
+create -s /app3 world           # 创建顺序节点
+create -e /tempnode world       # 创建临时节点
+create -s -e /tempnode2 aaa     # 创建顺序的临时节点
+set /app1  xxx                  # 修改节点数据
+delete /test                    # 删除的节点不能有子节点
+rmr    /app1                    # 递归删除
+```
+
+## 3. 配置文件
+
+```bash
 # 快照文件snapshot的目录
 dataDir=/data/zookeeper/data
 # 事务日志的目录
@@ -37,81 +167,3 @@ server.2=node02:2888:3888
 #metricsProvider.exportJvmInfo=true
 
 ```
-
-## 2. 命令
-
-```bash
-# 服务端命令
-zkServer.sh start   # 启动命令
-zkServer.sh stop    # 停止命令
-zkServer.sh restart # 重启命令
-zkServer.sh status  # 查看集群节点状态
-
-# 客户端命令
-zkCli.sh            # 启动客户端
-ls /                # 查看节点
-get /test           # 查看节点数据
-ls2 /test           # 查看该节点的子节点信息和属性信息
-create /app1 hello              # 创建普通节点
-create -s /app3 world           # 创建顺序节点
-create -e /tempnode world       # 创建临时节点
-create -s -e /tempnode2 aaa     # 创建顺序的临时节点
-set /app1  xxx                  # 修改节点数据
-delete /test                    # 删除的节点不能有子节点
-rmr    /app1                    # 递归删除
-```
-
-## 3. 集群
-
-解压
-```bash
-cd ~
-tar -xzf apache-zookeeper-3.7.0-bin.tar.gz -C /opt/
-mv /opt/apache-zookeeper-3.7.0-bin /opt/apache-zookeeper-3.7.0
-sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0     # 非root启动
-```
-
-设置环境变量
-```bash
-vi /etc/profile
-export ZK_HOME=/opt/apache-zookeeper-3.7.0
-export PATH=$PATH:$ZK_HOME/bin
-source /etc/profile
-```
-
-修改配置
-```bash
-cd /opt/apache-zookeeper-3.7.0/conf
-cp zoo_sample.cfg zoo.cfg
-vi zoo.cfg
-```
-
-配置文件
-```conf
-tickTime=2000
-initLimit=10
-syncLimit=5
-dataDir=/opt/apache-zookeeper-3.7.0/data
-dataLogDir=/opt/apache-zookeeper-3.7.0/logs
-clientPort=2181
-server.1=192.168.1.1:2888:3888
-server.2=192.168.1.2:2888:3888
-server.3=192.168.1.3:2888:3888
-```
-
-- 2888为组成zookeeper服务器之间的通信端口，3888为用来选举leader的端口
-- 在data目录下新建一个myid文件，里面只包括该节点的id
-
-```bash
-echo 1 > /opt/apache-zookeeper-3.7.0/data/myid
-```
-
-将配置之后的zookeeper，分发到其他节点上，并修改myid，执行启动命令 zkServer.sh start
-```bash
-scp -r  /opt/apache-zookeeper-3.7.0 node02:/opt/
-scp -r  /opt/apache-zookeeper-3.7.0 node03:/opt/
-```
-
-## 4. 可视化
-
-PrettyZoo的安装包，下载地址：https://github.com/vran-dev/PrettyZoo/releases
