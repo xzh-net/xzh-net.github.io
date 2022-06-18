@@ -13,14 +13,15 @@
 ```bash
 cd /opt/software
 tar -xzf apache-zookeeper-3.7.0-bin.tar.gz -C /opt/
-sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0-bin # 非root启动
+mv /opt/apache-zookeeper-3.7.0-bin /opt/apache-zookeeper-3.7.0
+sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0 # 非root启动
 ```
 
 2. 设置环境变量
 
 ```bash
 vi /etc/profile
-export ZK_HOME=/opt/apache-zookeeper-3.7.0-bin
+export ZK_HOME=/opt/apache-zookeeper-3.7.0
 export PATH=$PATH:$ZK_HOME/bin
 source /etc/profile
 ```
@@ -28,8 +29,8 @@ source /etc/profile
 3. 修改配置
 
 ```bash
-mkdir -p /opt/apache-zookeeper-3.7.0-bin/data /opt/apache-zookeeper-3.7.0-bin/logs
-cd /opt/apache-zookeeper-3.7.0-bin/conf
+mkdir -p /opt/apache-zookeeper-3.7.0/data /opt/apache-zookeeper-3.7.0/logs
+cd /opt/apache-zookeeper-3.7.0/conf
 cp zoo_sample.cfg zoo.cfg
 vi zoo.cfg
 ```
@@ -38,8 +39,8 @@ vi zoo.cfg
 tickTime=2000
 initLimit=10
 syncLimit=5
-dataDir=/opt/apache-zookeeper-3.7.0-bin/data
-dataLogDir=/opt/apache-zookeeper-3.7.0-bin/logs
+dataDir=/opt/apache-zookeeper-3.7.0/data
+dataLogDir=/opt/apache-zookeeper-3.7.0/logs
 clientPort=2181
 ```
 
@@ -79,8 +80,8 @@ vi /etc/hosts
 tickTime=2000
 initLimit=10
 syncLimit=5
-dataDir=/opt/apache-zookeeper-3.7.0-bin/data
-dataLogDir=/opt/apache-zookeeper-3.7.0-bin/logs
+dataDir=/opt/apache-zookeeper-3.7.0/data
+dataLogDir=/opt/apache-zookeeper-3.7.0/logs
 clientPort=2181
 server.1=node01:2888:3888
 server.2=node02:2888:3888
@@ -89,9 +90,9 @@ server.3=node03:2888:3888
 
 每台机器设置各自myid
 ```bash 
-touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 1 > /opt/apache-zookeeper-3.7.0-bin/data/myid    # 192.168.3.201 
-touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 2 > /opt/apache-zookeeper-3.7.0-bin/data/myid    # 192.168.3.202 
-touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0-bin/data/myid    # 192.168.3.203 
+touch /opt/apache-zookeeper-3.7.0/data/myid & echo 1 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.201 
+touch /opt/apache-zookeeper-3.7.0/data/myid & echo 2 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.202 
+touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.203 
 ```
 
 3. 启动
@@ -99,8 +100,8 @@ touch /opt/apache-zookeeper-3.7.0-bin/data/myid & echo 3 > /opt/apache-zookeeper
 启动集群就是分别启动每个实例。
 
 ```shell
-/opt/apache-zookeeper-3.7.0-bin/bin/zkServer.sh start
-/opt/apache-zookeeper-3.7.0-bin/bin/zkServer.sh status  # 检测节点状态
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh status  # 检测节点状态
 ```
 
 4. 测试
