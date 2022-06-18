@@ -398,17 +398,32 @@ Ctrl + Shift + v                    # 粘贴
 
 ### 4.1 Java
 
+- Jdk
+
 ```bash
-# jdk
+# yum安装
 yum install java-1.8.0-openjdk* -y
 yum install java-1.8.0-openjdk
-
 vim /etc/profile
+
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
 export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 
-# maven
+# 解压安装
+cd /opt/software
+tar -zxvf jdk-8u211-linux-x64.tar.gz
+mv jdk1.8.0_211/ /usr/local/
+vim /etc/profile
+
+export JAVA_HOME=/usr/local/jdk1.8.0_211
+export PATH=$PATH:$JAVA_HOME/bin
+source /etc/profile   # 配置生效
+```
+
+- Maven
+
+```
 tar -xzf apache-maven-3.6.2-bin.tar.gz    # 解压
 mkdir -p /opt/maven                       # 创建目录
 mv apache-maven-3.6.2/* /opt/maven        # 移动文件
