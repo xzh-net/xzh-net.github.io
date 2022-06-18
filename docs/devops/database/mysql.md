@@ -39,7 +39,7 @@ log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
 ```
 
-3. 初始化
+4. 初始化
 
 ```bash
 mysqld --initialize 					# 初始化mysql
@@ -48,7 +48,7 @@ cat /var/log/mysqld.log | grep password	# 初始密码
 systemctl start mysqld.service      	# 启动mysql
 ```
 
-4. 登录数据库
+5. 登录数据库
 
 ```bash
 mysql -u root -p
@@ -57,7 +57,7 @@ grant all privileges on *.* to 'root' @'%' identified by '123456';
 flush privileges;
 ```
 
-5. 启动服务
+6. 启动服务
 
 ```bash
 systemctl start mysqld
