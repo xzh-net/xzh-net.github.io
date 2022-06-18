@@ -244,7 +244,7 @@ cd /opt/efak-web-2.1.0/conf
 
 vi system-config.properties
 efak.zk.cluster.alias=cluster1
-cluster1.zk.list=node01:2181,node02:2181,node03:2181/kafka
+cluster1.zk.list=node01:2181,node02:2181,node03:2181
 
 efak.driver=com.mysql.cj.jdbc.Driver
 efak.url=jdbc:mysql://127.0.0.1:3306/ke?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
