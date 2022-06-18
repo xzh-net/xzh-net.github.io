@@ -29,13 +29,13 @@
   - [Zabbix](devops/deploy/zabbix)
   - [Prometheus](devops/deploy/prometheus)
   - [Zookeeper](devops/deploy/zookeeper)
+  - [Kafka](devops/deploy/kafka)
   - [Hadoop](devops/deploy/hadoop)
   - [Simple RTMP Server](devops/deploy/srs)
   - [TURN Server](devops/deploy/turnserver)
   - [Elastic Stack](devops/deploy/elk)
   - [RabbitMQ](devops/deploy/rabbitmq)
   - [RocketMQ](devops/deploy/rocketmq)
-  - [Kafka](devops/deploy/kafka)
 
 
 - 学习笔记
