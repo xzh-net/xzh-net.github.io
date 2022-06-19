@@ -39,7 +39,7 @@ log.dirs=/opt/kafka_2.13-3.1.0/data
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
-nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 内置了zookeeper自2.8.0
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 自2.8.0取消了zookeeper
 nohup bin/kafka-server-start.sh config/server.properties &
 ```
 
@@ -112,6 +112,53 @@ nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 启动ZooK
 nohup bin/kafka-server-start.sh config/server.properties &          # 启动Kafka
 # 测试Kafka集群是否启动成功
 bin/kafka-topics.sh --bootstrap-server node01:9092 --list
+```
+
+### 1.3 kraft
+
+1. 修改配置
+
+```bash
+cd /opt/kafka_2.13-3.1.0/config/kraft
+mkdir -p /opt/kafka_2.13-3.1.0/config/kraft/logs
+server.properties
+
+# 修改以下配置
+process.roles=broker,controller	# 数据节点，控制节点
+node.id=1	# 对应broker.id
+controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093 # 对应zk
+advertised.listeners=PLAINTEXT://node01:9092		# 对外暴漏端口，对应主机名称
+log.dirs=/opt/kafka_2.13-3.1.0/config/kraft/logs
+```
+
+2. 内容分发
+
+修改node02和node02的节点id和暴漏端口
+
+```bash
+scp -r /opt/kafka_2.13-3.1.0/config/kraft/ node02:/opt/kafka_2.13-3.1.0/config/
+scp -r /opt/kafka_2.13-3.1.0/config/kraft/ node03:/opt/kafka_2.13-3.1.0/config/
+```
+
+3. 初始化
+
+```bash
+cd $KAFKA_HOME
+bin/kafka-storage.sh random-uuid	# 生成id
+```
+
+用该id格式化三台机器的kafka存储目录
+
+```bash
+cd $KAFKA_HOME
+bin/kafka-storage.sh format -t 0T25c_coRNqGuGvssegx3Q -c /opt/kafka_2.13-3.1.0/config/kraft/server.properties
+```
+
+4. 启动服务
+
+三台机器分别执行
+```bash
+${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/server.properties
 ```
 
 ## 2. 脚本
@@ -197,11 +244,37 @@ case $1 in
 esac
 ```
 
-### 2.4 ka2.sh
+### 2.4 kraft.sh
 
 ```bash
+#!/bin/bash
 
-
+case $1 in
+"start"){
+	for i in node01 node02 node03
+	do
+		echo  ------------- 启动 $i kafka ------------
+		ssh $i "source /etc/profile;export JMX_PORT=9999;${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/server.properties"
+	done
+}
+;;
+"stop"){
+	for i in node01 node02 node03
+	do
+		echo  ------------- 停止 $i kafka ------------
+		ssh $i "/opt/kafka_2.13-3.1.0/bin/kafka-server-stop.sh"
+	done
+}
+;;
+"kill"){
+	for i in node01 node02 node03
+	do
+		echo  ------------- 停止 $i kafka ------------
+		ssh $i "source /etc/profile;jps |grep Kafka |cut -d' ' -f1 |xargs kill -s 9"
+	done
+}
+;;
+esac
 ```
 
 ## 3. 监控
