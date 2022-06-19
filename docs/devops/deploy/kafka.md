@@ -46,7 +46,7 @@ nohup bin/kafka-server-start.sh config/server.properties &
 5. 测试
 
 ```bash
-bin/kafka-topics.sh --create --topic product --bootstrap-server 192.168.3.200:9092 --partitions 2 --replication-factor 3	# 创建主题
+bin/kafka-topics.sh --create --topic product --partitions 2 --replication-factor 3 --bootstrap-server 192.168.3.200:9092 	# 创建主题
 bin/kafka-console-producer.sh --topic product --bootstrap-server 192.168.3.200:9092                  # 发送消息
 bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 192.168.3.200:9092 # 消费
 ```
