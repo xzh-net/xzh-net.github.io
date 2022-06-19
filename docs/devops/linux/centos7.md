@@ -641,16 +641,19 @@ vi install_jdk.sh
 
 ```bash
 #!/bin/bash
-tar -zxvf /export/softwares/jdk-8u141-linux-x64.tar.gz -C /export/servers/
-cd /export/servers/jdk1.8.0_141
+cd /opt/software
+tar -zxvf jdk-8u211-linux-x64.tar.gz
+mv jdk1.8.0_211/ /usr/local/
+
+cd /usr/local/jdk1.8.0_211
 home=`pwd`
 echo $home
 echo "export JAVA_HOME=${home}"  >> /etc/profile
 echo "export PATH=:\$PATH:\$JAVA_HOME/bin" >> /etc/profile
 source /etc/profile
-for m in  2 3
+for i in node01 node02 node03
 do
-scp -r /export/servers/jdk1.8.0_141 node0$m:/export/servers/
-ssh node0$m "echo 'export JAVA_HOME=/export/servers/jdk1.8.0_141' >> /etc/profile; echo 'export PATH=:\$PATH:\$JAVA_HOME/bin' >> /etc/profile;source /etc/profile"
+    scp -r /usr/local/jdk1.8.0_211 $i:/usr/local/
+    ssh $i "echo 'export JAVA_HOME=/usr/local/jdk1.8.0_211' >> /etc/profile; echo 'export PATH=:\$PATH:\$JAVA_HOME/bin' >> /etc/profile;source /etc/profile"
 done
 ```

@@ -139,8 +139,8 @@ lower_case_table_names=1
 
 rpm安装时配置文件位置
 ```bash
-find / -name my.cnf
-/etc/mysql/mysql.conf.d/mysqld.cnf
+vim /etc/my.cnf
+
 lower_case_table_names=1
 service mysql restart
 ```
@@ -149,13 +149,13 @@ service mysql restart
 
 
 ```bash
-set global slow_query_log = on      #临时开启慢查询日志
-set global slow_query_log = off     #临时关闭
-set long_query_time = 1             #临时设置查询临界点
-set globle log_output = file        #设置慢查询存储的方式
-show variables like '%quer%'        #开启状态和慢查询日志储存的位置
+set global slow_query_log = on      # 临时开启慢查询日志
+set global slow_query_log = off     # 临时关闭
+set long_query_time = 1             # 临时设置查询临界点
+set globle log_output = file        # 设置慢查询存储的方式
+show variables like '%quer%'        # 开启状态和慢查询日志储存的位置
 
-cat -n  /data/mysql/mysql-slow.log  #查看示例
+cat -n  /data/mysql/mysql-slow.log  # 查看示例
 ```
 
 ### 2.4 备份恢复
