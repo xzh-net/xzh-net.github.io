@@ -69,14 +69,14 @@ docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=12
 
 ### 2.1 双主双从
 
-1. 服务器环境
+#### 2.1.1 服务器环境
 
 | **序号** | **IP**         | **角色**                 | **架构模式**    |
 | -------- | -------------- | ------------------------ | --------------- |
 | 1        | 192.168.25.135 | nameserver、brokerserver | Master1、Slave2 |
 | 2        | 192.168.25.138 | nameserver、brokerserver | Master2、Slave1 |
 
-2. Host配置
+#### 2.1.2 Host配置
 
 ```bash
 vim /etc/hosts
@@ -93,7 +93,7 @@ vim /etc/hosts
 192.168.25.138 rocketmq-slave1
 ```
 
-3. 防火墙配置
+#### 2.1.3 防火墙配置
 
 ```bash
 # 关闭防火墙
@@ -121,7 +121,7 @@ firewall-cmd --remove-port=11011/tcp --permanent
 firewall-cmd --reload
 ```
 
-4. 环境变量配置
+#### 2.1.4 环境变量配置
 
 ```bash
 vim /etc/profile
@@ -137,7 +137,7 @@ export ROCKETMQ_HOME PATH
 source /etc/profile
 ```
 
-5. 创建消息存储路径
+#### 2.1.5 创建消息存储路径
 
 ```bash
 mkdir /usr/local/rocketmq/store
@@ -146,9 +146,9 @@ mkdir /usr/local/rocketmq/store/consumequeue
 mkdir /usr/local/rocketmq/store/index
 ```
 
-6. broker配置文件
+#### 2.1.6 broker配置文件
 
-1) master1
+1. master1
 
 服务器：192.168.25.135
 
@@ -221,7 +221,7 @@ flushDiskType=SYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-2) slave2
+2. slave2
 
 服务器：192.168.25.135
 
@@ -294,7 +294,7 @@ flushDiskType=ASYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-3) master2
+3. master2
 
 服务器：192.168.25.138
 
@@ -367,7 +367,7 @@ flushDiskType=SYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-4) slave1
+4. slave1
 
 服务器：192.168.25.138
 
@@ -440,9 +440,9 @@ flushDiskType=ASYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-7. 修改启动脚本文件
+#### 2.1.7 修改启动脚本文件
 
-1) 修改runserver默认内存
+1. 修改runserver默认内存
 
 ```bash
 vi /usr/local/rocketmq/rocketmq-4.9.2/bin/runserver.sh
@@ -452,7 +452,7 @@ vi /usr/local/rocketmq/rocketmq-4.9.2/bin/runserver.sh
 JAVA_OPT="${JAVA_OPT} -server -Xms512m -Xmx512m -Xmn256m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
 ```
 
-2) 修改runbroker默认内存
+2. 修改runbroker默认内存
 
 ```bash
 vi /usr/local/rocketmq/rocketmq-4.9.2/bin/runbroker.sh
@@ -462,7 +462,7 @@ vi /usr/local/rocketmq/rocketmq-4.9.2/bin/runbroker.sh
 JAVA_OPT="${JAVA_OPT} -server -Xms512m -Xmx512m"
 ```
 
-8. 启动NameServe集群
+#### 2.1.8 启动NameServe集群
 
 分别在192.168.25.135和192.168.25.138启动NameServer
 
@@ -471,7 +471,7 @@ cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqnamesrv &
 ```
 
-9. 启动Broker集群
+#### 2.1.9 启动Broker集群
 
 * 在192.168.25.135上启动master1和slave2
 
