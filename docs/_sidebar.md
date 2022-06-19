@@ -9,8 +9,9 @@
   - [Oracle](devops/database/oracle)
   - [PostgreSQL](devops/database/postgre)
   - [MySQL](devops/database/mysql)
-  - [Redis](devops/database/redis)
+  - [SQL Server](devops/database/mysql)
   - [MongoDB](devops/database/mongodb)
+  - [Redis](devops/database/redis)
   - [HBase](devops/database/hbase)
   - [ClickHouse](devops/database/clickhouse)
 
@@ -30,13 +31,13 @@
   - [Prometheus](devops/deploy/prometheus)
   - [Zookeeper](devops/deploy/zookeeper)
   - [Kafka](devops/deploy/kafka)
+  - [Debezium](devops/deploy/debezium)
   - [Hadoop](devops/deploy/hadoop)
-  - [Simple RTMP Server](devops/deploy/srs)
-  - [TURN Server](devops/deploy/turnserver)
   - [Elastic Stack](devops/deploy/elk)
   - [RabbitMQ](devops/deploy/rabbitmq)
   - [RocketMQ](devops/deploy/rocketmq)
-
+  - [Simple RTMP Server](devops/deploy/srs)
+  - [TURN Server](devops/deploy/turnserver)
 
 - 学习笔记
   - [解决方案](java/project/scheme)

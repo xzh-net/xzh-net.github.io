@@ -473,7 +473,7 @@ nohup sh mqnamesrv &
 
 #### 2.1.9 启动Broker集群
 
-* 在192.168.25.135上启动master1和slave2
+1. 在192.168.25.135上启动master1和slave2
 
 master1：
 
@@ -489,7 +489,7 @@ cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqbroker -c /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-b-s.properties &
 ```
 
-* 在192.168.25.138上启动master2和slave2
+2. 在192.168.25.138上启动master2和slave2
 
 master2
 
