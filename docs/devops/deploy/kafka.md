@@ -46,7 +46,7 @@ nohup bin/kafka-server-start.sh config/server.properties &
 5. 测试
 
 ```bash
-bin/kafka-topics.sh --create --topic product --bootstrap-server 192.168.3.200:9092                   # 创建主题
+bin/kafka-topics.sh --create --topic product --bootstrap-server 192.168.3.200:9092 --partitions 2 --replication-factor 3	# 创建主题
 bin/kafka-console-producer.sh --topic product --bootstrap-server 192.168.3.200:9092                  # 发送消息
 bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 192.168.3.200:9092 # 消费
 ```
@@ -174,7 +174,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- 启动 $i kafka ------------
-		ssh $i "/opt/kafka_2.13-3.1.0/bin/kafka-server-start.sh -daemon /opt/kafka_2.13-3.1.0/config/server.properties"
+		ssh $i "source /etc/profile;export JMX_PORT=9999;${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/server.properties"
 	done
 }
 ;;
@@ -186,24 +186,7 @@ case $1 in
 	done
 }
 ;;
-esac
-```
-
-### 2.4 ka2.sh
-
-```bash
-#!/bin/bash
-
-case $1 in
-"start"){
-	for i in node01 node02 node03
-	do
-		echo  ------------- 启动 $i kafka ------------
-		ssh $i "source /etc/profile;export JMX_PORT=9988;nohup ${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/server.properties >/dev/nul* 2>&1 &"
-	done
-}
-;;
-"stop"){
+"kill"){
 	for i in node01 node02 node03
 	do
 		echo  ------------- 停止 $i kafka ------------
@@ -212,6 +195,13 @@ case $1 in
 }
 ;;
 esac
+```
+
+### 2.4 ka2.sh
+
+```bash
+
+
 ```
 
 ## 3. 监控
@@ -250,6 +240,12 @@ efak.driver=com.mysql.cj.jdbc.Driver
 efak.url=jdbc:mysql://127.0.0.1:3306/ke?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
 efak.username=root
 efak.password=123456
+```
+
+vi kafka-server-start.sh 
+```bash
+export KAFKA_HEAP_OPTS="-server -Xms2G -Xmx2G -XX:PermSize=128m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=8 -XX:ConcGCThreads=5 -XX:InitiatingHeapOccupancyPercent=70"
+export JMX_PORT="9999"
 ```
 
 4. 启动服务
