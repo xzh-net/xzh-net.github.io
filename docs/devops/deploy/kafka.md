@@ -121,7 +121,7 @@ bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 ```bash
 cd /opt/kafka_2.13-3.1.0/config/kraft
 mkdir -p /opt/kafka_2.13-3.1.0/config/kraft/logs
-server.properties
+vi server.properties
 
 # 修改以下配置
 process.roles=broker,controller	# 数据节点，控制节点
