@@ -6,7 +6,7 @@
 
 ### 1.1 MySQL准备
 
-1. 开启binlog
+1. 修改配置
 
 ```bash
 vi /etc/my.cnf
@@ -16,7 +16,8 @@ log_bin=mysql-bin
 binlog_format=ROW
 ```
 
-重启服务校验是否开启成功
+重启服务校验binlog是否开启成功
+
 ```bash
 systemctl restart mysqld 
 mysql -uroot -p123456 -e "show variables like 'log_bin%'";
@@ -29,6 +30,9 @@ mysql -uroot -p123456
 CREATE DATABASE `test` CHARACTER SET utf8 COLLATE utf8_general_ci;
 use test;
 create table stu(id int primary key, name varchar(255), age int);
+insert into stu values(1, 'zs', 18);
+update stu set age=19 where id=1;
+delete from stu where id=1;
 ```
 
 ### 1.2 安装Mysql Connector
@@ -217,11 +221,116 @@ sudo systemctl start postgresql-14
 
 ```bash
 vi /var/lib/pgsql/14/data/postgresql.conf
-
+# 修改
 listen_addresses = '*'
 wal_level = logical
-max_wal_senders = 2
-max_replication_slots = 1
+max_wal_senders = 2       # 设置同时运行的WAL发送进程最大数量
+max_replication_slots = 2 # 设置同步的已定义复制槽的最大数
+
+vi /var/lib/pgsql/14/data/pg_hba.conf
+# 添加
+host    all             all             0.0.0.0/0            scram-sha-256
+host    replication     all             0.0.0.0.0               trust
+
+# 重启数据库
+systemctl restart postgresql-14
+```
+
+3. 准备测试库和表
+
+```bash
+sudo -i -u postgres
+psql
+create user "sonar" with password '123456'; # 创建新用户
+create database "sonardb" template template1 owner "sonar"; # 创建用户数据库
+grant all privileges on database "sonardb" to "sonar";  # 把库的所有权赋给用户
+alter user sonar replication superuser;  # 给用户添加application和权限
+exit
+
+sudo passwd -d postgres   # 删除postgres用户密码
+sudo passwd postgres      # 重新设置密码
+su - postgres
+psql -d sonardb
+create table stu(id int, name varchar(25));
+insert into stu values(1, 'lisi');
+update stu set name='zhangsan' where id=1;
+delete from stu where id=1;
+```
+
+### 2.2 安装PostgreSQL Connector
+
+1. 上传解压
+
+```bash
+cd /opt/software
+mkdir -p /opt/debezium/connector
+tar -zxvf debezium-connector-postgres-1.7.2.Final-plugin.tar.gz -C /opt/debezium/connector/
+```
+
+使用MySQL的配置即可
+
+### 2.3 启动服务
+
+```bash
+cd /opt/kafka_2.13-3.1.0/
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 启动zookeeper
+nohup bin/kafka-server-start.sh config/server.properties &			    # 启动kafka
+bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启动connector
+```
+
+### 2.4 注册连接器
+
+1. 监控表
+
+```bash
+{
+    "name":"xzh-pgsql-connector",
+    "config":{
+        "connector.class":"io.debezium.connector.postgresql.PostgresConnector",
+        "database.hostname":"192.168.3.200",
+        "database.port":"5432",
+        "database.dbname":"sonardb",
+        "database.user":"sonar",
+        "database.password":"123456",
+        "database.server.name":"pgsql4",
+        "table.whitelist": "public.test"
+        "plugin.name":"pgoutput"
+    }
+}
+```
+
+2. 监控库
+
+```bash
+{
+    "name":"xzh-pgsql-connector",
+    "config":{
+        "connector.class":"io.debezium.connector.postgresql.PostgresConnector",
+        "database.hostname":"192.168.3.200",
+        "database.port":"5432",
+        "database.dbname":"postgres",
+        "database.user":"sonar",
+        "database.password":"123456",
+        "database.server.name":"pgsql4",
+        "schema.whitelist": "public"
+        "plugin.name":"pgoutput"
+    }
+}
+```
+
+```bash
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors -d '{"name":"xzh-12345-connector","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","database.hostname":"192.168.3.200","database.port":"5432","database.user":"sonar","database.password":"123456","database.dbname":"sonardb","database.server.name":"pgsql4","plugin.name":"pgoutput"}}'
+
+curl -i -X GET 192.168.3.200:8083/connectors/xzh-12345-connector
+curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-pgsql-connector
+curl -i -X GET 192.168.3.200:8083/connectors/xzh-12345-connector/topics
+```
+
+
+### 2.5 测试
+
+```bash
+bin/kafka-console-consumer.sh --topic server5.sonar.stu --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
 ```
 
 ## 2. SQL Server
