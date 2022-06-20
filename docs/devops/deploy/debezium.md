@@ -2,63 +2,33 @@
 
 官方网站：https://debezium.io/
 
-## 1. MySQL
+## 1. 安装
 
-### 1.1 MySQL准备
+### 1.1 下载
 
-1. 修改配置
+- https://repo1.maven.org/maven2/io/debezium/debezium-connector-mysql/1.7.2.Final/debezium-connector-mysql-1.7.2.Final-plugin.tar.gz
+- https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/1.7.2.Final/debezium-connector-postgres-1.7.2.Final-plugin.tar.gz
+- https://repo1.maven.org/maven2/io/debezium/debezium-connector-sqlserver/1.7.2.Final/debezium-connector-sqlserver-1.7.2.Final-plugin.tar.gz
+- https://repo1.maven.org/maven2/io/debezium/debezium-connector-mongodb/1.7.2.Final/debezium-connector-mongodb-1.7.2.Final-plugin.tar.gz
 
-```bash
-vi /etc/my.cnf
+### 1.2 配置
 
-server_id=1
-log_bin=mysql-bin
-binlog_format=ROW
-```
-
-重启服务校验binlog是否开启成功
-
-```bash
-systemctl restart mysqld 
-mysql -uroot -p123456 -e "show variables like 'log_bin%'";
-```
-
-2. 准备测试库和表
-
-```bash
-mysql -uroot -p123456
-CREATE DATABASE `test` CHARACTER SET utf8 COLLATE utf8_general_ci;
-use test;
-create table stu(id int primary key, name varchar(255), age int);
-insert into stu values(1, 'zs', 18);
-update stu set age=19 where id=1;
-delete from stu where id=1;
-```
-
-### 1.2 安装Mysql Connector
-
-1. 上传解压
-
-```bash
-cd /opt/software
-mkdir -p /opt/debezium/connector
-tar -zxvf debezium-connector-mysql-1.7.2.Final-plugin.tar.gz -C /opt/debezium/connector/
-```
-
-2. 配置Mysql Connector插件
+1. kafak插件配置
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/config
 mv connect-distributed.properties connect-distributed.properties.bak
 cat connect-distributed.properties.bak | grep -v "#" | grep -v "^$" > connect-distributed.properties
 
+vi connect-distributed.properties
+# 修改配置
 bootstrap.servers=192.168.3.200:9092
-group.id=connect-mysql
+group.id=connect-xuzhihao
 key.converter=org.apache.kafka.connect.json.JsonConverter
 value.converter=org.apache.kafka.connect.json.JsonConverter
 key.converter.schemas.enable=false
 value.converter.schemas.enable=false
-offset.storage.topic=connect-mysql-status
+offset.storage.topic=connect-xuzhihao-status
 offset.storage.replication.factor=2
 config.storage.topic=connect-configs
 config.storage.replication.factor=1
@@ -68,53 +38,25 @@ offset.flush.interval.ms=10000
 plugin.path=/opt/debezium/connector
 ```
 
-!> 需要提前创建好topic
+2. 创建topic
 
 ```bash
-bin/kafka-topics.sh --create --topic connect-mysql-status --bootstrap-server 192.168.3.200:9092
+bin/kafka-topics.sh --create --topic connect-xuzhihao-status --bootstrap-server 192.168.3.200:9092
 bin/kafka-topics.sh --create --topic connect-configs --bootstrap-server 192.168.3.200:9092
 bin/kafka-topics.sh --create --topic connect-status --bootstrap-server 192.168.3.200:9092
 ```
 
-?> 配置日志压缩策略
+3. 配置日志压缩策略
 
 ```bash
 vi /opt/kafka_2.13-3.1.0/config/server.properties
 
-#1、是否开启日志压缩
-log.cleaner.enable=true
-#2、启用日志压缩策略
-log.cleanup.policy=compact
+log.cleaner.enable=true     # 开启日志压缩
+log.cleanup.policy=compact  # 用日志压缩
 ```
 
-### 1.3 启动服务
 
-```bash
-cd /opt/kafka_2.13-3.1.0/
-nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 启动zookeeper
-nohup bin/kafka-server-start.sh config/server.properties &			# 启动kafka
-bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启动connector
-```
-
-### 1.4 连接器配置
-
-```bash 
-{
-  "name": "xzh-mysql-connector",	# 连接器名字
-  "config": {  
-    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
-    "database.hostname": "192.168.3.200",  
-    "database.port": "3306",
-    "database.user": "root",
-    "database.password": "123456",
-    "database.server.id": "1",  
-    "database.server.name": "bigdata",	# 服务器名，会成为topic的前缀
-    "database.include.list": "test",	# 要监控的数据库列表，多个逗号
-    "database.history.kafka.bootstrap.servers": "192.168.3.200:9092",  
-    "database.history.kafka.topic": "schema-changes.inventory"  
-  }
-}
-```
+### 1.3 Connector API
 
 1.	检测kafka连接器的服务状态
 
@@ -194,18 +136,97 @@ curl -i -X GET 192.168.3.200:8083/connectors/xzh-mysql-connector/tasks
 curl -i -X GET 192.168.3.200:8083/connectors/xzh-mysql-connector/tasks/{taskid}/status
 ```
 
-### 1.5 测试
+## 2. MySQL
 
-topic名字就是: 服务器名.数据库名.表名[bigdata.test.stu]，启动kafka-eagle进行查看
+### 2.1 MySQL准备
+
+1. 修改配置
+
+```bash
+vi /etc/my.cnf
+
+server_id=1
+log_bin=mysql-bin
+binlog_format=ROW
+```
+
+重启服务校验binlog是否开启成功
+
+```bash
+systemctl restart mysqld 
+mysql -uroot -p123456 -e "show variables like 'log_bin%'";
+```
+
+2. 准备测试库和表
+
+```bash
+mysql -uroot -p123456
+CREATE DATABASE `test` CHARACTER SET utf8 COLLATE utf8_general_ci;
+use test;
+create table stu(id int primary key, name varchar(255), age int);
+insert into stu values(1, 'zs', 18);
+update stu set age=19 where id=1;
+delete from stu where id=1;
+```
+
+### 2.2 安装Mysql Connector
+
+上传解压
+
+```bash
+cd /opt/software
+mkdir -p /opt/debezium/connector
+tar -zxvf debezium-connector-mysql-1.7.2.Final-plugin.tar.gz -C /opt/debezium/connector/
+```
+
+### 2.3 启动服务
+
+```bash
+cd /opt/kafka_2.13-3.1.0/
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 启动zookeeper
+nohup bin/kafka-server-start.sh config/server.properties &			# 启动kafka
+bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启动connector
+```
+
+### 2.4 注册连接器
+
+```bash 
+{
+  "name": "xzh-mysql-connector",	# 连接器名字
+  "config": {  
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "database.hostname": "192.168.3.200",  
+    "database.port": "3306",
+    "database.user": "root",
+    "database.password": "123456",
+    "database.server.id": "1",  
+    "database.server.name": "bigdata",	# 服务器名，会成为topic的前缀
+    "database.include.list": "test",	# 要监控的数据库列表，多个逗号
+    "database.history.kafka.bootstrap.servers": "192.168.3.200:9092",  
+    "database.history.kafka.topic": "schema-changes.inventory"  
+  }
+}
+```
+
+```bash
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/ -d '{"name":"xzh-mysql-connector","config":{"connector.class":"io.debezium.connector.mysql.MySqlConnector","database.hostname":"192.168.3.200","database.port":"3306","database.user":"root","database.password": "123456","database.server.id":"1","database.server.name":"bigdata","database.include.list":"test","database.history.kafka.bootstrap.servers":"192.168.3.200:9092","database.history.kafka.topic":"schema-changes.inventory"}}'
+
+curl -i -X GET 192.168.3.200:8083/connectors/xzh-mysql-connector/topics
+curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-mysql-connector
+```
+
+### 2.5 测试
+
+topic名字就是: 服务器名.数据库名.表名，启动kafka-eagle进行查看
 
 ```bash
 bin/kafka-console-consumer.sh --topic bigdata.test.stu --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
 ```
 
 
-## 2. PostgreSQL
+## 3. PostgreSQL
 
-### 2.1 PostgreSQL准备
+### 3.1 PostgreSQL准备
 
 1. 安装PostgreSQL14
 
@@ -251,15 +272,16 @@ sudo passwd -d postgres   # 删除postgres用户密码
 sudo passwd postgres      # 重新设置密码
 su - postgres
 psql -d sonardb
-create table stu(id int, name varchar(25));
-insert into stu values(1, 'lisi');
-update stu set name='zhangsan' where id=1;
-delete from stu where id=1;
+create table product(id int, name varchar(25), PRIMARY KEY (id));
+insert into product values(1, 'lisi');
+update product set name='zhangsan' where id=1;
+delete from product where id=1;
+SELECT * FROM pg_replication_slots;
 ```
 
-### 2.2 安装PostgreSQL Connector
+### 3.2 安装PostgreSQL Connector
 
-1. 上传解压
+上传解压
 
 ```bash
 cd /opt/software
@@ -267,9 +289,7 @@ mkdir -p /opt/debezium/connector
 tar -zxvf debezium-connector-postgres-1.7.2.Final-plugin.tar.gz -C /opt/debezium/connector/
 ```
 
-使用MySQL的配置即可
-
-### 2.3 启动服务
+### 3.3 启动服务
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
@@ -278,13 +298,11 @@ nohup bin/kafka-server-start.sh config/server.properties &			    # 启动kafka
 bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启动connector
 ```
 
-### 2.4 注册连接器
-
-1. 监控表
+### 3.4 注册连接器
 
 ```bash
 {
-    "name":"xzh-pgsql-connector",
+    "name":"xzh-psql-connector",
     "config":{
         "connector.class":"io.debezium.connector.postgresql.PostgresConnector",
         "database.hostname":"192.168.3.200",
@@ -293,46 +311,30 @@ bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启�
         "database.user":"sonar",
         "database.password":"123456",
         "database.server.name":"pgsql4",
-        "table.whitelist": "public.test"
+        "table.whitelist": "public.product",
         "plugin.name":"pgoutput"
     }
 }
+
 ```
 
-2. 监控库
+!> 如果之前调试MySQL连接器，主题必须重建，否则新的连接器会无法获取数据
 
 ```bash
-{
-    "name":"xzh-pgsql-connector",
-    "config":{
-        "connector.class":"io.debezium.connector.postgresql.PostgresConnector",
-        "database.hostname":"192.168.3.200",
-        "database.port":"5432",
-        "database.dbname":"postgres",
-        "database.user":"sonar",
-        "database.password":"123456",
-        "database.server.name":"pgsql4",
-        "schema.whitelist": "public"
-        "plugin.name":"pgoutput"
-    }
-}
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{"name":"xzh-psql-connector","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","database.hostname":"192.168.3.200","database.port":"5432","database.dbname":"sonardb","database.user":"sonar","database.password":"123456","database.server.name":"pgsql4","table.whitelist":"public.product","plugin.name":"pgoutput"}}'
+
+curl -i -X GET 192.168.3.200:8083/connectors/xzh-psql-connector/topics
+curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-psql-connector
 ```
+
+### 3.5 测试
+
+每个被监控的表在Kafka都会对应一个topic，topic的命名规范是<database.server.name>.<schema>.<table>
 
 ```bash
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors -d '{"name":"xzh-12345-connector","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","database.hostname":"192.168.3.200","database.port":"5432","database.user":"sonar","database.password":"123456","database.dbname":"sonardb","database.server.name":"pgsql4","plugin.name":"pgoutput"}}'
-
-curl -i -X GET 192.168.3.200:8083/connectors/xzh-12345-connector
-curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-pgsql-connector
-curl -i -X GET 192.168.3.200:8083/connectors/xzh-12345-connector/topics
+bin/kafka-console-consumer.sh --topic pgsql4.public.product --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
 ```
 
+## 4. SQL Server
 
-### 2.5 测试
-
-```bash
-bin/kafka-console-consumer.sh --topic server5.sonar.stu --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
-```
-
-## 2. SQL Server
-
-## 2. MongoDB
+## 5. MongoDB
