@@ -339,7 +339,24 @@ bin/kafka-console-consumer.sh --topic pgsql4.public.product --from-beginning --b
 
 ### 4.1 SQL Server准备
 
-1. 开启CDC
+
+1. 准备测试库和表
+
+```bash
+sqlcmd -S localhost -U SA -P Huilove521
+
+create database test
+go
+use test
+go
+create table product(id int primary key not null,name varchar(25))
+go
+insert into product values(1,'zhangsan')
+go
+```
+
+
+2. 开启CDC
 
 开启sqlagent
 
@@ -351,6 +368,7 @@ sudo systemctl restart mssql-server.service
 数据库开启cdc
 
 ```bash
+sqlcmd -S localhost -U SA -p 1234Qwer
 use test
 go
 EXEC sys.sp_cdc_enable_db
@@ -364,10 +382,10 @@ use test
 go
 EXEC sys.sp_cdc_enable_table
      @source_schema = N'dbo',
-     @source_name   = N'test',
+     @source_name   = N'product',
      @role_name     = NULL,
      @supports_net_changes = 0
-GO
+go
 ```
 
 验证是否开启成功
@@ -376,21 +394,6 @@ GO
 use test;
 go
 EXEC sys.sp_cdc_help_change_data_capture
-go
-```
-
-2. 准备测试库和表
-
-```bash
-sqlcmd -S localhost -U SA -P Huilove521
-
-create database test
-go
-use test
-go
-create table product(id int primary key not null,name varchar(25))
-go
-insert into product values(1,'zhangsan')
 go
 ```
 
@@ -445,10 +448,8 @@ curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json
 
 ### 4.5 测试
 
-每个被监控的表在Kafka都会对应一个topic，topic的命名规范是<database.server.name>.<schema>.<table>
-
 ```bash
-bin/kafka-console-consumer.sh --topic mssql.test.product --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
+bin/kafka-console-consumer.sh --topic mssql.dbo.product --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
 ```
 
 ## 5. MongoDB
