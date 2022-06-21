@@ -318,8 +318,6 @@ bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启�
 
 ```
 
-!> 如果之前调试MySQL连接器，主题必须重建，否则新的连接器会无法获取数据
-
 ```bash
 curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{"name":"xzh-psql-connector","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","database.hostname":"192.168.3.200","database.port":"5432","database.dbname":"sonardb","database.user":"sonar","database.password":"123456","database.server.name":"pgsql4","table.whitelist":"public.product","plugin.name":"pgoutput"}}'
 
@@ -437,8 +435,6 @@ bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启�
 
 ```
 
-!> 如果之前调试MySQL连接器，主题必须重建，否则新的连接器会无法获取数据
-
 ```bash
 curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d  '{"name":"xzh-sql-server-connector","config":{"connector.class":"io.debezium.connector.sqlserver.SqlServerConnector","database.hostname":"192.168.3.200","database.port":"1433","database.user":"sa","database.password":"1234Qwer","database.dbname":"test","database.server.name":"mssql","table.include.list":"dbo.product","database.history.kafka.bootstrap.servers":"192.168.3.200:9092","database.history.kafka.topic":"dbhistory.fullfillment"}}'
 
@@ -465,7 +461,7 @@ MongoDB连接器使用MongoDB的oplog来捕获更改，因此该连接器仅适�
 ```bash
 use test
 db.createCollection("product")
-db.stu.insert({"id": 1 ,"name": "zs", "age":20})
+db.product.insert({"id": 1 ,"name": "zs", "age":20})
 ```
 
 ### 5.2 安装MongoDB Connector
@@ -491,30 +487,28 @@ bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启�
 
 ```bash
 {
-  "name": "atguigu-mongodb-connector", 
+  "name": "xzh-mongodb-connector", 
   "config": {
     "connector.class": "io.debezium.connector.mongodb.MongoDbConnector", 
-    "mongodb.hosts": "rs0/192.168.3.200:27017", 
-    "mongodb.name": "server3", 
+    "mongodb.hosts": "myrs/192.168.3.200:27017", 
+    "mongodb.name": "mongodb", 
     "collection.include.list": "*" 
   }
 }
-
 ```
 
-!> 如果之前调试MySQL连接器，主题必须重建，否则新的连接器会无法获取数据
-
 ```bash
-curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d  '{"name":"xzh-sql-server-connector","config":{"connector.class":"io.debezium.connector.sqlserver.SqlServerConnector","database.hostname":"192.168.3.200","database.port":"1433","database.user":"sa","database.password":"1234Qwer","database.dbname":"test","database.server.name":"mssql","table.include.list":"dbo.product","database.history.kafka.bootstrap.servers":"192.168.3.200:9092","database.history.kafka.topic":"dbhistory.fullfillment"}}'
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d  '{"name":"xzh-mongodb-connector","config":{"connector.class":"io.debezium.connector.mongodb.MongoDbConnector","mongodb.hosts":"myrs/192.168.3.200:27017","mongodb.name":"mongodb"}}'
 
-curl -i -X GET 192.168.3.200:8083/connectors/xzh-sql-server-connector/topics
-curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-sql-server-connector
+curl -i -X GET 192.168.3.200:8083/connectors/xzh-mongodb-connector/topics
+curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-mongodb-connector
 ```
 
 ### 4.5 测试
 
-每个被监控的表在Kafka都会对应一个topic，topic的命名规范是<database.server.name>.<schema>.<table>
+所有表都会创建topic
 
 ```bash
-bin/kafka-console-consumer.sh --topic mssql.test.product --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
+bin/kafka-console-consumer.sh --topic mongodb.test.product --from-beginning --bootstrap-server 192.168.3.200:9092       # 监控变化
+bin/kafka-console-consumer.sh --topic mongodb.articledb.comment --from-beginning --bootstrap-server 192.168.3.200:9092  # 监控变化
 ```
