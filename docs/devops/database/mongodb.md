@@ -16,7 +16,7 @@ tar -xvf mongodb-linux-x86_64-rhel70-4.4.6.tgz -C /mydata/
 mv /mydata/mongodb-linux-x86_64-rhel70-4.4.6 /usr/local/mongodb
 ```
 
-3. 修改配置
+2. 修改配置
 
 ```bash
 mkdir -p /mydata/mongodb/data/db    # 数据存储目录
@@ -49,7 +49,7 @@ net:
     port: 27017
 ```
 
-4. 启动服务
+3. 启动服务
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
