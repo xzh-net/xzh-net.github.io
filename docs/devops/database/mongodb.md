@@ -638,9 +638,6 @@ sharding:
     configDB: myconfigrs/192.168.3.201:27019,192.168.3.201:27119,192.168.3.201:27219
 ```
 
-```bash
-/usr/local/mongodb/bin/mongos -f /mydata/mongodb/sharded_cluster/mymongos_27017/mongos.conf
-```
 
 3. 创建路由2
 
@@ -662,11 +659,15 @@ sharding:
     configDB: myconfigrs/192.168.3.201:27019,192.168.3.201:27119,192.168.3.201:27219
 ```
 
+4. 启动
+
 ```bash
+/usr/local/mongodb/bin/mongos -f /mydata/mongodb/sharded_cluster/mymongos_27017/mongos.conf
 /usr/local/mongodb/bin/mongos -f /mydata/mongodb/sharded_cluster/mymongos_27117/mongos.conf
+ps -ef |grep mongos
 ```
 
-4. 分片配置
+5. 分片配置
 
 ```bash
 # 登录客户端
