@@ -9,6 +9,7 @@
 ```bash
 cd /opt/software/
 mkdir -p mysql
+wget https://cdn.mysql.com/archives/mysql-5.7/mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar
 tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
 ```
 
