@@ -452,3 +452,68 @@ bin/kafka-console-consumer.sh --topic mssql.test.product --from-beginning --boot
 ```
 
 ## 5. MongoDB
+
+MongoDB连接器使用MongoDB的oplog来捕获更改，因此该连接器仅适用于MongoDB副本集或分片集群
+
+### 5.1 MongoDB准备
+
+1. 搭建副本集
+
+2. 准备测试库和表
+
+```bash
+use test
+db.createCollection("product")
+db.stu.insert({"id": 1 ,"name": "zs", "age":20})
+```
+
+### 5.2 安装MongoDB Connector
+
+上传解压
+
+```bash
+cd /opt/software
+mkdir -p /opt/debezium/connector
+tar -zxvf debezium-connector-mongodb-1.7.2.Final-plugin.tar.gz -C /opt/debezium/connector/
+```
+
+### 5.3 启动服务
+
+```bash
+cd /opt/kafka_2.13-3.1.0/
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties &         # 启动zookeeper
+nohup bin/kafka-server-start.sh config/server.properties &			          # 启动kafka
+bin/connect-distributed.sh -daemon config/connect-distributed.properties  # 启动connector
+```
+
+### 5.4 注册连接器
+
+```bash
+{
+  "name": "atguigu-mongodb-connector", 
+  "config": {
+    "connector.class": "io.debezium.connector.mongodb.MongoDbConnector", 
+    "mongodb.hosts": "rs0/192.168.3.200:27017", 
+    "mongodb.name": "server3", 
+    "collection.include.list": "*" 
+  }
+}
+
+```
+
+!> 如果之前调试MySQL连接器，主题必须重建，否则新的连接器会无法获取数据
+
+```bash
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d  '{"name":"xzh-sql-server-connector","config":{"connector.class":"io.debezium.connector.sqlserver.SqlServerConnector","database.hostname":"192.168.3.200","database.port":"1433","database.user":"sa","database.password":"1234Qwer","database.dbname":"test","database.server.name":"mssql","table.include.list":"dbo.product","database.history.kafka.bootstrap.servers":"192.168.3.200:9092","database.history.kafka.topic":"dbhistory.fullfillment"}}'
+
+curl -i -X GET 192.168.3.200:8083/connectors/xzh-sql-server-connector/topics
+curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-sql-server-connector
+```
+
+### 4.5 测试
+
+每个被监控的表在Kafka都会对应一个topic，topic的命名规范是<database.server.name>.<schema>.<table>
+
+```bash
+bin/kafka-console-consumer.sh --topic mssql.test.product --from-beginning --bootstrap-server 192.168.3.200:9092 # 监控变化
+```
