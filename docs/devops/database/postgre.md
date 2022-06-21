@@ -2,7 +2,7 @@
 
 ## 1. 安装
 
-### 1.1 rpm安装
+### 1.1 单机
 
 ```bash
 sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -179,6 +179,104 @@ pg_stat_statements.track = all
 service postgresql start
 psql \c
 create extension pg_stat_statements;
+```
+
+### 1.4 主备流复制
+
+#### 1.4.1 主节点
+
+1. 修改pg_hba.conf
+
+```bash
+host replication replica 0.0.0.0/0 md5
+```
+
+2. 添加流复制用户
+
+```sql
+create role replica with replication login password '123456';
+alter user replica with password '123456';
+```
+
+3. 修改postgresql.conf
+
+```bash
+listen_addresses = '*'                     
+port = 5432
+max_connections = 1200
+superuser_reserved_connections = 10
+full_page_writes = on
+wal_log_hints = off
+max_wal_senders = 50
+hot_standby = on
+log_destination = 'csvlog'
+logging_collector = on
+log_directory = 'log'
+log_filename = 'postgresql-%Y-%m-%d_%H%M%S'
+log_rotation_age = 1d
+log_rotation_size = 10MB
+log_statement = 'mod'
+log_timezone = 'PRC'
+timezone = 'PRC'
+unix_socket_directories = '/tmp'
+shared_buffers = 512MB
+temp_buffers = 16MB
+work_mem = 32MB
+effective_cache_size = 2GB
+maintenance_work_mem = 128MB
+#max_stack_depth = 2MB
+dynamic_shared_memory_type = posix
+## PITR
+full_page_writes = on
+wal_buffers = 16MB
+wal_writer_delay = 200ms
+commit_delay = 0
+commit_siblings = 5
+wal_level = replica # 支持wal归档和复制
+archive_mode = on
+archive_command = 'test ! -f /data/pgdata/12/data/archivedir/%f && cp %p /data/pgdata/12/data/archivedir/%f'
+archive_timeout = 60s     # 切换到一个新的wal段时间，定时归档间隔
+max_wal_senders = 4       # 流复制连接个数
+wal_keep_segments = 16    # 流复制保留的最多的xlog数目
+```
+
+#### 1.4.2 从节点
+
+1. 清空数据
+
+```bash
+rm -rf /data/pgdata/12/data/*         # 数据主目录
+rm -rf /data/pgdata/12/archive/*      # 归档恢复路径
+```
+
+2. 恢复数据和归档
+
+```bash
+pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h 192.168.3.200 -p 5432 -R # 备份base和pg_wal
+tar xf base.tar -C $PGDATA
+tar xf base.tar -C /data/pgdata/12/archive
+```
+
+3. 修改standby.signal
+
+```bash
+vi standby.signal 
+standby_mode = 'on'
+```
+
+4. 修改postgre.auto.conf
+
+```bash
+primary_conninfo = 'user=replication password=123456 host=192.168.3.200 port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
+```
+
+5. 验证
+
+```bash
+# 启动从库以后再启动主库
+select pg_wal_replay_resume(); 
+select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
+psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
 ```
 
 
@@ -983,104 +1081,4 @@ END;
  $BODY$
   LANGUAGE plpgsql VOLATILE SECURITY DEFINER
   COST 100
-```
-
-## 7. 高可用
-
-### 7.1 主备流复制
-
-#### 7.1 主节点
-
-1. 修改pg_hba.conf
-
-```bash
-host replication replica 0.0.0.0/0 md5
-```
-
-2. 添加流复制用户
-
-```sql
-create role replica with replication login password '123456';
-alter user replica with password '123456';
-```
-
-3. 修改postgresql.conf
-
-```bash
-listen_addresses = '*'                     
-port = 5432
-max_connections = 1200
-superuser_reserved_connections = 10
-full_page_writes = on
-wal_log_hints = off
-max_wal_senders = 50
-hot_standby = on
-log_destination = 'csvlog'
-logging_collector = on
-log_directory = 'log'
-log_filename = 'postgresql-%Y-%m-%d_%H%M%S'
-log_rotation_age = 1d
-log_rotation_size = 10MB
-log_statement = 'mod'
-log_timezone = 'PRC'
-timezone = 'PRC'
-unix_socket_directories = '/tmp'
-shared_buffers = 512MB
-temp_buffers = 16MB
-work_mem = 32MB
-effective_cache_size = 2GB
-maintenance_work_mem = 128MB
-#max_stack_depth = 2MB
-dynamic_shared_memory_type = posix
-## PITR
-full_page_writes = on
-wal_buffers = 16MB
-wal_writer_delay = 200ms
-commit_delay = 0
-commit_siblings = 5
-wal_level = replica # 支持wal归档和复制
-archive_mode = on
-archive_command = 'test ! -f /data/pgdata/12/data/archivedir/%f && cp %p /data/pgdata/12/data/archivedir/%f'
-archive_timeout = 60s     # 切换到一个新的wal段时间，定时归档间隔
-max_wal_senders = 4       # 流复制连接个数
-wal_keep_segments = 16    # 流复制保留的最多的xlog数目
-```
-
-#### 7.2 从节点
-
-1. 清空数据
-
-```bash
-rm -rf /data/pgdata/12/data/*         # 数据主目录
-rm -rf /data/pgdata/12/archive/*      # 归档恢复路径
-```
-
-2. 恢复数据和归档
-
-```bash
-pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h 192.168.3.200 -p 5432 -R # 备份base和pg_wal
-tar xf base.tar -C $PGDATA
-tar xf base.tar -C /data/pgdata/12/archive
-```
-
-3. 修改standby.signal
-
-```bash
-vi standby.signal 
-standby_mode = 'on'
-```
-
-4. 修改postgre.auto.conf
-
-```bash
-primary_conninfo = 'user=replication password=123456 host=192.168.3.200 port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
-```
-
-5. 验证
-
-```bash
-# 启动从库以后再启动主库
-select pg_wal_replay_resume(); 
-select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
-psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
 ```
