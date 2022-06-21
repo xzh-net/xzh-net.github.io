@@ -55,7 +55,7 @@ source /etc/profile
 7. 测试
 
 ```bash
-sqlcmd -S localhost -U SA -p
+sqlcmd -S localhost -U SA -p 1234Qwer
 
 CREATE DATABASE [Test]
 GO
