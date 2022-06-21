@@ -1,6 +1,6 @@
 - 操作系统
-  - [CentOS 7](devops/linux/centos7)
   - [Redhat 7](devops/linux/rhel7)
+  - [CentOS 7](devops/linux/centos7)
   - [Rocky 8.5](devops/linux/rocky85)
   - [debian 11](devops/linux/debian11)
   - [Windows 10](devops/windows/windows10)
@@ -9,7 +9,7 @@
   - [Oracle](devops/database/oracle)
   - [PostgreSQL](devops/database/postgre)
   - [MySQL](devops/database/mysql)
-  - [SQL Server](devops/database/mysql)
+  - [SQL Server](devops/database/mssql)
   - [MongoDB](devops/database/mongodb)
   - [Redis](devops/database/redis)
   - [HBase](devops/database/hbase)
