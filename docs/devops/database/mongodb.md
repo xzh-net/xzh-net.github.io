@@ -74,7 +74,7 @@ rm -f /mydata/mongodb/data/db/*.lock
 在192.168.3.200执行
 
 ```bash
-mkdir -p /mydata/mongodb/data/db/log \ &
+mkdir -p /mydata/mongodb/log
 mkdir -p /mydata/mongodb/data/db
 
 vim /mydata/mongodb/mongod.conf
@@ -117,7 +117,7 @@ replication:
 在192.168.3.201执行
 
 ```bash
-mkdir -p /mydata/mongodb/data/db/log \ &
+mkdir -p /mydata/mongodb/log
 mkdir -p /mydata/mongodb/data/db
 
 vim /mydata/mongodb/mongod.conf
@@ -161,7 +161,7 @@ replication:
 在192.168.3.202执行
 
 ```bash
-mkdir -p /mydata/mongodb/data/db/log \ &
+mkdir -p /mydata/mongodb/log
 mkdir -p /mydata/mongodb/data/db
 
 vim /mydata/mongodb/mongod.conf
