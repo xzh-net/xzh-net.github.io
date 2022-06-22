@@ -504,7 +504,7 @@ curl -i -X GET 192.168.3.200:8083/connectors/xzh-mongodb-connector/topics
 curl -i -X DELETE -H "Accept:application/json" -H "Content-Type:application/json" 192.168.3.200:8083/connectors/xzh-mongodb-connector
 ```
 
-### 4.5 测试
+### 5.5 测试
 
 所有表都会创建topic
 
