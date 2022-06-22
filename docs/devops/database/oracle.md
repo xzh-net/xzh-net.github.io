@@ -244,9 +244,254 @@ exit
 ```
 
 
-### 1.2 图形化安装
+### 1.2 图形化安装11.2.0.4.0
+
+1. 一键安装和配置VNC图形化相关
+
+```bash
+#!/bin/bash
+#因为脚本内容大量中文，临时设置中文环境
+export LC_ALL=zh_CN.UTF-8
+echo '------欢迎使用 CentOS7 Oracle 11G安装助手------'
+echo '脚本使用环境如下：'
+echo '操作系统: CentOS Linux release 7.9.2009 (Core)'
+echo 'Oracle: linux.x64_11g_11.2.0.4'
+echo '* 创建oracle用户和组。'
+echo '* 搭建图形化的操作环境：VNC远程。'
+echo '* 防火墙放行VNC端口5901和Oracle默认端口1521。'
+echo '* 安装oracle安装程序依赖程序包。'
+echo '* 安装中文字体解决中文乱码问题。'
+echo '* 单独安装pdksh-5.2.14'
+echo '------欢迎使用 CentOS7 Oracle 11G安装助手------'
+echo '当前操作系统版本是：'
+cat /etc/redhat-release
+read -r -p "确定继续执行吗? [Y/n] " input
+
+case $input in
+    [yY][eE][sS]|[yY]|[1])
+		echo '-------------正在安装VNC图形化相关软件----------------'
+    #图形界面必备`X Window System`
+    yum -y groupinstall "X Window System"
+    #安装epel源
+    yum -y install epel-release
+    #安装VNC+图形需要的软件
+    yum -y install tigervnc-server openbox xfce4-terminal tint2 cjkuni-ukai-fonts network-manager-applet
+    echo '-------------自动修改/etc/xdg/openbox/autostart配置文件-------------'
+    #自动修改/etc/xdg/openbox/autostart配置文件
+    echo 'if which dbus-launch >/dev/null && test -z "$DBUS_SESSION_BUS_ADDRESS"; then' > /etc/xdg/openbox/autostart
+    echo '       eval `dbus-launch --sh-syntax --exit-with-session`' >> /etc/xdg/openbox/autostart
+    echo 'fi' >> /etc/xdg/openbox/autostart
+    echo 'tint2 &' >> /etc/xdg/openbox/autostart
+    echo 'nm-applet  &' >> /etc/xdg/openbox/autostart
+    echo 'xfce4-terminal &' >> /etc/xdg/openbox/autostart
+    echo ' ' >> /etc/xdg/openbox/autostart
+    cat /etc/xdg/openbox/autostart
+    echo '-------------防火墙放行VNC端口5901-------------'
+    firewall-cmd --add-port=5901/tcp
+    firewall-cmd --add-port=5901/tcp --permanent
+    echo '-------------防火墙放行VNC端口1521-------------'
+    firewall-cmd --add-port=1521/tcp
+    firewall-cmd --add-port=1521/tcp --permanent
+    echo '-------------安装oracle依赖的程序包-------------'
+    yum -y install binutils compat-libcap1  compat-libstdc++-33 compat-libstdc++-33*.i686 elfutils-libelf-devel gcc gcc-c++ glibc*.i686 glibc glibc-devel glibc-devel*.i686 ksh libgcc*.i686 libgcc libstdc++ libstdc++*.i686 libstdc++-devel libstdc++-devel*.i686 libaio libaio*.i686 libaio-devel libaio-devel*.i686 make sysstat unixODBC unixODBC*.i686 unixODBC-devel unixODBC-devel*.i686 libXp
+    echo '-------------正在安装中易宋体18030-------------'
+    #新建字体目录
+    mkdir -p /usr/share/fonts/zh_CN/TrueType
+    #复制字体到字体目录
+    cp zysong.ttf /usr/share/fonts/zh_CN/TrueType/zysong.ttf
+    #更改字体文件属性，使其生效
+    chmod 75 /usr/share/fonts/zh_CN/TrueType/zysong.ttf
+    echo '字体安装完成！'
+    ls /usr/share/fonts/zh_CN/TrueType
+    echo '-------------正在尝试安装pdksh-5.2.14-------------'
+    echo '尝试卸载冲突ksh-20120801-142.el7.x86_64'
+    rpm -e ksh-20120801-142.el7.x86_64
+    rpm -e ksh-20120801-143.el7_9.x86_64
+    rpm -ivh pdksh-5.2.14-37.el5_8.1.x86_64.rpm
+    echo '查询是否安装成功：'
+    rpm -q pdksh
+    echo '脚本执行完成！开始oracle安装吧!'
+		;;
+
+    [nN][oO]|[nN]|[0])
+		echo "No"
+       	;;
+
+    *)
+		echo "Invalid input..."
+		exit 1
+		;;
+esac
+```
+
+2. 创建用户和组
+
+```bash
+groupadd oinstall && groupadd dba && useradd -g oinstall -G dba oracle
+passwd oracle
+```
+
+3. 开启VNC服务
+
+```bash
+su oracle
+# 首次运行，生成~/.vnc/xstartup等配置文件
+vncserver :1 -geometry 1024x768
+# 配置VNC默认启动openbox
+echo "openbox-session &" > ~/.vnc/xstartup
+# 停止服务
+vncserver -kill :1
+# 重新开启vnc服务
+vncserver :1 -geometry 1024x768
+```
+
+使用 [VNC Viewer点击下载](https://www.realvnc.com/en/connect/download/viewer/) 连接192.168.3.200:5901
 
 
+4. 上传并解压安装包
+
+```bash
+su oracle
+unzip p13390677_112040_Linux-x86-64_1of7.zip
+unzip p13390677_112040_Linux-x86-64_2of7.zip
+```
+
+5. oracle用户登录vnc远程桌面
+
+```bash
+cd ~/database/
+./runInstaller
+```
+
+不接收邮件通知更新
+
+![](../../assets/_images/devops/database/oracle/step1.png)
+
+跳过软件更新
+
+![](../../assets/_images/devops/database/oracle/step2.png)
+
+创建和配置数据库
+
+![](../../assets/_images/devops/database/oracle/step3.png)
+
+选择服务器类
+
+![](../../assets/_images/devops/database/oracle/step4.png)
+
+默认选择单实例数据库
+
+![](../../assets/_images/devops/database/oracle/step5.png)
+
+默认典型安装
+
+![](../../assets/_images/devops/database/oracle/step6.png)
+
+设置实例和密码，其他默认即可。这里密码要在大写字母+小写字母+数字组合。比如：1234Qwer
+
+![](../../assets/_images/devops/database/oracle/step7.png)
+
+创建产品清单，默认
+
+![](../../assets/_images/devops/database/oracle/step8.png)
+
+执行先决条件检查，按照静默方式的内核参数和限制设定
+
+```bash
+# 创建swap文件 bs=2300的设置的值一般为内存的1.5倍以上 
+dd if=/dev/zero of=swapfree bs=32k count=65515
+mkswap swapfree # 将创建的文件用做交换分区
+swapon swapfree # 开启交换分区
+# 使Swap文件永久生效,/etc/fstab加入配置
+echo "swapfree   swap    swap    sw  0   0" >> /etc/fstab
+```
+
+![](../../assets/_images/devops/database/oracle/step9.png)
+
+准备安装
+
+![](../../assets/_images/devops/database/oracle/step10.png)
+
+进行安装
+
+![](../../assets/_images/devops/database/oracle/step11.png)
+
+
+进度70% `ins_emagent.mk错误弹框`
+
+![](../../assets/_images/devops/database/oracle/step11_error.png)
+
+
+?> 编辑 /home/oracle/app/oracle/product/11.2.0/dbhome_1/sysman/lib/ins_emagent.mk 约176行，可以搜索$(MK_EMAGENT_NMECTL) 关键字快速找到。
+
+![](../../assets/_images/devops/database/oracle/step11_update.png)
+
+```bash
+#===========================
+#  emdctl
+#===========================
+
+$(SYSMANBIN)emdctl:
+        $(MK_EMAGENT_NMECTL) -lnnz11
+
+#===========================
+#  nmocat
+#===========================
+```
+
+修改完成后，点击重试（R）
+
+![](../../assets/_images/devops/database/oracle/step11_goon.png)
+
+数据库创建完成
+
+![](../../assets/_images/devops/database/oracle/step11_done.png)
+
+执行配置脚本
+
+![](../../assets/_images/devops/database/oracle/step11_shell.png)
+
+使用root身份执行
+
+```bash
+/home/oracle/app/oraInventory/orainstRoot.sh 
+/home/oracle/app/oracle/product/11.2.0/dbhome_1/root.sh 
+```
+
+执行完成这两个脚本，点击确定
+
+![](../../assets/_images/devops/database/oracle/step11_shell_ok.png)
+
+Oracle Database 安装成功
+
+![](../../assets/_images/devops/database/oracle/step12.png)
+
+6. 设置oracle用户环境变量
+
+```bash
+su - oracle
+vim .bash_profile
+
+export ORACLE_HOME=/home/oracle/app/oracle/product/11.2.0/dbhome_1/
+export ORACLE_SID=orcl
+export PATH=$ORACLE_HOME/bin:$PATH
+
+source .bash_profile
+```
+
+7. 登录数据库
+
+```bash 
+su - oracle
+lsnrctl status
+lsnrctl start
+lsnrctl stop
+sqlplus / as sysdba
+startup
+shutdown immediate
+select status from v$instance;
+exit
+```
 
 ### 1.3 RAC
 
