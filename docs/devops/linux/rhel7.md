@@ -132,14 +132,8 @@
 ### 3.1 yum更换
 
 ```bash
-rpm -qa | grep yum
-echo `rpm -qa | grep yum` > aa
-# 删除yum程序
-rpm -e yum-langpacks-0.4.2-7.el7.noarch --nodeps
-rpm -e yum-3.4.3-168.el7.noarch --nodeps
-rpm -e yum-metadata-parser-1.1.4-10.el7.x86_64 --nodeps
-rpm -e yum-rhn-plugin-2.0.1-10.el7.noarch --nodeps
-rpm -e yum-utils-1.1.31-54.el7_8.noarch --nodeps
+rpm -e --nodeps `rpm -qa | grep yum`
+
 # 下载yum安装包
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/PackageKit-yum-1.1.10-2.el7.centos.x86_64.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-3.4.3-168.el7.centos.noarch.rpm
