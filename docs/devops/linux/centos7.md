@@ -1,5 +1,9 @@
 # CentOS 7
 
+- https://ftp.redhat.com
+- https://www.rpmfind.net
+- https://rpm.pbone.net
+
 ## 1. 虚拟机
 
 ### 1.1 初始化
@@ -82,8 +86,8 @@ yum repolist  # 查看当前yum源
 ### 1.5 卸载
 
 ```bash
-rpm -qa | grep mariadb
-rpm -e --nodeps mariadb-libs-5.5.64-1.el7.x86_64
+
+rpm -e --nodeps `rpm -qa | grep mariadb`
 ```
 
 ### 1.6 vim编辑器
@@ -102,6 +106,24 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 ```
 
 ## 2. 命令
+
+### 2.1 RPM
+
+- -ivh  安装  
+- -e     卸载
+- -Uvh  升级  如果已安装老版本,则升级;如果没安装,则直接安装
+- -Fvh  升级   如果已安装老版本,则升级;如果没安装,则**不**安装
+- -ivh --force  强制安装
+- --nodeps  忽略依赖关系
+- -ql   查看已经安装的软件的文件列表
+- -qlp   package.rpm     查看未安装的rpm包里的文件列表
+- -qa  查看已经安装的所有rpm包
+- -qd  查看软件的文档列表
+- -qc   查看软件的配置文件
+- -qi   查看软件的详细信息
+- -qf    filename    查看文件来自哪个rpm包
+- --import    key_file    导入公钥用于检查rpm文件的签名
+- -checksig   package.rpm  检查rpm包的签名
 
 ### 2.1 系统
 
@@ -132,9 +154,8 @@ shutdown -r now # 重启
 ### 2.2 文件
 
 ```bash
-
-ls -a
 # 替换
+ls -a
 sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
 echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   # 文件批量拷贝至目录
 
