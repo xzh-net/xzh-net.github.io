@@ -6,7 +6,7 @@
 
 ## 1. 虚拟机
 
-### 1.1 初始化
+1. 初始化
 
 ```bash
 yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
@@ -20,7 +20,7 @@ systemctl disable firewalld.service # 关闭
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-### 1.2 OpenSSH
+2. OpenSSH
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -37,7 +37,7 @@ service sshd start
 systemctl enable sshd
 ```
 
-### 1.3 网络
+3. 网络
 
 ```bash
 vi /etc/hosts
@@ -74,7 +74,7 @@ DNS1=114.114.114.114
 systemctl restart network
 ```
 
-### 1.4 yum更换
+4. yum更换
 
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
@@ -83,14 +83,14 @@ yum makecache # 更新yum缓存
 yum repolist  # 查看当前yum源
 ```
 
-### 1.5 卸载
+5. 卸载
 
 ```bash
 
 rpm -e --nodeps `rpm -qa | grep mariadb`
 ```
 
-### 1.6 vim编辑器
+6. vim编辑器
 
 ```bash
 yum -y install vim*
@@ -410,8 +410,7 @@ vim /etc/shells
 yum install -y rsync
 ```
 
-
-## 3. 快捷键
+### 2.8 快捷键
 
 ```bash
 ctrl + z / fg                       # 挂起
@@ -422,14 +421,12 @@ Ctrl + Shift + c                    # 复制
 Ctrl + Shift + v                    # 粘贴    
 ```
 
-## 4. 开发环境
+## 3. 开发环境
 
-### 4.1 Java
-
-- Jdk
+1. Java
 
 ```bash
-# yum安装
+# Jdk安装
 yum install java-1.8.0-openjdk* -y
 yum install java-1.8.0-openjdk
 vim /etc/profile
@@ -449,9 +446,8 @@ export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 ```
 
-- Maven
-
-```
+```bash
+# Maven安装
 tar -xzf apache-maven-3.6.2-bin.tar.gz    # 解压
 mkdir -p /opt/maven                       # 创建目录
 mv apache-maven-3.6.2/* /opt/maven        # 移动文件
@@ -465,7 +461,7 @@ mvn -v                # 查找Maven版本
 ```
 
 ```xml
-  <localRepository>/opt/repository</localRepository>
+<localRepository>/opt/repository</localRepository>
   <mirrors>
         <!-- 阿里云仓库 -->
         <mirror>
@@ -492,7 +488,7 @@ mvn -v                # 查找Maven版本
 ```
 
 
-### 4.2 Node
+2. Node
 
 ```bash
 yum install -y git
@@ -520,9 +516,6 @@ forever start -w app.js     #监听文件改动
 forever start -l forever.log -o out.log -e err.log app.js #日志输出
 ```
 
-
-### 4.3 Npm
-
 ```bash
 npm -v #查看npm安装的版本
 
@@ -546,7 +539,7 @@ npm list                #查看当前目录下已安装的node包
 npm list parseable=true #以目录的形式来展现当前安装的所有node包
 ```
 
-### 4.4 TypeScript
+3. TypeScript
 
 ```bash
 npm init -y                     # 生成package.json配置文件
@@ -557,7 +550,7 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-### 4.5 Golang
+4. Golang
 
 ```bash
 wget  https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
@@ -576,9 +569,9 @@ go version
 go env
 ```
 
-## 5. Shell
+## 4. Shell
 
-### 5.1 Tomcat监控 
+### 4.1 Tomcat监控 
 
 1. 重启
 
@@ -602,7 +595,7 @@ cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
 sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
 ```
 
-### 5.2 Spring Boot启动
+### 4.2 Spring Boot启动
 
 ```bash
 #!/bin/bash
@@ -634,7 +627,7 @@ fi
 sed -i 's/\r$//' run.sh  
 ```
 
-### 5.3 Jdk批量
+### 4.3 Jdk批量
 
 ```bash
 vim /etc/hosts
