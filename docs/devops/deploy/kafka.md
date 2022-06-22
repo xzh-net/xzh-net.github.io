@@ -120,7 +120,7 @@ bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/config/kraft
-mkdir -p /opt/kafka_2.13-3.1.0/config/kraft/logs
+mkdir -p /opt/kafka_2.13-3.1.0/data
 vi server.properties
 
 # 修改以下配置
@@ -128,7 +128,7 @@ process.roles=broker,controller	# 数据节点，控制节点
 node.id=1	# 对应broker.id
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093 # 对应zk
 advertised.listeners=PLAINTEXT://node01:9092		# 对外暴漏端口，对应主机名称
-log.dirs=/opt/kafka_2.13-3.1.0/config/kraft/logs
+log.dirs=/opt/kafka_2.13-3.1.0/data
 ```
 
 2. 内容分发
