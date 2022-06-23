@@ -8,6 +8,8 @@
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 systemctl stop firewalld.service
 systemctl disable firewalld.service # 关闭
+systemctl enable --now cockpit.socket   # 开启web管理程序
+systemctl disable cockpit.socket
 ```
 
 ### 1.2 网络设置

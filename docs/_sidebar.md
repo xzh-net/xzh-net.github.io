@@ -27,7 +27,7 @@
   - [Nexus3](devops/deploy/nexus3)
   - [Gitlab](devops/deploy/gitlab)
   - [Jenkins](devops/deploy/jenkins)
-  - [Zabbix](devops/deploy/zabbix)
+  - [Zabbix 6.0](devops/deploy/zabbix6)
   - [Prometheus](devops/deploy/prometheus)
   - [Zookeeper](devops/deploy/zookeeper)
   - [Kafka](devops/deploy/kafka)
