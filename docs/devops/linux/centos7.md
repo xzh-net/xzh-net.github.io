@@ -13,7 +13,7 @@ yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_6
 yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
 /usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
 
-service iptables status
+systemctl stop iptables.service
 systemctl disable iptables.service  # 关闭
 systemctl stop firewalld.service
 systemctl disable firewalld.service # 关闭
