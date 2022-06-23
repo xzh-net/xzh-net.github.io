@@ -102,10 +102,11 @@ rm -rf /var/log/mysqld.log
 ### 2.1 建库用户授权
 
 ```sql
-CREATE DATABASE IF NOT EXISTS sonar DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
-GRANT ALL ON sonar.* TO 'sonar'@'%' IDENTIFIED BY '123456';
-GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY '123456';
-flush privileges;
+mysql -uroot -p123456
+create database zabbix character set utf8 collate utf8_bin;
+create user zabbix@localhost identified by "123456";
+grant all privileges on zabbix.* to zabbix@localhost
+grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
 
 修改密码
