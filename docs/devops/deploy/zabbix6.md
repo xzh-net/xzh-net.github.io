@@ -126,8 +126,21 @@ rpm -e zabbix-release-6.0-1.el8.noarch --nodeps
 rm -rf `find / -name zabbix` 
 rm -rf `find / -name mysql` 
 rm -rf /etc/my.cnf
-
 ```
 
 
-## 1. 安装 Zabbix Agent
+## 2. 安装 Zabbix Agent
+
+### 2.1 一键安装
+
+### 2.2 启动
+
+```bash
+ss -ntlp|grep zabbix    # 检测是否安装成功
+```
+
+### 2.3 卸载
+
+```bash
+yum -y remove zabbix-agent2
+```
