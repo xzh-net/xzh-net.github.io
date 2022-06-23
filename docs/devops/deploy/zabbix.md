@@ -148,4 +148,27 @@ netstat -lntp|grep -E "zabbix|http|mysql|php"
 
 访问地址：http://192.168.3.200/zabbix
 - 默认账号：Admin
-- 默认密码：zabbix
+- 默认密码：zabbix+
+
+## 5. 客户端
+
+```bash
+yum install -y ntpdate
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
+timedatectl set-timezone Asia/Shanghai                 # 同步时区
+
+rpm -Uvh https://mirrors.aliyun.com/zabbix/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
+sed -i 's#http://repo.zabbix.com#https://mirrors.aliyun.com/zabbix#' /etc/yum.repos.d/zabbix.repo
+yum install -y zabbix-agent2
+
+sed -i -e "/^Server=127.0.0.1/c Server=$ZABBIX_SERVER"  -e "/^Hostname=Zabbix server/c Hostname=${ZABBIX_HOSTNAME}"  /etc/zabbix/zabbix_agent2.conf
+
+/usr/sbin/zabbix_agent2
+cat /lib/systemd/system/zabbix_agent2.service
+grep -Ev '^#|$^' /etc/zabbix/zabbix_agent2.conf
+cat /var/run/zabbix/zabbix_agent2.pid
+修改host对应Hostname
+
+服务器安装zabbix-get  zabbix-get -s '192.168.3.201' -p 10050 -k 'agent.ping'
+
+```
