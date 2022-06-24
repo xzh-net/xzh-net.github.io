@@ -43,7 +43,7 @@ systemctl enable sshd
 vi /etc/hosts
 vi /etc/resolv.conf  nameserver 192.168.0.1    # DNS
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # IP地址
-vi /etc/sysconfig/network                      # 默认网关
+vi /etc/sysconfig/network                      # 默认网关 GATEWAY=192.168.3.1
 hostnamectl set-hostname xuzhihao              # 修改主机名
 ```
 
