@@ -152,23 +152,62 @@ netstat -lntp|grep -E "zabbix|http|mysql|php"
 
 ## 5. 客户端
 
+### 5.1 时区同步
+
 ```bash
 yum install -y ntpdate
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
-timedatectl set-timezone Asia/Shanghai                 # 同步时区
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w
+timedatectl set-timezone Asia/Shanghai
+```
 
+### 5.2 配置yum源
+
+```bash
 rpm -Uvh https://mirrors.aliyun.com/zabbix/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
 sed -i 's#http://repo.zabbix.com#https://mirrors.aliyun.com/zabbix#' /etc/yum.repos.d/zabbix.repo
+yum clean all
+```
+
+### 5.3 安装zabbix-agent2
+
+```bash
 yum install -y zabbix-agent2
+```
 
-sed -i -e "/^Server=127.0.0.1/c Server=$ZABBIX_SERVER"  -e "/^Hostname=Zabbix server/c Hostname=${ZABBIX_HOSTNAME}"  /etc/zabbix/zabbix_agent2.conf
+### 5.4 修改配置
 
-/usr/sbin/zabbix_agent2
-cat /lib/systemd/system/zabbix_agent2.service
-grep -Ev '^#|$^' /etc/zabbix/zabbix_agent2.conf
-cat /var/run/zabbix/zabbix_agent2.pid
-修改host对应Hostname
+1. 客户端上报地址
 
-服务器安装zabbix-get  zabbix-get -s '192.168.3.201' -p 10050 -k 'agent.ping'
+```bash
+vi /etc/zabbix/zabbix_agent2.conf
 
+# 修改以下配置
+Server=zabbix.xuzhihao.net
+ServerActive=zabbix.xuzhihao.net
+Hostname=Zabbix02
+```
+
+2. 启动服务
+
+```bash
+systemctl start zabbix-agent2.service
+systemctl enable zabbix-agent2.service
+```
+
+3. 测试
+
+```bash
+grep -Ev '^#|$^' /etc/zabbix/zabbix_agent2.conf # 确认配置无误
+netstat -lutp | grep 32160
+cat /usr/lib/systemd/system/zabbix-agent2.service   # 查看启动文件
+
+PIDFile=/run/zabbix/zabbix_agent2.pid
+ExecStart=/usr/sbin/zabbix_agent2 -c $CONFFILE
+```
+
+服务器安装zabbix-get  
+
+```bash
+yum install -y zabbix-get
+zabbix_get -s '192.168.3.201' -p 10050 -k 'agent.ping'
 ```
