@@ -187,14 +187,14 @@ ServerActive=zabbix.xuzhihao.net
 Hostname=Zabbix02
 ```
 
-2. 启动服务
+### 5.5 启动服务
 
 ```bash
 systemctl start zabbix-agent2.service
 systemctl enable zabbix-agent2.service
 ```
 
-3. 测试
+### 5.6 测试
 
 ```bash
 grep -Ev '^#|$^' /etc/zabbix/zabbix_agent2.conf # 确认配置无误
