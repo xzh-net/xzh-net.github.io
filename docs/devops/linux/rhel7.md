@@ -1,6 +1,6 @@
 # Redhat 7
 
-## 1. VMware 12
+## 1. 安装VMware
 
 ![](../../assets/_images/devops/linux/rhel7/Vm1.png)
 ![](../../assets/_images/devops/linux/rhel7/Vm2.png)
@@ -29,7 +29,7 @@
 ![](../../assets/_images/devops/linux/rhel7/Vm12.png)
 
 
-## 2. 安装
+## 2. 创建虚拟机
 
 1. 创建虚拟机
 
@@ -129,7 +129,7 @@
 
 ## 3. 虚拟机
 
-### 3.1 yum更换
+1. yum更换
 
 ```bash
 rpm -e --nodeps `rpm -qa | grep yum`
@@ -183,7 +183,7 @@ gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
 yum clean all
 ```
 
-### 3.1 网络设置
+2. 网络设置
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-ens33   
