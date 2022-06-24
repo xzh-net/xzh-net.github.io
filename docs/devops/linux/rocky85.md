@@ -2,7 +2,18 @@
 
 ## 1. 虚拟机
 
-### 1.1 初始化
+1. yum更换
+
+```bash
+sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
+    -i.bak \
+    /etc/yum.repos.d/Rocky-*.repo
+ 
+dnf makecache
+```
+
+2. 关闭防火墙
 
 ```bash
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
@@ -12,7 +23,7 @@ systemctl enable --now cockpit.socket   # 开启web管理程序
 systemctl disable cockpit.socket
 ```
 
-### 1.2 网络设置
+3. 网络
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
@@ -47,14 +58,5 @@ ifdown enp0s3; ifup enp0s3
 ```
 
 
-### 1.3 yum更换
 
-```bash
-sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
-    -i.bak \
-    /etc/yum.repos.d/Rocky-*.repo
- 
-dnf makecache
-```
 
