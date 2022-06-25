@@ -211,3 +211,93 @@ ExecStart=/usr/sbin/zabbix_agent2 -c $CONFFILE
 yum install -y zabbix-get
 zabbix_get -s '192.168.3.201' -p 10050 -k 'agent.ping'
 ```
+
+## 6. 自定义监控
+
+### 6.1 客户端配置
+
+1. 启用自定义配置
+
+```bash
+vi /etc/zabbix/zabbix_agent2.conf
+# 修改
+Include=/etc/zabbix/zabbix_agent2.d/*.conf:q!
+UnsafeUserParameters=1
+```
+
+2. 添加自定义key
+
+```bash
+cd /etc/zabbix/zabbix_agent2.d/
+vi UserParameter.conf
+# 添加
+UserParameter=login.user,who|wc -l
+```
+
+3. 重启zabbix-agent
+
+```bash
+systemctl restart zabbix-agent2.service
+```
+
+4. 服务器测试
+
+```bash
+zabbix_get -s '192.168.3.201' -p 10050 -k 'login.user'
+```
+
+### 6.1 服务端配置
+
+1. 添加模板
+
+?> 配置-模板-创建模板
+
+![](../../assets/_images/devops/deploy/zabbix/create_template.png)
+
+2. 创建应用集
+
+?> 配置-模板-Template login user-应用集-创建应用集
+
+![](../../assets/_images/devops/deploy/zabbix/modify_template.png)
+
+![](../../assets/_images/devops/deploy/zabbix/create_app.png)
+
+3. 创建监控项
+
+?> 配置-模板-Template login user-监控项-创建监控项
+
+![](../../assets/_images/devops/deploy/zabbix/create_monitor.png)
+
+4. 创建触发器
+
+?> 配置-模板-Template login user-触发器-创建触发器
+
+![](../../assets/_images/devops/deploy/zabbix/create_trigger.png)
+
+5. 创建图形
+
+?> 配置-模板-Template login user-图形-创建图形
+
+![](../../assets/_images/devops/deploy/zabbix/create_graph.png)
+
+6. 主机关联模板
+
+![](../../assets/_images/devops/deploy/zabbix/template_rel.png)
+
+7. 邮件报警
+
+?> 管理-报警媒介类型-创建媒介类型(密码为邮箱授权码)
+
+![](../../assets/_images/devops/deploy/zabbix/create_email.png)
+
+![](../../assets/_images/devops/deploy/zabbix/create_email_template.png)
+
+8. 用户设置
+
+?> User settings-报警媒介
+
+![](../../assets/_images/devops/deploy/zabbix/user_settings_email.png)
+
+9. 激活报警
+
+![](../../assets/_images/devops/deploy/zabbix/enable_email.png)
