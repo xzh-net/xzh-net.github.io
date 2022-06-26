@@ -11,7 +11,7 @@
 1. 备份yum源
 
 ```bash
-cd /etc/yum.repos.d/ && mkdir bakup && mv *.repo /bakups
+cd /etc/yum.repos.d/ && mkdir bakup && mv *.repo bakup
 ```
 
 2. 添加挂载
@@ -228,13 +228,54 @@ firewall-cmd --reload                                    # 重启防火墙
 1. 服务端
 
 ```bash
-
+yum -y install telnet-server xinetd
+rpm -q xinetd telnet-server # 确认安装成功
 ```
 
+配置文件
+
+```bash
+cat /etc/xinetd.conf  | grep -v ^# | grep -v ^$
+
+defaults
+{
+    log_type        = SYSLOG daemon info        # 日志类型，表示使用syslog进行服务登记。
+    log_on_failure  = HOST                      # 失败日志，失败后记录客户机的IP地址。
+    log_on_success  = PID HOST DURATION EXIT    # 成功日志，记录客户机的IP地址和进程ID
+    cps             = 50 10                     # 表示每秒50个连接，如果超过限制，则等待10秒。主要用于对付拒绝服务攻击。
+    instances       = 50        # 最大连接数
+    per_source      = 10        # 每个IP地址最大连接数
+    v6only          = no        # 不使用ipv6
+    groups          = yes       # 确定该服务的进程组ID，/etc/group
+    umask           = 002       # 文件生成码反掩码   666（664） 777(775)
+}
+includedir /etc/xinetd.d        # 外部调用的目录
+```
+
+启动服务
+
+```bash
+systemctl start xinetd.service
+systemctl enable xinetd.service
+
+systemctl start telnet.socket
+systemctl enable telnet.socket
+```
+
+root 用户默认无法登录
+
+```bash
+vi /etc/securetty
+# 添加到最后位置
+pts/0 
+pts/1
+```
 
 2. 客户端
 
 ```bash
+yum install -y telnet
+ping 192.168.100.1 # 输入用户名和密码
 ```
 
 ## 2. 命令
