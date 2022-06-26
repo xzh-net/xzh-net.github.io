@@ -132,7 +132,7 @@ ifconfig
 
 ### 1.4 ssh
 
-1. 配置
+1. 配置文件
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -144,9 +144,8 @@ ListenAddress ::
 PermitRootLogin yes # 允许远程登录
 PasswordAuthentication yes  # 开启用户名和密码来验证
 
-# 重启
-service sshd start
-systemctl enable sshd
+service sshd start      # 启动服务
+systemctl enable sshd   # 开机自启
 ```
 
 2. 免密登录
