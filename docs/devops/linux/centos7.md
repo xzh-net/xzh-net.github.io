@@ -1,26 +1,138 @@
-# CentOS 7
+# CentOS Linux release 7.9.2009
 
 - https://ftp.redhat.com
 - https://www.rpmfind.net
 - https://rpm.pbone.net
 
-## 1. 虚拟机
+## 1. 服务
 
-1. 初始化
+### 1.1 yum
+
+1. 备份yum源
 
 ```bash
-yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
-yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
-
-systemctl stop iptables.service
-systemctl disable iptables.service  # 关闭
-systemctl stop firewalld.service
-systemctl disable firewalld.service # 关闭
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+cd /etc/yum.repos.d/ && mkdir bakup && mv *.repo /bakups
 ```
 
-2. OpenSSH
+2. 添加挂载
+
+```bash
+lsblk                       # 查看可用设备信息
+mkdir /mnt/cdrom            # 创建挂载文件夹
+mount /dev/cdrom /mnt/cdrom # 创建挂载点
+echo "/dev/cdrom /mnt/cdrom iso9660 defaults 0 0" >> /etc/fstab # 永久挂载
+
+yum install -y psmisc   # 无法删除挂载点需要使用kuser命令
+fuser -km /mnt/cdrom    # kill 挂载进程
+umount /mnt/cdrom       # 取消挂载
+```
+
+3. 创建本地yum源
+
+```bash
+cd /etc/yum.repos.d/
+vi local-yum.repo
+# 添加以下内容
+[local-yum]
+name=local yum
+baseurl=file:///mnt/cdrom
+enabled=1
+gpgcheck=0
+```
+
+4. 网络yum源
+
+```bash
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
+yum repolist    # 查看源信息
+yum clean all   # 清空缓存  
+yum makecache   # 更新yum缓存
+```
+
+### 1.2 dhcp
+
+- DHCP主机的IP为: 192.168.100.1/24
+- DHCP动态分配的IP范围为： 192.168.100.100/24 - 192.168.100.200/24
+- DHCP客户端的网关设置为:  192.168.100.1
+
+1. ip配置
+
+```bash
+vi /etc/sysconfig/network-scripts/ifcfg-enps33
+
+IPADDR=192.168.100.1
+NETMASK=255.255.255.0
+GATEWAY=192.168.100.1
+
+systemctl restart network
+ifconfig
+```
+
+2. 安装dhcp
+
+```bash
+yum -y install dhcp
+rpm -ql dhcp
+
+/etc/dhcp
+/etc/dhcp/dhcpd.conf    # 主配置文件
+/etc/rc.d/init.d/dhcpd  # 启动脚本
+/usr/sbin/dhcpd         # 二进制命令
+```
+
+3. 配置dhcpd
+
+?> 服务器的地址必须与仅主机模式中设置的ip网段相同
+
+```bash
+vim /etc/dhcp/dhcpd.conf
+
+default-lease-time 259200;    # 预设租期3天
+max-lease-time 518400;        # 最大租期6天
+option domain-name "xuzhihao.com";         # 指定默认域名
+option domain-name-servers 192.168.100.1;  # DNS(可以写多个)
+ddns-update-style none;       # 禁用 DNS 动态更新 
+log-facility local7;          # 定义日志设备载体 （/var/log/boot.log输出）
+
+subnet 192.168.100.0 netmask 255.255.255.0 {    # 子网
+  range 192.168.100.100 192.168.100.200;        # 地址范围
+  option routers 192.168.100.1;                 # 网关，客户端的默认的转发地址
+  option broadcast-address 192.168.2.255;       # 广播地址
+}
+
+```
+
+4. 启动
+
+```bash
+systemctl start dhcpd
+systemctl status dhcpd
+```
+
+5. 测试
+
+client端修改IP地址为动态获取
+
+```bash
+vi /etc/sysconfig/network-scripts/ifcfg-enps33
+
+BOOTPROTO=dhcp
+#IPADDR=192.168.3.200
+#NETMASK=255.255.255.0
+#GATEWAY=192.168.3.1
+#DNS1=114.114.114.114
+
+systemctl restart network
+ifconfig
+```
+
+
+### 1.3 dns
+
+### 1.4 ssh
+
+1. 配置
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -37,72 +149,92 @@ service sshd start
 systemctl enable sshd
 ```
 
-3. 网络
+2. 免密登录
 
 ```bash
-vi /etc/hosts
-vi /etc/resolv.conf  nameserver 192.168.0.1    # DNS
-vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # IP地址
-vi /etc/sysconfig/network                      # 默认网关 GATEWAY=192.168.3.1
-hostnamectl set-hostname xuzhihao              # 修改主机名
+# 192.168.3.201机器执行
+ssh-keygen -t rsa
+cd /root/.ssh
+ssh-copy-id -i id_rsa.pub root@192.168.3.202
+ssh-copy-id -i id_rsa.pub root@192.168.3.203
+
+# 192.168.3.202,192.168.3.203 如果提示没有权限
+cd /root/.ssh
+chmod 600 authorized_keys
 ```
 
-```conf
-TYPE="Ethernet"
-PROXY_METHOD="none"
-BROWSER_ONLY="no"
-BOOTPROTO="static" # dhcp 
-DEFROUTE="yes"
-IPV4_FAILURE_FATAL="no"
-IPV6INIT="yes"
-IPV6_AUTOCONF="yes"
-IPV6_DEFROUTE="yes"
-IPV6_FAILURE_FATAL="no"
-IPV6_ADDR_GEN_MODE="stable-privacy"
-NAME="enp0s3"
-UUID="e66600c1-35a8-4a09-9bbe-aeafe7ded9b0"
-DEVICE="enp0s3"
-ONBOOT="yes"
-IPV6_PRIVACY="no"
-IPADDR=192.168.3.200
-NETMASK=255.255.255.0
-GATEWAY=192.168.3.1
-DNS1=114.114.114.114
-```
-
-```
-systemctl restart network
-```
-
-4. yum更换
+### 1.5 ftp
 
 ```bash
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
-yum makecache # 更新yum缓存
-yum repolist  # 查看当前yum源
+yum install vsftpd                  # 安装
+systemctl restart vsftpd.service    # 重启
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config     # 关闭selinux
+cat /etc/vsftpd/vsftpd.conf         # 配置文件
+cat /etc/vsftpd/vsftpd.conf | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf.bak
+
+vim /etc/vsftpd/ftpusers    # 连接黑名单，总是生效
+vim /etc/vsftpd/user_list   # 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
+
+cat /etc/passwd       # 查看用户
+useradd xzh -g xzh -d /opt/xzh.webapp -s /sbin/nologin
+passwd xzh
+chmod -R 777 /opt/xzh.webapp
+userdel xzh
+
+# -s /sbin/nologin 无法登录需要修改
+vim /etc/shells
+/sbin/nologin
 ```
 
-5. 卸载
+### 1.6 iptables
+
+```bash
+service iptables status # 查看iptables状态
+/etc/init.d/iptables status
+/etc/init.d/iptables start
+/etc/init.d/iptables stop
+/etc/init.d/iptables restart
+
+# -I：添加，-D：删除。INPUT表示入站，***.***.***.*** 表示要封停的IP，DROP表示放弃连接。
+iptables -I INPUT -s 211.0.0.0/8 -j DROP    # 封整段
+iptables -I INPUT -s 211.1.0.0/16 -j DROP   # 封IP段
+iptables -I INPUT -s 61.37.80.0/24 -j DROP
+iptables -I INPUT -s 61.37.81.0/24 -j DROP
+
+iptables -D INPUT -s 192.168.3.202 -j DROP        # 解封一个IP
+iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
+iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
+```
+
+### 1.7 firewalld
+
+```bash
+systemctl start firewalld.service     # 启动firewall
+systemctl restart firewalld.service   # 重启firewall
+systemctl stop firewalld.service      # 关闭firewall
+systemctl status firewalld.service    # 查看防火墙状态
+systemctl disable firewalld.service   # 禁止firewall随系统启动
+systemctl enable firewalld.service    # 随系统启动
+
+firewall-cmd --zone=public --add-port=80/tcp --permanent            # 开放端口
+firewall-cmd --zone=public --remove-port=9003/tcp --permanent       # 移除端口
+firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开放端口
+firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
+firewall-cmd --reload                                    # 重启防火墙
+```
+
+### 1.8 telnet
+
+1. 服务端
 
 ```bash
 
-rpm -e --nodeps `rpm -qa | grep mariadb`
 ```
 
-6. vim编辑器
+
+2. 客户端
 
 ```bash
-yum -y install vim*
-vi /etc/vimrc  # 添加 colorscheme murphy
-vi /etc/profile    # 添加 alias vi=vim
-source /etc/profile 
-```
-
-```bash
-:set nu                 # 显示行号:set nonu
-vim +3 /etc/passwd      # 定位到第三行
-vim +/sssd /etc/passwd  # 定位到sssd所在的行
 ```
 
 ## 2. 命令
@@ -170,66 +302,9 @@ find /doc \( -name 'ja*' -o- -name 'ma*' \) –print  # 会从/doc目录开始�
 find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
 ```
 
-### 2.3 防火墙
+### 2.3 磁盘
 
-1. iptables
-
-```bash
-service iptables status # 查看iptables状态
-/etc/init.d/iptables status
-/etc/init.d/iptables start
-/etc/init.d/iptables stop
-/etc/init.d/iptables restart
-
-# -I：添加，-D：删除。INPUT表示入站，***.***.***.*** 表示要封停的IP，DROP表示放弃连接。
-iptables -I INPUT -s 211.0.0.0/8 -j DROP    # 封整段
-iptables -I INPUT -s 211.1.0.0/16 -j DROP   # 封IP段
-iptables -I INPUT -s 61.37.80.0/24 -j DROP
-iptables -I INPUT -s 61.37.81.0/24 -j DROP
-
-iptables -D INPUT -s 39.105.58.136 -j DROP        # 解封一个IP
-iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
-iptables -I INPUT -s 39.105.58.136 -p TCP –dport 80 -j ACCEPT   # 只允许39.105.58.136访问80端口
-```
-
-2. firewalld
-
-```bash
-systemctl start firewalld.service     # 启动firewall
-systemctl restart firewalld.service   # 重启firewall
-systemctl stop firewalld.service      # 关闭firewall
-systemctl status firewalld.service    # 查看防火墙状态
-systemctl disable firewalld.service   # 禁止firewall随系统启动
-systemctl enable firewalld.service    # 随系统启动
-
-firewall-cmd --zone=public --add-port=80/tcp --permanent            # 开放端口
-firewall-cmd --zone=public --remove-port=9003/tcp --permanent       # 移除端口
-firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开放端口
-firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
-firewall-cmd --reload                                    # 重启防火墙
-```
-
-
-### 2.4 磁盘
-
-1. 挂载
-
-```bash
-du -H -h    # 查看目录及子目录大小
-du -sh *    # 查看当前目录下各个文件, 文件夹占了多少空间, 不会递归
-sudo fdisk -l              # 查看磁盘空间
-fdisk /dev/sdb             # 磁盘分区
-m/n/p/1/w
-sudo mkfs.ext4 /dev/sdb1   # 格式化磁盘分区
-sudo mkdir /data           # 创建挂载点
-sudo mount -t ext4 /dev/sdb1 /data   # 磁盘挂载到 /data
-df -h
-
-sudo vim /etc/fstab        # 自动挂载
-/dev/sdb1 /data ext4 errors=remount-ro 0 1
-```
-
-2. 监控
+1. 监控
 
 ```bash
 yum install sysstat iotop -y
@@ -255,7 +330,7 @@ svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位�
 %util： 在统计时间内所有处理IO时间，除以总共统计时间。例如，如果统计间隔1秒，该设备有0.8秒在处理IO，而0.2秒闲置，那么该设备的%util = 0.8/1 = 80%，所以该参数暗示了设备的繁忙程度。一般地，如果该参数是100%表示设备已经接近满负荷运行了（当然如果是多磁盘，即使%util是100%，因为磁盘的并发能力，所以磁盘使用未必就到了瓶颈）。
 ```
 
-### 2.5 网络
+### 2.4 网络
 
 1. 进程
 
@@ -330,7 +405,7 @@ ifstat -tT
 -d 指定一个驱动来收集状态信息
 ```
 
-### 2.6 编译
+### 2.5 编译
 
 1. gcc
 
@@ -345,7 +420,7 @@ which gcc
 gcc --version
 ```
 
-### 2.7 应用
+### 2.6 应用
 
 1. 启动命令
 
@@ -363,27 +438,61 @@ nohup ./openfire.sh >/dev/null 2>&1 &
 nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 ```
 
-2. FTP安装
+
+2. tomcat
+
+- 启动
 
 ```bash
-yum install vsftpd                  # 安装
-systemctl restart vsftpd.service    # 重启
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config     # 关闭selinux
-cat /etc/vsftpd/vsftpd.conf         # 配置文件
-cat /etc/vsftpd/vsftpd.conf | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf.bak
+sh /data/tomcat_webapp_3001/bin/shutdown.sh
+sleep 2s
+ps -ef | grep tomcat_webapp_3001 | grep -v grep | awk '{print $2}'| xargs kill -9
+sleep 1s
+sh /data/tomcat_webapp_3001/bin/startup.sh;tail -f /data/tomcat_webapp_3001/logs/catalina.out
+```
 
-vim /etc/vsftpd/ftpusers    # 连接黑名单，总是生效
-vim /etc/vsftpd/user_list   # 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
+- war部署
 
-cat /etc/passwd       # 查看用户
-useradd xzh -g xzh -d /opt/xzh.webapp -s /sbin/nologin
-passwd xzh
-chmod -R 777 /opt/xzh.webapp
-userdel xzh
+```bash
+sh /opt/tomcat/bin/shutdown.sh
+sleep 2s
+ps -ef | grep /opt/tomcat/ | grep -v grep | awk '{print $2}'| xargs kill -9
+sleep 1s
+rm -rf /opt/tomcat/webapps/servlet*
+cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
+sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
+```
 
-# -s /sbin/nologin 无法登录需要修改
-vim /etc/shells
-/sbin/nologin
+4. Spring Boot
+
+```bash
+#!/bin/bash
+
+JAVA_OPTS="-server -Xms1024m -Xmx1024m -Xmn1024m -XX:MetaspaceSize=1024m -XX:MaxMetaspaceSize=1024m -Xverify:none -XX:+DisableExplicitGC -Djava.awt.headless=true"
+
+jar_name="eureka-server.jar"
+this_dir="$( cd "$( dirname "$0"  )" && pwd )"
+log_dir="${this_dir}/logs"
+jar_file="${this_dir}/${jar_name}"
+echo "${jar_file}"
+
+#日志文件夹不存在，则创建
+if [ ! -d "${log_dir}" ]; then
+    mkdir "${log_dir}"
+fi
+
+#父目录下jar文件存在
+if [ -f "${jar_file}" ]; then
+   	nohup java $JAVA_OPTS -jar ${jar_file} 1> ${log_dir}/catalina.log 2>&1 &
+    exit 0
+else
+    echo -e "\033[31m${jar_file}文件不存在！\033[0m"
+    exit 1
+fi
+```
+
+```bash
+sed -i 's/\r$//' run.sh  
 ```
 
 3. xsync
@@ -392,7 +501,7 @@ vim /etc/shells
 yum install -y rsync
 ```
 
-### 2.8 快捷键
+### 2.7 快捷键
 
 ```bash
 ctrl + z / fg                       # 挂起
@@ -403,9 +512,109 @@ Ctrl + Shift + c                    # 复制
 Ctrl + Shift + v                    # 粘贴    
 ```
 
-## 3. 开发环境
+## 3. 虚拟机
 
-1. Java
+### 3.1 初始化
+
+```bash
+yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
+
+systemctl stop iptables.service
+systemctl disable iptables.service  # 关闭
+systemctl stop firewalld.service
+systemctl disable firewalld.service # 关闭
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+```
+
+### 3.2 ssh
+
+```bash
+vi /etc/ssh/sshd_config
+
+# 配置文件
+Port 22
+ListenAddress 0.0.0.0
+ListenAddress ::
+PermitRootLogin yes # 允许远程登录
+PasswordAuthentication yes  # 开启用户名和密码来验证
+
+# 重启
+service sshd start
+systemctl enable sshd
+```
+
+### 3.3 网络配置
+
+```bash
+vi /etc/hosts
+vi /etc/resolv.conf  nameserver 192.168.0.1    # DNS
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # IP地址
+vi /etc/sysconfig/network                      # 默认网关 GATEWAY=192.168.3.1
+hostnamectl set-hostname xuzhihao              # 修改主机名
+```
+
+```conf
+TYPE="Ethernet"
+PROXY_METHOD="none"
+BROWSER_ONLY="no"
+BOOTPROTO="static" # dhcp 
+DEFROUTE="yes"
+IPV4_FAILURE_FATAL="no"
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+IPV6_DEFROUTE="yes"
+IPV6_FAILURE_FATAL="no"
+IPV6_ADDR_GEN_MODE="stable-privacy"
+NAME="enp0s3"
+UUID="e66600c1-35a8-4a09-9bbe-aeafe7ded9b0"
+DEVICE="enp0s3"
+ONBOOT="yes"
+IPV6_PRIVACY="no"
+IPADDR=192.168.3.200
+NETMASK=255.255.255.0
+GATEWAY=192.168.3.1
+DNS1=114.114.114.114
+```
+
+```
+systemctl restart network
+```
+
+### 3.4 更换yum源
+
+```bash
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
+yum clean all # 清空缓存  
+yum makecache # 更新yum缓存
+```
+
+### 3.5 卸载软件
+
+```bash
+rpm -e --nodeps `rpm -qa | grep mariadb`
+```
+
+### 3.6 安装vim
+
+```bash
+yum -y install vim*
+vi /etc/vimrc  # 添加 colorscheme murphy
+vi /etc/profile    # 添加 alias vi=vim
+source /etc/profile 
+```
+
+```bash
+:set nu                 # 显示行号:set nonu
+vim +3 /etc/passwd      # 定位到第三行
+vim +/sssd /etc/passwd  # 定位到sssd所在的行
+```
+
+## 4. 开发环境
+
+### 4.1 Java
 
 ```bash
 # Jdk安装
@@ -470,7 +679,7 @@ mvn -v                # 查找Maven版本
 ```
 
 
-2. Node
+### 4.2 Node
 
 ```bash
 yum install -y git
@@ -521,7 +730,7 @@ npm list                #查看当前目录下已安装的node包
 npm list parseable=true #以目录的形式来展现当前安装的所有node包
 ```
 
-3. TypeScript
+### 4.3 TypeScript
 
 ```bash
 npm init -y                     # 生成package.json配置文件
@@ -532,7 +741,7 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-4. Golang
+### 4.4 Golang
 
 ```bash
 wget  https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
@@ -549,107 +758,4 @@ source /etc/profile
 
 go version
 go env
-```
-
-## 4. Shell
-
-### 4.1 Tomcat监控 
-
-1. 重启
-
-```bash
-sh /data/tomcat_webapp_3001/bin/shutdown.sh
-sleep 2s
-ps -ef | grep tomcat_webapp_3001 | grep -v grep | awk '{print $2}'| xargs kill -9
-sleep 1s
-sh /data/tomcat_webapp_3001/bin/startup.sh;tail -f /data/tomcat_webapp_3001/logs/catalina.out
-```
-
-2. war部署
-
-```bash
-sh /opt/tomcat/bin/shutdown.sh
-sleep 2s
-ps -ef | grep /opt/tomcat/ | grep -v grep | awk '{print $2}'| xargs kill -9
-sleep 1s
-rm -rf /opt/tomcat/webapps/servlet*
-cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
-sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
-```
-
-### 4.2 Spring Boot启动
-
-```bash
-#!/bin/bash
-
-JAVA_OPTS="-server -Xms1024m -Xmx1024m -Xmn1024m -XX:MetaspaceSize=1024m -XX:MaxMetaspaceSize=1024m -Xverify:none -XX:+DisableExplicitGC -Djava.awt.headless=true"
-
-jar_name="eureka-server.jar"
-this_dir="$( cd "$( dirname "$0"  )" && pwd )"
-log_dir="${this_dir}/logs"
-jar_file="${this_dir}/${jar_name}"
-echo "${jar_file}"
-
-#日志文件夹不存在，则创建
-if [ ! -d "${log_dir}" ]; then
-    mkdir "${log_dir}"
-fi
-
-#父目录下jar文件存在
-if [ -f "${jar_file}" ]; then
-   	nohup java $JAVA_OPTS -jar ${jar_file} 1> ${log_dir}/catalina.log 2>&1 &
-    exit 0
-else
-    echo -e "\033[31m${jar_file}文件不存在！\033[0m"
-    exit 1
-fi
-```
-
-```bash
-sed -i 's/\r$//' run.sh  
-```
-
-### 4.3 Jdk批量
-
-```bash
-vim /etc/hosts
-192.168.3.201 node01 node01.hadoop.com
-192.168.3.202 node02 node02.hadoop.com
-192.168.3.203 node03 node03.hadoop.com
-```
-
-```bash
-# 三台机器分别执行
-ssh-keygen -t rsa
-
-# 192.168.3.201机器执行
-cd /root/.ssh
-scp /root/.ssh/id_rsa.pub root@192.168.3.202:/root/.ssh/authorized_keys
-scp /root/.ssh/id_rsa.pub root@192.168.3.203:/root/.ssh/authorized_keys
-
-# 192.168.3.202,192.168.3.203 机器执行
-cd /root/.ssh
-cat id_rsa.pub >>authorized_keys
-chmod 600 authorized_keys
-```
-
-vi install_jdk.sh
-
-```bash
-#!/bin/bash
-cd /opt/software
-tar -zxvf jdk-8u211-linux-x64.tar.gz
-mv jdk1.8.0_211/ /usr/local/
-
-cd /usr/local/jdk1.8.0_211
-home=`pwd`
-echo $home
-echo "export JAVA_HOME=${home}"  >> /etc/profile
-echo "export PATH=:\$PATH:\$JAVA_HOME/bin" >> /etc/profile
-source /etc/profile
-for i in node01 node02 node03
-do
-    scp -r /usr/local/jdk1.8.0_211 $i:/usr/local/
-    ssh $i "echo 'export JAVA_HOME=/usr/local/jdk1.8.0_211' >> /etc/profile; echo 'export PATH=:\$PATH:\$JAVA_HOME/bin' >> /etc/profile;source /etc/profile"
-done
 ```

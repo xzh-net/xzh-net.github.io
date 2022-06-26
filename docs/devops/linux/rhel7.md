@@ -1,4 +1,4 @@
-# Redhat 7
+# Red Hat Enterprise Linux Server release 7.9
 
 ## 1. 安装VMware
 
