@@ -6,7 +6,7 @@
 
 ## 1. 服务
 
-### 1.1 yum
+### 1.1 Yum
 
 1. 备份yum源
 
@@ -50,7 +50,7 @@ yum clean all   # 清空缓存
 yum makecache   # 更新yum缓存
 ```
 
-### 1.2 dhcp
+### 1.2 DHCP
 
 - DHCP主机的IP为: 192.168.100.1/24
 - DHCP动态分配的IP范围为： 192.168.100.100/24 - 192.168.100.200/24
@@ -128,9 +128,9 @@ ifconfig
 ```
 
 
-### 1.3 dns
+### 1.3 DNS
 
-### 1.4 ssh
+### 1.4 SSH
 
 1. 配置文件
 
@@ -162,7 +162,7 @@ cd /root/.ssh
 chmod 600 authorized_keys
 ```
 
-### 1.5 ftp
+### 1.5 FTP
 
 ```bash
 yum install vsftpd                  # 安装
@@ -185,7 +185,50 @@ vim /etc/shells
 /sbin/nologin
 ```
 
-### 1.6 iptables
+### 1.6 NFS
+
+1. 安装NFS服务
+
+```bash
+yum install -y nfs-utils
+```
+
+2. 创建共享目录
+
+```bash
+mkdir -p /share/nfs/software
+chmod o+w /share/nfs/software   # 非root用户访问时需要增加其他组的写权限
+touch {1..5}.txt    # 批量创建测试文件
+```
+
+3. 共享配置
+
+```bash
+vi /etc/exports 
+# 添加
+/share/nfs/software *(rw,no_root_squash) # *代表对所有IP都开放此目录，rw是读写
+```
+
+4. 启动服务
+
+```bash
+systemctl start nfs-server
+systemctl enable nfs-server
+```
+
+5. 客户端测试
+
+```bash
+yum install -y nfs-utils.x86_64
+mkdir -p /mnt/nfs/software      # 添加挂载文件夹
+showmount -e 172.17.17.171      # 查看NFS共享目录
+mount.nfs 172.17.17.171:/share/nfs/software /mnt/nfs/software   # 挂载目录
+df -h
+echo "172.17.17.171:/share/nfs/software /mnt/nfs/software nfs defaults 0 0" >> /etc/fstab    # 永久挂载
+```
+
+
+### 1.7 iptables
 
 ```bash
 service iptables status # 查看iptables状态
@@ -205,7 +248,7 @@ iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
 iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
 ```
 
-### 1.7 firewalld
+### 1.8 firewalld
 
 ```bash
 systemctl start firewalld.service     # 启动firewall
@@ -222,16 +265,16 @@ firewall-cmd --query-port=6379/tcp                       # 查看端口是否开
 firewall-cmd --reload                                    # 重启防火墙
 ```
 
-### 1.8 telnet
+### 1.9 telnet
 
-1. 服务端
+1. 安装telnet服务
 
 ```bash
 yum -y install telnet-server xinetd
 rpm -q xinetd telnet-server # 确认安装成功
 ```
 
-配置文件
+2. 修改配置
 
 ```bash
 cat /etc/xinetd.conf  | grep -v ^# | grep -v ^$
@@ -251,7 +294,7 @@ defaults
 includedir /etc/xinetd.d        # 外部调用的目录
 ```
 
-启动服务
+3. 启动服务
 
 ```bash
 systemctl start xinetd.service
@@ -270,12 +313,14 @@ pts/0
 pts/1
 ```
 
-2. 客户端
+4. 客户端测试
 
 ```bash
 yum install -y telnet
 ping 192.168.100.1 # 输入用户名和密码
 ```
+
+
 
 ## 2. 命令
 
