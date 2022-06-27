@@ -320,7 +320,7 @@ yum install -y telnet
 ping 192.168.100.1 # 输入用户名和密码
 ```
 
-
+### 1.10 samba
 
 ## 2. 命令
 
