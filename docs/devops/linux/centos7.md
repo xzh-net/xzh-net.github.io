@@ -14,7 +14,7 @@
 cd /etc/yum.repos.d/ && mkdir bakup && mv *.repo bakup
 ```
 
-2. 添加挂载
+2. 使用光驱挂载本地yum源
 
 ```bash
 lsblk                       # 查看可用设备信息
@@ -27,7 +27,7 @@ fuser -km /mnt/cdrom    # kill 挂载进程
 umount /mnt/cdrom       # 取消挂载
 ```
 
-3. 创建本地yum源
+3. 配置本地yum源
 
 ```bash
 cd /etc/yum.repos.d/
@@ -40,7 +40,7 @@ enabled=1
 gpgcheck=0
 ```
 
-4. 网络yum源
+4. 配置网络yum源
 
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
@@ -223,49 +223,97 @@ yum install -y nfs-utils.x86_64
 mkdir -p /mnt/nfs/software      # 添加挂载文件夹
 showmount -e 172.17.17.171      # 查看NFS共享目录
 mount.nfs 172.17.17.171:/share/nfs/software /mnt/nfs/software   # 挂载目录
+fuser -km /mnt/nfs/software     # kill 挂载进程
+umount /mnt/nfs/software        # 取消目录
 df -h
 echo "172.17.17.171:/share/nfs/software /mnt/nfs/software nfs defaults 0 0" >> /etc/fstab    # 永久挂载
 ```
 
+### 1.7 samba
 
-### 1.7 iptables
-
-```bash
-service iptables status # 查看iptables状态
-/etc/init.d/iptables status
-/etc/init.d/iptables start
-/etc/init.d/iptables stop
-/etc/init.d/iptables restart
-
-# -I：添加，-D：删除。INPUT表示入站，***.***.***.*** 表示要封停的IP，DROP表示放弃连接。
-iptables -I INPUT -s 211.0.0.0/8 -j DROP    # 封整段
-iptables -I INPUT -s 211.1.0.0/16 -j DROP   # 封IP段
-iptables -I INPUT -s 61.37.80.0/24 -j DROP
-iptables -I INPUT -s 61.37.81.0/24 -j DROP
-
-iptables -D INPUT -s 192.168.3.202 -j DROP        # 解封一个IP
-iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
-iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
-```
-
-### 1.8 firewalld
+1. 安装samba服务
 
 ```bash
-systemctl start firewalld.service     # 启动firewall
-systemctl restart firewalld.service   # 重启firewall
-systemctl stop firewalld.service      # 关闭firewall
-systemctl status firewalld.service    # 查看防火墙状态
-systemctl disable firewalld.service   # 禁止firewall随系统启动
-systemctl enable firewalld.service    # 随系统启动
-
-firewall-cmd --zone=public --add-port=80/tcp --permanent            # 开放端口
-firewall-cmd --zone=public --remove-port=9003/tcp --permanent       # 移除端口
-firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开放端口
-firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
-firewall-cmd --reload                                    # 重启防火墙
+yum -y install samba
+rpm -aq|grep ^samba
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-### 1.9 telnet
+2. 用户默认访问家目录
+
+修改配置
+
+```bash
+vi /etc/samba/smb.conf
+# 编辑
+[homes]
+    comment = Home Directories
+    browseable = No
+    writable = yes
+```
+
+添加访问用户
+
+```bash
+useradd zhangsan        # 添加系统用户
+smbpasswd -a zhangsan   # 添加smaba用户
+pdbedit -L zhangsan     # 查看用户
+pdbedit -a zhangsan     # 修改smaba用户密码
+```
+
+启动服务
+
+```bash
+systemctl start smb
+systemctl start nmb
+```
+
+客户端测试
+
+```bash
+yum install -y samba-client cifs-utils
+smbclient //172.17.17.201/zhangsan -U zhangsan
+mkdir -p /mnt/samba/zhangsan
+mount.cifs -o user=zhangsan,pass=123456 //172.17.17.201/zhangsan /mnt/samba/zhangsan
+fuser -km /mnt/samba/zhangsan     # kill 挂载进程
+umount /mnt/samba/zhangsan        # 取消目录
+```
+
+3. 匿名用户访问
+
+修改配置
+
+```bash
+mkdir -p /share/samba/anon
+chmod o+w /share/samba/anon
+
+vi /etc/samba/smb.conf
+# 添加
+[anon_share]
+	path=/share/samba/anon
+	public = yes
+	writable = yes
+```
+
+启动服务
+
+```bash
+systemctl restart smb
+systemctl restart nmb
+```
+
+
+客户端测试
+
+```bash
+mkdir -p /mnt/samba/software
+smbclient //172.17.17.201/anon_share
+mount.cifs -o user=zhangsan,pass=123456 //172.17.17.201/anon_share /mnt/samba/software
+fuser -km /mnt/samba/software     # kill 挂载进程
+umount /mnt/samba/software        # 取消目录
+```
+
+### 1.8 telnet
 
 1. 安装telnet服务
 
@@ -320,7 +368,43 @@ yum install -y telnet
 ping 192.168.100.1 # 输入用户名和密码
 ```
 
-### 1.10 samba
+
+### 1.9 iptables
+
+```bash
+service iptables status # 查看iptables状态
+/etc/init.d/iptables status
+/etc/init.d/iptables start
+/etc/init.d/iptables stop
+/etc/init.d/iptables restart
+
+# -I：添加，-D：删除。INPUT表示入站，***.***.***.*** 表示要封停的IP，DROP表示放弃连接。
+iptables -I INPUT -s 211.0.0.0/8 -j DROP    # 封整段
+iptables -I INPUT -s 211.1.0.0/16 -j DROP   # 封IP段
+iptables -I INPUT -s 61.37.80.0/24 -j DROP
+iptables -I INPUT -s 61.37.81.0/24 -j DROP
+
+iptables -D INPUT -s 192.168.3.202 -j DROP        # 解封一个IP
+iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
+iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
+```
+
+### 1.10 firewalld
+
+```bash
+systemctl start firewalld.service     # 启动firewall
+systemctl restart firewalld.service   # 重启firewall
+systemctl stop firewalld.service      # 关闭firewall
+systemctl status firewalld.service    # 查看防火墙状态
+systemctl disable firewalld.service   # 禁止firewall随系统启动
+systemctl enable firewalld.service    # 随系统启动
+
+firewall-cmd --zone=public --add-port=80/tcp --permanent            # 开放端口
+firewall-cmd --zone=public --remove-port=9003/tcp --permanent       # 移除端口
+firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开放端口
+firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
+firewall-cmd --reload                                    # 重启防火墙
+```
 
 ## 2. 命令
 
