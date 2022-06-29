@@ -110,7 +110,7 @@ systemctl start dhcpd
 systemctl status dhcpd
 ```
 
-5. 测试
+5. 客户端测试
 
 client端修改IP地址为动态获取
 
@@ -312,6 +312,11 @@ mount.cifs -o user=zhangsan,pass=123456 //172.17.17.201/anon_share /mnt/samba/so
 fuser -km /mnt/samba/software     # kill 挂载进程
 umount /mnt/samba/software        # 取消目录
 ```
+
+总结：
+1. samba服务默认是基于用户名和密码认证的服务
+2. samba服务的用户必须是samba服务器上存在的用户，密码必须是samba数据库里的密码
+3. 对于发布的共享资源，默认情况下本地用户是可以访问的，匿名用户是否访问看是否打开public=yes
 
 ### 1.8 telnet
 
