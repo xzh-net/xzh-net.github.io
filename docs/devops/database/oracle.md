@@ -4,33 +4,33 @@
 
 ### 1.1 静默安装11.2.0.1.0
 
-1. 安装依赖
+#### 1.1.1 安装依赖
 
 ```bash
 yum -y install gcc gcc-c++ make binutils compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel elfutils-libelf-devel-static glibc glibc-common glibc-devel ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel numactl-devel sysstat unixODBC unixODBC-devel kernelheaders pdksh pcre-devel readline rlwrap
 ```
 
-2. 创建用户和组
+#### 1.1.2 创建用户和组
 
 ```bash
 groupadd oinstall && groupadd dba && useradd -g oinstall -G dba oracle
 passwd oracle
 ```
 
-3. 创建安装包存放目录
+#### 1.1.3 创建安装包存放目录
 
 ```bash
 mkdir -p /u01/software # 上传安装文件
 ```
 
-4. 解压安装包
+#### 1.1.4 解压安装包
 
 ```bash
 cd /u01/software
 unzip linux.x64_11gR2_database_1of2.zip && unzip linux.x64_11gR2_database_2of2.zip
 ```
 
-5. 创建oracle目录，并授权文件夹目录权限给oracle
+#### 1.1.5 创建oracle目录，并授权文件夹目录权限给oracle
 
 ```bash
 mkdir -p /u01/app/oracle/product/11.2.0/dbhome_1
@@ -39,7 +39,7 @@ chown -R oracle:oinstall /u01/app/oracle/
 chmod -R 775 /u01/app/oracle
 ```
 
-6. 修改内核参数
+#### 1.1.6 修改内核参数
 
   kernel.shmmax官方建议值：
     - 32位linux系统：可取最大值为 4GB （ 4294967296bytes ） -1byte ，即 4294967295 。建议值为多于内存的一半，所以如果是 32 为系统，一般可取值为 4294967295 。 32 位系统对 SGA 大小有限制，所以 SGA 肯定可以包含在单个共享内存段中。
@@ -64,7 +64,7 @@ net.core.wmem_max=1048586
 sysctl -p
 ```
 
-7. 修改用户限制
+#### 1.1.7 修改用户限制
 
 vim /etc/security/limits.conf
 ```bash
@@ -75,7 +75,7 @@ oracle	hard	nofile	65536
 oracle	soft	stack	10240
 ```
 
-8. 修改/etc/pam.d/login文件
+#### 1.1.8  修改/etc/pam.d/login文件
 
 vim /etc/pam.d/login
 ```bash
@@ -86,7 +86,7 @@ session required /lib64/security/pam_limits.so
 session required pam_limits.so
 ```
 
-9. 修改/etc/profile文件
+#### 1.1.9 修改/etc/profile文件
 
 vim /etc/profile
 ```bash
@@ -101,7 +101,7 @@ if [ $USER = "oracle" ]; then
 fi
 ```
 
-10. 设置oracle用户环境变量
+#### 1.1.10 设置oracle用户环境变量
 
 ```bash
 su - oracle
@@ -120,7 +120,7 @@ export NLS_LANG=american_america.AL32UTF8
 source .bash_profile
 ```
 
-11. 添加主机名与ip对应记录
+#### 1.1.11 添加主机名与ip对应记录
 
 ```bash
 su - root 
@@ -129,7 +129,7 @@ vim /etc/hosts
 127.0.0.1 oracledb
 ```
 
-12. 编辑静默安装响应文件
+#### 1.1.12 编辑静默安装响应文件
 
 ```bash
 su - oracle
@@ -152,7 +152,7 @@ oracle.install.db.OPER_GROUP=dba
 DECLINE_SECURITY_UPDATES=true
 ```
 
-13. 安装
+#### 1.1.13 执行安装
 
 ```bash
 cd /u01/software/database/
@@ -188,7 +188,7 @@ sh /u01/app/oracle/inventory/orainstRoot.sh
 sh /u01/app/oracle/product/11.2.0/dbhome_1/root.sh
 ```
 
-14. 以静默方式配置监听
+#### 1.1.14 以静默方式配置监听
 
 ```bash
 su - oracle
@@ -204,7 +204,7 @@ netstat -tunlp|grep 1521
 ```
 
 
-15. 以静默方式建立新库，同时也建立一个对应的实例
+#### 1.1.15 以静默方式建立新库，同时也建立一个对应的实例
 
 ```bash
 su - oracle
@@ -229,7 +229,7 @@ dbca -silent -responseFile /home/oracle/response/dbca.rsp
 ps -ef | grep ora_ | grep -v grep
 ```
 
-16. 登录数据库
+#### 1.1.16 登录数据库
 
 ```bash 
 su - oracle
@@ -246,7 +246,7 @@ exit
 
 ### 1.2 图形化安装11.2.0.4.0
 
-1. 一键安装和配置VNC图形化相关
+#### 1.2.1 一键安装和配置VNC图形化相关
 
 ```bash
 #!/bin/bash
@@ -324,14 +324,14 @@ case $input in
 esac
 ```
 
-2. 创建用户和组
+#### 1.2.2 创建用户和组
 
 ```bash
 groupadd oinstall && groupadd dba && useradd -g oinstall -G dba oracle
 passwd oracle
 ```
 
-3. 开启VNC服务
+#### 1.2.3 开启VNC服务
 
 ```bash
 su oracle
@@ -348,7 +348,7 @@ vncserver :1 -geometry 1024x768
 使用 [VNC Viewer点击下载](https://www.realvnc.com/en/connect/download/viewer/) 连接192.168.3.200:5901
 
 
-4. 上传并解压安装包
+#### 1.2.4 上传并解压安装包
 
 ```bash
 su oracle
@@ -356,7 +356,7 @@ unzip p13390677_112040_Linux-x86-64_1of7.zip
 unzip p13390677_112040_Linux-x86-64_2of7.zip
 ```
 
-5. oracle用户登录vnc远程桌面
+#### 1.2.5 oracle用户登录vnc远程桌面
 
 ```bash
 cd ~/database/
@@ -466,7 +466,7 @@ Oracle Database 安装成功
 
 ![](../../assets/_images/devops/database/oracle/step12.png)
 
-6. 设置oracle用户环境变量
+#### 1.2.6 设置oracle用户环境变量
 
 ```bash
 su - oracle
@@ -479,7 +479,7 @@ export PATH=$ORACLE_HOME/bin:$PATH
 source .bash_profile
 ```
 
-7. 登录数据库
+#### 1.2.7 登录数据库
 
 ```bash 
 su - oracle
@@ -521,6 +521,8 @@ rm -rf /u01/app
 
 ### 2.1 重启
 
+#### 2.1.1 命令重启
+
 ```sql
 su – oracle
 sqlplus /nolog
@@ -529,7 +531,8 @@ shutdown immediate
 startup
 ```
 
-脚本重启
+#### 2.1.2 脚本重启
+
 vi /data/oracle_restart.sh
 ```sh
 su - oracle -c "sqlplus /nolog<< EOF
@@ -547,10 +550,10 @@ nohup sh /data/oracle_restart.sh &     # 后台执行
 
 ### 2.2 表空间
 
-- 临时表空间
+#### 2.2.1 临时表空间
   
-
 表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
+
 ```bash
 create temporary tablespace xzh_temp
 tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' 
@@ -570,7 +573,7 @@ alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;            
 drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
 ```
 
-- 数据表空间
+#### 2.2.2 数据表空间
 
 ```bash
 create tablespace xzh
@@ -619,12 +622,16 @@ GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        --将oradmp目录的赋�
 
 ### 2.5 备份恢复
 
+#### 2.5.1 按表名备份、还原
+
 ```bash
-# 按表名备份、还原
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=sys_menu,sys_role,sys_user  
 impdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=xzh0610.sys_menu,xzh0610.sys_user REMAP_SCHEMA=xzh0610:xzh0610 table_exists_action=replace
+```
 
-# 完全备份、还原
+#### 2.5.2 全量备份、还原
+
+```bash
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp SCHEMAS=xzh0610 logfile=xzh0610_$(date +%Y%m%d-%H%M).log
 impdp xzh0611/123456 directory=oradmp dumpfile=xzh0610.dmp  schemas=xzh0610 REMAP_SCHEMA=xzh0610:xzh0611 REMAP_TABLESPACE=xzh:xzh
 
@@ -632,7 +639,8 @@ impdp xzh0611/123456 directory=oradmp dumpfile=xzh0610.dmp  schemas=xzh0610 REMA
 execute dbms_stats.delete_schema_stats('xzh0610');
 ```
 
-定时数据还原
+#### 2.5.3 定时数据还原
+
 ```bash
 yum install -y ntp
 crontab -e
@@ -798,9 +806,8 @@ echo '总计结束时间：'$endtime >> /data/kh_shell/kh_log.log
 echo "本次总计运行时间： "$(($(date --date="$endtime" +%s)-$(date --date="$starttime" +%s)))"s" >> /data/kh_shell/kh_log.log
 ```
 
-### 2.6 AWR报告
+### 2.6 生成AWR报告
 
-导出
 ```bash
 su - oracle
 sqlplus /nolog
@@ -922,7 +929,8 @@ SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
 
 ### 3.4 占用统计
 
-PGA使用率
+#### 3.4.1 PGA使用率
+
 ```sql
 SELECT
 	name,
@@ -956,7 +964,8 @@ FROM
 	);
 ```
 
-表空间物理文件的名称及大小
+#### 3.4.2 表空间物理文件的名称及大小
+
 ```sql
 SELECT tablespace_name, 
 file_id, 
@@ -966,7 +975,8 @@ FROM dba_data_files
 ORDER BY tablespace_name; 
 ```
 
-表空间使用率
+#### 3.4.3 表空间使用率
+
 ```sql
 SELECT
 	* 
@@ -997,7 +1007,18 @@ FROM
 	)
 ```
 
-大内存占用
+#### 3.4.4 占用空间查询
+
+ ```sql
+select sum(bytes)/(1024*1024)  from user_segments
+where segment_name=upper('TS_FLOW_PATH_COM_LOG_INFO');
+
+SELECT * FROM (SELECT SEGMENT_NAME, SUM(BYTES) / 1024 / 1024 MB 
+FROM DBA_SEGMENTS WHERE TABLESPACE_NAME = upper('JSWZ_DATA') GROUP BY SEGMENT_NAME ORDER BY 2 DESC) WHERE ROWNUM < 10;
+ ```
+
+#### 3.4.5 大内存占用
+
 ```sql
 -- 通过下面的sql查询占用share pool内存大于10M的sql
   SELECT substr(sql_text, 1, 100) "Stmt",
@@ -1021,20 +1042,14 @@ SELECT address,
  WHERE version_count > 10;
 ```
 
-占用空间查询
- ```sql
-select sum(bytes)/(1024*1024)  from user_segments
-where segment_name=upper('TS_FLOW_PATH_COM_LOG_INFO');
 
-SELECT * FROM (SELECT SEGMENT_NAME, SUM(BYTES) / 1024 / 1024 MB 
-FROM DBA_SEGMENTS WHERE TABLESPACE_NAME = upper('JSWZ_DATA') GROUP BY SEGMENT_NAME ORDER BY 2 DESC) WHERE ROWNUM < 10;
- ```
 
 ## 4. PL/SQL
 
 ### 4.1 匿名块
 
-遍历更新
+#### 4.1.1 遍历更新
+
 ```sql
 DECLARE
   -- LOCAL VARIABLES HERE
@@ -1053,6 +1068,8 @@ BEGIN
   END LOOP;
 END;
 ```
+
+#### 4.1.2 DLL遍历更新
 
 ```sql
 DECLARE
@@ -1084,9 +1101,8 @@ BEGIN
 END;
 ```
 
-### 4.2 FUNCTION 
+### 4.2 FUNCTION函数
 
-循环函数
 ```sql
 CREATE OR REPLACE FUNCTION FUN_OTO_ORDERBYSHOP(P_USERID IN CHAR)
   RETURN VARCHAR2 AS
@@ -1118,9 +1134,10 @@ BEGIN
 END;
 ```
 
-### 4.3 PROCEDURE 
+### 4.3 PROCEDURE过程
 
-动态执行SQL
+#### 4.3.1 动态执行SQL
+
 ```sql
 CREATE OR REPLACE PROCEDURE PROC_updateSortCommon(V_GNID   NUMBER, --审批状态
                                                   V_MKID   NUMBER,
@@ -1178,7 +1195,6 @@ END;
 select * from qrtz_job_details_local t 
 where dbms_lob.instr(job_data,utl_raw.cast_to_raw('declarano'),1,1)<>0;
 ```
-
 
 ### 4.5 Shell调试
 
