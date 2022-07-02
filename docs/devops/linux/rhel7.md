@@ -1,6 +1,6 @@
 # Red Hat Enterprise Linux Server release 7.9
 
-## 1. 安装VMware
+## 1. 安装虚拟机
 
 ![](../../assets/_images/devops/linux/rhel7/Vm1.png)
 ![](../../assets/_images/devops/linux/rhel7/Vm2.png)
@@ -10,28 +10,36 @@
 ![](../../assets/_images/devops/linux/rhel7/Vm6.png)
 ![](../../assets/_images/devops/linux/rhel7/Vm7.png)
 
-设置虚拟网络
+### 1.1 配置首选项
 
 ![](../../assets/_images/devops/linux/rhel7/Vm8.png)
 
-?> 桥接模式，必须手动选择宿主机对应的网卡，同时确认宿主机VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选，防火墙关闭。宿主机与虚拟机相同级别，都可连接外网
+
+### 1.2 桥接模式
+
+必须手动选择宿主机对应的网卡
 
 ![](../../assets/_images/devops/linux/rhel7/Vm9.png)
 
+Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选，防火墙关闭。宿主机与虚拟机相同级别，都可连接外网
+
 ![](../../assets/_images/devops/linux/rhel7/Vm10.png)
 
-?>将默认的VMnet8 （NET模式）网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为VMnet8 ，可以实现虚拟机linux与外网通讯，手动设置虚拟机IP地址需要注意将dns设置为网关地址，总结：虚拟机可以连接宿主机所在局域网的其他机器，但是局域网机器不能连接虚拟机，因为虚拟dhcp服务器在宿主机上，宿主机是虚拟机的上级
+### 1.3 NET模式
+
+将默认的VMnet8 网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为VMnet8 ，可以实现虚拟机linux与外网通讯，手动设置虚拟机IP地址需要注意将dns设置为网关地址，总结：虚拟机可以连接宿主机所在局域网的其他机器，但是局域网机器不能连接虚拟机，因为虚拟dhcp服务器在宿主机上，宿主机是虚拟机的上级
 
 ![](../../assets/_images/devops/linux/rhel7/Vm11.png)
 
-?>将默认的VMnet1 （仅主机模式）网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
+### 1.4 仅主机模式
+
+将默认的VMnet1 网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
 
 ![](../../assets/_images/devops/linux/rhel7/Vm12.png)
 
+## 2. 安装操作系统
 
-## 2. 创建虚拟机
-
-1. 创建虚拟机
+### 2.1 新建虚拟机
 
 ![](../../assets/_images/devops/linux/rhel7/1.png)
 ![](../../assets/_images/devops/linux/rhel7/2.png)
@@ -43,7 +51,9 @@
 ![](../../assets/_images/devops/linux/rhel7/8.png)
 ![](../../assets/_images/devops/linux/rhel7/9.png)
 
-2. 系统初始化，选择 `Install Red Hat Enterprise Linux 7.9`
+### 2.2 系统安装
+
+> 选择 `Install Red Hat Enterprise Linux 7.9`
 
 ![](../../assets/_images/devops/linux/rhel7/10.png)
 
@@ -51,7 +61,7 @@
 
 ![](../../assets/_images/devops/linux/rhel7/11.png)
 
-3. 选择-`LOCALIZATION`-DATE & TIME 设置时区
+### 2.3 设置时区
 
 ![](../../assets/_images/devops/linux/rhel7/12.png)
 
@@ -59,7 +69,7 @@
 
 ![](../../assets/_images/devops/linux/rhel7/13.png)
 
-4. 选择-`SOFTWARE`-INSTALLATION SOURCE 设置安装源
+### 2.4 设置安装源
 
 ![](../../assets/_images/devops/linux/rhel7/14.png)
 
@@ -72,7 +82,7 @@
 
 ![](../../assets/_images/devops/linux/rhel7/17.png)
 
-5. 选择-`SOFTWARE`-SOFTWARE SELECTION 选择软件
+### 2.5 安装软件
 
 ![](../../assets/_images/devops/linux/rhel7/18.png)
 
@@ -80,8 +90,7 @@
 
 ![](../../assets/_images/devops/linux/rhel7/19.png)
 
-
-6. 选择-`SYSTEM`-INSTALLTION DESTINATION，进入磁盘分区界面
+### 2.6 磁盘分区
 
 ![](../../assets/_images/devops/linux/rhel7/20.png)
 
@@ -100,21 +109,21 @@
 ![](../../assets/_images/devops/linux/rhel7/24.png)
 ![](../../assets/_images/devops/linux/rhel7/25.png)
 
-7. 选择-`SYSTEM`-KDUMP设置
+### 2.7 KDUMP设置
 
 ![](../../assets/_images/devops/linux/rhel7/26.png)
 ![](../../assets/_images/devops/linux/rhel7/27.png)
 
-8. 选择-`SYSTEM`-NETWORK & HOST NAME 
+### 2.8 网络主机设置
 
 ![](../../assets/_images/devops/linux/rhel7/28.png)
 
-网络配置，开启以太网连接，将会自动获取IP地址，如果要手动配置，单击配置，`请根据虚拟机所在网络调整`
+开启以太网连接，将会自动获取IP地址，如果要手动配置，单击配置，请根据虚拟机所在网络调整
 
 ![](../../assets/_images/devops/linux/rhel7/29.png)
 ![](../../assets/_images/devops/linux/rhel7/30.png)
 
-9. 选择-`SYSTEM`-SECURITY-POLICY设置
+### 2.9 安全策略
 
 ![](../../assets/_images/devops/linux/rhel7/31.png)
 
@@ -122,26 +131,34 @@
 
 ![](../../assets/_images/devops/linux/rhel7/32.png)
 
-10. 全部配置完成，单击开始安装，设置管理员密码，等待系统重启
+### 2.10 设置管理员密码
 
 ![](../../assets/_images/devops/linux/rhel7/33.png)
+
+### 2.11 系统重启
+
 ![](../../assets/_images/devops/linux/rhel7/34.png)
 
-## 3. 虚拟机
+## 3. 虚拟机设置
 
-1. yum更换
+### 3.1 更换yum源
+
+1. 下载yum安装包
 
 ```bash
 rpm -e --nodeps `rpm -qa | grep yum`
 
-# 下载yum安装包
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/PackageKit-yum-1.1.10-2.el7.centos.x86_64.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-3.4.3-168.el7.centos.noarch.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-langpacks-0.4.2-7.el7.noarch.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-metadata-parser-1.1.4-10.el7.x86_64.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-rhn-plugin-2.0.1-10.el7.noarch.rpm
 wget http://mirrors.163.com/centos/7/os/x86_64/Packages/yum-utils-1.1.31-54.el7_8.noarch.rpm
-# 安装并设置yum源地址
+```
+
+2. 安装并设置yum源地址
+
+```
 rpm -ivh *.rpm --force --nodeps
 vi /etc/yum.repos.d/CentOS-Base.repo
 ```
@@ -179,11 +196,19 @@ enabled=0
 gpgkey=http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
 ```
 
-```
-yum clean all
+3. 测试
+
+```bash
+yum clean all   # 清空缓存
+
+yum -y install vim*
+vi /etc/vimrc       # 添加 colorscheme murphy
+vi /etc/profile     # 添加 alias vi=vim
+source /etc/profile 
+
 ```
 
-2. 网络设置
+### 3.2 网络设置
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-ens33   
