@@ -248,6 +248,8 @@ systemctl enable named
 echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
 
 nslookup www.hwcq.online
+dig @172.17.17.201 www.hwcq.online
+host www.hwcq.online
 ```
 
 ### 1.4 SSH
@@ -648,8 +650,8 @@ svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位�
 ```bash
 ps -aux | grep redis          # 查看启动进程参数
 lsof -i:80                    # 可以看到pid和用户 
-netstat -tunlp | grep 8080    # 端口占用查看
-netstat -anp | grep 17010pos 
+netstat -tunlp | grep 8080    # 查看端口进程号
+netstat -anp | grep 17010pos  # 查看应用占用端口
 /sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"  # 获取本机ip地址
 
 # 输出每个ip的连接数，以及总的各个状态的连接数
