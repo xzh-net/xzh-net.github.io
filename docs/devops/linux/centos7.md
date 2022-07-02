@@ -8,13 +8,13 @@
 
 ### 1.1 Yum
 
-1. 备份yum源
+#### 1.1.1 备份yum源
 
 ```bash
 cd /etc/yum.repos.d/ && mkdir bakup && mv *.repo bakup
 ```
 
-2. 使用光驱挂载本地yum源
+#### 1.1.2 使用光驱挂载本地yum源
 
 ```bash
 lsblk                       # 查看可用设备信息
@@ -27,7 +27,7 @@ fuser -km /mnt/cdrom    # kill 挂载进程
 umount /mnt/cdrom       # 取消挂载
 ```
 
-3. 配置本地yum源
+#### 1.1.3 配置本地yum源
 
 ```bash
 cd /etc/yum.repos.d/
@@ -40,7 +40,7 @@ enabled=1
 gpgcheck=0
 ```
 
-4. 配置网络yum源
+#### 1.1.4 配置网络yum源
 
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
@@ -56,7 +56,7 @@ yum makecache   # 更新yum缓存
 - DHCP动态分配的IP范围为： 192.168.100.100/24 - 192.168.100.200/24
 - DHCP客户端的网关设置为:  192.168.100.1
 
-1. ip配置
+#### 1.2.1 配置IP
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enps33
@@ -69,7 +69,7 @@ systemctl restart network
 ifconfig
 ```
 
-2. 安装dhcp
+#### 1.2.2 安装
 
 ```bash
 yum -y install dhcp
@@ -81,7 +81,7 @@ rpm -ql dhcp
 /usr/sbin/dhcpd         # 二进制命令
 ```
 
-3. 配置dhcpd
+#### 1.2.3 配置dhcpd
 
 ?> 服务器的地址必须与仅主机模式中设置的ip网段相同
 
@@ -103,14 +103,14 @@ subnet 192.168.100.0 netmask 255.255.255.0 {    # 子网
 
 ```
 
-4. 启动
+#### 1.2.4 启动
 
 ```bash
 systemctl start dhcpd
 systemctl enable dhcpd
 ```
 
-5. 客户端测试
+#### 1.2.5 客户端测试
 
 client端修改IP地址为动态获取
 
@@ -128,6 +128,8 @@ ifconfig
 ```
 
 ### 1.3 DNS
+
+#### 1.3.1 正向解析
 
 1. 安装
 
@@ -252,9 +254,74 @@ dig @172.17.17.201 www.hwcq.online
 host www.hwcq.online
 ```
 
+
+#### 1.3.2 反向解析
+
+1. 修改子配置文件（下面操作基于正向解析环境）
+
+```bash
+vim /etc/named.rfc1912.zones
+
+# 在该文件最后面增加以下内容：
+zone "17.17.172.in-addr.arpa" IN {
+	type master;
+	file "172.17.17.zone";
+	allow-update { none; };
+};
+```
+
+2. 配置zone文件
+
+```bash
+cp -p /var/named/named.loopback /var/named/172.17.17.zone    # 一定要使用-p复制用户组和权限
+vi /var/named/172.17.17.zone
+
+$TTL 1D
+@	IN SOA	hwcq.online. rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+@	NS	dns2.hwcq.online.   # 如果dns2.hwcq.online在正向域文件中存在，可以不用写A记录
+dns2	A	127.0.0.1
+165	PTR	www.hwqc.online.
+```
+
+3. 检查配置文件的语法错误
+
+```bash
+named-checkconf /etc/named.conf
+named-checkconf /etc/named.rfc1912.zones
+
+cd /var/named/
+named-checkzone 172.17.17.zone 172.17.17.zone # 区域文件写2遍
+```
+
+4. 启动服务
+
+```bash
+systemctl restart named
+systemctl status named
+```
+
+5. 客户端测试
+
+```bash
+echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
+
+nslookup 172.17.17.165
+dig @172.17.17.201 -x 172.17.17.165
+host 172.17.17.165
+```
+
+
+#### 1.3.3 主从搭建
+
+
 ### 1.4 SSH
 
-1. 配置文件
+#### 1.4.1 配置文件
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -270,7 +337,7 @@ systemctl start  sshd   # 启动服务
 systemctl enable sshd   # 开机自启
 ```
 
-2. 免密登录
+#### 1.4.1 免密登录
 
 ```bash
 # 192.168.3.201机器执行
@@ -286,13 +353,13 @@ chmod 600 authorized_keys
 
 ### 1.5 FTP
 
-1. 安装
+#### 1.5.1 安装
 
 ```bash
 yum install vsftpd
 ```
 
-2. 修改配置
+#### 1.5.2 修改配置
 
 ```bash
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config     # 关闭selinux
@@ -307,7 +374,7 @@ vim /etc/shells
 /sbin/nologin
 ```
 
-3. 添加用户
+#### 1.5.3 添加用户
 
 ```bash
 cat /etc/passwd       # 查看用户
@@ -317,7 +384,7 @@ chmod -R 777 /opt/xzh.webapp
 userdel xzh
 ```
 
-4. 启动
+#### 1.5.4 启动
 
 ```bash
 systemctl start vsftpd.service      # 启动
@@ -326,13 +393,13 @@ systemctl enable vsftpd.service     # 开机自启
 
 ### 1.6 NFS
 
-1. 安装NFS服务
+#### 1.6.1 安装
 
 ```bash
 yum install -y nfs-utils
 ```
 
-2. 创建共享目录
+#### 1.6.2 创建共享目录
 
 ```bash
 mkdir -p /share/nfs/software
@@ -340,7 +407,7 @@ chmod o+w /share/nfs/software   # 非root用户访问时需要增加其他组的
 touch {1..5}.txt    # 批量创建测试文件
 ```
 
-3. 共享配置
+#### 1.6.3 共享配置
 
 ```bash
 vi /etc/exports 
@@ -348,14 +415,14 @@ vi /etc/exports
 /share/nfs/software *(rw,no_root_squash) # *代表对所有IP都开放此目录，rw是读写
 ```
 
-4. 启动服务
+#### 1.6.4 启动服务
 
 ```bash
 systemctl start nfs-server
 systemctl enable nfs-server
 ```
 
-5. 客户端测试
+#### 1.6.5 客户端测试
 
 ```bash
 yum install -y nfs-utils.x86_64
@@ -370,7 +437,7 @@ echo "172.17.17.171:/share/nfs/software /mnt/nfs/software nfs defaults 0 0" >> /
 
 ### 1.7 samba
 
-1. 安装samba服务
+#### 1.7.1 安装
 
 ```bash
 yum -y install samba
@@ -378,9 +445,9 @@ rpm -aq|grep ^samba
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-2. 用户默认访问家目录
+#### 1.7.2 用户默认访问家目录
 
-修改配置
+1. 修改配置
 
 ```bash
 vi /etc/samba/smb.conf
@@ -391,7 +458,7 @@ vi /etc/samba/smb.conf
     writable = yes
 ```
 
-添加访问用户
+2. 添加访问用户
 
 ```bash
 useradd zhangsan        # 添加系统用户
@@ -400,14 +467,14 @@ pdbedit -L zhangsan     # 查看用户
 pdbedit -a zhangsan     # 修改smaba用户密码
 ```
 
-启动服务
+3. 启动服务
 
 ```bash
 systemctl start smb
 systemctl start nmb
 ```
 
-客户端测试
+4. 客户端测试
 
 ```bash
 yum install -y samba-client cifs-utils
@@ -418,9 +485,9 @@ fuser -km /mnt/samba/zhangsan     # kill 挂载进程
 umount /mnt/samba/zhangsan        # 取消目录
 ```
 
-3. 匿名用户访问
+#### 1.7.3 匿名用户访问
 
-修改配置
+1. 修改配置
 
 ```bash
 mkdir -p /share/samba/anon
@@ -434,7 +501,7 @@ vi /etc/samba/smb.conf
 	writable = yes
 ```
 
-启动服务
+2. 启动服务
 
 ```bash
 systemctl restart smb
@@ -442,7 +509,7 @@ systemctl restart nmb
 ```
 
 
-客户端测试
+3. 客户端测试
 
 ```bash
 mkdir -p /mnt/samba/software
@@ -459,14 +526,14 @@ umount /mnt/samba/software        # 取消目录
 
 ### 1.8 telnet
 
-1. 安装telnet服务
+#### 1.8.1 安装
 
 ```bash
 yum -y install telnet-server xinetd
 rpm -q xinetd telnet-server # 确认安装成功
 ```
 
-2. 修改配置
+#### 1.8.2 修改配置
 
 ```bash
 cat /etc/xinetd.conf  | grep -v ^# | grep -v ^$
@@ -486,7 +553,7 @@ defaults
 includedir /etc/xinetd.d        # 外部调用的目录
 ```
 
-3. 启动服务
+#### 1.8.3 启动服务
 
 ```bash
 systemctl start xinetd.service
@@ -496,7 +563,7 @@ systemctl start telnet.socket
 systemctl enable telnet.socket
 ```
 
-root 用户默认无法登录
+?> 如果root用户默认无法登录，修改
 
 ```bash
 vi /etc/securetty
@@ -505,11 +572,11 @@ pts/0
 pts/1
 ```
 
-4. 客户端测试
+#### 1.8.4 客户端测试
 
 ```bash
 yum install -y telnet
-ping 192.168.100.1 # 输入用户名和密码
+telnet 192.168.100.1 # 输入用户名和密码
 ```
 
 
@@ -738,9 +805,9 @@ which gcc
 gcc --version
 ```
 
-### 2.6 应用
+### 2.6 shell
 
-1. 启动命令
+#### 2.6.1 常用命令
 
 ```bash
 # solr
@@ -757,9 +824,9 @@ nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 ```
 
 
-2. tomcat
+#### 2.6.2 tomcat
 
-- 启动
+1. 启动
 
 ```bash
 sh /data/tomcat_webapp_3001/bin/shutdown.sh
@@ -769,7 +836,7 @@ sleep 1s
 sh /data/tomcat_webapp_3001/bin/startup.sh;tail -f /data/tomcat_webapp_3001/logs/catalina.out
 ```
 
-- war部署
+2. war部署
 
 ```bash
 sh /opt/tomcat/bin/shutdown.sh
@@ -781,7 +848,7 @@ cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
 sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
 ```
 
-4. Spring Boot
+#### 2.6.3 Spring Boot
 
 ```bash
 #!/bin/bash
@@ -813,7 +880,7 @@ fi
 sed -i 's/\r$//' run.sh  
 ```
 
-3. xsync
+#### 2.6.4 xsync
 
 ```bash
 yum install -y rsync
@@ -867,9 +934,9 @@ systemctl enable sshd
 
 ```bash
 vi /etc/hosts
-vi /etc/resolv.conf  nameserver 192.168.0.1    # DNS
-vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # IP地址
-vi /etc/sysconfig/network                      # 默认网关 GATEWAY=192.168.3.1
+vi /etc/resolv.conf  nameserver 192.168.0.1    # 修改DNS
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # 修改IP
+vi /etc/sysconfig/network                      # 修改网关 GATEWAY=192.168.3.1
 hostnamectl set-hostname xuzhihao              # 修改主机名
 ```
 
@@ -934,8 +1001,9 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 
 ### 4.1 Java
 
+1. yum安装jdk
+
 ```bash
-# Jdk安装
 yum install java-1.8.0-openjdk* -y
 yum install java-1.8.0-openjdk
 vim /etc/profile
@@ -943,8 +1011,11 @@ vim /etc/profile
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
 export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
+```
 
-# 解压安装
+2. 解压安装jdk
+
+```bash
 cd /opt/software
 tar -zxvf jdk-8u211-linux-x64.tar.gz
 mv jdk1.8.0_211/ /usr/local/
@@ -955,8 +1026,9 @@ export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 ```
 
+3. Maven安装
+
 ```bash
-# Maven安装
 tar -xzf apache-maven-3.6.2-bin.tar.gz    # 解压
 mkdir -p /opt/maven                       # 创建目录
 mv apache-maven-3.6.2/* /opt/maven        # 移动文件
@@ -968,6 +1040,8 @@ export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin
 source /etc/profile   # 配置生效
 mvn -v                # 查找Maven版本
 ```
+
+4. Maven仓库
 
 ```xml
 <localRepository>/opt/repository</localRepository>
