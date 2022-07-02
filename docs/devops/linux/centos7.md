@@ -244,6 +244,11 @@ systemctl enable named
 
 8. 客户端测试
 
+```bash
+echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
+
+nslookup www.hwcq.online
+```
 
 ### 1.4 SSH
 
@@ -671,12 +676,17 @@ traceroute -p 8080 192.168.10.11    # 加上端口跟踪
 route add default gw 192.168.3.1    # 添加临时网关 route -n
 ```
 
-2. TCP调试
+2. 端口检测
 
 ```bash
+yum install nc
+
 nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok
 nc -v -w 10 -z 192.168.20.183 7443
 nc -v -w 2 -z 127.0.0.1 7000-7500
+
+yum install nmap
+nmap www.baidu.com
 
 ```
 
