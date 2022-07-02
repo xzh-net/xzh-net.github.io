@@ -1,8 +1,8 @@
 # Rocky 8.5
 
-## 1. 虚拟机
+## 1. 虚拟机设置
 
-1. yum更换
+### 1.1 更换yum源
 
 ```bash
 sed -e 's|^mirrorlist=|#mirrorlist=|g' \
@@ -13,7 +13,7 @@ sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 dnf makecache
 ```
 
-2. 关闭防火墙
+### 1.2 关闭防火墙
 
 ```bash
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
@@ -23,7 +23,7 @@ systemctl enable --now cockpit.socket   # 开启web管理程序
 systemctl disable cockpit.socket
 ```
 
-3. 网络
+### 1.3 配置IP
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
