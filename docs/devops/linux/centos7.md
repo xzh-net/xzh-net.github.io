@@ -107,7 +107,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {    # 子网
 
 ```bash
 systemctl start dhcpd
-systemctl status dhcpd
+systemctl enable dhcpd
 ```
 
 5. 客户端测试
@@ -127,8 +127,123 @@ systemctl restart network
 ifconfig
 ```
 
-
 ### 1.3 DNS
+
+1. 安装
+
+```bash
+yum -y install bind
+rpm -q bind     # 确认安装成功
+rpm -ql bind    # 查看安装文件列表
+```
+
+2. 配置文件
+
+```bash
+/etc/logrotate.d/named      # 日志轮转文件
+/etc/named                  # 配置文件的主目录
+/etc/named.conf             # 主配置文件
+/etc/named.rfc1912.zones    # zone文件，定义域
+
+/usr/sbin/named             # 二进制命令
+/usr/sbin/named-checkconf   # 检查配置文件的命令
+/usr/sbin/named-checkzone   # 检查区域文件的命令
+
+/var/log/named.log          # 日志文件
+/var/named                  # 数据文件的主目录
+/var/named/data             # 
+/var/named/dynamic          # 
+/var/named/named.ca         # 根域服务器
+/var/named/named.empty      # 
+/var/named/named.localhost  # 正向解析区域文件的模板
+/var/named/named.loopback   # 反向解析区域文件的模板
+/var/named/slaves           # 从dns服务器下载文件的默认路径
+/var/run/named              # 进程文件
+```
+
+3. 主配置文件
+
+```bash
+cp -p /etc/named.conf /etc/named.conf.bak
+vim /etc/named.conf
+
+options {
+        listen-on port 53 { 127.0.0.1;any; };   # 添加any
+        directory       "/var/named";
+        dump-file       "/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+        recursing-file  "/var/named/data/named.recursing";
+        secroots-file   "/var/named/data/named.secroots";
+        allow-query     { localhost;any; };   # 添加any
+
+        recursion yes;
+        dnssec-enable no;
+        dnssec-validation no;
+
+        bindkeys-file "/etc/named.root.key";
+
+        managed-keys-directory "/var/named/dynamic";
+
+        pid-file "/run/named/named.pid";
+        session-keyfile "/run/named/session.key";
+};
+
+```
+
+4. 子配置文件
+
+```bash
+cp -p /etc/named.rfc1912.zones /etc/named.rfc1912.zones.bak
+vim /etc/named.rfc1912.zones
+
+# 在该文件最后面增加以下内容：
+zone "hwcq.online" IN {
+        type master;
+        file "hwcq.online.zone";
+        allow-update { none; };
+};
+```
+
+5. 配置zone文件
+
+```bash
+cp -p /var/named/named.localhost /var/named/hwcq.online.zone    # 一定要使用-p复制用户组和权限
+vi /var/named/hwcq.online.zone
+
+$TTL 1D
+@       IN SOA  hwcq.online.  rname.invalid. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@       NS      dns1.hwcq.online.   # dns1表示命名空间，可以有多个，但是后面的Ａ记录保持一致就行
+dns1    A       127.0.0.1           # 一定是当前DNS服务器的IP
+www     A    192.168.3.200          # 根据实际填写
+```
+
+6. 检查配置文件的语法错误
+
+```bash
+named-checkconf /etc/named.conf
+named-checkconf /etc/named.rfc1912.zones
+
+cd /var/named/
+named-checkzone hwcq.online.zone hwcq.online.zone # 区域文件写2遍
+```
+
+7. 启动服务
+
+```bash
+systemctl start named
+netstat -tunlp|grep 53  # 端口
+systemctl enable named
+```
+
+
+8. 客户端测试
+
 
 ### 1.4 SSH
 
@@ -144,7 +259,7 @@ ListenAddress ::
 PermitRootLogin yes # 允许远程登录
 PasswordAuthentication yes  # 开启用户名和密码来验证
 
-service sshd start      # 启动服务
+systemctl start  sshd   # 启动服务
 systemctl enable sshd   # 开机自启
 ```
 
@@ -166,10 +281,12 @@ chmod 600 authorized_keys
 
 ```bash
 yum install vsftpd                  # 安装
-systemctl restart vsftpd.service    # 重启
+systemctl start vsftpd.service      # 启动
+systemctl enable vsftpd.service     # 开机自启
+
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config     # 关闭selinux
-cat /etc/vsftpd/vsftpd.conf         # 配置文件
-cat /etc/vsftpd/vsftpd.conf | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf.bak
+cp -p /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.bak       # 备份
+cat /etc/vsftpd/vsftpd.conf.bak | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf  # 去掉注释
 
 vim /etc/vsftpd/ftpusers    # 连接黑名单，总是生效
 vim /etc/vsftpd/user_list   # 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
