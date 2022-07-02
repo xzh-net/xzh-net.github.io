@@ -2,7 +2,7 @@
 
 ## 1. VirtualBox
 
-重置uuid
+1. 重置uuid
 
 ```bash
 cd C:\Program Files\Oracle\VirtualBox
@@ -18,7 +18,9 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
 
 ## 3. 开发环境
 
-1. Java
+### 3.1 Java
+
+设置环境变量
 
 ```java
 JAVA_HOME
@@ -35,9 +37,11 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
-2. Golang
+### 3.2 Golang
 
-https://golang.google.cn/dl/
+下载地址：https://golang.google.cn/dl/
+
+设置环境变量
 
 ```lua
 GO111MODULE
