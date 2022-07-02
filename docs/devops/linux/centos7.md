@@ -986,8 +986,8 @@ rpm -e --nodeps `rpm -qa | grep mariadb`
 
 ```bash
 yum -y install vim*
-vi /etc/vimrc  # 添加 colorscheme murphy
-vi /etc/profile    # 添加 alias vi=vim
+vi /etc/vimrc       # 添加 colorscheme murphy
+vi /etc/profile     # 添加 alias vi=vim
 source /etc/profile 
 ```
 
