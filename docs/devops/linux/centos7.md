@@ -279,11 +279,15 @@ chmod 600 authorized_keys
 
 ### 1.5 FTP
 
-```bash
-yum install vsftpd                  # 安装
-systemctl start vsftpd.service      # 启动
-systemctl enable vsftpd.service     # 开机自启
+1. 安装
 
+```bash
+yum install vsftpd
+```
+
+2. 修改配置
+
+```bash
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config     # 关闭selinux
 cp -p /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.bak       # 备份
 cat /etc/vsftpd/vsftpd.conf.bak | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf  # 去掉注释
@@ -291,15 +295,26 @@ cat /etc/vsftpd/vsftpd.conf.bak | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftp
 vim /etc/vsftpd/ftpusers    # 连接黑名单，总是生效
 vim /etc/vsftpd/user_list   # 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
 
+# -s /sbin/nologin 无法登录需要修改
+vim /etc/shells
+/sbin/nologin
+```
+
+3. 添加用户
+
+```bash
 cat /etc/passwd       # 查看用户
 useradd xzh -g xzh -d /opt/xzh.webapp -s /sbin/nologin
 passwd xzh
 chmod -R 777 /opt/xzh.webapp
 userdel xzh
+```
 
-# -s /sbin/nologin 无法登录需要修改
-vim /etc/shells
-/sbin/nologin
+4. 启动
+
+```bash
+systemctl start vsftpd.service      # 启动
+systemctl enable vsftpd.service     # 开机自启
 ```
 
 ### 1.6 NFS
