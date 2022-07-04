@@ -318,6 +318,8 @@ host 172.17.17.165
 
 #### 1.3.3 主从搭建
 
+主从的系统时间要保持一致，需要提前准备好时间同步服务器，并做好配置
+
 
 ### 1.4 SSH
 
@@ -579,8 +581,68 @@ yum install -y telnet
 telnet 192.168.100.1 # 输入用户名和密码
 ```
 
+### 1.9 时间同步服务器
 
-### 1.9 iptables
+#### 1.9.1 时间和时区设置
+
+1. 时间、时区设置
+
+```bash
+timedatectl                             # 查看时区
+timedatectl list-timezones              # 查看所有可以使用的时区
+timedatectl set-timezone Asia/Shanghai  # 设置本地时区
+timedatectl set-timezone UTC            # 设置UTC时区
+
+timedatectl set-local-rtc 1 # 硬件时钟协调本地时间
+timedatectl set-local-rtc 0 # 硬件时钟协调世界时间
+timedatectl status
+
+# 时间设置（需要关闭NTP服务）
+timedatectl set-ntp true
+timedatectl set-ntp false
+
+timedatectl set-time 16:40:30
+timedatectl set-time 2022-07-04
+timedatectl set-time "2022-07-04 16:44:30"
+```
+
+
+#### 1.9.2 NTP服务
+
+1. 安装NTP
+
+```bash
+yum install -y ntp
+rpm -ql ntp
+```
+
+2. 配置
+
+```bash
+vim /etc/ntp.conf
+# 添加配置
+restrict 172.17.17.0 mask 255.0.0.0 nomodify notrap	# 允许172.17.17.0/24网段的主机同步时间
+```
+
+3. 启动服务
+
+```bash
+service ntpd start
+netstat -tunlp|grep ntpd
+```
+
+4. 客户端测试
+
+```bash
+yum install -y  ntpdate
+timedatectl set-ntp false   # 关闭时间同步
+timedatectl set-time "2022-07-04 16:44:30" # 模拟时间错乱
+ntpdate 172.17.17.201
+```
+
+#### 1.9.2 xinetd服务
+
+### 1.10 iptables
 
 ```bash
 service iptables status # 查看iptables状态
@@ -600,7 +662,7 @@ iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
 iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
 ```
 
-### 1.10 firewalld
+### 1.11 firewalld
 
 ```bash
 systemctl start firewalld.service     # 启动firewall
@@ -638,8 +700,6 @@ echo 3 >/proc/sys/vm/drop_caches    # 清理缓存
 HISTTIMEFORMAT='%F %T'              # 历史命令格式化
 set +o history                      # 关闭history 
 vi /etc/motd                        # 设置欢迎语
-timedatectl                             # 查看时区
-timedatectl set-timezone Asia/Shanghai  # 设置时区
 
 shutdown -h now # 关机
 shutdown -r now # 重启
@@ -904,7 +964,7 @@ Ctrl + Shift + v                    # 粘贴
 ```bash
 yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
 yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w     # 同步时间
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
 
 systemctl stop iptables.service
 systemctl disable iptables.service  # 关闭
