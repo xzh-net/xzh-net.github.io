@@ -156,8 +156,8 @@ netstat -lntp|grep -E "zabbix|http|mysql|php"
 
 ```bash
 yum install -y ntpdate
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w
 timedatectl set-timezone Asia/Shanghai
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w
 ```
 
 ### 5.2 配置yum源
