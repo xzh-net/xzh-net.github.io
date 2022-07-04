@@ -585,8 +585,6 @@ telnet 192.168.100.1 # 输入用户名和密码
 
 #### 1.9.1 时间和时区设置
 
-1. 时间、时区设置
-
 ```bash
 timedatectl                             # 查看时区
 timedatectl list-timezones              # 查看所有可以使用的时区
@@ -628,6 +626,7 @@ restrict 172.17.17.0 mask 255.0.0.0 nomodify notrap	# 允许172.17.17.0/24网段
 
 ```bash
 service ntpd start
+service enable start
 netstat -tunlp|grep ntpd
 ```
 
@@ -641,6 +640,39 @@ ntpdate 172.17.17.201
 ```
 
 #### 1.9.2 xinetd服务
+
+1. 安装
+
+```bash
+yum -y install xinetd
+```
+
+2. 配置
+
+```bash
+vim /etc/xinetd.d/time-dgram
+# 修改
+disable = no
+
+vim /etc/xinetd.d/time-stream
+# 修改
+disable = no
+```
+
+3. 启动服务
+
+```bash
+systemctl start xinetd
+systemctl enable xinetd
+netstat -ntlup |grep :37
+```
+
+4. 客户端测试
+
+```bash
+date -s "2022-07-04 16:44:30"
+rdate -s 172.17.17.201
+```
 
 ### 1.10 iptables
 
