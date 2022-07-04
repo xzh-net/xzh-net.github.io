@@ -642,10 +642,7 @@ execute dbms_stats.delete_schema_stats('xzh0610');
 #### 2.5.3 定时数据还原
 
 ```bash
-yum install -y ntp
 crontab -e
-*/10 * * * * /usr/sbin/ntpdate ntp4.aliyun.com; # 10秒执行一次
-0 */10 * * * /usr/sbin/ntpdate 10.84.103.251;/sbin/hwclock -w # 10分钟执行一次
 30 3 * * * sh /data/shell/ei.sh  # 每天凌晨3点半执行
 ```
 
