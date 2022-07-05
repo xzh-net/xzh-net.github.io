@@ -318,8 +318,85 @@ host 172.17.17.165
 
 #### 1.3.3 主从搭建
 
-主从的系统时间要保持一致，需要提前准备好时间同步服务器，并做好配置
+主从的系统时间要保持一致，需要提前准备好时间同步服务器，并做好配置，主从并不是高可用，而是在客户端配置了多套dns地址
 
+1. 同步master和slave的系统时间
+
+```bash
+crontab -e
+*/2 * * * * /usr/sbin/ntpdate ntp4.aliyun.com &>/dev/null
+```
+
+2. 搭建dns服务器slave节点
+
+```bash
+yum -y install bind
+```
+
+修改主配置
+
+```bash
+vi /etc/named.conf
+# 修改内容
+options {
+	listen-on port 53 { 127.0.0.1;any; };
+	#listen-on-v6 port 53 { ::1; };
+	allow-query     { localhost;any; };
+	
+    dnssec-enable no;
+	dnssec-validation no;
+};
+```
+
+修改子配置
+
+```bash
+vi /etc/named.rfc1912.zones
+# 最后添加
+zone "hwcq.online" IN {
+        type slave;
+        masters {172.17.17.201;};       # 指定master dns的ip地址
+        file "slaves/hwcq.online.zone"; # 同步过来的文件的保存路径及名字
+};
+```
+
+3. 修改dns服务器master节点
+
+```bash
+vi /etc/named.rfc1912.zones
+
+# 修改以下内容：
+zone "hwcq.online" IN {
+        type master;
+        file "hwcq.online.zone";
+        //allow-update { none; }; # 删除
+};
+```
+
+4. 重启主备服务
+
+```bash
+systemctl restart named
+systemctl status named
+```
+
+5. 验证slave节点
+
+```bash
+cd /var/named/slaves
+ll  # 可见同步过来的hwcq.online.zone文件
+```
+
+6. 客户端测试
+
+```bash
+echo nameserver 172.17.17.201 > /etc/resolv.conf  # 客户端机器添加dns服务器
+echo nameserver 172.17.17.200 >> /etc/resolv.conf 
+
+nslookup www.hwcq.online
+dig @172.17.17.201 www.hwcq.online
+host www.hwcq.online
+```
 
 ### 1.4 SSH
 
