@@ -2,7 +2,7 @@
 
 ## 1. 安装
 
-### 1.1 单机
+### 1.1 yum安装
 
 ```bash
 sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -12,7 +12,7 @@ sudo systemctl enable postgresql-12
 sudo systemctl start postgresql-12
 ```
 
-### 1.2 源码安装
+### 1.2 编译安装
 
 1. 下载
 
@@ -385,7 +385,7 @@ select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 
 
 ### 3.2 备份恢复
 
-- 逻辑备份
+#### 3.2.1 逻辑备份
 
 ```bash
 # 单表导出sql语句，多表使用-t sys_user -t sys_menu
@@ -402,7 +402,7 @@ pg_dump --help
 pg_restore --help
 ```
 
-- 物理备份
+#### 3.2.2 物理备份
 
 ```bash
 pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R # 备份base和pg_wal
@@ -422,7 +422,7 @@ service postgresql start
 select pg_wal_replay_resume();  # 停止恢复
 ```
 
-- PITR数据恢复
+#### 3.2.3 PITR数据恢复
 
 ```bash
 # 恢复到指定事务id
@@ -457,7 +457,7 @@ echo "backup finished" his
 
 ### 3.4 归档日志
 
-1. 自动清理
+#### 3.4.1 自动清理
 
 ```bash
 mkdir -p $PGDATA/archivedir/  # 创建归档目录
@@ -471,7 +471,7 @@ archive_mode = on
 archive_command = 'pg_archive.sh %f %p'
 ```
 
-2. 手动清理
+#### 3.4.2 手动清理
 
 ```bash
 su - postgres
@@ -733,7 +733,8 @@ ALTER TABLE "view_of_user" OWNER TO "postgres";
 
 ### 5.2 TRIGGER
 
-分数表
+1. 分数表
+
 ```sql
 CREATE TABLE stu_score
 (
@@ -747,7 +748,8 @@ WITH (
 ALTER TABLE stu_score OWNER TO postgres;
 ```
 
-汇总表
+2. 汇总表
+
 ```sql
 CREATE TABLE major_stats
 (
@@ -761,7 +763,8 @@ WITH (
 ALTER TABLE major_stats OWNER TO postgres;
 ```
 
-计算函数
+3. 计算函数
+   
 ```sql
 create or replace function fun_stu_major()
 returns trigger as 
@@ -781,7 +784,8 @@ $BODY$
   COST 100;
 ```
 
-触发规则
+4. 触发规则
+
 ```sql
 create trigger tri_stu_major 
 AFTER insert or update or delete
@@ -792,7 +796,8 @@ execute procedure fun_stu_major()
 
 ### 5.3 FUNCTION
 
-循环函数
+#### 5.3.1 循环函数
+
 ```sql
 CREATE OR REPLACE FUNCTION "public"."f_actuser"("v_flowcid" text)
   RETURNS "pg_catalog"."text" AS $BODY$
@@ -828,7 +833,8 @@ $BODY$
   COST 100
 ```
 
-执行sql函数
+#### 5.3.2 执行sql函数
+
 ```sql
 CREATE OR REPLACE FUNCTION "public"."Untitled"("formno" text)
   RETURNS "pg_catalog"."varchar" AS $BODY$
@@ -950,7 +956,8 @@ ALTER FUNCTION "public"."Untitled"("""formno""" "pg_catalog"."text") OWNER TO "p
 
 ### 5.4 PROCEDURE
 
-返回游标过程
+#### 5.4.1 返回游标过程
+
 ```sql
 CREATE OR REPLACE FUNCTION "public"."proc_init_flow_cando"(IN "v_partnerid" text, IN "v_flowcid" text, IN "v_pathid" text, OUT "v_out" refcursor)
   RETURNS "pg_catalog"."refcursor" AS $BODY$
@@ -1004,7 +1011,8 @@ $BODY$
   COST 100
 ```
 
-执行sql过程
+#### 5.4.2 执行sql过程
+
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_delete_crm_target"("v_year" int8=0, "v_tstype" int8=0, "v_spid" text=NULL::text, "v_sptypeid" text=NULL::text)
   RETURNS "pg_catalog"."void" AS $BODY$
@@ -1026,7 +1034,8 @@ $BODY$
   COST 100
 ```
 
-遍历过程
+#### 5.4.3 遍历过程
+
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_crm_insert_seqdetail"("v_sfaid" text, "v_seqid" text, "v_execdate" timestamp)
   RETURNS "pg_catalog"."void" AS $BODY$
