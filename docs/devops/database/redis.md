@@ -4,13 +4,13 @@
 
 ### 1.1 单机
 
-1. 下载
+#### 1.1.1 下载
 
 ```bash
 wget https://download.redis.io/releases/redis-6.2.6.tar.gz
 ```
 
-2. 编译安装
+#### 1.1.2 编译安装
 
 ```bash
 yum install -y gcc tcl
@@ -20,7 +20,7 @@ cd /usr/local/redis
 make PREFIX=/usr/local/redis install
 ```
 
-3. 应用配置
+#### 1.1.3 修改配置
 
 ```bash
 cd /usr/local/redis
@@ -36,7 +36,7 @@ logfile "6379.log"
 dir /usr/local/redis/data
 ```
 
-4. 启动
+#### 1.1.4 启动服务
 
 ```bash
 cd /usr/local/redis/bin
@@ -44,7 +44,7 @@ cd /usr/local/redis/bin
 ./redis-server --port 6380				# 默认配置指定端口启动
 ```
 
-5. 客户端
+#### 1.1.5 客户端测试
 
 ```bash
 /usr/local/redis/bin/redis-cli -p 6380
@@ -54,7 +54,7 @@ cd /usr/local/redis/bin
 
 ### 1.2 主从
 
-1. 主配置6379
+#### 1.2.1 主配置6379
 
 ```bash
 vi /usr/local/redis/conf/redis-6379.conf
@@ -79,7 +79,7 @@ appendfilename "appendonly-6379.aof"
 sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
 ```
 
-2. 从配置6380
+#### 1.2.2 从配置6380
 
 ```bash
 vi /usr/local/redis/conf/redis-6380.conf
@@ -101,7 +101,7 @@ appendfilename "appendonly-6380.aof"
 replicaof 192.168.3.200 6379
 ```
 
-3. 从配置6381
+#### 1.2.3 从配置6381
 
 ```bash
 vi /usr/local/redis/conf/redis-6381.conf
@@ -124,7 +124,8 @@ replicaof 192.168.3.200 6379
 ```
 
 
-4. 启动
+#### 1.2.4 启动服务
+
 ```bash
 cd /usr/local/redis/bin
 ./redis-server ../conf/redis-6379.conf
@@ -135,7 +136,7 @@ cd /usr/local/redis/bin
 
 ### 1.3 哨兵
 
-1. 主配置26379
+#### 1.3.1 主配置26379
 
 ```bash
 vi /usr/local/redis/conf/sentinel-26379.conf
@@ -154,7 +155,7 @@ sentinel parallel-syncs mymaster 1
 sentinel failover-timeout mymaster 180000
 ```
 
-2. 从配置26380
+#### 1.3.2 从配置26380
 
 ```bash
 vi /usr/local/redis/conf/sentinel-26380.conf
@@ -173,7 +174,7 @@ sentinel parallel-syncs mymaster 1
 sentinel failover-timeout mymaster 180000
 ```
 
-3. 从配置26381
+#### 1.3.3 从配置26381
 
 ```bash
 vi /usr/local/redis/conf/sentinel-26381.conf
@@ -192,7 +193,8 @@ sentinel parallel-syncs mymaster 1
 sentinel failover-timeout mymaster 180000
 ```
 
-4. 启动
+#### 1.3.4 启动服务
+
 ```bash
 cd /usr/local/redis/bin
 ./redis-sentinel ../conf/sentinel-26379.conf
@@ -202,7 +204,7 @@ cd /usr/local/redis/bin
 
 ### 1.4 集群
 
-1. 配置文件
+#### 1.4.1 配置文件
 
 ```bash
 cd /usr/local/redis/data
@@ -225,7 +227,7 @@ cluster-node-timeout 5000
 databases 1
 ```
 
-2. 批量启动
+#### 1.4.2 批量启动
 
 ```bash
 cd /usr/local/redis/data
@@ -240,7 +242,7 @@ ps aux|grep redis
 ps -ef | grep redis | awk '{print $2}' | xargs kill
 ```
 
-3. 初始化
+#### 1.4.3 初始化
 
 ```bash
 cd /usr/local/redis/bin
@@ -726,12 +728,11 @@ public void delBigZset(String host, int port, String password, String bigZsetKey
 	}
 ```
 
-## 4. 脚本
+## 4. shell
 
 
 
-### 4.2 批量删除
-
+### 4.1 批量删除
 
 ```bash
 redis-cli -h 127.0.0.1 -p 6379 -a "password"
@@ -741,7 +742,10 @@ redis-cli -a "password" -n 0 -p 6379 --scan --pattern "user:admin:info:*" | xarg
 redis-cli -c -h 172.17.17.193 -p 26379 -a "password" keys "GetMerchantByUserId*" | xargs -r -t -n1 redis-cli -c -h 172.17.17.193 -p 26379 -a "password" del
 ```
 
-脚本添加key vi add.sh
+### 4.2 批量添加key 
+
+vi add.sh
+
 ```bash
 #!/bin/bash
 
@@ -768,7 +772,10 @@ done
 echo "完成"
 ```
 
-脚本删除key vi del.sh
+### 4.3 批量删除key 
+
+vi del.sh
+
 ```bash
 #!/bin/bash
 
@@ -790,7 +797,9 @@ for info in ${redis_list[@]}
 echo "完成"
 ```
 
-通过keys文件列表操作 vi key.txt 编辑待删除的key
+### 4.4 通过keys文件批量操作
+
+编辑待删除的key，vi key.txt
 
 ```lua
 key1
