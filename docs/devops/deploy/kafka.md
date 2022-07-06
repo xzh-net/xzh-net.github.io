@@ -6,14 +6,14 @@
 
 ### 1.1 单机
 
-1. 上传解压
+#### 1.1.1 上传解压
 
 ```bash
 cd /opt/software
 tar -xzf kafka_2.13-3.1.0.tgz -C /opt/
 ```
 
-2. 设置环境变量
+#### 1.1.2 设置环境变量
 
 ```bash
 vim /etc/profile
@@ -22,7 +22,7 @@ export PATH=:$PATH:${KAFKA_HOME}
 source /etc/profile
 ```
 
-3. 修改配置
+#### 1.1.3 修改配置
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
@@ -35,7 +35,7 @@ zookeeper.connect=192.168.3.200:2181
 log.dirs=/opt/kafka_2.13-3.1.0/data
 ```
 
-4. 启动服务器
+#### 1.1.4 启动服务
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
@@ -43,7 +43,7 @@ nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 自2.8.0�
 nohup bin/kafka-server-start.sh config/server.properties &
 ```
 
-5. 测试
+#### 1.1.5 客户端测试
 
 ```bash
 bin/kafka-topics.sh --create --topic product --partitions 2 --replication-factor 3 --bootstrap-server 192.168.3.200:9092 	# 创建主题
@@ -53,14 +53,14 @@ bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-serve
 
 ### 1.2 集群
 
-1. 将Kafka的安装包上传到虚拟机，并解压
+#### 1.2.1 上传解压 
 
 ```bash
 cd /opt/software
 tar -xzf kafka_2.13-3.1.0.tgz -C /opt/
 ```
 
-2. 修改server.properties
+#### 1.2.2 修改配置
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
@@ -71,7 +71,9 @@ log.dirs=/opt/kafka_2.13-3.1.0/data
 zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
 ```
 
-3. 将安装好的kafka复制到另外两台服务器
+#### 1.2.3 内容分发
+
+将安装好的kafka复制到另外两台服务器
 
 ```bash
 scp -r /opt/kafka_2.13-3.1.0/ node02:/opt/kafka_2.13-3.1.0/
@@ -89,7 +91,7 @@ vi config/server.properties
 broker.id=3
 ```
 
-4. 配置环境变量
+#### 1.2.4 设置环境变量
 
 ```bash
 vim /etc/profile
@@ -104,7 +106,7 @@ scp /etc/profile node03:/etc/profile
 source /etc/profile
 ```
 
-5. 启动服务器
+#### 1.2.5 启动服务
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
@@ -116,7 +118,7 @@ bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 
 ### 1.3 kraft
 
-1. 修改配置
+#### 1.3.1 修改配置
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/config/kraft
@@ -131,7 +133,7 @@ advertised.listeners=PLAINTEXT://node01:9092		# 对外暴漏端口，对应主�
 log.dirs=/opt/kafka_2.13-3.1.0/data
 ```
 
-2. 内容分发
+#### 1.3.2 内容分发
 
 修改node02和node02的节点id和暴漏端口
 
@@ -140,7 +142,7 @@ scp -r /opt/kafka_2.13-3.1.0/config/kraft/ node02:/opt/kafka_2.13-3.1.0/config/
 scp -r /opt/kafka_2.13-3.1.0/config/kraft/ node03:/opt/kafka_2.13-3.1.0/config/
 ```
 
-3. 初始化
+#### 1.3.3 初始化
 
 ```bash
 cd $KAFKA_HOME
@@ -154,7 +156,7 @@ cd $KAFKA_HOME
 bin/kafka-storage.sh format -t 0T25c_coRNqGuGvssegx3Q -c /opt/kafka_2.13-3.1.0/config/kraft/server.properties
 ```
 
-4. 启动服务
+#### 1.3.4 启动服务
 
 三台机器分别执行
 ```bash
@@ -281,7 +283,7 @@ esac
 
 下载地址：http://download.kafka-eagle.org/
 
-1. 上传解压
+### 3.1 上传解压
 
 ```bash
 cd /opt/software
@@ -291,7 +293,7 @@ rm -rf /opt/kafka-eagle-bin-2.1.0
 cd /opt/efak-web-2.1.0
 ```
 
-2. 设置环境变量
+### 3.2 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -300,7 +302,7 @@ export PATH=$PATH:$KE_HOME/bin
 source /etc/profile
 ```
 
-3. 修改配置
+### 3.3 修改配置
 
 ```bash
 cd /opt/efak-web-2.1.0/conf
@@ -321,7 +323,7 @@ export KAFKA_HEAP_OPTS="-server -Xms2G -Xmx2G -XX:PermSize=128m -XX:+UseG1GC -XX
 export JMX_PORT="9999"
 ```
 
-4. 启动服务
+### 3.4 启动服务
 
 ```bash
 cd ${KE_HOME}/bin
