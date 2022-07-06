@@ -948,6 +948,8 @@ find /usr -ctime 5 –print                   # 会从/usr目录开始往下找�
 find /doc -user xzh -name 'j*' –print               # 会从/doc目录开始往下找，找用户xzh的、文件名开头是j的文件。  
 find /doc \( -name 'ja*' -o- -name 'ma*' \) –print  # 会从/doc目录开始往下找，找寻文件名是ja开头或者ma开头的文件。
 find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
+find ./ -type f | xargs rm -rf;                     # 当前路径下文件类全部删除
+find ./ -type f -delete;                            # 当前路径下文件类全部删除
 ```
 
 ### 2.3 磁盘
