@@ -1,7 +1,37 @@
 
 # 基于Nexus3快速搭建Maven私有仓库
 
+!> 为什么要搭建私有仓库
+
+![](../../assets/_images/devops/deploy/nexus3/maven.png)
+
+通常都是通过本机的Maven直接访问到中央仓库，并没有使用到虚线标识的区域，直接使用中央仓库可能会给我们带来的问题
+
+- `网络问题`：中央仓库在国外，需要科学上网，私服搭建好以后，本地开发环境优先连接私服，当私服没有的资源的时候去中央仓库下载，只需要私服从中央仓库下载一次即可
+- `私有项目的管理`：企业内部资源，如封装的类库，框架等更新直接上传到私服即可
+- `三方未上传到中央仓库的类库`：如：oracle.jar，paoding-analysis等，直接通过本地环境直接上传到私服，项目组所有成员可共享
+
+2. 默认仓库
+   
+- `maven-central`：maven中央库，默认`https://repo1.maven.org/maven2`
+- `maven-releases`：私库发行版，首次安装请将Deployment policy设置为Allow redeploy
+- `maven-snapshots`：私库快照版本
+- `maven-public`：仓库组
+
+3. Nexus仓库类型
+
+- `hosted`：本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。
+- `proxy`：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
+- `group`：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
+
+![](../../assets/_images/devops/deploy/nexus3/repository_types.png)
+
+
 ## 1. 安装
+
+### 1.1 二进制安装
+
+### 1.2 docker安装
 
 ```bash
 docker pull sonatype/nexus3:3.38.0
@@ -12,54 +42,27 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 使用默认管理员身份登录，帐号：**admin**，密码：`cat /nexus-data/admin.password`
 
 
-!> 为什么要搭建私有仓库
-
-![](../../assets/_images/devops/deploy/nexus3/maven.png)
-
-通常都是通过本机的Maven直接访问到中央仓库，并没有使用到虚线标识的区域，直接使用中央仓库可能会给我们带来的问题
-- 网络问题
-    - 中央仓库在国外，需要科学上网，私服搭建好以后，本地开发环境优先连接私服，当私服没有的资源的时候去中央仓库下载，只需要私服从中央仓库下载一次即可
-- 私有项目的管理
-    - 企业内部资源，如封装的类库，框架等更新直接上传到私服即可
-- 三方未上传到中央仓库的类库
-    - 如：oracle.jar，paoding-analysis等，直接通过本地环境直接上传到私服，项目组所有成员可共享
-
 ## 2. 配置
 
-默认仓库
-- maven-central：maven中央库，默认https://repo1.maven.org/maven2
-- maven-releases：私库发行版，首次安装请将Deployment policy设置为Allow redeploy
-- maven-snapshots：私库快照版本
-- maven-public：仓库组
-
-Nexus仓库类型
-- hosted：本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。
-- proxy：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
-- group：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
-
-![](../../assets/_images/devops/deploy/nexus3/repository_types.png)
-
-1. 创建Blob Stores
+### 2.1 创建存储
 
 ![](../../assets/_images/devops/deploy/nexus3/create_blob.png)
 
 ![](../../assets/_images/devops/deploy/nexus3/blob_list.png)
 
-2. 创建托管仓库
+### 2.2 三方混合托管库
 
 ![](../../assets/_images/devops/deploy/nexus3/repository_list.png)
 
 ![](../../assets/_images/devops/deploy/nexus3/hosted_repository.png)
 
-三方混合托管库
-
 ![](../../assets/_images/devops/deploy/nexus3/hosted_mixed.png)
 
-二方发布托管库
+### 2.3 二方发布托管库
 
 ![](../../assets/_images/devops/deploy/nexus3/hosted_releases.png)
 
-二方快照托管库
+### 2.4 二方快照托管库
 
 ![](../../assets/_images/devops/deploy/nexus3/hosted_snapshots.png)
 
@@ -69,8 +72,7 @@ Hosted选项
 - Read-Only：不允许提交任何版本
 - 原生的maven-releases库是Disable redeploy设置， maven-snapshots是Allow redeploy。
 
-
-3. 创建代理仓库
+### 2.5 代理仓库
 
 ![](../../assets/_images/devops/deploy/nexus3/proxy_repository.png)
 
@@ -78,11 +80,11 @@ Hosted选项
 
 ?> 阿里云的maven中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
 
-4. 创建仓库组
+### 2.6 创建仓库组
 
 ![](../../assets/_images/devops/deploy/nexus3/group_repository.png)
 
-5. settings配置
+### 2.7 客户端Maven配置
 
 修改Maven的settings.xml文件，加入认证机制
 
@@ -121,7 +123,7 @@ Hosted选项
   </mirrors>
 ```
 
-6. 命令上传三方jar包
+### 2.8 命令上传三方jar包
 
 ```
 mvn install:install-file -Dfile=D:\paoding-analysis.jar -DgroupId=net.paoding -DartifactId=paoding-analysis -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true 
@@ -142,7 +144,7 @@ mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversio
 - -DrepositoryId：仓库名称
 
 
-7. Idea上传至私有库
+### 2.9 Idea上传至私有库
 
 pom文件添加本地仓库的配置
 
