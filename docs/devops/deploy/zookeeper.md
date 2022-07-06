@@ -8,7 +8,7 @@
 
 ### 1.1 单机
 
-1. 上传解压
+#### 1.1.1 上传解压
 
 ```bash
 cd /opt/software
@@ -17,7 +17,7 @@ mv /opt/apache-zookeeper-3.7.0-bin /opt/apache-zookeeper-3.7.0
 sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0 # 非root启动
 ```
 
-2. 设置环境变量
+#### 1.1.2 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -26,7 +26,7 @@ export PATH=$PATH:$ZK_HOME/bin
 source /etc/profile
 ```
 
-3. 修改配置
+#### 1.1.3 修改配置
 
 ```bash
 mkdir -p /opt/apache-zookeeper-3.7.0/data /opt/apache-zookeeper-3.7.0/logs
@@ -44,7 +44,7 @@ dataLogDir=/opt/apache-zookeeper-3.7.0/logs
 clientPort=2181
 ```
 
-4. 启动
+#### 1.1.4 启动服务
 
 ```bash
 zkServer.sh start
@@ -53,7 +53,7 @@ jps
 
 ### 1.2 集群
 
-1. 环境变量
+#### 1.2.1 环境变量设置
 
 将192.168.3.201单机复制三台，每台机器设置hostname
 
@@ -72,7 +72,7 @@ vi /etc/hosts
 192.168.3.203 node03
 ```
 
-2. 配置文件
+#### 1.2.2 修改配置
 
 其中2888为集群通信端口，3888为选举端口，三台进行集群配置
 
@@ -97,7 +97,7 @@ touch /opt/apache-zookeeper-3.7.0/data/myid & echo 2 > /opt/apache-zookeeper-3.7
 touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.203 
 ```
 
-3. 启动
+#### 1.2.3 启动服务
 
 启动集群就是分别启动每个实例。
 
@@ -106,7 +106,7 @@ touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7
 /opt/apache-zookeeper-3.7.0/bin/zkServer.sh status  # 检测节点状态
 ```
 
-4. 测试
+#### 1.2.4 客户端测试
 
 PrettyZoo
 
