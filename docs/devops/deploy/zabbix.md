@@ -115,7 +115,7 @@ egrep -v "(^#|^$)" /etc/zabbix/zabbix_server.conf   # 检查配置是否正确
 
 ### 3.3 修改php配置文件
 
-1. 设置时区
+#### 3.3.1 设置时区
 
 ```bash
 vi /etc/opt/rh/rh-php72/php-fpm.d/zabbix.conf
@@ -123,13 +123,13 @@ vi /etc/opt/rh/rh-php72/php-fpm.d/zabbix.conf
 php_value[date.timezone] = Asia/Shanghai
 ```
 
-2. 修改引导页面（可选）
+#### 3.3.2 修改引导页面（可选）
 
 ```bash
 chown apache:apache /etc/zabbix/web/zabbix.conf.php
 ```
 
-3. 安装中文字体
+#### 3.3.3 安装中文字体
 
 将windows下字体文件msyhbd.ttc拷贝并改名
 
