@@ -514,7 +514,7 @@ df -h
 echo "172.17.17.171:/share/nfs/software /mnt/nfs/software nfs defaults 0 0" >> /etc/fstab    # 永久挂载
 ```
 
-### 1.7 samba
+### 1.7 Samba
 
 #### 1.7.1 安装
 
@@ -603,7 +603,7 @@ umount /mnt/samba/software        # 取消目录
 2. samba服务的用户必须是samba服务器上存在的用户，密码必须是samba数据库里的密码
 3. 对于发布的共享资源，默认情况下本地用户是可以访问的，匿名用户是否访问看是否打开public=yes
 
-### 1.8 telnet
+### 1.8 Telnet
 
 #### 1.8.1 安装
 
@@ -750,6 +750,105 @@ netstat -ntlup |grep :37
 date -s "2022-07-04 16:44:30"
 rdate -s 172.17.17.201
 ```
+
+### 1.10 Rsyslog系统日志
+
+#### 1.10.1 系统配置
+
+1. 配置文件
+
+```bash
+systemctl status rsyslog
+systemctl restart rsyslog
+
+rpm -qc rsyslog
+# 配置文件
+/etc/logrotate.d/syslog # 日志轮转
+/etc/rsyslog.conf       # 主配置文件
+/etc/sysconfig/rsyslog
+
+cp -p /etc/rsyslog.conf /etc/rsyslog.conf.bak   # 备份
+cat /etc/rsyslog.conf.bak | grep -v "#" | grep -v "^$" > /etc/rsyslog.conf  # 去掉空行和注释
+```
+
+2. 日志格式：文本日志/二进制日志/数据库日志
+
+```bash
+/var/log/boot.log   # 系统引导日志，记录开机启动信息
+/var/log/dmesg      # 核心的启动日志
+/var/log/messages   # 系统的日志文件
+/var/log/maillog    # 邮件服务的日志
+/var/log/xferlog    # ftp服务的日志
+/var/log/secure     # 网络连接及系统登录的安全信息
+/var/log/cron       # 定时任务的日志
+/var/log/wtmp       # 记录所有的登入和登出  last -f 查看
+/var/log/btmp       # 记录失败的登入尝试
+```
+
+3. 日志级别
+
+```lua
+7 debug 调试信息的日志，日志信息最多
+6 info 一般信息的日志，最常用
+5 notice 最具有重要性的普通条件的信息
+4 warning 警告级别
+3 error 错误级别，阻止某个功能或者模块不能正常工作的信息
+2 crit 严重级别，阻止整个系统或者整个软件不能正常工作的信息
+1 alert 需要立刻修改的信息
+0 emerg 内核崩溃等严重信息
+```
+
+4. 日志类型
+
+```bash
+auth    # 用户认证时产生的日志
+authpriv    # ssh、ftp等登录信息的验证信息
+cron    # 系统执行定时任务产生的日志。
+daemon  # 一些守护进程产生的日志
+kern    # 系统内核日志
+lpr     # 打印相关活动
+mail    # 邮件日志
+mark    # 服务内部的信息，时间标识
+news    # 网络新闻传输协议(nntp)产生的消息。
+security
+syslog  # 系统日志
+user    # 用户进程
+uucp    # Unix-to-Unix Copy 两个unix之间的相关通信
+console # 针对系统控制台的消息。
+ftp     # FTP产生的日志
+local0~local7   # 自定义程序使用
+```
+
+#### 1.10.2 本地日志管理
+
+1. 测试邮件日志
+
+```bash
+vi /etc/rsyslog.conf    # 查看邮件日志保存目录
+
+echo haha |mail -s "test mail log" zhangsan # 服务器向zhangsan发送测试邮件
+tail -f /var/spool/mail/zhangsan            # 客户端查看接收到的邮件
+```
+
+2. 测试ssh日志
+
+```bash
+vim /etc/ssh/sshd_config
+SyslogFacility LOCAL6   # 修改ssh默认日志载体
+
+systemctl restart sshd  # 重启服务
+```
+
+```bash
+vim /etc/rsyslog.conf
+local6.*    /var/log/ssh   # 指定LOCAL6设备载体的日志记录到指定位置
+
+systemctl restart rsyslog  # 重启服务
+```
+
+#### 1.10.3 远程日志管理
+
+
 
 ### 1.10 iptables
 
