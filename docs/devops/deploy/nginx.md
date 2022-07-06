@@ -300,7 +300,7 @@ cp nginx /usr/local/nginx/sbin
 进入到安装目录`cd ~/nginx/core/nginx-1.16.1`，执行`make upgrade`
 
 
-## 3. 核心配置
+## 3. 配置
 
 ### 1.1 默认nginx.conf
 
