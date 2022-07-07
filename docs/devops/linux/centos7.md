@@ -951,7 +951,7 @@ logrotate -f /etc/logrotate.conf    # 强制轮转
 2. nginx轮转
 
 ```bash
-/usr/local/nginx/logs/*.log {
+/usr/local/nginx/logs/*.log{
     create 0640 nginx root
     daily
     rotate 10
@@ -971,10 +971,11 @@ logrotate -f /etc/logrotate.conf    # 强制轮转
 将原日志文件复制一份，然后将原日志文件清空。这种截断方式不需要重启服务
 
 ```bash
+mkdir -p /opt/tomcat/logs/backlog
 cd /etc/logrotate.d/
-vi javalog
+vi tomcat8080
 # 添加内容
-/home/project/125_QCPT/vjsp.pocservice/nohup.out{
+/opt/tomcat/logs/catalina.out{
     copytruncate
     daily
     rotate 7
