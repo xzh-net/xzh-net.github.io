@@ -43,7 +43,7 @@ gpgcheck=0
 #### 1.1.4 配置网络yum源
 
 ```bash
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak              # 备份本地yum源
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
 yum repolist    # 查看源信息
 yum clean all   # 清空缓存  
@@ -81,7 +81,7 @@ rpm -ql dhcp
 /usr/sbin/dhcpd         # 二进制命令
 ```
 
-#### 1.2.3 配置dhcpd
+#### 1.2.3 修改配置
 
 ?> 服务器的地址必须与仅主机模式中设置的ip网段相同
 
@@ -103,7 +103,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {    # 子网
 
 ```
 
-#### 1.2.4 启动
+#### 1.2.4 启动服务
 
 ```bash
 systemctl start dhcpd
@@ -163,7 +163,7 @@ rpm -ql bind    # 查看安装文件列表
 /var/run/named              # 进程文件
 ```
 
-3. 主配置文件
+3. 修改主配置文件
 
 ```bash
 cp -p /etc/named.conf /etc/named.conf.bak
@@ -193,7 +193,7 @@ options {
 
 ```
 
-4. 子配置文件
+4. 修改子配置文件
 
 ```bash
 cp -p /etc/named.rfc1912.zones /etc/named.rfc1912.zones.bak
@@ -416,7 +416,7 @@ systemctl start  sshd   # 启动服务
 systemctl enable sshd   # 开机自启
 ```
 
-#### 1.4.1 免密登录
+#### 1.4.2 免密登录
 
 ```bash
 # 192.168.3.201机器执行
@@ -463,7 +463,7 @@ chmod -R 777 /opt/xzh.webapp
 userdel xzh
 ```
 
-#### 1.5.4 启动
+#### 1.5.4 启动服务
 
 ```bash
 systemctl start vsftpd.service      # 启动
@@ -691,7 +691,7 @@ yum install -y ntp
 rpm -ql ntp
 ```
 
-2. 配置
+2. 修改配置
 
 ```bash
 vim /etc/ntp.conf
@@ -724,7 +724,7 @@ ntpdate 172.17.17.201
 yum -y install xinetd
 ```
 
-2. 配置
+2. 修改配置
 
 ```bash
 vim /etc/xinetd.d/time-dgram
@@ -821,7 +821,7 @@ local0~local7   # 自定义程序使用
 
 #### 1.10.2 本地日志管理
 
-1. 测试邮件日志
+1. 测试mail日志
 
 ```bash
 vi /etc/rsyslog.conf    # 查看邮件日志保存目录
@@ -834,6 +834,7 @@ tail -f /var/spool/mail/zhangsan            # 客户端查看接收到的邮件
 
 ```bash
 vim /etc/ssh/sshd_config
+# 修改内容
 SyslogFacility LOCAL6   # 修改ssh默认日志载体
 
 systemctl restart sshd  # 重启服务
@@ -841,14 +842,76 @@ systemctl restart sshd  # 重启服务
 
 ```bash
 vim /etc/rsyslog.conf
+# 修改内容
+*.info;mail.none;authpriv.none;cron.none;local6.none    /var/log/messages  # LOCAL6设备载体的日志不记录到messages中
 local6.*    /var/log/ssh   # 指定LOCAL6设备载体的日志记录到指定位置
 
 systemctl restart rsyslog  # 重启服务
 ```
 
+
 #### 1.10.3 远程日志管理
 
+1. 日志服务器配置
 
+```bash
+vim /etc/rsyslog.conf   
+# 修改内容
+$ModLoad imudp  # 开启udp接收端口
+$UDPServerRun 514
+
+$ModLoad imtcp  # # 开启tcp接收端口
+$InputTCPServerRun 514
+
+systemctl restart rsyslog  # 重启服务
+```
+
+2. 客户端配置
+
+修改ssh日志载体
+
+```bash
+vim /etc/ssh/sshd_config
+# 修改内容
+SyslogFacility LOCAL0   # 修改ssh默认日志载体
+
+systemctl restart sshd  # 重启服务
+```
+
+修改日志记录方式发送到远端
+
+```bash
+vim /etc/rsyslog.conf
+# 修改内容
+local0.*        @172.17.17.52:514   # @代表UDP协议传输；@@代表TCP协议传输
+
+systemctl restart rsyslog  # 重启服务
+```
+
+3. 客户端测试
+
+登录客户端ssh，查看日志服务端的输出
+
+```bash
+tail -f /var/log/messages   # 在日志服务端打开日志文件
+```
+
+4. 远程日志保存到指定的文件
+
+
+```bash
+vim /etc/rsyslog.conf   # 修改日志服务器配置
+# 修改内容
+$template DynFile,"/var/log/system-%HOSTNAME%.log"
+local0.*	?DynFile
+
+systemctl restart rsyslog  # 重启服务
+ll /var/log/system*
+```
+
+客户端修改hostname以后必须重启rsyslog
+
+#### 1.10.3 日志轮转
 
 ### 1.10 iptables
 
@@ -919,7 +982,7 @@ shutdown -r now # 重启
 # 替换
 ls -a
 sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
-echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   # 文件批量拷贝至目录
+echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   # 文件批量拷贝至当前目录下的指定文件夹内
 
 # 压缩
 zip -r xzh2021.zip * -x  './node_modules/*'         # 排除指定文件夹
@@ -947,9 +1010,13 @@ find /usr -atime 3 –print                   # 会从/usr目录开始往下找�
 find /usr -ctime 5 –print                   # 会从/usr目录开始往下找，找最近5天之内修改过的文件。
 find /doc -user xzh -name 'j*' –print               # 会从/doc目录开始往下找，找用户xzh的、文件名开头是j的文件。  
 find /doc \( -name 'ja*' -o- -name 'ma*' \) –print  # 会从/doc目录开始往下找，找寻文件名是ja开头或者ma开头的文件。
+
+# 删除
 find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
 find ./ -type f | xargs rm -rf;                     # 当前路径下文件类全部删除
 find ./ -type f -delete;                            # 当前路径下文件类全部删除
+find . -inum 105267648 -exec rm -i {} \;            # 通过inode号交互式删除文件
+find ./ -inum 105267651 -delete                     
 ```
 
 ### 2.3 磁盘
