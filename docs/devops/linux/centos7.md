@@ -853,7 +853,6 @@ local6.*    /var/log/ssh   # 指定LOCAL6设备载体的日志记录到指定位
 systemctl restart rsyslog  # 重启服务
 ```
 
-
 #### 1.10.3 远程日志管理
 
 1. 服务端配置
@@ -922,6 +921,68 @@ ll /var/log/system*
 客户端修改hostname以后必须重启rsyslog
 
 #### 1.10.3 日志轮转
+
+1. 配置文件
+
+```bash
+# 常用的指令解释，可以在man logrotate 查看。
+daily                   # 指定转储周期为每天
+monthly                 # 指定转储周期为每月
+weekly                  # 每周轮转一次(monthly)
+rotate 4                # 同一个文件最多轮转4次，4次之后就删除该文件
+create 0664 root utmp   # 轮转之后创建新文件，权限是0664，属于root用户和utmp组
+dateext                 # 用日期来做轮转之后的文件的后缀名
+compress                # 用gzip对轮转后的日志进行压缩
+minsize 30K             # 文件大于30K，而且周期到了，才会轮转
+size 30k                # 文件必须大于30K才会轮转，而且文件只要大于30K就会轮转，不管周期是否已到
+copytruncate            # 用于还在打开中的日志文件，把当前日志备份并截断
+missingok               # 如果日志文件不存在，不报错
+notifempty              # 如果日志文件是空的，不轮转
+delaycompress           # 下一次轮转的时候才压缩
+sharedscripts           # 不管有多少个文件待轮转，prerotate 和 postrotate 代码只执行一次
+prerotate               # 如果符合轮转的条件，则在轮转之前执行prerotate和endscript 之间的shell代码
+postrotate              # 轮转完后执行postrotate 和 endscript 之间的shell代码
+```
+
+```bash
+logrotate -f /etc/logrotate.conf    # 强制轮转
+```
+
+2. nginx轮转
+
+```bash
+/usr/local/nginx/logs/*.log {
+    create 0640 nginx root
+    daily
+    rotate 10
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /bin/kill -USR1 `cat /usr/local/nginx/logs/nginx.pid 2>/dev/null` 2>/dev/null || true
+    endscript
+}
+```
+
+3. 自定义日志
+
+将原日志文件复制一份，然后将原日志文件清空。这种截断方式不需要重启服务
+
+```bash
+cd /etc/logrotate.d/
+vi javalog
+# 添加内容
+/home/project/125_QCPT/vjsp.pocservice/nohup.out{
+    copytruncate
+    daily
+    rotate 7
+    su root root
+    olddir backlog
+    dateext dateformat %Y%m%d%s
+}
+```
 
 ### 1.10 iptables
 
