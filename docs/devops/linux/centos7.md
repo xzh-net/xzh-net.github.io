@@ -832,13 +832,17 @@ tail -f /var/spool/mail/zhangsan            # 客户端查看接收到的邮件
 
 2. 测试ssh日志
 
+修改ssh默认日志载体
+
 ```bash
 vim /etc/ssh/sshd_config
 # 修改内容
-SyslogFacility LOCAL6   # 修改ssh默认日志载体
+SyslogFacility LOCAL6   # 
 
 systemctl restart sshd  # 重启服务
 ```
+
+修改ssh日志记录位置
 
 ```bash
 vim /etc/rsyslog.conf
@@ -852,7 +856,9 @@ systemctl restart rsyslog  # 重启服务
 
 #### 1.10.3 远程日志管理
 
-1. 日志服务器配置
+1. 服务端配置
+
+开启远程接收日志端口
 
 ```bash
 vim /etc/rsyslog.conf   
@@ -862,8 +868,12 @@ $UDPServerRun 514
 
 $ModLoad imtcp  # # 开启tcp接收端口
 $InputTCPServerRun 514
+```
 
-systemctl restart rsyslog  # 重启服务
+重启服务
+
+```bash
+systemctl restart rsyslog
 ```
 
 2. 客户端配置
@@ -878,7 +888,7 @@ SyslogFacility LOCAL0   # 修改ssh默认日志载体
 systemctl restart sshd  # 重启服务
 ```
 
-修改日志记录方式发送到远端
+修改rsyslog将日志发送到服务器
 
 ```bash
 vim /etc/rsyslog.conf
