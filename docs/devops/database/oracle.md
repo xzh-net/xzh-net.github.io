@@ -924,9 +924,11 @@ SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
  WHERE PADDR IN (SELECT ADDR FROM V$PROCESS WHERE SPID IN (55751,15842));
 ```
 
-### 3.4 占用统计
+### 3.4 统计
 
-#### 3.4.1 PGA使用率
+#### 3.4.1 内存查询
+
+1. SGA/PGA使用率
 
 ```sql
 SELECT
@@ -961,63 +963,9 @@ FROM
 	);
 ```
 
-#### 3.4.2 表空间物理文件的名称及大小
+2. 查询占用share pool内存大于10M的sql
 
 ```sql
-SELECT tablespace_name, 
-file_id, 
-file_name, 
-round(bytes / (1024 * 1024), 0) total_space 
-FROM dba_data_files 
-ORDER BY tablespace_name; 
-```
-
-#### 3.4.3 表空间使用率
-
-```sql
-SELECT
-	* 
-FROM
-	(
-	SELECT
-		a.tablespace_name,
-		to_char( a.bytes / 1024 / 1024, '99,999.999' ) total_bytes,
-		to_char( b.bytes / 1024 / 1024, '99,999.999' ) free_bytes,
-		to_char( a.bytes / 1024 / 1024 - b.bytes / 1024 / 1024, '99,999.999' ) use_bytes,
-		to_char( ( 1 - b.bytes / a.bytes ) * 100, '99.99' ) || '%' USE 
-	FROM
-		( SELECT tablespace_name, sum( bytes ) bytes FROM dba_data_files GROUP BY tablespace_name ) a,
-		( SELECT tablespace_name, sum( bytes ) bytes FROM dba_free_space GROUP BY tablespace_name ) b 
-	WHERE
-		a.tablespace_name = b.tablespace_name UNION ALL
-	SELECT
-		c.tablespace_name,
-		to_char( c.bytes / 1024 / 1024, '99,999.999' ) total_bytes,
-		to_char( ( c.bytes - d.bytes_used ) / 1024 / 1024, '99,999.999' ) free_bytes,
-		to_char( d.bytes_used / 1024 / 1024, '99,999.999' ) use_bytes,
-		to_char( d.bytes_used * 100 / c.bytes, '99.99' ) || '%' USE 
-	FROM
-		( SELECT tablespace_name, sum( bytes ) bytes FROM dba_temp_files GROUP BY tablespace_name ) c,
-		( SELECT tablespace_name, sum( bytes_cached ) bytes_used FROM v$temp_extent_pool GROUP BY tablespace_name ) d 
-	WHERE
-	c.tablespace_name = d.tablespace_name 
-	)
-```
-
-#### 3.4.4 占用空间查询
-
- ```sql
-select sum(bytes)/(1024*1024)  from user_segments
-where segment_name=upper('TS_FLOW_PATH_COM_LOG_INFO');
-
-SELECT * FROM (SELECT SEGMENT_NAME, SUM(BYTES) / 1024 / 1024 MB 
-FROM DBA_SEGMENTS WHERE TABLESPACE_NAME = upper('JSWZ_DATA') GROUP BY SEGMENT_NAME ORDER BY 2 DESC) WHERE ROWNUM < 10;
- ```
-
-#### 3.4.5 大内存占用
-
-```sql
--- 通过下面的sql查询占用share pool内存大于10M的sql
   SELECT substr(sql_text, 1, 100) "Stmt",
          count(*),
          sum(sharable_mem) "Mem",
@@ -1026,8 +974,11 @@ FROM DBA_SEGMENTS WHERE TABLESPACE_NAME = upper('JSWZ_DATA') GROUP BY SEGMENT_NA
     FROM v$sql
    GROUP BY substr(sql_text, 1, 100)
   HAVING sum(sharable_mem) > 10000000;
+```
 
--- 查询一下version count过高的语句
+3. 查询version count过高SQL
+
+```sql
 SELECT address,
        sql_id,
        hash_value,
@@ -1039,6 +990,64 @@ SELECT address,
  WHERE version_count > 10;
 ```
 
+#### 3.4.2 表空间查询
+
+1. 查看当前用户下所有表空间的使用情况
+
+```sql
+SELECT A.TABLESPACE_NAME "表空间名",
+       TOTAL / (1024 * 1024) "表空间大小(M)",
+       FREE / (1024 * 1024) "表空间剩余大小(M)",
+       (TOTAL - FREE) / (1024 * 1024) "表空间使用大小(M)",
+       ROUND((TOTAL - FREE) / TOTAL, 4) * 100 "使用率 %"
+  FROM (SELECT TABLESPACE_NAME, SUM(BYTES) FREE
+          FROM DBA_FREE_SPACE
+         GROUP BY TABLESPACE_NAME) A,
+       (SELECT TABLESPACE_NAME, SUM(BYTES) TOTAL
+          FROM DBA_DATA_FILES
+         GROUP BY TABLESPACE_NAME) B
+ WHERE A.TABLESPACE_NAME = B.TABLESPACE_NAME;
+```
+
+
+#### 3.4.3 数据查询
+
+1. 单表占用物理空间
+
+ ```sql
+SELECT SEGMENT_NAME              TABLE_NAME
+      ,SUM(BLOCKS)               BLOCKS
+      ,SUM(BYTES)/(1024*1024)    "TABLE_SIZE[MB]"
+FROM USER_SEGMENTS
+WHERE  SEGMENT_TYPE='TABLE'
+   AND SEGMENT_NAME='JG_GY_XP'
+GROUP BY SEGMENT_NAME;
+```
+
+2. 所有表占用物理空间
+
+```sql
+SELECT OWNER AS "用户名", SUM(BYTES) / 1024 / 1024 AS "所有表的大小(MB)"
+FROM DBA_SEGMENTS
+WHERE SEGMENT_NAME IN (SELECT T2.OBJECT_NAME
+                        FROM DBA_OBJECTS T2
+                       WHERE T2.OBJECT_TYPE = 'TABLE')
+GROUP BY OWNER ORDER BY 2 DESC;
+```
+
+#### 3.4.4 记录查询
+
+1. 查询某用户下所有表的记录总数
+
+```
+SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'SHJG0814';
+```
+
+2. 查看户下所有表的各自的记录条数
+
+```sql
+SELECT T.TABLE_NAME "表名",T.NUM_ROWS "记录条数" FROM USER_TABLES T;
+```
 
 
 ## 4. PL/SQL
