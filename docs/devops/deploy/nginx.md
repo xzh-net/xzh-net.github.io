@@ -839,7 +839,7 @@ server
   charset utf-8; 
   location /	{
       root /home/www/; 
-      fancyindex on;   i                              # 开启nginx目录浏览功能 
+      fancyindex on;                                 # 开启nginx目录浏览功能 
       fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
       fancyindex_exact_size off;                     # 文件大小从KB开始显示 
       fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
