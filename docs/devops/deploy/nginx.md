@@ -6,19 +6,17 @@ http://nginx.org/
 
 ### 1.1 yum安装
 
-1. 安装yum-utils
+#### 1.1.1 安装依赖
 
 ```bash
 sudo yum install yum-utils
 ```
 
-2. 添加yum源文件
+#### 1.1.2 编辑yum源文件
 
 ```bash
 vim /etc/yum.repos.d/nginx.repo
-```
-内容
-```conf
+# 添加内容
 [nginx-stable]
 name=nginx stable repo
 baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
@@ -40,7 +38,7 @@ module_hotfixes=true
 sudo yum-config-manager --enable nginx-mainline
 ```
 
-3. 使用yum进行安装
+#### 1.1.3 进行安装
 
 ```bash
 yum install -y nginx
@@ -48,24 +46,38 @@ yum install -y nginx
 
 ### 1.2 源码安装
 
-1. 下载
+#### 1.2.1 下载
 
 http://nginx.org/download/
+
 ```bash
+cd /opt/software
 wget http://nginx.org/download/nginx-1.20.2.tar.gz
 ```
 
-2. 编译
+#### 1.2.2 安装依赖
+
 ```bash
-yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel  # 依赖环境
-tar xf nginx-1.20.2.tar.gz
-cd nginx-1.20.2
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+```
+
+#### 1.2.3 添加用户
+
+```bash
 useradd nginx -s /sbin/nologin -M
+```
+
+#### 1.2.3 解压编译
+
+```bash
+cd /opt/software 
+tar zxvf nginx-1.20.2.tar.gz -C /opt
+cd /opt/nginx-1.20.2
 ./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module
 make && make install
 ```
 
-3. 添加到环境变量
+#### 1.2.4 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -74,19 +86,16 @@ PATH=$PATH:/usr/local/nginx/sbin
 export PATH
 # 使生效
 source /etc/profile
-
-nginx -V
 ```
 
-4. 配置成系统服务
+#### 1.2.5 配置开机启动
 
 在`/usr/lib/systemd/system`目录下添加nginx.service
+
 ```bash
 vim /usr/lib/systemd/system/nginx.service
-```
 
-内容如下:
-```
+#添加内容
 [Unit]
 Description=nginx web service
 Documentation=http://nginx.org/en/docs/
@@ -105,19 +114,23 @@ PrivateTmp=true
 WantedBy=default.target
 ```
 
-授权
+添加授权
+
 ```bash
 chmod 755 /usr/lib/systemd/system/nginx.service
 ```
 
-操作命令
+#### 1.2.6 启动服务
+
 ```bash
 systemctl start nginx     # 启动
+systemctl enable nginx    # 开机启动
+nginx -V	# 查看版本
+
 systemctl stop nginx      # 停止
 systemctl restart nginx   # 重启
 systemctl reload nginx    # 重新加载配置文件
 systemctl status nginx    # 查看nginx状态
-systemctl enable nginx    # 开机启动
 ```
 
 ### 1.3 一键安装
@@ -219,9 +232,8 @@ sed -i 's/\r$//' run.sh
 ### 1.4 卸载
 
 ```bash
-yum remove -y nginx
-# 编译安装直接删除
-find / -name nginx | xargs rm -rf
+yum remove -y nginx					# yum卸载
+find / -name nginx | xargs rm -rf	# 编译删除
 ```
 
 
@@ -259,56 +271,67 @@ find / -name nginx | xargs rm -rf
 
 ### 2.2 不停机升级
 
-1. 使用信号
+#### 2.2.1 使用信号
 
-备份
+1. 备份
+
 ```bash
 cd /usr/local/nginx/sbin
 mv nginx nginxold
 ```
 
-新程序拷贝到原安装路径下
+2. 新程序拷贝到原安装路径下
+
 ```bash
 cd ~/nginx/core/nginx-1.16.1/objs
 cp nginx /usr/local/nginx/sbin
 ```
 
-发送USR2信号给master进程，告诉master进程要平滑升级，这个时候，会重新开启对应的master进程和work进程，整个系统中将会有两个master进程，并且新的master进程的PID会被记录在`/usr/local/nginx/logs/nginx.pid`而之前的旧的master进程PID会被记录
+3. 发送USR2信号给master进程，告诉master进程要平滑升级，这个时候，会重新开启对应的master进程和work进程，整个系统中将会有两个master进程，并且新的master进程的PID会被记录在`/usr/local/nginx/logs/nginx.pid`而之前的旧的master进程PID会被记录
+
 ```bash
 kill -USR2 PID / kill -USR2 `cat /usr/local/nginx/logs/nginx.pid`
 ```
 
-发送信号QUIT给旧版本退出
+4. 发送信号QUIT给旧版本退出
+
 ```
 kill -QUIT `more /usr/local/logs/nginx.pid.oldbin`
 ```
 
-2. 使用makefile命令
+#### 2.2.2 使用makefile命令
 
-备份
+1. 备份
+
 ```bash
 cd /usr/local/nginx/sbin
 mv nginx nginxold
 ```
 
-新程序拷贝到原安装路径下
+2. 新程序拷贝到原安装路径下
+
 ```bash
 cd ~/nginx/core/nginx-1.16.1/objs
 cp nginx /usr/local/nginx/sbin
 ```
 
-进入到安装目录`cd ~/nginx/core/nginx-1.16.1`，执行`make upgrade`
+3. 升级
+
+```bash
+cd ~/nginx/core/nginx-1.16.1
+make upgrade
+```
 
 
-## 3. 配置
+## 3. 高级
 
-### 1.1 默认nginx.conf
+### 3.1 配置文件
 
 ```bash
 ./configure --prefix=/usr/local/nginx --with-stream --with-http_stub_status_module --with-http_ssl_module
 ```
 
-1. nginx.conf
+#### 3.1.1 nginx.conf
 
 ```conf
 user nginx;
@@ -379,7 +402,7 @@ http {
 }
 ```
 
-2. blob.xuzhihao.net_upstream.conf
+#### 3.1.2 blob.xuzhihao.net_upstream.conf
 
 ```conf
 upstream blob.xuzhihao.net {
@@ -389,7 +412,7 @@ upstream blob.xuzhihao.net {
 }
 ```
 
-3. blob.xuzhihao.net.conf
+#### 3.1.3 blob.xuzhihao.net.conf
 
 ```conf
 server {
@@ -429,9 +452,10 @@ server {
 }
 ```
 
-### 1.2 负载均衡upstream
+### 3.2 负载均衡upstream
 
-负载均衡状态
+#### 3.2.1 负载均衡状态
+
 ```conf
 upstream backend{
 	server 192.168.3.200:9001 down;
@@ -440,9 +464,10 @@ upstream backend{
 }
 ```
 
-负载均衡策略
+#### 3.2.2 负载均衡策略
 
 1. weight
+
 ```conf
 upstream backend{
 	server 192.168.200.146:9001 weight=10;
@@ -452,6 +477,7 @@ upstream backend{
 ```
 
 2. ip_hash
+
 ```conf
 upstream blob.xuzhihao.net {
   ip_hash;
@@ -461,6 +487,7 @@ upstream blob.xuzhihao.net {
 ```
 
 3. least_conn
+
 ```
 upstream backend{
 	least_conn;
@@ -471,6 +498,7 @@ upstream backend{
 ```
 
 4. url_hash
+
 ```conf
 upstream backend{
 	hash &request_uri;
@@ -481,6 +509,7 @@ upstream backend{
 ```
 
 5. fair
+
 ```conf
 upstream backend{
 	fair;
@@ -491,7 +520,7 @@ upstream backend{
 ```
 
 
-### 1.3 四层负载stream
+### 3.3 四层负载stream
 
 ```bash
 ./configure --prefix=/usr/local/nginx --with-stream
@@ -512,7 +541,7 @@ stream {
 }
 ```
 
-### 1.4 泛域名
+### 3.4 泛域名
 
 ```bash
 ./configure  --prefix=/usr/local/nginx --with-http_sub_module
@@ -537,7 +566,7 @@ server
 ```
 
 
-### 1.5 二级路径
+### 3.5 二级路径
 
 ```text
 server 
@@ -562,16 +591,18 @@ server
 }
 ```
 
-### 1.6 错误页
+### 3.6 错误页
 
-1. 指定具体跳转地址
+#### 3.6.1 指定具体跳转地址
+
 ```bash
 server {
 	error_page 404 http://www.xuzhihao.net;
 }
 ```
 
-2. 指定重定向地址
+#### 3.6.2 指定重定向地址
+
 ```bash
 server{
 	error_page 404 /50x.html;
@@ -582,7 +613,8 @@ server{
 }
 ```
 
-3. 使用location的@符号
+#### 3.6.3 使用location的@符号
+
 ```bash
 server{
 	error_page 404 @jump_to_error;
@@ -593,7 +625,8 @@ server{
 }
 ```
 
-4. 修改指定状态码
+#### 3.6.4 修改指定状态码
+
 ```bash
 server{
 	error_page 404 =200 /50x.html;
@@ -603,7 +636,7 @@ server{
 }
 ```
 
-### 1.7 跨域
+### 3.7 跨域
 
 ```conf
 location /getUser {
@@ -632,7 +665,7 @@ location /postUser {
 }
 ```
 
-### 1.8 防盗链
+### 3.8 防盗链
 
 ```conf
 location ~*\.(png|jpg|gif){
@@ -654,7 +687,7 @@ location /images {
 }
 ```
 
-### 1.9 Rewrite
+### 3.9 Rewrite
 
 常用变量
 
@@ -694,7 +727,7 @@ server {
 }
 ```
 
-### 1.10 web缓存
+### 3.10 web缓存
 
 ```conf
 http{
@@ -758,16 +791,16 @@ server{
 }
 ```
 
-### 1.11 目录索引
+### 3.11 目录索引
 
-1. 下载
+#### 3.11.1 下载
 
 ```bash
 wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
 wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
 ```
 
-2. 编译
+#### 3.11.2 编译
 
 ```bash
 unzip ngx-fancyindex-master.zip
@@ -777,7 +810,7 @@ make  # 不要 make install
 cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
 ```
 
-3. 配置
+#### 3.11.3 配置
 
 `fancyindex文件夹在app内`
 
@@ -803,7 +836,7 @@ server
 }
 ```
 
-4. md在线预览
+#### 3.11.4 md在线预览
 
 `注意此配置app和fancyindex文件夹是平行关系`
 
@@ -905,7 +938,8 @@ server {
 
 ```
 
-预览服务器启动
+#### 3.11.5 启动预览服务器
+
 ```
 ./markdown-renderer -mode local -root /home/www/app/
 ```
