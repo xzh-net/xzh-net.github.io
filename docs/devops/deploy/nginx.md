@@ -793,28 +793,45 @@ server{
 
 ### 3.11 目录索引
 
-#### 3.11.1 下载
+#### 3.11.1 下载插件
 
 ```bash
+cd /opt/software
 wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
-wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
+
 ```
 
-#### 3.11.2 编译
+#### 3.11.2 解压编译
 
 ```bash
 unzip ngx-fancyindex-master.zip
+mv ngx-fancyindex-master /opt
 cd nginx-1.20.2
 ./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=../ngx-fancyindex-master
 make  # 不要 make install
 cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
 ```
 
-#### 3.11.3 配置
+#### 3.11.3 配置模板
 
-`fancyindex文件夹在app内`
+
+1. 下载模板
+
+```bash
+wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
+cd /home/www
+unzip nginx-fancyindex.zip	
+mv nginx-fancyindex fancyindex
+```
+
+2. 配置fancyindex路径
+
+?> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
 
 ```conf
+vi /usr/local/nginx/conf/nginx.conf
+
+# 修改内容
 server 
 {
   listen 80;
@@ -822,7 +839,7 @@ server
   charset utf-8; 
   location /	{
       root /home/www/; 
-      fancyindex on;                                 # 开启nginx目录浏览功能 
+      fancyindex on;   i                              # 开启nginx目录浏览功能 
       fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
       fancyindex_exact_size off;                     # 文件大小从KB开始显示 
       fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
@@ -838,43 +855,89 @@ server
 
 #### 3.11.4 md在线预览
 
-`注意此配置app和fancyindex文件夹是平行关系`
+?> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
+
+1. nginx配置
+
+```conf
+http {  
+    include mime.types;
+    default_type application/octet-stream;
+
+    client_max_body_size 100M;
+    charset utf-8;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    '$status $body_bytes_sent "$http_referer" '
+    '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log off;
+
+    server_tokens   off;
+    sendfile        on; 
+
+    keepalive_timeout  65;
+
+    gzip on;
+    gzip_disable "msie6";
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+    client_header_buffer_size 64k;
+    large_client_header_buffers 4 64k;
+    client_body_buffer_size 20m;
+
+    index index.html;
+
+    include /usr/local/nginx/sites-enabled/*;
+}
+```
+
+2. 站点配置
+
+```bash
+mkdir -p /usr/local/nginx/sites-enabled
+cd /usr/local/nginx/sites-enabled
+vi default
+```
 
 ```conf
 server {
-	listen   80; ## listen for ipv4; this line is default and implied
-	listen   [::]:80 ipv6only=on; ## listen for ipv6
+    listen   80; ## listen for ipv4; this line is default and implied
+    listen   [::]:80 ipv6only=on; ## listen for ipv6
 
-	listen   443 ssl;
-	listen   [::]:443 default ipv6only=on ssl;
+    listen   443 ssl;
+    listen   [::]:443 default ipv6only=on ssl;
 
-	# Enable SSL
-	ssl_certificate /app/ssl/ssl.crt;
-	ssl_certificate_key /app/ssl/ssl.key;
-	ssl_session_timeout 10m;
-	ssl_session_cache   shared:SSL:10m;
-	ssl_protocols TLSv1.1 TLSv1.2;
-	ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
-	ssl_prefer_server_ciphers on;
+    # Enable SSL
+    ssl_certificate /home/www/ssl/ssl.crt;
+    ssl_certificate_key /home/www/ssl/ssl.key;
+    ssl_session_timeout 10m;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_protocols TLSv1.1 TLSv1.2;
+    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+    ssl_prefer_server_ciphers on;
 
-	root /home/www/app;
-	index index.html index.htm;
+    root /home/www/public;
+    index index.html index.htm;
 
-	location / {
-	  auth_basic "off";
-	  include /home/www/fancyindex/fancyindex.conf;
-	}
+    location / {
+        auth_basic "off";
+        include /home/www/fancyindex/fancyindex.conf;
+    }
 
     location ~ \.(?:md|markdown)$$ {
-      auth_basic "off";
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
+        auth_basic "off";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
     }
 
     location =/assets/gfm.css {
-      auth_basic "off";
-      proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
+        auth_basic "off";
+        proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
     }
 
     #fixup fancyindex subrequest
@@ -900,48 +963,46 @@ server {
         deny  all;
     }
 
-	add_header X-Frame-Options "SAMEORIGIN";
-	add_header X-XSS-Protection "1; mode=block";
-	add_header X-Content-Type-Options "nosniff";
+  add_header X-Frame-Options "SAMEORIGIN";
+  add_header X-XSS-Protection "1; mode=block";
+  add_header X-Content-Type-Options "nosniff";
 
-	location = /favicon.ico { access_log off; log_not_found off; }
-	location = /robots.txt  { access_log off; log_not_found off; }
+  location = /favicon.ico { access_log off; log_not_found off; }
+  location = /robots.txt  { access_log off; log_not_found off; }
 
-	location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|ttf|ttc|otf|eot|woff)$ {
-		auth_basic "off";
-		expires max;
-		access_log off;
-		add_header Pragma public;
-		add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-	}
+  location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|ttf|ttc|otf|eot|woff)$ {
+    auth_basic "off";
+    expires max;
+    access_log off;
+    add_header Pragma public;
+    add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+  }
 
-	location ~* \.(?:css|js)$ {
-		auth_basic "off";
-		expires 1y;
-		add_header Cache-Control "public";
-	}
+  location ~* \.(?:css|js)$ {
+    auth_basic "off";
+    expires 1y;
+    add_header Cache-Control "public";
+  }
 
-	# deny access to . files, for security
-	location ~ /\.(?!well-known).* {
-		access_log off;
-		log_not_found off;
-		deny all;
-	}
+  # deny access to . files, for security
+  location ~ /\.(?!well-known).* {
+    access_log off;
+    log_not_found off;
+    deny all;
+  }
 
-	location ~* (?:\.(?:bak|config|db|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
-		deny all;
-		access_log off;
-		log_not_found off;
-	}
-
+  location ~* (?:\.(?:bak|config|db|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
+    deny all;
+    access_log off;
+    log_not_found off;
+  }
 }
-
 ```
 
 #### 3.11.5 启动预览服务器
 
 ```
-./markdown-renderer -mode local -root /home/www/app/
+/usr/local/bin/markdown-renderer -mode local -root /home/www/public/
 ```
 
 
