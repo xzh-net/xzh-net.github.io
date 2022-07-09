@@ -985,14 +985,42 @@ vi tomcat8080
 }
 ```
 
-### 1.10 iptables
+### 1.11 Apache
+
+#### 1.11.1 安装
 
 ```bash
-service iptables status # 查看iptables状态
-/etc/init.d/iptables status
-/etc/init.d/iptables start
-/etc/init.d/iptables stop
-/etc/init.d/iptables restart
+yum install -y httpd
+rpm -ql httpd
+```
+
+#### 1.11.2 配置文件
+
+```bash
+/etc/httpd/conf/httpd.conf		# 主配置文件
+/etc/httpd/conf.d/*.conf		# 子配置文件
+/etc/httpd/conf.d/welcome.conf	# 默认测试页面
+/etc/httpd/logs                 # 日志目录 /var/log/httpd/ 硬链接
+/etc/httpd/modules              # 库文件 /usr/lib64/httpd/modules 硬链接
+/etc/httpd/run                  # pid信息
+/etc/logrotate.d/httpd          # 轮转日志
+/etc/sysconfig/httpd            # 额外配置文件
+```
+
+```conf
+```
+
+
+
+#### 1.11.3 xxxx
+
+#### 1.11.4 启动服务
+
+
+### 1.12 iptables
+
+```bash
+systemctl status iptables    # 查看防火墙状态
 
 # -I：添加，-D：删除。INPUT表示入站，***.***.***.*** 表示要封停的IP，DROP表示放弃连接。
 iptables -I INPUT -s 211.0.0.0/8 -j DROP    # 封整段
@@ -1005,7 +1033,7 @@ iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
 iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
 ```
 
-### 1.11 firewalld
+### 1.13 firewalld
 
 ```bash
 systemctl start firewalld.service     # 启动firewall
@@ -1019,7 +1047,7 @@ firewall-cmd --zone=public --add-port=80/tcp --permanent            # 开放端�
 firewall-cmd --zone=public --remove-port=9003/tcp --permanent       # 移除端口
 firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开放端口
 firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
-firewall-cmd --reload                                    # 重启防火墙
+firewall-cmd --reload                                    # 重载防火墙配置
 ```
 
 ## 2. 命令
