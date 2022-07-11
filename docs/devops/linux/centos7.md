@@ -991,15 +991,17 @@ vi tomcat8080
 
 ```bash
 yum install -y httpd
+yum -y install httpd-manual.noarch	# 访问地址http://39.105.58.136/manual/
 rpm -ql httpd
+systemctl start httpd
 ```
 
 #### 1.11.2 配置文件
 
 ```bash
-/etc/httpd/conf/httpd.conf		# 主配置文件
-/etc/httpd/conf.d/*.conf		# 子配置文件
-/etc/httpd/conf.d/welcome.conf	# 默认测试页面
+/etc/httpd/conf/httpd.con       # 主配置文件
+/etc/httpd/conf.d/*.conf        # 子配置文件
+/etc/httpd/conf.d/welcome.conf  # 默认测试页面
 /etc/httpd/logs                 # 日志目录 /var/log/httpd/ 硬链接
 /etc/httpd/modules              # 库文件 /usr/lib64/httpd/modules 硬链接
 /etc/httpd/run                  # pid信息
@@ -1007,15 +1009,68 @@ rpm -ql httpd
 /etc/sysconfig/httpd            # 额外配置文件
 ```
 
-```conf
+#### 1.11.3 共享文件
+
+1. 软连接方式
+
+```bash
+vi /etc/httpd/conf/httpd.conf
+# 编辑内容
+DocumentRoot "/var/www/html"
+<Directory "/var/www/html">
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+</Directory>
+
+mkdir -p /data
+touch /data/file{1..5}
+
+ln -s /data/ /var/www/html/share    # 创建链接
+systemctl restart httpd             # 重启服务
+http://39.105.58.136/share/         # 测试地址
+
 ```
 
+2. 别名方式
 
+```bash
+vi /etc/httpd/conf.d/autoindex.conf
+# 添加
+Alias /test/ "/data/"
+<Directory "/data">
+    Options Indexes MultiViews FollowSymlinks
+    AllowOverride None
+    Require all granted
+</Directory>
 
-#### 1.11.3 xxxx
+systemctl restart httpd             # 重启服务
+http://39.105.58.136/test/          # 测试地址
+```
 
-#### 1.11.4 启动服务
+#### 1.11.4 虚拟主机
 
+```bash
+vi /etc/httpd/conf/httpd.conf   # 添加监听端口
+# 编辑
+Listen 80
+Listen 7070
+
+vi /etc/httpd/conf.d/vhost.conf
+# 添加
+<VirtualHost *:8080>
+        ServerName webmaster@dummy-host.example.com
+        DocumentRoot "/data2/"
+        DirectoryIndex index.php index.html
+        <Directory "/data2">
+                Options -Indexes +FollowSymlinks
+                AllowOverride All
+                Require all granted
+        </Directory>
+        ErrorLog "logs/lot_9xzb-error_log"
+        CustomLog "logs/lot_9xzb-access_log" common
+</VirtualHost>
+```
 
 ### 1.12 iptables
 
