@@ -1058,7 +1058,7 @@ Listen 7070
 
 vi /etc/httpd/conf.d/vhost.conf
 # 添加
-<VirtualHost *:8080>
+<VirtualHost *:7070>
         ServerName webmaster@dummy-host.example.com
         DocumentRoot "/data2/"
         DirectoryIndex index.php index.html
