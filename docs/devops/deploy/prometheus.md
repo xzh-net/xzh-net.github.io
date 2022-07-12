@@ -1,35 +1,37 @@
-# Prometheus 2.27.0
-
-## 1. 下载
+# Prometheus 2.27.0 + grafana-7.3.7-1.x86_64
 
 Prometheus是由SoundCloud开发的开源监控报警系统和时序列数据库(TSDB)。Prometheus使用Go语言开发，是Google BorgMon监控系统的开源版本
 
-https://grafana.com/grafana/dashboards?dataSource=prometheus
-
 - Prometheus 下载地址：https://prometheus.io/download/
 - Grafana 下载地址：https://grafana.com/grafana/download
+- Grafana 控制台：https://grafana.com/grafana/dashboards?dataSource=prometheus
 - node_exporter 下载地址：https://prometheus.io/download/#node_exporter
 
-## 2. 安装
 
-### 2.1 Prometheus
+## 1. Prometheus
+
+### 1.1 下载解压
 
 ```bash
-tar zxvf prometheus-2.27.0.linux-amd64.tar.gz
-cd prometheus-2.27.0.linux-amd64/
-./prometheus --config.file="/usr/local/prometheus/prometheus.yml" &
-curl localhost:9090
+cd /opt/software
+wget https://github.com/prometheus/prometheus/releases/download/v2.27.0/prometheus-2.27.0.linux-amd64.tar.gz
+tar zxvf prometheus-2.27.0.linux-amd64.tar.gz -C /opt
+mv /opt/prometheus-2.27.0.linux-amd64/ /opt/prometheus
+/opt/prometheus/prometheus --version  # 查看版本号
 ```
-访问：localhost:9090/graph
 
-`prometheus.yml`
-```yaml
+### 1.2 修改配置
+
+```bash
+vi /opt/prometheus/prometheus.yml
+```
+
+```conf
 # 全局配置（如果有内部单独设定，会覆盖这个参数）
 global:
   scrape_interval: 15s      # 默认15s 全局每次数据收集的间隔
   evaluation_interval: 15s  # 规则扫描时间间隔是15秒，默认不填写是 1分钟
   scrape_timeout: 5s        # 超时时间 默认10s
-  external_labels: lable    # 用于外部系统标签的，不是用于metrics(度量)数据
 
 # 告警插件定义。这里会设定alertmanager这个报警插件
 alerting:
@@ -52,25 +54,21 @@ scrape_configs:
       - targets: ['localhost:9090']
         labels:
           instance: prometheus
-        
   - job_name: linux
     static_configs:
       - targets: ['172.17.17.201:9100','172.17.17.200:9100']
         labels:
           instance: Linux
-
   - job_name: docker
     static_configs:
       - targets: ['172.17.17.80:18080']
         labels:
           instance: docker18
-      
   - job_name: mysql
     static_configs:
       - targets: ['172.17.17.80:9104']
         labels:
           instance: mysql8
-
   - job_name: redis_192
     static_configs:
       - targets: ['172.17.17.192:9121']
@@ -79,48 +77,152 @@ scrape_configs:
 ```
 
 
-### 2.2 Grafana
+### 1.3 添加系统服务
+
+1. 创建启动文件
 
 ```bash
-wget https://dl.grafana.com/oss/release/grafana-7.3.7-1.x86_64.rpm
-yum localinstall grafana-7.3.7-1.x86_64.rpm -y
-systemctl start grafana-server.service
-systemctl enable grafana-server.service
-curl localhost:3000
+cd /usr/lib/systemd/system
+vim prometheus.service
+# 添加内容
+[Unit]
+Description=https://prometheus.io
+
+[Service]
+Restart=on-failure
+ExecStart=/opt/prometheus/prometheus --config.file=/opt/prometheus/prometheus.yml --web.listen-address=:9090
+
+[Install]
+WantedBy=multi-user.target
 ```
-admin/admin
 
-## 3. exporter
-
-### 3.1 node_exporter
+2. 重载守护进程
 
 ```bash
-curl -OL https://github.com/prometheus/node_exporter/releases/download/v1.1.2/node_exporter-1.1.2.linux-amd64.tar.gz
-tar -xzf node_exporter-1.1.2.linux-amd64.tar.gz
-cp node_exporter-1.1.2.linux-amd64/node_exporter /usr/local/bin/
-node_exporter # 前台启动
+systemctl daemon-reload
+```
+
+### 1.4 启动服务
+
+```bash
+systemctl start prometheus
+systemctl enable prometheus
+
+# 也可使用脚本启动
+cd /opt/prometheus
+./prometheus --config.file="/opt/prometheus/prometheus.yml" &
+./prometheus --help       # 启动参数帮助文档
+```
+
+### 1.5 客户端
+
+?> 访问地址：http://ip:9090/targets
+
+
+## 2. node_exporter
+
+### 2.1 linux监控
+
+
+#### 2.1.1 下载解压
+
+```bash
+cd /opt/software
+wget https://github.com/prometheus/node_exporter/releases/download/v1.1.2/node_exporter-1.1.2.linux-amd64.tar.gz
+tar zxvf node_exporter-1.1.2.linux-amd64.tar.gz -C /usr/local/
+mv /usr/local/node_exporter-1.1.2.linux-amd64/ /usr/local/node_exporter
+```
+
+#### 2.1.2 添加系统服务
+
+1. 创建启动文件
+
+```bash
+vim /usr/lib/systemd/system/node_exporter.service
+# 添加内容
+[Unit]
+Description=node_exporter
+After=network.target
+
+[Service]
+ExecStart=/usr/local/node_exporter/node_exporter
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+2. 重载守护进程
+
+```bash
+systemctl daemon-reload
+```
+
+#### 2.1.3 启动服务
+
+```bash
+systemctl start node_exporter
+# 或者使用脚本启动
+cd /usr/local/node_exporter
 nohup ./node_exporter  --web.listen-address=":9100" & # 后台启动
 lsof -i:9100
 ```
 
-https://grafana.com/grafana/dashboards/8919
+### 2.2 mysql监控
 
-### 3.2 mysqld_exporter
+#### 2.2.1 下载解压
 
-```sql
-CREATE USER 'mysqld_exporter'@'localhost' IDENTIFIED BY '123456' WITH MAX_USER_CONNECTIONS 3;
-GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysqld_exporter'@'localhost';
-flush privileges;
+```bash
+cd /opt/software
+wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.14.0/mysqld_exporter-0.14.0.linux-amd64.tar.gz
+tar zxvf mysqld_exporter-0.14.0.linux-amd64.tar.gz -C /usr/local/
+mv /usr/local/mysqld_exporter-0.14.0.linux-amd64 /usr/local/mysqld_exporter
+vim /usr/local/mysqld_exporter/.my.cnf
+# 编辑
+[client]
+host=172.17.17.137
+port=3306
+user=root
+password=root
+```
+
+#### 2.2.2 添加系统服务
+
+1. 创建启动文件
+
+```bash
+vim /usr/lib/systemd/system/mysqld_exporter.service
 ```
 
 ```bash
-docker pull prom/mysqld-exporter
-docker run -d -p 9104:9104 --network mydata_default --link=mysql:mysql -e DATA_SOURCE_NAME="mysqld_exporter:123456@(mysql:3306)/mysql" prom/mysqld-exporter
+[Unit]
+Description=mysqld_exporter
+After=network.target
+
+[Service]
+ExecStart=/usr/local/mysqld_exporter/mysqld_exporter --config.my-cnf=/usr/local/mysqld_exporter/.my.cnf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-https://grafana.com/grafana/dashboards/7362
+2. 重载守护进程
 
-### 3.3 google/cadvisor
+```bash
+systemctl daemon-reload
+```
+
+#### 2.2.3 启动服务
+
+```bash
+systemctl start mysqld_exporter
+# 或者使用脚本启动
+nohup /usr/local/mysqld_exporter/mysqld_exporter --config.my-cnf=/usr/local/mysqld_exporter/.my.cnf & # 后台启动
+lsof -i:9104
+```
+
+### 2.3 容器监控
 
 docker-compose-cadvisor.yml
 ```yml
@@ -144,7 +246,7 @@ services:
 docker-compose -f docker-compose-cadvisor.yml up -d  
 ```
 
-### 4.4 redis_exporter
+### 2.4 redis监控
 
 ```bash
 wget https://github.com/oliver006/redis_exporter/releases/download/v1.6.1/redis_exporter-v1.6.1.linux-amd64.tar.gz
@@ -169,3 +271,60 @@ docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:
 ```
 
 https://grafana.com/api/dashboards/763/revisions/1/downloa
+
+
+## 3. Grafana
+
+### 3.1 下载
+
+```bash
+wget https://dl.grafana.com/oss/release/grafana-7.3.7-1.x86_64.rpm
+```
+
+### 3.2 安装
+
+```bash
+yum localinstall grafana-7.3.7-1.x86_64.rpm -y
+```
+
+### 3.3 启动服务
+
+```bash
+systemctl start grafana-server
+systemctl enable grafana-server
+```
+
+### 3.4 客户端
+
+?> 访问地址：http://ip:3000 账号密码：admin/admin
+
+#### 2.4.1 linux监控
+
+?> 监控模板：https://grafana.com/grafana/dashboards/8919
+
+1. 添加Prometheus数据源
+
+Configuration -> Data Sources ->add data source -> Prometheus
+
+![](../../assets/_images/devops/deploy/prometheus/grafana1.png)
+![](../../assets/_images/devops/deploy/prometheus/grafana2.png)
+![](../../assets/_images/devops/deploy/prometheus/grafana3.png)
+
+2. 导入模板
+
+![](../../assets/_images/devops/deploy/prometheus/grafana4.png)
+
+选择数据源
+
+![](../../assets/_images/devops/deploy/prometheus/grafana5.png)
+
+
+#### 2.4.2 mysql监控
+
+?> 监控模板：https://grafana.com/grafana/dashboards/7362
+
+
+
+#### 2.4.3 容器监控
+
+#### 2.4.4 redis监控
