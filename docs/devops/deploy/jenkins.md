@@ -14,7 +14,9 @@
 
 ### 1.2 Jenkins安装
 
-- 下载：https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.332-1.1.noarch.rpm
+#### 1.2.1 下载安装
+
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.332-1.1.noarch.rpm
 
 ```bash
 yum install java-1.8.0-openjdk* -y  # jdk:/usr/lib/jvm
@@ -26,7 +28,7 @@ rpm -e --nodeps jenkins-2.332-1.1.noarch
 rpm -ivh jenkins-2.332-1.1.noarch.rpm
 ```
 
-- 修改Jenkins配置
+#### 1.2.2 修改配置
 
 ```bash
 vi /etc/sysconfig/jenkins
@@ -41,8 +43,6 @@ systemctl start jenkins
 
 ?>访问地址：http://172.17.17.200:8888/
 
-- 跳过插件
-
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_skip.png)
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_admin.png)
@@ -50,17 +50,18 @@ systemctl start jenkins
 
 ### 1.3 Jenkins插件管理
 
-1. 修改插件源
+#### 1.3.1 修改插件源
 
-Manage Plugins点击Advanced，首先把Update Site改为`http://updates.jenkins-zh.cn/update-center.json`来解除https校验
+1. Manage Plugins点击Advanced，首先把Update Site改为`http://updates.jenkins-zh.cn/update-center.json`来解除https校验
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_https.png)
 
-然后点击`available`待全部载入完毕
+2. 然后点击`available`待全部载入完毕
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_load.png)
 
-更换清华大学源
+3. 更换清华大学源
+
 ```bash
 https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
 ```
@@ -68,7 +69,7 @@ https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_tuna.png)
 
 
-修改插件下载地址
+4. 修改插件下载地址
 
 ```bash
 cd /var/lib/jenkins/updates
@@ -79,13 +80,11 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ?>重启服务：http://172.17.17.200:8888/restart
 
 
-2. 汉化插件
+#### 1.3.2 汉化插件
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_chinese.png)
 
-插件下载错误，需要下载skip-certificate-check，用于ssl无法识别问题以及插件安装超时问题，可以到国内清华大学开源软件镜像站的插件中心
-https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/skip-certificate-check
-下载后直接放在你的Jenkins的plugins目录下即可，需要重启两次完成加载
+插件下载错误，需要下载skip-certificate-check，用于ssl无法识别问题以及插件安装超时问题，可以到国内清华大学开源软件镜像站的插件中心https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/skip-certificate-check 下载后直接放在你的Jenkins的plugins目录下即可，需要重启两次完成加载
 
 ### 1.4 Jenkins用户权限管理
 
@@ -93,6 +92,7 @@ https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/skip-certificate-check
 
 1. 修改密码
    
+
 编辑config.xml文件，替换passwordHash行的内容123456
 
 ```bash
@@ -111,19 +111,19 @@ systemctl restart jenkins
 
 #### 1.4.2 权限设置
 
-- 安装Role-based Authorization Strategy插件来管理Jenkins用户权限
+1. 安装Role-based Authorization Strategy插件来管理Jenkins用户权限
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_role.png)
 
-- 开启权限全局安全配置
+2. 开启权限全局安全配置
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_set.png)
 
-授权策略切换为"Role-Based Strategy"
+3. 授权策略切换为"Role-Based Strategy"
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_set2.png)
 
-- 创建角色
+4. 创建角色
 
 在系统管理页面进入 Manage and Assign Roles
 
@@ -141,7 +141,7 @@ missing the Overall/Read permission
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_role2.png)
 
-- 创建用户
+5. 创建用户
 
 在系统管理页面进入 Manage Users
 
@@ -157,7 +157,7 @@ missing the Overall/Read permission
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user_role.png)
 
-- 创建项目测试权限
+6. 创建项目测试权限
 
 以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
@@ -201,13 +201,13 @@ git --version #安装后查看版本
 
 #### 1.5.3 用户密码类型凭证
 
-- 创建凭证
+1. 创建凭证
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_git2.png)
 
 选择"Username with password"，输入Gitlab的用户名和密码，点击"确定"
 
-- 测试凭证是否可用
+2. 测试凭证是否可用
 
 创建一个FreeStyle项目：新建Item->FreeStyle Project->确定
 
@@ -229,13 +229,13 @@ git --version #安装后查看版本
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_ssh_rsa.png)
 
-- gitlab服务器使用root用户生成公钥和私钥在/root/.ssh/目录
+1. gitlab服务器使用root用户生成公钥和私钥在/root/.ssh/目录
 
 ```bash
 ssh-keygen -t rsa
 ```
 
-- 把生成的公钥放在Gitlab中
+2. 把生成的公钥放在Gitlab中
 
 以root账户登录->点击头像->Settings->SSH Public Keys->复制刚才id_rsa.pub文件的内容到这里，点击"Add Key"
 
@@ -245,7 +245,7 @@ ssh-keygen -t rsa
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh.png)
 
-- 测试凭证是否可用
+3. 测试凭证是否可用
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh_test.png)
 
@@ -284,7 +284,7 @@ Manage Jenkins->Configure System->Global Properties ，添加三个全局变量J
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_env.png)
 
-- 修改Maven的settings.xml
+1. 修改Maven的settings.xml
 
 ```bash
 mkdir /root/repo # 仓库目录
