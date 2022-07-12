@@ -163,8 +163,7 @@ systemctl daemon-reload
 ```bash
 systemctl start node_exporter
 # 或者使用脚本启动
-cd /usr/local/node_exporter
-nohup ./node_exporter  --web.listen-address=":9100" & # 后台启动
+nohup /usr/local/node_exporter/node_exporter  --web.listen-address=":9100" & # 后台启动
 lsof -i:9100
 ```
 
@@ -224,54 +223,70 @@ lsof -i:9104
 
 ### 2.3 容器监控
 
-docker-compose-cadvisor.yml
-```yml
-version: '2'
-services:
-  cadvisor:
-    image: "google/cadvisor:v0.32.0"
-    hostname: cadvisor
-    container_name: cadvisor
-    ports:
-      - '18080:8080'
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    restart: always
-```
+1. 安装
 
 ```bash
-docker-compose -f docker-compose-cadvisor.yml up -d  
+docker run -d \
+  --volume=/:/rootfs:ro \
+  --volume=/var/run:/var/run:rw \
+  --volume=/sys:/sys:ro \
+  --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --publish=18080:8080 \
+  --detach=true \
+  --name=cadvisor \
+  google/cadvisor:latest
 ```
+
+2. 访问地址
+
+?> http://localhost:8090/containers/
 
 ### 2.4 redis监控
 
+#### 2.4.1 下载解压 
+
 ```bash
+cd /opt/software
 wget https://github.com/oliver006/redis_exporter/releases/download/v1.6.1/redis_exporter-v1.6.1.linux-amd64.tar.gz
-tar -zxf redis_exporter-v1.6.1.linux-amd64.tar.gz 
-mv redis_exporter-v1.6.1.linux-amd64 /usr/local/redis_exporter
-cd /usr/local/redis_exporter
-nohup ./redis_exporter -redis.addr 127.0.0.1:6379 -redis.password "redis16379" &   # 后台启动
-lsof -i:9121
-# ./redis_exporter --help
--redis.addr         # string：Redis实例的地址，可以使一个或者多个，多个节点使用逗号分隔，默认为 "redis://localhost:6379"
--redis.password     # string：Redis实例的密码		
--web.listen-address # string：服务监听的地址，默认为 0.0.0.0:9121
+tar zxvf redis_exporter-v1.6.1.linux-amd64.tar.gz -C /usr/local/
+mv /usr/local/redis_exporter-v1.6.1.linux-amd64 /usr/local/redis_exporter
+```
 
-groupadd prometheus
-useradd -g prometheus -m -d /var/lib/prometheus -s /sbin/nologin prometheus
-chown -R prometheus:prometheus /usr/local/redis_exporter
+#### 2.4.2 添加系统服务
+
+1. 创建启动文件
+
+```bash
+vim /usr/lib/systemd/system/redis_exporter.service
 ```
 
 ```bash
-docker pull oliver006/redis_exporter:v1.28.0
-docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:v1.28.0 --redis.addr redis://172.17.17.192:16379 --redis.password 'redis16379'
+[Unit]
+Description=redis_exporter
+After=network.target
+
+[Service]
+ExecStart=/usr/local/redis_exporter/redis_exporter -redis.addr 172.17.17.192:16396 -redis.password "redis16396"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-https://grafana.com/api/dashboards/763/revisions/1/downloa
+2. 重载守护进程
 
+```bash
+systemctl daemon-reload
+```
+
+#### 2.4.3 启动服务
+
+```bash
+systemctl start redis_exporter
+# 或者使用脚本启动
+nohup /usr/local/redis_exporter/redis_exporter -redis.addr 172.17.17.192:16396 -redis.password "redis16396" &   # 后台启动
+lsof -i:9121
+```
 
 ## 3. Grafana
 
@@ -323,8 +338,11 @@ Configuration -> Data Sources ->add data source -> Prometheus
 
 ?> 监控模板：https://grafana.com/grafana/dashboards/7362
 
-
-
 #### 2.4.3 容器监控
 
+?> 监控模板：https://grafana.com/grafana/dashboards/893
+
 #### 2.4.4 redis监控
+
+?> 监控模板：https://grafana.com/grafana/dashboards/763
+
