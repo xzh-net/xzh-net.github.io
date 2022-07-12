@@ -41,7 +41,7 @@ systemctl daemon-reload
 systemctl start jenkins
 ```
 
-?>访问地址：http://172.17.17.200:8888/
+访问地址：http://172.17.17.200:8888/
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_skip.png)
 
@@ -77,7 +77,7 @@ sed -i 's/http:\/\/updates.jenkinsci.org\/download/https:\/\/mirrors.tuna.tsingh
 sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ```
 
-?>重启服务：http://172.17.17.200:8888/restart
+重启服务：http://172.17.17.200:8888/restart
 
 
 #### 1.3.2 汉化插件
@@ -241,11 +241,11 @@ ssh-keygen -t rsa
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_secret.png)
 
-- 在Jenkins中添加凭证，配置私钥
+3. 在Jenkins中添加凭证，配置私钥
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh.png)
 
-3. 测试凭证是否可用
+4. 测试凭证是否可用
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh_test.png)
 
@@ -395,15 +395,13 @@ echo "编译和打包结束"
 
 #### 2.1.2 部署
 
-把项目部署到远程的Tomcat里面
-
-1）安装 Deploy to container插件
+1. 安装 Deploy to container插件
 
 Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to container插件实现
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_deploy.png)
 
-2）添加Tomcat用户凭证
+2. 添加Tomcat用户凭证
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_auth.png)
 
@@ -455,13 +453,13 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to 
 
 #### 2.3.2 Pipeline语法快速入门
 
-- Declarative声明式-Pipeline
-  - stages：代表整个流水线的所有执行阶段。通常stages只有1个，里面包含多个stage
-  - stage：代表流水线中的某个阶段，可能出现n个。一般分为拉取代码，编译构建，部署等阶段。
-  - steps：代表一个阶段内需要执行的逻辑。steps里面是shell脚本，git拉取代码，ssh远程发布等任意内容。
+1. Declarative声明式-Pipeline
+   - stages：代表整个流水线的所有执行阶段。通常stages只有1个，里面包含多个stage
+   - stage：代表流水线中的某个阶段，可能出现n个。一般分为拉取代码，编译构建，部署等阶段。
+   - steps：代表一个阶段内需要执行的逻辑。steps里面是shell脚本，git拉取代码，ssh远程发布等任意内容。
 
 > 流水线->选择HelloWorld模板
-> 
+
 ```shell
 pipeline {
    agent any
@@ -490,10 +488,10 @@ pipeline {
 
 点击构建，可以看到整个构建过程
 
-- Pipeline脚本式-Pipeline
-  - Node：节点，一个 Node 就是一个 Jenkins 节点，Master 或者 Agent，是执行 Step 的具体运行环境，后续讲到Jenkins的Master-Slave架构的时候用到。
-  - Stage：阶段，一个 Pipeline 可以划分为若干个 Stage，每个 Stage 代表一组操作，比如：Build、Test、Deploy，Stage 是一个逻辑分组的概念。
-  - Step：步骤，Step 是最基本的操作单元，可以是打印一句话，也可以是构建一个 Docker 镜像，由各类 Jenkins 插件提供，比如命令：sh ‘make’，就相当于我们平时 shell 终端中执行 make 命令
+2. Pipeline脚本式-Pipeline
+   - Node：节点，一个 Node 就是一个 Jenkins 节点，Master 或者 Agent，是执行 Step 的具体运行环境，后续讲到Jenkins的Master-Slave架构的时候用到。
+   - Stage：阶段，一个 Pipeline 可以划分为若干个 Stage，每个 Stage 代表一组操作，比如：Build、Test、Deploy，Stage 是一个逻辑分组的概念。
+   - Step：步骤，Step 是最基本的操作单元，可以是打印一句话，也可以是构建一个 Docker 镜像，由各类 Jenkins 插件提供，比如命令：sh ‘make’，就相当于我们平时 shell 终端中执行 make 命令
 一样。
 
 ```shell
@@ -629,17 +627,17 @@ Jenkins内置4种构建触发器：
 - 轮询SCM（Poll SCM）
 
 
-1) 触发远程构建
+1.  触发远程构建
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_build_triger1.png)
 
 触发构建url：http://172.17.17.200:8888/job/test_pipeline01/build?token=123456
 
-2) 其他工程构建后触发
+2. 其他工程构建后触发
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_build_after.png)
 
-3) 定时构建
+3. 定时构建
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_build_task.png)
 ```bash
@@ -655,7 +653,7 @@ HH(8-15)/2 * * 1-5
 HH 1,15 1-11 *
 ```
 
-4) 轮询SCM
+4. 轮询SCM
 
 轮询SCM，是指定时扫描本地代码仓库的代码是否有变更，如果代码有变更就触发项目构建。但是定时扫描本地整个项目的代码，增大系统的开销，不建议使用
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_build_scm.png)
@@ -668,11 +666,11 @@ HH 1,15 1-11 *
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_gitwebhook.png)
 
-- Jenkins设置自动构建
+1. Jenkins设置自动构建
 
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_project_webhook.png)
 
-- Gitlab配置webhook
+2. Gitlab配置webhook
 
 1）开启webhook功能
 使用root账户登录到后台，点击Admin Area -> Settings -> Network
