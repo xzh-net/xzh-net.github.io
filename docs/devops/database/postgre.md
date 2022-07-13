@@ -14,14 +14,14 @@ sudo systemctl start postgresql-12
 
 ### 1.2 编译安装
 
-1. 下载
+#### 1.2.1 下载
 
 http://www.postgresql.org/ftp/source/
 ```bash
 wget https://ftp.postgresql.org/pub/source/v12.4/postgresql-12.4.tar.gz --no-check-certificate
 ```
 
-2. 安装依赖
+#### 1.2.2 安装依赖
 
 ```bash
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
@@ -31,7 +31,7 @@ yum update
 yum install -y gcc readline-devel zlib-devel docbook-dtds docbook-style-xsl fop libxslt readline-devel.x86_64 zlib-devel.x86_64 libmemcached libpqxx
 ```
 
-3. 解压编译
+#### 1.2.3 解压编译
 
 ```bash
 tar -zxvf postgresql-12.4.tar.gz -C /home/
@@ -41,7 +41,7 @@ cd postgresql-12.4
 make && make install
 ```
 
-4. 创建用户组和目录授权
+#### 1.2.4 创建用户组和目录授权
 
 ```bash
 useradd postgres
@@ -56,7 +56,7 @@ chown postgres /data/pgdata/12/archive
 chown postgres /data/pg_backup 
 ```
 
-5. 系统参数优化
+#### 1.2.5 系统参数优化
 
 vi /etc/sysctl.conf
 
@@ -88,7 +88,7 @@ vi /etc/security/limits.conf
 * hard memlock 50000000
 ```
 
-5. 设置环境变量
+#### 1.2.6 设置环境变量
 
 ```bash
 su - postgres
@@ -103,14 +103,14 @@ source .bash_profile
 # psql --version
 ```
 
-6. 数据库初使化
+#### 1.2.7 数据库初使化
 
 ```bash
 su - postgres
 initdb -D $PGDATA
 ```
 
-7. 应用配置
+#### 1.2.8 应用配置
 
 ```bash
 cd /data/pgdata/12/data
@@ -126,7 +126,7 @@ host all all 0.0.0.0/0 md5          # 所有地址访问
 host replication all 0.0.0.0/0 md5  # 物理备份 -R
 ```
 
-8. 设置开机自启动
+#### 1.2.9 设置开机自启动
 
 ```bash
 su - root
@@ -146,7 +146,7 @@ chkconfig --add postgresql
 chkconfig
 ```
 
-9. 启动关闭
+#### 1.2.10 启动服务
 
 ```bash
 pg_ctl -D /data/pgdata/12/data -l logfile start
@@ -157,7 +157,11 @@ pg_ctl -D /data/pgdata/12/data -l logfile status
 service postgresql start
 service postgresql stop
 service postgresql restart
+```
 
+#### 1.2.11 测试
+
+```bash
 psql
 ALTER USER postgres WITH PASSWORD 'postgres'; # 修改用户默认密码
 /usr/local/pgsql/bin/createdb test
@@ -282,6 +286,8 @@ psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
 
 ## 2. 命令
 
+### 2.1 基本信息
+
 ```bash
 psql -h localhost -p 5432 -U postgres -W #使用指定用户和IP端口登陆
 \q              #退出psql命令行
@@ -342,7 +348,8 @@ pg_create_logical_replication_slot(slotname,decodingname);
 pg_logical_slot_get_changes();
 ```
 
-DLL
+### 2.2 建表语句
+
 ```bash
 set timezone = 'Etc/UTC';
 set timezone = 'Asia/Shanghai';
@@ -439,7 +446,7 @@ select pg_wal_replay_resume();  # 停止恢复
 ```
 
 
-### 3.3 定时备份
+#### 3.2.4 定时备份
 
 ```bash
 #!/bin/bash
@@ -455,9 +462,9 @@ rm -rf /opt/DB/vjsp10010260_$cur_time.dump
 echo "backup finished" his
 ```
 
-### 3.4 归档日志
+### 3.3 归档日志
 
-#### 3.4.1 自动清理
+#### 3.3.1 自动清理
 
 ```bash
 mkdir -p $PGDATA/archivedir/  # 创建归档目录
@@ -471,7 +478,7 @@ archive_mode = on
 archive_command = 'pg_archive.sh %f %p'
 ```
 
-#### 3.4.2 手动清理
+#### 3.3.2 手动清理
 
 ```bash
 su - postgres
@@ -480,8 +487,6 @@ cd /usr/local/pgsql/bin
 cd /data/pgdata/12/data/archivedir
 pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
 ```
-
-
 
 ## 4. 表操作
 
@@ -527,6 +532,8 @@ SELECT pg_cancel_backend(pid);
 ```
 
 ### 4.2 占用统计
+
+
 ```sql
 -- 查询所有数据库大小
 SELECT
@@ -564,6 +571,7 @@ select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespa
 ```
 
 ### 4.3 表注释
+
 ```sql
 -- 查询所有表注释
 SELECT tb.table_name, d.description 
@@ -698,13 +706,15 @@ select pg_stat_statements_reset();
 
 ### 5.1 VIEW
 
-dual解决方案
+1. dual解决方案
+
 ```sql
 CREATE VIEW "public"."dual" AS  SELECT 'X'::character varying(1) AS dummy;
 ALTER TABLE "public"."dual" OWNER TO "postgres";
 ```
 
-普通视图
+2. 普通视图
+
 ```sql
 CREATE VIEW "public"."view_product" AS  SELECT product.id,
     product.create_user_id,
@@ -714,7 +724,8 @@ CREATE VIEW "public"."view_product" AS  SELECT product.id,
 ALTER TABLE "public"."view_product" OWNER TO "postgres";
 ```
 
-拼接视图
+3. 拼接视图
+
 ```sql
 CREATE VIEW "view_of_user" AS  SELECT ofuser.username,
     ofuser.email,
