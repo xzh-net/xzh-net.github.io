@@ -20,7 +20,6 @@
   - [Keepalived](devops/deploy/keepalived)
   - [HAProxy](devops/deploy/haproxy)
   - [Docker](devops/deploy/docker)
-  - [Docker Hub](devops/deploy/docker_hub)
   - [Nexus3](devops/deploy/nexus3)
   - [Gitlab](devops/deploy/gitlab)
   - [Jenkins](devops/deploy/jenkins)
