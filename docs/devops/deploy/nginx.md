@@ -1005,6 +1005,53 @@ server {
 /usr/local/bin/markdown-renderer -mode local -root /home/www/public/
 ```
 
+### 3.12 IP过滤
+
+1. 屏蔽ip
+
+单独网站屏蔽IP的方法，把include blocksip.conf放到网址对应的在server{}语句块，所有网站屏蔽IP的方法，把include blocksip.conf放到http {}语句块。
+
+```bash
+include blockip.conf; 
+# 添加内容
+allow  180.164.67.212;
+allow  59.46.186.253;
+deny all;
+
+http {
+    # include blockip.conf;
+    server {
+        listen       28101;
+        server_name  _;
+        # include blockip.conf;
+        location /  {
+                proxy_redirect off;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_pass http://127.0.0.1:18101;
+                # include blockip.conf;
+        }
+        
+    }
+}
+```
+
+统计ip访问次数
+
+```bash
+awk '{print $1}' /var/log/nginx/access.log |sort |uniq -c|sort -n
+```
+
+2. 通过User-Agent过滤爬虫
+
+```bash
+location / {
+    if ($http_user_agent ~* "scrapy|python|curl|java|wget|httpclient|okhttp") {
+        return 503;
+    }
+}
+```
 
 ## 4. SSL证书
 
