@@ -132,15 +132,20 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 >Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
 
-1. 本地构建
+### 4.1 本地构建
 
-- jar
+#### 4.1.1 jar
+
+1. 编写Dockerfile文件
 
 ```bash
-# 基于openjdk 镜像
+vim Dockerfile
+```
+
+```bash
 FROM openjdk:8-jdk-alpine
 ARG JAR_FILE
-# 复制文件到容器
+# 复制文件到容器 ，COPY . /public  # 当前路径所有复制到容器内
 COPY ${JAR_FILE} app.jar
 # 声明需要暴露的端口
 EXPOSE 9001
@@ -148,24 +153,24 @@ EXPOSE 9001
 ENTRYPOINT ["java","-jar","/app.jar"]
 ```
 
-```shell
-# -f :指定要使用的Dockerfile路径；
-docker build --build-arg JAR_FILE=sc-gateway.jar -t xzh-gateway:1.0 .
-docker images     #查看镜像是否创建成功
-docker run -p 9900:9900 --name=xzh-gateway -d xzh-gateway:1.0     #创建容器
-```
-
-- 基于debian  
+2. build构建
 
 ```bash
-FROM debian  
-COPY . /app  
-RUN apt-get update  
-RUN apt-get -y install openjdk-11-jdk ssh emacs  
-CMD [“java”, “-jar”, “/app/target/my-app-1.0-SNAPSHOT.jar”]  
+docker build --build-arg JAR_FILE=test-sso.jar -t test-sso:1.0 . # -f :指定要使用的Dockerfile路径；
+docker images       # 查看镜像是否创建成功
+docker run -p 9876:9001 --name=test-sso -d test-sso:1.0 # 创建容器
+docker exec -it [containerid] /bin/ash                  # 进入容器
+cat /etc/issue  # 查看操作系统
+uname -a        # 查看内核
 ```
 
-- tomcat8
+#### 4.1.2 tomcat8
+
+1. 编写Dockerfile文件
+
+```bash
+vim Dockerfile
+```
 
 ```bash
 FROM centos:7
@@ -188,26 +193,117 @@ EXPOSE 8080
 CMD /usr/local/tomcat/apache-tomcat-8.5.66/bin/startup.sh && tail -f /usr/local/tomcat/apache-tomcat-8.5.66/logs/catalina.out
 ```
 
-```shell
-docker build -t xzh/tomcat8 .
-```
-
-2. 下载构建
-
-[基于ubuntu:14.04的turnserver4.4.2.2](/linux/deploy/docker_hub?id=turn-server-4422)
-
-3. 容器构建
+2. build构建
 
 ```bash
-# 基于当前redis容器创建一个新的镜像；
-# -a 提交的镜像作者；
-# -c 使用Dockerfile指令来创建镜像；
-# -m :提交时的说明文字；
-# -p :在commit时，将容器暂停
-docker commit -a="xzh" -m="my redis" [redis容器ID]  myredis:v1.1
+docker build -t xzh/tomcat8 .
+docker run -p 9876:8080 --name=tomcat8 -d xzh/tomcat8  # 创建容器
+docker exec -it [containerid] /bin/bash                # 进入容器
 ```
 
-4. 插件构建
+### 4.2 下载构建
+
+#### 4.2.1 turnserver4.4.2.2
+
+
+1. 编写Dockerfile文件
+
+```bash
+vim Dockerfile
+```
+
+```bash
+# Coturn
+#
+# VERSION 4.4.2.2
+FROM  ubuntu:14.04
+MAINTAINER xzh<xzh@gmail.com>
+
+RUN apt-get update && apt-get install -y \
+  curl \
+  libevent-core-2.0-5 \
+  libevent-extra-2.0-5 \
+  libevent-openssl-2.0-5 \
+  libevent-pthreads-2.0-5 \
+  libhiredis0.10 \
+  libmysqlclient18 \
+  libpq5 \
+  telnet \
+  wget
+
+RUN wget http://turnserver.open-sys.org/downloads/v4.4.2.2/turnserver-4.4.2.2-debian-wheezy-ubuntu-mint-x86-64bits.tar.gz \
+  && tar xzf turnserver-4.4.2.2-debian-wheezy-ubuntu-mint-x86-64bits.tar.gz \
+  && dpkg -i coturn_4.4.2.2-1_amd64.deb
+
+COPY ./turnserver.sh /turnserver.sh
+
+ENV TURN_USERNAME kurento
+ENV TURN_PASSWORD kurento
+ENV REALM kurento.org
+ENV NAT true
+
+EXPOSE 3478 3478/udp
+
+ENTRYPOINT ["/turnserver.sh"]
+```
+
+2. 编写启动脚本
+
+```bash
+vim turnserver.sh
+```
+
+```bash
+#!/bin/bash
+set -e
+
+if [ $NAT = "true" -a -z "$EXTERNAL_IP" ]; then
+
+  # Try to get public IP
+  PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4) || echo "No public ip found on http://169.254.169.254/latest/meta-data/public-ipv4"
+  if [ -z "$PUBLIC_IP" ]; then
+    PUBLIC_IP=$(curl http://icanhazip.com) || exit 1
+  fi
+
+  # Try to get private IP
+  PRIVATE_IP=$(ifconfig | awk '/inet addr/{print substr($2,6)}' | grep -v 127.0.0.1) || exit 1
+  export EXTERNAL_IP="$PUBLIC_IP/$PRIVATE_IP"
+  echo "Starting turn server with external IP: $EXTERNAL_IP"
+fi
+
+echo 'min-port=49152' > /etc/turnserver.conf
+echo 'max-port=65535' >> /etc/turnserver.conf
+echo 'fingerprint' >> /etc/turnserver.conf
+echo 'lt-cred-mech' >> /etc/turnserver.conf
+echo "realm=$REALM" >> /etc/turnserver.conf
+echo 'log-file stdout' >> /etc/turnserver.conf
+echo "user=$TURN_USERNAME:$TURN_PASSWORD" >> /etc/turnserver.conf
+[ $NAT = "true" ] && echo "external-ip=$EXTERNAL_IP" >> /etc/turnserver.conf
+
+exec /usr/bin/turnserver "$@"
+```
+
+
+3. build构建
+ 
+```bash
+chmod -R 777 /home/coturn
+sudo docker build --tag coturn .
+sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
+```
+
+### 4.3 容器构建
+
+基于一个已存在的容器构建出镜像
+   - -a 提交的镜像作者；
+   - -c 使用Dockerfile指令来创建镜像；
+   - -m :提交时的说明文字；
+
+```bash
+docker commit  -a="xzh" -m="my haha" [containerid]  haha:v1.1
+```
+
+### 4.4 插件构建
 
 pom.xml
 
@@ -278,7 +374,13 @@ pom.xml
     </build>
 ```
 
-## 5. Docker Compose
+## 5. docker-compose
+
+### 5.1 mall-env.yml
+
+```bash
+vi docker-compose-env.yml
+```
 
 ```yml
 version: '3'
@@ -344,8 +446,11 @@ docker-compose -f docker-compose-env.yml down
 ```
 
 
+### 5.1 elk-762.yml
 
-ELK7.6.2.yml
+```bash
+vi docker-compose-elk.yml
+```
 
 ```yml
 version: '3'

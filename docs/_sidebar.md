@@ -30,7 +30,6 @@
   - [Kafka](devops/deploy/kafka)
   - [Debezium](devops/deploy/debezium)
   - [Kubernetes](devops/deploy/kubernetes)
-  - [Kubernetes YAML](devops/deploy/kubernetes_yaml)
   - [Minikube](devops/deploy/minikube)
   - [Hadoop](devops/deploy/hadoop)
   - [Elastic Stack](devops/deploy/elk)
