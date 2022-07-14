@@ -4,7 +4,7 @@
 
 ### 1.1 单机
 
-1. 更新yum
+#### 1.1.1 更新yum
 
 ```bash
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo 
@@ -12,7 +12,7 @@ wget -O /etc/yum.repos.d/mssql-server.repo https://packages.microsoft.com/config
 yum makecache 
 ```
 
-2. 安装mssql-server
+#### 1.1.2 安装mssql-server
 
 ```bash
 yum install -y mssql-server
@@ -21,7 +21,7 @@ wget https://packages.microsoft.com/rhel/7/mssql-server-2017/mssql-server-14.0.3
 yum localinstall mssql-server-14.0.3445.2-4.x86_64.rpm
 ```
 
-3. 初始化
+#### 1.1.4 初始化
 
 ```bash
 sudo /opt/mssql/bin/mssql-conf setup    # 选择Developer版本，密码：1234Qwer
@@ -29,7 +29,7 @@ sudo /opt/mssql/bin/mssql-conf setup    # 选择Developer版本，密码：1234Q
 vi /opt/mssql/bin/mssql-conf
 ```
 
-4. 启动
+#### 1.1.4 启动服务
 
 ```bash
 systemctl status mssql-server # 安装默认开机启动
@@ -37,22 +37,24 @@ systemctl stop mssql-server
 systemctl start mssql-server
 ```
 
-5. 客户端工具
+#### 1.1.5 客户端测试
+
+
+1. 安装客户端
 
 ```bash
 wget -O  /etc/yum.repos.d/msprod.repo https://packages.microsoft.com/config/rhel/7/prod.repo
 yum install -y mssql-tools unixODBC-devel # 输入两次yes进行确认
 ```
 
-6. 设置环境变量
+2. 设置环境变量
 
 ```bash
 echo "export PATH=$PATH:/opt/mssql-tools/bin" >> /etc/profile
 source /etc/profile
 ```
 
-
-7. 测试
+3. 测试
 
 ```bash
 sqlcmd -S localhost -U SA -p 1234Qwer
@@ -61,7 +63,7 @@ CREATE DATABASE [Test]
 GO
 ```
 
-### 1.2 卸载
+#### 1.1.6 服务端卸载
 
 ```bash
 yum remove mssql-server
