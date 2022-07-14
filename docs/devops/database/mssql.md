@@ -21,7 +21,7 @@ wget https://packages.microsoft.com/rhel/7/mssql-server-2017/mssql-server-14.0.3
 yum localinstall mssql-server-14.0.3445.2-4.x86_64.rpm
 ```
 
-#### 1.1.4 初始化
+#### 1.1.3 初始化
 
 ```bash
 sudo /opt/mssql/bin/mssql-conf setup    # 选择Developer版本，密码：1234Qwer
