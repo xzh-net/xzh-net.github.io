@@ -188,7 +188,8 @@ mysql -uroot -p1q2w3e4r -e "show variables like 'log_bin%'";
 
 ## 3. 表操作
 
-获取所有表结构信息
+1. 获取所有表结构信息
+   
 ```sql
 select table_name tableName, engine engine, table_comment tableComment, create_time createTime from
 		information_schema.tables
@@ -197,13 +198,15 @@ select table_name tableName, engine engine, table_comment tableComment, create_t
 		order by create_time desc
 ```
 
-获取表名及备注sql
+2. 获取表名及备注sql
+
 ```sql
 select table_name tableName, engine, table_comment tableComment, create_time createTime from information_schema.tables
         where table_schema = (select database()) and table_name = #{tableName}
 ```
 
-获取指定表的字段名称主键等
+3. 获取指定表的字段名称主键等
+
 ```sql
 select column_name columnName, data_type dataType, column_comment columnComment, column_key columnKey, extra from information_schema.columns
         where table_name = #{tableName} and table_schema = (select database()) order by ordinal_position
