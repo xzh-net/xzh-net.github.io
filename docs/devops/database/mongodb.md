@@ -8,7 +8,7 @@
 
 ### 1.1 单机
 
-1. 上传解压
+#### 1.1.1 上传解压
 
 ```bash
 mkdir -p /mydata/mongodb 
@@ -16,7 +16,7 @@ tar -xvf mongodb-linux-x86_64-rhel70-4.4.6.tgz -C /mydata/
 mv /mydata/mongodb-linux-x86_64-rhel70-4.4.6 /usr/local/mongodb
 ```
 
-2. 修改配置
+#### 1.1.2 修改配置
 
 ```bash
 mkdir -p /mydata/mongodb/data/db    # 数据存储目录
@@ -49,7 +49,7 @@ net:
     port: 27017
 ```
 
-3. 启动服务
+#### 1.1.3 启动服务
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
@@ -71,7 +71,7 @@ rm -f /mydata/mongodb/data/db/*.lock
 
 #### 1.2.1 创建主节点
 
-在192.168.3.200执行
+1. 在192.168.3.200执行
 
 ```bash
 mkdir -p /mydata/mongodb/log /mydata/mongodb/data/db
@@ -106,14 +106,15 @@ replication:
     replSetName: myrs
 ```
 
-启动主节点
+2. 启动主节点
+
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
 ```
 
 #### 1.2.2 创建副本节点
 
-在192.168.3.201执行
+1. 在192.168.3.201执行
 
 ```bash
 mkdir -p /mydata/mongodb/log /mydata/mongodb/data/db
@@ -148,7 +149,7 @@ replication:
     replSetName: myrs
 ```
 
-启动副本节点
+2. 启动副本节点
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
@@ -156,7 +157,7 @@ replication:
 
 #### 1.2.3 创建仲裁节点
 
-在192.168.3.202执行
+1. 在192.168.3.202执行
 
 ```bash
 mkdir -p /mydata/mongodb/log /mydata/mongodb/data/db
@@ -191,7 +192,7 @@ replication:
     replSetName: myrs
 ```
 
-启动仲裁节点
+2. 启动仲裁节点
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
@@ -228,9 +229,9 @@ rs.status()
 rs.stepDown(600)                    # 主节点下线
 ```
 
-#### 1.2.5 测试
+#### 1.2.5 客户端测试
 
-登录主节点
+1. 登录主节点
 
 ```bash
 /usr/local/mongodb/bin/mongo --host=192.168.3.200 --port=27017
@@ -238,14 +239,14 @@ use articledb
 db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date()})
 ```
 
-登录从节点
+2. 登录从节点
 
 ```bash
 /usr/local/mongodb/bin/mongo --host=192.168.3.201 --port=27017
 show dbs;
 ```
 
-从节点不能读取集合的数据。当前从节点只是一个备份，不是奴隶节点，无法读取数据，也不能写入，需要加读的权限
+3. 从节点不能读取集合的数据。当前从节点只是一个备份，不是奴隶节点，无法读取数据，也不能写入，需要加读的权限
 
 ```bash
 rs.slaveOk()       # 允许该节点读取数据，该命令是db.getMongo().setSlaveOk()的简化命令
@@ -350,7 +351,7 @@ sharding:
     clusterRole: shardsvr	
 ```
 
-5. 启动
+5. 启动服务
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs01_27017/mongod.conf
@@ -466,7 +467,7 @@ sharding:
     clusterRole: shardsvr	
 ```
 
-5. 启动
+5. 启动服务
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs02_37017/mongod.conf
@@ -582,7 +583,7 @@ sharding:
     clusterRole: configsvr
 ```
 
-5. 启动
+5. 启动服务
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myconfigrs_27019/mongod.conf
@@ -656,7 +657,7 @@ sharding:
     configDB: myconfigrs/192.168.3.201:27019,192.168.3.201:27119,192.168.3.201:27219
 ```
 
-4. 启动
+4. 启动服务
 
 ```bash
 /usr/local/mongodb/bin/mongos -f /mydata/mongodb/sharded_cluster/mymongos_27017/mongos.conf
@@ -728,12 +729,14 @@ root 超级账号，超级权限
 
 ### 2.2 单机认证
 
-参数方式
+#### 2.2.1 参数方式
+
 ```bash
 /usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf --auth
 ```
 
-配置方式
+#### 2.2.2 配置方式
+
 ```bash
 vi /mydata/mongodb/mongod.conf
 ```
@@ -748,14 +751,14 @@ security:
 
 ### 2.3 副本集认证
 
-开启认证之前，创建超管用户，也可以通过localhost创建超管用户
+1. 开启认证之前，创建超管用户，也可以通过localhost创建超管用户
 
 ```bash
 use admin
 db.createUser({user:"myroot",pwd:"123456",roles:["root"]})
 ```
 
-创建认证文件
+2. 创建认证文件
 
 ```bash
 openssl rand -base64 90 -out /mydata/mongodb/mongo.keyfile
@@ -772,7 +775,8 @@ security:
     authorization: enabled
 ```
 
-在主节点上添加普通账号
+3. 在主节点上添加普通账号
+
 ```bash
 #先用管理员账号登录再切换到admin库
 use admin
