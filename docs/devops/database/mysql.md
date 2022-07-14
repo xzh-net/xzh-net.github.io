@@ -4,7 +4,7 @@
 
 ### 1.1 单机
 
-1. 上传解压
+#### 1.1.1 上传解压
 
 ```bash
 cd /opt/software/
@@ -13,7 +13,7 @@ wget https://cdn.mysql.com/archives/mysql-5.7/mysql-5.7.29-1.el7.x86_64.rpm-bund
 tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
 ```
 
-2. 安装
+#### 1.1.2 安装
 
 ```bash
 # 卸载版本
@@ -26,7 +26,7 @@ cd /opt/software/mysql
 rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm mysql-community-libs-5.7.29-1.el7.x86_64.rpm mysql-community-client-5.7.29-1.el7.x86_64.rpm mysql-community-server-5.7.29-1.el7.x86_64.rpm
 ```
 
-3. 修改配置
+#### 1.1.3 修改配置
 
 ```bash
 vim /etc/my.cnf
@@ -40,7 +40,7 @@ log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
 ```
 
-4. 初始化
+#### 1.1.4 初始化
 
 ```bash
 mysqld --initialize 					# 初始化mysql
@@ -49,7 +49,17 @@ cat /var/log/mysqld.log | grep password	# 初始密码
 systemctl start mysqld.service      	# 启动mysql
 ```
 
-5. 登录数据库
+#### 1.1.5 启动服务
+
+```bash
+systemctl start mysqld
+systemctl stop mysqld
+systemctl status mysqld
+systemctl enable  mysqld    # 设置开机启动
+ps aux | grep mysqld        
+```
+
+#### 1.1.6 创建用户
 
 ```bash
 mysql -u root -p
@@ -58,17 +68,7 @@ grant all privileges on *.* to 'root' @'%' identified by '123456';
 flush privileges;
 ```
 
-6. 启动服务
-
-```bash
-systemctl start mysqld
-systemctl stop mysqld
-systemctl status mysqld
-systemctl enable  mysqld    # 设置自启动成功
-ps aux | grep mysqld        # 查看是否已经
-```
-
-### 1.2 卸载
+#### 1.1.7 卸载服务
 
 1. 停止服务
 
