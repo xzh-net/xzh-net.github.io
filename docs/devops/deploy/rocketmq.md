@@ -2,13 +2,13 @@
 
 ## 1. 安装
 
-### 1.1 源码
+### 1.1 单机
 
-1. 下载
+#### 1.1.1 下载
 
 https://rocketmq.apache.org/
 
-2. 编译
+#### 1.1.2 编译
 
 ```bash
 unzip rocketmq-all-4.9.2-source-release.zip
@@ -17,66 +17,58 @@ mvn -Prelease-all -DskipTests clean install -U
 cd distribution/target/rocketmq-4.9.2/rocketmq-4.9.2
 ```
 
-3. 启动
+#### 1.1.3 启动服务
+
+1. 启动NameServer
 
 ```bash
-nohup sh bin/mqnamesrv &                    # 启动 Name Server
+nohup sh bin/mqnamesrv &
 tail -f ~/logs/rocketmqlogs/namesrv.log
+```
 
-nohup sh bin/mqbroker -n localhost:9876 &   # 启动 Broker
+2. 启动Broker
+
+```bash
+nohup sh bin/mqbroker -n localhost:9876 &
 tail -f ~/logs/rocketmqlogs/broker.log
 ```
 
-4. 测试
-
-```bash
-# 1.设置环境变量
-export NAMESRV_ADDR=localhost:9876
-# 2.使用安装包的Demo发送消息
-sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer
-```
-
-```bash
-# 1.设置环境变量
-export NAMESRV_ADDR=localhost:9876
-# 2.接收消息
-sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
-```
-
-5. 关闭
+3. 关闭服务
 
 ```bash
 sh bin/mqshutdown broker  # 关闭Broker
 sh bin/mqshutdown namesrv # 关闭NameServer
 ```
 
-### 1.2 监控
+#### 1.1.4 客户端测试
 
-https://github.com/xzh-net/rocketmq-dashboard
+1. 发送消息
 
 ```bash
-mvn clean package -Dmaven.test.skip=true
-java -jar target/rocketmq-dashboard-1.0.1-SNAPSHOT.jar
+# 设置环境变量
+export NAMESRV_ADDR=localhost:9876
+sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer
 ```
 
-docker
+1. 接收消息
+
 ```bash
-docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=127.0.0.1:9876" -p 8080:8080 -t apacherocketmq/rocketmq-dashboard:latest
+# 设置环境变量
+export NAMESRV_ADDR=localhost:9876
+sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
 ```
 
 
-## 2. 集群
+### 1.2 集群-双主双从
 
-### 2.1 双主双从
-
-#### 2.1.1 服务器环境
+#### 1.2.1 服务器环境
 
 | **序号** | **IP**         | **角色**                 | **架构模式**    |
 | -------- | -------------- | ------------------------ | --------------- |
 | 1        | 192.168.25.135 | nameserver、brokerserver | Master1、Slave2 |
 | 2        | 192.168.25.138 | nameserver、brokerserver | Master2、Slave1 |
 
-#### 2.1.2 Host配置
+#### 1.2.2 Host配置
 
 ```bash
 vim /etc/hosts
@@ -86,6 +78,7 @@ vim /etc/hosts
 # nameserver
 192.168.25.135 rocketmq-nameserver1
 192.168.25.138 rocketmq-nameserver2
+
 # broker
 192.168.25.135 rocketmq-master1
 192.168.25.135 rocketmq-slave2
@@ -93,7 +86,9 @@ vim /etc/hosts
 192.168.25.138 rocketmq-slave1
 ```
 
-#### 2.1.3 防火墙配置
+#### 1.2.3 防火墙配置
+
+两台机器都执行
 
 ```bash
 # 关闭防火墙
@@ -121,7 +116,9 @@ firewall-cmd --remove-port=11011/tcp --permanent
 firewall-cmd --reload
 ```
 
-#### 2.1.4 环境变量配置
+#### 1.2.4 环境变量配置
+
+两台机器都执行
 
 ```bash
 vim /etc/profile
@@ -137,7 +134,9 @@ export ROCKETMQ_HOME PATH
 source /etc/profile
 ```
 
-#### 2.1.5 创建消息存储路径
+#### 1.2.5 创建消息存储路径
+
+两台机器都执行
 
 ```bash
 mkdir /usr/local/rocketmq/store
@@ -146,11 +145,9 @@ mkdir /usr/local/rocketmq/store/consumequeue
 mkdir /usr/local/rocketmq/store/index
 ```
 
-#### 2.1.6 broker配置文件
+#### 1.2.6 broker配置文件192.168.25.135
 
 1. master1
-
-服务器：192.168.25.135
 
 ```sh
 vi /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-a.properties
@@ -223,8 +220,6 @@ flushDiskType=SYNC_FLUSH
 
 2. slave2
 
-服务器：192.168.25.135
-
 ```sh
 vi /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-b-s.properties
 ```
@@ -294,9 +289,10 @@ flushDiskType=ASYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-3. master2
 
-服务器：192.168.25.138
+#### 1.2.7 broker配置文件192.168.25.138
+
+1. master2
 
 ```sh
 vi /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-b.properties
@@ -367,9 +363,7 @@ flushDiskType=SYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-4. slave1
-
-服务器：192.168.25.138
+2. slave1
 
 ```sh
 vi /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-a-s.properties
@@ -440,7 +434,7 @@ flushDiskType=ASYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-#### 2.1.7 修改启动脚本文件
+#### 1.2.7 修改启动脚本文件
 
 1. 修改runserver默认内存
 
@@ -462,7 +456,7 @@ vi /usr/local/rocketmq/rocketmq-4.9.2/bin/runbroker.sh
 JAVA_OPT="${JAVA_OPT} -server -Xms512m -Xmx512m"
 ```
 
-#### 2.1.8 启动NameServe集群
+#### 1.2.8 启动NameServe集群
 
 分别在192.168.25.135和192.168.25.138启动NameServer
 
@@ -471,7 +465,7 @@ cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqnamesrv &
 ```
 
-#### 2.1.9 启动Broker集群
+#### 1.2.9 启动Broker集群
 
 1. 在192.168.25.135上启动master1和slave2
 
@@ -489,7 +483,7 @@ cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqbroker -c /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-b-s.properties &
 ```
 
-2. 在192.168.25.138上启动master2和slave2
+2. 在192.168.25.138上启动master2和slave1
 
 master2
 
@@ -503,4 +497,26 @@ slave1
 ```sh
 cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqbroker -c /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-a-s.properties &
+```
+
+## 2. 监控
+
+### 2.1 下载
+
+https://github.com/xzh-net/rocketmq-dashboard
+
+
+### 2.2 编译
+
+#### 2.2.1 源码安装 
+
+```bash
+mvn clean package -Dmaven.test.skip=true
+java -jar target/rocketmq-dashboard-1.0.1-SNAPSHOT.jar
+```
+
+#### 2.2.2 docker运行
+
+```bash
+docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=127.0.0.1:9876" -p 8080:8080 -t apacherocketmq/rocketmq-dashboard:latest
 ```
