@@ -4,26 +4,26 @@ SRS是一个采用MIT协议授权的国产简单RTMP/HLS直播服务器。最新
 
 ## 1. 安装
 
-https://codeload.github.com/ossrs/srs/tar.gz/refs/tags/v4.0.187
+### 1.1 下载
+
+https://github.com/ossrs/srs/releases/download/v4.0-r1/srs-server-4.0-r1.tar.gz
+
+### 1.2 解压编译
 
 ```bash
-cd /home
-tar -xvf srs-4.0.187.tar.gz     # 解压
-cd /home/srs-4.0.187/trunk      # 切换目录
+cd /opt/software
+tar -zxvf srs-server-4.0-b10.tar.gz -C /opt
+cd /opt/srs-server-4.0-b10/trunk
 ./configure
 make
-
-./objs/srs -c conf/srs.conf     # 启动
-./etc/init.d/srs status         # 查看状态
-tail -n 30 -f ./objs/srs.log    # 查看日志
 ```
 
-控制台网址 http://127.0.0.1:1985/console/ng_index.html
+### 1.3 修改配置
 
-
-## 2. 配置
-
+```bash
+cd conf
 vi http.hls.conf
+```
 
 ```conf
 listen              1935;
@@ -63,34 +63,105 @@ vhost __defaultVhost__ {
 }
 ```
 
-## 3. 测试
+### 1.4 启动服务
 
-### 3.1 推流
-
-- FFmpeg推流，使用rtmp协议时，默认使用1935端口 http://ffmpeg.org/
 ```bash
-ffmpeg -re -i time.flv -vcodec copy -acodec copy -f flv -y rtmp://127.0.0.1/live/time
+cd /opt/srs-server-4.0-b10/trunk
+./objs/srs -c conf/srs.conf     # 启动
+./etc/init.d/srs status         # 查看状态
+tail -n 30 -f ./objs/srs.log    # 查看日志
 ```
 
-- OBS推流 https://obsproject.com/
+检查SRS是否成功启动，可以打开 http://39.105.58.136:8080/
 
-### 3.2 拉流
+控制台网址 http://39.105.58.136:1985/console/ng_index.html
 
-- rtmp
 
+## 2. 客户端测试
+
+- RTMP流地址：rtmp://39.105.58.136/live/time （端口号1935）
+- FLV地址：http://39.105.58.136:8080/live/time.flv （端口号8080）
+- HLS流地址：http://39.105.58.136:8080/live/time.m3u8 （端口号8080）
+- WebRTC流地址: webrtc://39.105.58.136/live/time （webrtc使用的是udp,默认监听8000,不需要设置端口号）
+
+### 2.1 FFmpeg
+
+下载地址：http://ffmpeg.org 
+
+FFmpeg推流，使用rtmp协议时，默认使用1935端口，这里使用windows10安装ffmpeg来测试
+
+#### 2.1.1 配置环境
+
+path环境变量添加`D:\tools\ffmpeg\bin`
+
+#### 2.1.2 推流
+
+```bash
+ffmpeg -re -i time.flv -vcodec copy -acodec copy -f flv -y rtmp://39.105.58.136/live/time
 ```
-rtmp://127.0.0.1/live/livestream
-rtmp://127.0.0.1:8080/live/livestream.flv
-rtmp://127.0.0.1:8080/live/livestream.m3u8
 
-RTMP流地址：rtmp://127.0.0.1/live/time                # 端口号1935
-HTTP FLV地址：http://127.0.0.1:8080/live/time.flv     # 端口号8080
-HLS流地址：http://127.0.0.1:8080/live/time.m3u8       # 端口号8080
-WebRTC流地址: webrtc://127.0.0.1/live/time            # 没有端口号
+#### 2.1.3 拉流
 
-webrtc使用的是udp,默认监听8000,不需要设置端口号
+- rtmp://39.105.58.136/live/time
+- rtmp://39.105.58.136:8080/live/time.flv
+- rtmp://39.105.58.136:8080/live/time.m3u8
+
+```bash
+ffplay rtmp://39.105.58.136/live/time
 ```
 
-- 在线播放器
+### 2.2 VLC
 
-http://127.0.0.1:8080/players/srs_player.html
+下载地址：https://get.videolan.org/vlc/3.0.12/win64/vlc-3.0.12-win64.exe
+
+#### 2.2.1 拉流
+
+媒体 -> 打开网络串流 -> 输入rtmp地址
+
+### 2.3 OBS
+
+下载地址：https://obsproject.com/
+
+#### 2.3.1 推流
+
+1. 设置捕获源
+
+![](../../assets/_images/devops/deploy/srs/1.png)
+![](../../assets/_images/devops/deploy/srs/2.png)
+![](../../assets/_images/devops/deploy/srs/3.png)
+![](../../assets/_images/devops/deploy/srs/4.png)
+
+2. 设置视频
+
+![](../../assets/_images/devops/deploy/srs/5.png)
+![](../../assets/_images/devops/deploy/srs/6.png)
+
+
+3. 设置音频
+
+【注意】如果只想进行桌面共享，不想传输声音，则将方框中选项全部选择已禁用。如果想进行桌面共享及传输声音，则按照图示设置
+
+![](../../assets/_images/devops/deploy/srs/7.png)
+
+4. 设置输出
+
+![](../../assets/_images/devops/deploy/srs/8.png)
+
+5. 设置推流
+
+![](../../assets/_images/devops/deploy/srs/9.png)
+
+6. 开始推流
+
+![](../../assets/_images/devops/deploy/srs/10.png)
+![](../../assets/_images/devops/deploy/srs/11.png)
+
+
+### 2.4 在线播放器
+
+http://39.105.58.136:8080/players/srs_player.html
+
+
+
+
+
