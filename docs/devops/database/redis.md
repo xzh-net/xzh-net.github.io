@@ -254,8 +254,11 @@ cd /usr/local/redis/bin
 
 ## 2. 命令
 
+### 2.1 String
+
+String可实现：缓存，限流，计数器，分布式锁，session共享
+
 ```bash
-# String可实现：`缓存，限流，计数器，分布式锁，session共享`
 SETEX key seconds value          # 将值 value 关联到 key ，并将 key 的过期时间设为 seconds (以秒为单位)。
 MSETNX key value [key value ...] # 同时设置一个或多个 key-value 对，当且仅当所有给定 key 都不存在。
 # 非原子
@@ -277,8 +280,13 @@ PSETEX key milliseconds value   # 这个命令和 SETEX 命令相似，但它以
 APPEND key value                # 如果 key 已经存在并且是一个字符串， APPEND 命令将 value 追加到 key 原来的值的末尾。
 GETSET key value                # 将给定 key 的值设为 value ，并返回 key 的旧值(old value)。
 MGET key [key ...]              # 获取所有(一个或多个)给定 key 的值。
+```
 
-# Hash可实现：`用户信息存储，访问量等组合查询`
+### 2.2 Hash
+
+Hash可实现：用户信息存储，访问量等组合查询
+
+```bash
 HMSET key field value [field value ...] # 同时将多个 field-value (域-值)对设置到哈希表 key 中。
 HMGET key field [field ...]             # 获取所有给定字段的值
 HSET key field value                    # 将哈希表 key 中的字段 field 的值设为 value 。
@@ -292,8 +300,13 @@ HDEL key field [field ...]      # 删除一个或多个哈希表字段
 HVALS key                       # 获取哈希表中所有值
 HKEYS key                       # 获取所有哈希表中的字段
 HSETNX key field value          # 只有在字段 field 不存在时，设置哈希表字段的值。
+```
 
-# List可实现：`取最新n个，简单队列`
+### 2.3 List
+
+List可实现：取最新n个，简单队列
+
+```bash
 RPOPLPUSH source destination            # 移除列表的最后一个元素，并将该元素添加到另一个列表并返回
 # 非原子
 LINDEX key index                        # 通过索引获取列表中的元素
@@ -312,8 +325,13 @@ LSET key index value                # 通过索引设置列表元素的值
 LPUSH key value [value ...]         # 将一个或多个值插入到列表头部
 RPUSHX key value                    # 为已存在的列表添加值
 LINSERT key BEFORE|AFTER pivot value # 在列表的元素前或者后插入元素
+```
 
-#  Set可实现：`共同好友，交集差集，踩，赞，标签`
+### 2.4 Set
+
+Set可实现：共同好友，交集差集，踩，赞，标签
+
+```bash
 SUNION key [key ...]            # 返回所有给定集合的并集
 SCARD key                       # 获取集合的成员数
 SRANDMEMBER key [count]         # 返回集合中一个或多个随机数
@@ -329,8 +347,13 @@ SSCAN key cursor [MATCH pattern] [COUNT count] # 迭代集合中的元素
 SDIFFSTORE destination key [key ...]            # 返回给定所有集合的差集并存储在 destination 中
 SINTERSTORE destination key [key ...]           # 返回给定所有集合的交集并存储在 destination 中
 SUNIONSTORE destination key [key ...]           # 所有给定集合的并集存储在 destination 集合中
+```
 
-# Sorted Set 可实现：`排行榜`
+### 2.5 Sorted Set
+
+Sorted Set 可实现：排行榜
+
+```bash
 ZCARD key                           # 获取有序集合的成员数
 ZSCORE key member                   # 返回有序集中，成员的分数值
 ZRANK key member                    # 返回有序集合中指定成员的索引
@@ -348,8 +371,13 @@ ZREVRANGEBYSCORE key max min [WITHSCORES] [LIMIT offset count]  # 返回有序�
 ZREVRANGE key start stop [WITHSCORES]                           # 返回有序集中指定区间内的成员，通过索引，分数从高到底
 ZSCAN key cursor [MATCH pattern] [COUNT count]                  # 迭代有序集合中的元素（包括元素成员和元素分值）
 ZADD key score member [[score member] [score member] ...]       # 向有序集合添加一个或多个成员，或者更新已存在成员的分数
+```
 
-# 键命令
+### 2.6 其他命令 
+
+#### 2.6.1 键命令
+
+```bash
 DEL key [key ...]       # 该命令用于在 key 存在是删除 key。
 DUMP key                # 序列化给定 key ，并返回被序列化的值。
 EXISTS key              # 检查给定 key 是否存在。
@@ -365,15 +393,11 @@ EXPIREAT key timestamp  # 设置 key 过期时间的时间戳(unix timestamp)
 TTL key                 # 以秒为单位，返回给定 key 的剩余生存时间(TTL, time to live)。
 Pttl key                # 以毫秒为单位返回 key 的剩余的过期时间。
 PEXPIREAT key milliseconds-timestamp # 设置 key 的过期时间亿以毫秒计。
+```
 
-# 连接命令
-Ping # 查看服务是否运行
-Quit # 关闭当前连接
-ECHO message  # 打印字符串
-SELECT index  # 切换到指定的数据库
-AUTH password # 验证密码是否正确
+#### 2.6.2 服务器命令
 
-# 服务器命令
+```bash
 redis-server --version
 redis-server /opt/redis/redis.conf
 redis-cli -h host -p port -a password
@@ -408,36 +432,61 @@ CLIENT LIST                 # 获取连接到服务器的客户端连接列表
 CLIENT SETNAME connection-name  # 设置当前连接的名称
 SLOWLOG subcommand [argument]   # 管理的慢日志
 COMMAND INFO command-name [command-name ...]  # 获取指定 命令描述的数组
+```
 
-# 脚本命令
+#### 2.6.3 连接命令
+
+```bash
+Ping # 查看服务是否运行
+Quit # 关闭当前连接
+ECHO message  # 打印字符串
+SELECT index  # 切换到指定的数据库
+AUTH password # 验证密码是否正确
+```
+
+#### 2.6.4 脚本命令
+
+```bash
 Script kill             # 杀死当前正在运行的 Lua 脚本。
 SCRIPT LOAD script      # 将脚本 script 添加到脚本缓存中，但并不立即执行这个脚本。
 SCRIPT FLUSH            # 从脚本缓存中移除所有脚本。
 EVAL script numkeys key [key ...] arg [arg ...]     # 执行 Lua 脚本。
 EVALSHA sha1 numkeys key [key ...] arg [arg ...]    # 执行 Lua 脚本。
 SCRIPT EXISTS script [script ...]                   # 查看指定的脚本是否已经被保存在缓存当中。
+```
 
-# 事务命令
+#### 2.6.5 事务命令
+
+```bash
 Exec                # 执行所有事务块内的命令。
 Unwatch             # 取消 WATCH 命令对所有 key 的监视。
 WATCH key [key ...] # 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。
 Discard             # 取消事务，放弃执行事务块内的所有命令。
 Multi               # 标记一个事务块的开始。
+```
 
-# HyperLogLog命令
+#### 2.6.6 HyperLogLog命令
+
+```bash
 PFMERGE destkey sourcekey [sourcekey ...] # 将多个 HyperLogLog 合并为一个 HyperLogLog
 PFADD key element [element ...] # 添加指定元素到 HyperLogLog 中。
 PFCOUNT key [key ...] # 返回给定 HyperLogLog 的基数估算值。
+```
 
-# 发布订阅命令
+#### 2.6.7 发布订阅命令
+
+```bash
 UNSUBSCRIBE [channel [channel ...]] # 指退订给定的频道。
 SUBSCRIBE channel [channel ...] # 订阅给定的一个或多个频道的信息。
 PUBSUB <subcommand> [argument [argument ...]] # 查看订阅与发布系统状态。
 PUNSUBSCRIBE [pattern [pattern ...]] # 退订所有给定模式的频道。
 PUBLISH channel message # 将信息发送到指定的频道。
 PSUBSCRIBE pattern [pattern ...] # 订阅一个或多个符合给定模式的频道。
+```
 
-# 地理位置(geo)命令
+#### 2.6.8 地理位置(geo)命令
+
+```bash
 GEOHASH # 返回一个或多个位置元素的 Geohash 表示
 GEOPOS # 从key里返回所有给定位置元素的位置（经度和纬度）
 GEODIST # 返回两个给定位置之间的距离
@@ -450,25 +499,28 @@ GEORADIUSBYMEMBER # 找出位于指定范围内的元素，中心点是由给定
 
 ### 3.1 设计规范
 
-1. key的规范要点
-  - 以业务名为key前缀，用冒号隔开，以防止key冲突覆盖。如，`live:rank:1`
-  - 确保key的语义清晰的情况下，key的长度尽量小于30个字符。拒绝bigkey
-  - key禁止包含特殊字符，如空格、换行、单双引号以及其他转义字符。
+#### 3.1.1 key的规范要点
 
-2. value的规范要点
-  - string类型控制在10KB以内，hash、list、set、zset元素个数不要超过5000
-  - 要选择适合的数据类型
-  - 使用expire设置过期时间(条件允许可以打散过期时间，防止集中过期)，不过期的数据重点关注idletime
+- 以业务名为key前缀，用冒号隔开，以防止key冲突覆盖。如，`live:rank:1`
+- 确保key的语义清晰的情况下，key的长度尽量小于30个字符。拒绝bigkey
+- key禁止包含特殊字符，如空格、换行、单双引号以及其他转义字符。
 
-3. 命令使用
-  - [推荐]禁止线上使用keys、flushall、flushdb等，通过redis的rename机制禁掉命令，或者使用scan渐进式处理
-  - [推荐]使用pipeline批量操作提高效率
-  - [推荐]O(N)命令关注N的数量,hgetall、lrange、smembers、zrange、sinter等并非不能使用，但是需要明确N的值。有遍历的需求可以使用hscan、sscan、zscan代替
-  - [建议]Redis的事务功能较弱(不支持回滚)，而且集群版本(自研和官方)要求一次事务操作的key必须在一个slot上(可以使用hashtag功能解决)不建议过多使用
-  - [建议]集群版本Lua上有特殊要求:所有key，必须在1个slot上
-  - [建议]必要情况下使用monitor命令时，要注意不要长时间使用
+#### 3.1.2 value的规范要点
 
-4. 运维
+- string类型控制在10KB以内，hash、list、set、zset元素个数不要超过5000
+- 要选择适合的数据类型
+- 使用expire设置过期时间(条件允许可以打散过期时间，防止集中过期)，不过期的数据重点关注idletime
+
+#### 3.1.3. 命令使用
+
+- [推荐]禁止线上使用keys、flushall、flushdb等，通过redis的rename机制禁掉命令，或者使用scan渐进式处理
+- [推荐]使用pipeline批量操作提高效率
+- [推荐]O(N)命令关注N的数量,hgetall、lrange、smembers、zrange、sinter等并非不能使用，但是需要明确N的值。有遍历的需求可以使用hscan、sscan、zscan代替
+- [建议]Redis的事务功能较弱(不支持回滚)，而且集群版本(自研和官方)要求一次事务操作的key必须在一个slot上(可以使用hashtag功能解决)不建议过多使用
+- [建议]集群版本Lua上有特殊要求:所有key，必须在1个slot上
+- [建议]必要情况下使用monitor命令时，要注意不要长时间使用
+
+#### 3.1.4 运维
 
 - Redis Cluster只支持db0，切换会损耗新能，迁移成本高
 - 开启 lazy-free机制，减少对主线程的阻塞
@@ -476,14 +528,14 @@ GEORADIUSBYMEMBER # 找出位于指定范围内的元素，中心点是由给定
 
 为了防止内存积压膨胀。避免直接挂掉，需要根据实际业务，选好maxmemory-policy(最大内存淘汰策略)，设置好过期时间。一共有8种内存淘汰策略：
 
-	1. volatile-lru：当内存不足以容纳新写入数据时，从设置了过期时间的key中使用LRU（最近最少使用）算法进行淘汰
-	2. allkeys-lru：当内存不足以容纳新写入数据时，从所有key中使用LRU（最近最少使用）算法进行淘汰
-	3. volatile-lfu：4.0版本新增，当内存不足以容纳新写入数据时，在过期的key中，使用LFU算法进行删除key
-	4. allkeys-lfu：4.0版本新增，当内存不足以容纳新写入数据时，从所有key中使用LFU算法进行淘汰
-	5. volatile-random：当内存不足以容纳新写入数据时，从设置了过期时间的key中，随机淘汰数据
-	6. allkeys-random：当内存不足以容纳新写入数据时，从所有key中随机淘汰数据
-	7. volatile-ttl：当内存不足以容纳新写入数据时，在设置了过期时间的key中，根据过期时间进行淘汰，越早过期的优先被淘汰
-	8. oeviction：默认策略，当内存不足以容纳新写入数据时，新写入操作会报错。
+1. volatile-lru：当内存不足以容纳新写入数据时，从设置了过期时间的key中使用LRU（最近最少使用）算法进行淘汰
+2. allkeys-lru：当内存不足以容纳新写入数据时，从所有key中使用LRU（最近最少使用）算法进行淘汰
+3. volatile-lfu：4.0版本新增，当内存不足以容纳新写入数据时，在过期的key中，使用LFU算法进行删除key
+4. allkeys-lfu：4.0版本新增，当内存不足以容纳新写入数据时，从所有key中使用LFU算法进行淘汰
+5. volatile-random：当内存不足以容纳新写入数据时，从设置了过期时间的key中，随机淘汰数据
+6. allkeys-random：当内存不足以容纳新写入数据时，从所有key中随机淘汰数据
+7. volatile-ttl：当内存不足以容纳新写入数据时，在设置了过期时间的key中，根据过期时间进行淘汰，越早过期的优先被淘汰
+8. oeviction：默认策略，当内存不足以容纳新写入数据时，新写入操作会报错。
 
 ### 3.2 缓存穿透(安全问题)
 
@@ -601,7 +653,7 @@ func main() {
 
 ### 3.7 分布不均问题、Hash Tags
 
-1. 问题原理
+#### 3.7.1 问题原理
 
 - 对于客户端请求的key，根据公式HASH_SLOT=CRC16(key) mod 16384，计算出映射到哪个分片上，然后Redis会去相应的节点进行操作
 - keySlot算法中，如果key包含{}，就不对整个key做hash，而是使用第一个{}内部的字符串作为hash key，这样就可以保证拥有同样{}内部字符串的key就会拥有相同slot
@@ -618,7 +670,7 @@ SINTERSTORE,SUNIONSTORE,ZINTERSTORE,ZUNIONSTORE
 
 即要求key尽可能地分散到不同机器，又要求某些相关联的key分配到相同机器
 
-2. Hash Tags
+#### 3.7.2 Hash Tags
 
 HashTag机制可以影响key被分配到的slot，从而可以使用那些被限制在slot中操作
 
@@ -629,7 +681,7 @@ HashTag不支持嵌套，可能会使过多的key分配到同一个slot中，造
 
 ### 3.8 bigkey删除
 
-- Hash删除: hscan + hdel
+#### 3.8.1 Hash删除: hscan + hdel
 
 ```java
 public void delBigHash(String host, int port, String password, String bigHashKey) {
@@ -655,7 +707,7 @@ public void delBigHash(String host, int port, String password, String bigHashKey
 	}
 ```
 
-- List删除: ltrim
+#### 3.8.2 List删除: ltrim
 
 ```java
 public void delBigList(String host, int port, String password, String bigListKey) {
@@ -676,7 +728,7 @@ public void delBigList(String host, int port, String password, String bigListKey
 	}
 ```
 
-- Set删除: sscan + srem
+#### 3.8.3 Set删除: sscan + srem
 
 ```java
 public void delBigSet(String host, int port, String password, String bigSetKey) {
@@ -702,7 +754,7 @@ public void delBigSet(String host, int port, String password, String bigSetKey) 
 	}
 ```
 
-- SortedSet删除: zscan + zrem
+#### 3.8.4 SortedSet删除: zscan + zrem
 
 ```java
 public void delBigZset(String host, int port, String password, String bigZsetKey) {
@@ -729,8 +781,6 @@ public void delBigZset(String host, int port, String password, String bigZsetKey
 ```
 
 ## 4. shell
-
-
 
 ### 4.1 批量删除
 
