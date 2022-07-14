@@ -167,7 +167,10 @@ EOF
 
 #### 3.2.2 配置Erlang Cookie
 
+机器之间通信借助于erlang进行消息传输，所以要求集群中所有节点必须有相同的erlang.cookie，将主节点的文件同步到node2和node3
+
 ```bash
+systemctl stop rabbitmq-server
 scp /var/lib/rabbitmq/.erlang.cookie root@rabbit-node2:/var/lib/rabbitmq/
 scp /var/lib/rabbitmq/.erlang.cookie root@rabbit-node3:/var/lib/rabbitmq/
 chmod 600 /var/lib/rabbitmq/.erlang.cookie
@@ -175,7 +178,7 @@ chmod 600 /var/lib/rabbitmq/.erlang.cookie
 
 #### 3.2.4 启动服务
 
-三台机器分别执行
+停掉所有的MQ节点然后使用集群的方式启动，三台机器分别执行
 
 ```bash
 systemctl start rabbitmq-server
@@ -183,14 +186,17 @@ systemctl start rabbitmq-server
 
 #### 3.2.5 加入集群
 
-在 rabbit-node2 和rabbit-node3 上执行以下命令，rabbit-node2加入node1, rabbit-node3加入node1 --ram标识内存节点，集群必须保证有一个磁盘节点
+在node2和node3分别执行以下命令，使rabbit-node2加入node1, rabbit-node3加入node1 --ram标识内存节点，集群必须保证有一个磁盘节点
 
 ```bash
 rabbitmqctl stop_app        
 rabbitmqctl reset           
 rabbitmqctl join_cluster --ram rabbit@rabbit-node1
-rabbitmqctl start_app       
-rabbitmqctl cluster_status  
+rabbitmqctl start_app    
+
+rabbitmqctl set_cluster_name rabbitmq_cd_itcast     # 修改集群的名字
+rabbitmqctl forget_cluster_node rabbit@rabbit-node3 # 移除节点
+rabbitmqctl cluster_status                          # 查看集群状态
 ```
 
 #### 3.2.6 添加用户、授权
@@ -200,7 +206,9 @@ rabbitmqctl add_user root 123456
 rabbitmqctl set_user_tags root administrator
 ```
 
-#### 3.2.7 开启镜像同步
+#### 3.2.7 设置镜像队列策略
+
+将所有队列设置为镜像队列，在主节点执行
 
 ```bash
 rabbitmqctl -n rabbit-1 set_policy ha-all "^" '{"ha-mode":"all"}'
