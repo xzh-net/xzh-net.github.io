@@ -182,7 +182,7 @@ fi
 ```
 
 ```bash
-chmod 755 ck_nginx.sh
+chmod 755 nginx_check.sh
 ```
 
 ### 2.2 haproxy
@@ -269,5 +269,5 @@ fi
 
 ```bash
 chmod +x /etc/keepalived/haproxy_check.sh
-sed -i 's/\r$//' check_haproxy.sh
+sed -i 's/\r$//' haproxy_check.sh
 ```
