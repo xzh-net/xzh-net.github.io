@@ -1204,37 +1204,24 @@ svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位�
 
 ### 2.4 网络
 
-1. 进程
+1. 监控
 
 ```bash
 ps -aux | grep redis          # 查看启动进程参数
 lsof -i:80                    # 可以看到pid和用户 
 netstat -tunlp | grep 8080    # 查看端口进程号
 netstat -anp | grep 17010pos  # 查看应用占用端口
-/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"  # 获取本机ip地址
 
-# 输出每个ip的连接数，以及总的各个状态的连接数
-netstat -n | awk '/^tcp/ {n=split($(NF-1),array,":");if(n<=2)++S[array[(1)]];else++S[array[(4)]];++s[$NF];++N} END {for(a in S){printf("%-20s %s\n", a, S[a]);++I}printf("%-20s %s\n","TOTAL_IP",I);for(a in s) printf("%-20s %s\n",a, s[a]);printf("%-20s %s\n","TOTAL_LINK",N);}'
-# 统计所有连接状态
-# CLOSED：无连接是活动的或正在进行
-# LISTEN：服务器在等待进入呼叫
-# SYN_RECV：一个连接请求已经到达，等待确认
-# SYN_SENT：应用已经开始，打开一个连接
-# ESTABLISHED：正常数据传输状态
-# FIN_WAIT1：应用说它已经完成
-# FIN_WAIT2：另一边已同意释放
-# ITMED_WAIT：等待所有分组死掉
-# CLOSING：两边同时尝试关闭
-# TIME_WAIT：主动关闭连接一端还没有等到另一端反馈期间的状态
-# LAST_ACK：等待所有分组死掉
-netstat -n | awk '/^tcp/ {++state[$NF]} END {for(key in state) print key,"\t",state[key]}'
-
-# 查找较多time_wait连接
-netstat -n|grep TIME_WAIT|awk '{print $5}'|sort|uniq -c|sort -rn|head -n20
 traceroute -I www.163.com           # traceroute默认使用udp方式, 如果是-I则改成icmp方式
 traceroute -M 3 www.163.com         # 从ttl第3跳跟踪
 traceroute -p 8080 192.168.10.11    # 加上端口跟踪
-route add default gw 192.168.3.1    # 添加临时网关 route -n
+
+route -n            # 查看路由,显示ip,不解析
+route del default   # 删除默认路由
+route add default gw 192.168.1.110      # 添加一个默认网关，把所有不知道的网络交给网关来转发
+route del default gw 192.168.1.110      # 删除默认网关	        
+route add -host 192.168.3.1 gw 192.168.1.110    # 对一个具体的ip添加路由
+rouate add -net 192.168.2.0/24 dev eth0         # 对一个网络添加一个新的路由（另一个网段）
 ```
 
 2. 端口检测
