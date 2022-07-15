@@ -434,7 +434,7 @@ flushDiskType=ASYNC_FLUSH
 #pullMessageThreadPoolNums=128
 ```
 
-#### 1.2.7 修改启动脚本文件
+#### 1.2.8 修改启动脚本文件
 
 1. 修改runserver默认内存
 
@@ -456,7 +456,7 @@ vi /usr/local/rocketmq/rocketmq-4.9.2/bin/runbroker.sh
 JAVA_OPT="${JAVA_OPT} -server -Xms512m -Xmx512m"
 ```
 
-#### 1.2.8 启动NameServe集群
+#### 1.2.9 启动NameServe集群
 
 分别在192.168.25.135和192.168.25.138启动NameServer
 
@@ -465,7 +465,7 @@ cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqnamesrv &
 ```
 
-#### 1.2.9 启动Broker集群
+#### 1.2.10 启动Broker集群
 
 1. 在192.168.25.135上启动master1和slave2
 

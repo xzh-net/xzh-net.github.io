@@ -1,6 +1,6 @@
 # Jenkins-2.332
 
-## 1. Jenkins安装和持续集成环境配置
+## 1. 安装
 
 | 名称 | IP地址 | 安装的软件 |
 | :---------- | :---------- | :---------------------------------- |
@@ -370,7 +370,7 @@ allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat2.png)
 
 
-## 2. Jenkins构建Maven项目
+## 2. 构建项目
 
 Jenkins中自动构建项目的类型有很多，常用的有以下三种：
 - 自由风格软件项目（FreeStyle Project）
@@ -616,7 +616,7 @@ pipeline {
 ![](../../assets/_images/devops/deploy/jenkins/jenkins_scm2.png)
 
 
-### 2.4 Jenkins项目构建细节
+### 2.4 Jenkins项目构建参数
 
 #### 2.4.1 常用的构建触发器
 

@@ -195,7 +195,7 @@ haproxy -f /usr/local/haproxy/conf/haproxy.cfg  # 检查配置文件
 ps -ef | grep haproxy
 ```
 
-访问地址：http://39.105.58.136:8888/admin?stats   admin/admin
+访问地址：http://39.105.58.136:8888/admin?stats 密码：admin/admin
 
 
 ## 2. 代理
