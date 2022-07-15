@@ -1289,17 +1289,14 @@ gcc --version
 #### 2.6.1 常用命令
 
 ```bash
-# solr
-cd /opt/solr-4.7.2/example
-nohup java -Djetty.port=8080 -jar start.jar &
-ps aux|grep jetty
+# solr后台运行,并且有nohup.out输出
+nohup java -Djetty.port=8080 -jar /opt/solr-4.7.2/example/start.jar &
 
-# openfire
-cd /opt/openfire/bin
-nohup ./openfire.sh >/dev/null 2>&1 &
+# openfire后台运行, 不输出任何日志
+nohup /opt/openfire/bin/openfire.sh >/dev/null &    
 
-# sentinel
-nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
+# sentinel后台运行, 并将错误信息做标准输出到日志中
+nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 & 
 ```
 
 
@@ -1374,6 +1371,11 @@ ctrl + u                            # 前删除
 ctrl + k                            # 后删除
 Ctrl + Shift + c                    # 复制
 Ctrl + Shift + v                    # 粘贴    
+
+0  # 光标移到行首(数字0)
+$  # 光标移至行尾
+shift + g # 跳到文件最后
+gg # 跳到文件头
 ```
 
 ## 3. 虚拟机
