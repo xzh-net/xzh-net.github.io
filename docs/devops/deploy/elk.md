@@ -1,80 +1,106 @@
 # Elastic (ELK) Stack 7.6.2
 
+- https://www.elastic.co/downloads/elasticsearch
+- https://elasticsearch.cn/download/
+
 ## 1. Elasticsearch
-
-https://www.elastic.co/downloads/elasticsearch
-
-https://elasticsearch.cn/download/
 
 ### 1.1 单机
 
-解压
+#### 1.1.1 上传解压
+
 ```bash
-tar -zxvf elasticsearch-7.6.2-linux-x86_64.tar.gz -C /opt
+cd /opt/software
+tar -zxvf elasticsearch-7.6.2-linux-x86_64.tar.gz -C /home/elastic/
 ```
 
-创建用户
-```bash
-useradd elsearch      # 新增elsearch用户
-passwd elsearch       # 为elsearch用户设置密码
-userde1 -r elsearch   # 删除
-#为普通用户授权 否则无法运行es
-cd /opt/
-chown -R elsearch:elsearch elasticsearch-7.6.2
-```
+#### 1.1.2 修改es配置
 
-修改elasticsearch.yml文件
 ```bash
-vi /opt/elasticsearch-7.6.2/config/elasticsearch.yml
+mkdir -p /home/elastic/elasticsearch-7.6.2/data /home/elastic/elasticsearch-7.6.2/logs
+vi /home/elastic/elasticsearch-7.6.2/config/elasticsearch.yml
 ```
 
 ```conf
-# ================= Elasticsearch   configuration =================
-cluster.name: my-application              # 默认是elasticsearch
+cluster.name: elasticsearch               # 默认是elasticsearch
 node.name: node-1                         # elasticsearch会默认随机指定一个名字
 network.host: 0.0.0.0                     # 允许外网访问
 http.port: 9200                           # http访问端口
-cluster.initial_master_nodes: ["node-1"]  # 初始化新的集群时需要此配置来选举master
+cluster.initial_master_nodes: ["node-1"]  # 这里就是node.name
+path.data: /home/elastic/elasticsearch-7.6.2/data  # 数据目录
+path.logs: /home/elastic/elasticsearch-7.6.2/logs  # 日志目录
 http.cors.enabled: true                   # head插件跨域
 http.cors.allow-origin: "*"
 ```
 
-修改系统配置文件
-```conf
-#切换到root用户
-su root
-vi /etc/security/limits.conf  # 最大可创建文件数太小
-# 在文件末尾中增加下面内容
-elsearch soft nofile 65536
-elsearch hard nofile 65536
+#### 1.1.3 修改系统配置
 
-vi /etc/security/limits.d/20-nproc.conf # 文件名可能不一致
-# 在文件末尾中增加下面内容
-elsearch soft nofile 65536
-elsearch hard nofile 65536
+1. 修改文件资源限制
+
+```bash
+vi /etc/security/limits.conf
+# 末尾添加
+elastic soft nofile 65536
+elastic hard nofile 65536
 *  hard    nproc     4096
-# 注:*代表Linux所有用户名称
+```
 
-vi /etc/sysctl.conf     # 最大虚拟内存太小
-# 在文件中增加下面内容
+2. 修改用户线程数
+
+```bash
+vi /etc/security/limits.d/20-nproc.conf
+# 编辑
+* soft nproc 65535
+```
+
+3. 修改虚拟内存
+
+```bash
+vi /etc/sysctl.conf
+# 末尾添加
 vm.max_map_count=655360
-#重新加载，输入下面命令:
+
+# 使配置生效
 sysctl -p
 ```
 
-启动elasticsearch
+#### 1.1.4 创建用户
+
+1. 新增elastic用户
+
 ```bash
-su - elsearch
-cd /opt/elasticsearch-7.6.2/bin
-./elasticsearch 
+useradd elastic
+passwd elastic   # 为elastic用户设置密码
+```
+
+2. 为elastic授权
+
+```bash
+chown -R elastic:elastic /home/elastic
+```
+
+#### 1.1.5 启动服务
+
+```bash
+su - elastic
+cd /home/elastic/elasticsearch-7.6.2/bin
 ./elasticsearch -d  # 后台启动
 ```
 
+#### 1.1.6 验证服务
+
+```bash
+ps aux|grep elasticsearch
+curl http://127.0.0.1:9200
+```
+
+
 ### 1.2 集群
 
-拷贝副本
+#### 1.2.2 拷贝副本
+
 ```bash
-cd /opt
+su - elastic
 cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9201
 cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9202
 cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9203
@@ -175,17 +201,27 @@ cd /opt/elasticsearch-7.6.2-9203/bin/
 
 ### 1.3 插件
 
-1. elasticsearch-head
+#### 1.3.1 elasticsearch-head
 
-- docker安装
+1. Chrome版
+
+- 下载地址：https://www.crx4chrome.com， 打开搜索`ElasticSearch-Head-0.1.5-Chrome.crx`下载
+- 打开Chrome插件设置页面，拖入下载好的.crx插件，启用
+- 使用插件：依次点击Chrome右上角插件图标—>ElasticSearch-Head—>输入ES地址—>连接
+
+2. docker版
+
+拉取镜像
 
 ```bash
 docker run -d --name elasticsearch-head -p 9100:9100 docker.io/mobz/elasticsearch-head:5
 ```
 
-插件请求406解决：修改容器中`/usr/src/app/_site/vendor.js`文件，6886行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
+插件请求406解决：修改容器中`/usr/src/app/_site/vendor.js`文件
+- 6886行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
+- 7574行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
 
-7574行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
+从容器中拷贝文件到宿主机
 
 ```bash
 docker cp elasticsearch-head:/usr/src/app/_site/vendor.js /home
@@ -193,11 +229,27 @@ docker cp /home/vendor.js elasticsearch-head:/usr/src/app/_site/
 docker restart elasticsearch-head
 ```
 
-- google插件安装
+#### 1.3.2 analysis-ik
 
-https://chrome.google.com/webstore/detail/elasticsearch-head/ffmkiejjmecolpfloofpjologoblkegm
+1. 下载解压
 
-2. analysis-ik
+https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.6.2/elasticsearch-analysis-ik-7.6.2.zip
+
+```bash
+mkdir -p /home/elastic/elasticsearch-7.6.2/plugins/analysis-ik
+cd /home/elastic/elasticsearch-7.6.2/plugins/analysis-ik
+# 上传
+unzip elasticsearch-analysis-ik-7.6.2.zip 
+```
+
+2. 重启服务
+
+```bash
+ps aux|grep elasticsearch
+cd /home/elastic/elasticsearch-7.6.2/bin
+./elasticsearch -d
+```
+
 
 
 ## 2. Logstash
