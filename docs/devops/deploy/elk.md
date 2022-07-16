@@ -14,7 +14,7 @@ cd /opt/software
 tar -zxvf elasticsearch-7.6.2-linux-x86_64.tar.gz -C /home/elastic/
 ```
 
-#### 1.1.2 修改es配置
+#### 1.1.2 修改配置
 
 ```bash
 mkdir -p /home/elastic/elasticsearch-7.6.2/data /home/elastic/elasticsearch-7.6.2/logs
@@ -33,7 +33,7 @@ http.cors.enabled: true                   # head插件跨域
 http.cors.allow-origin: "*"
 ```
 
-#### 1.1.3 修改系统配置
+#### 1.1.3 系统设置
 
 1. 修改文件资源限制
 
@@ -97,7 +97,7 @@ curl http://127.0.0.1:9200
 
 ### 1.2 集群
 
-#### 1.2.2 拷贝副本
+#### 1.2.1 拷贝副本
 
 ```bash
 su - elastic
@@ -106,18 +106,24 @@ cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9202
 cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9203
 ```
 
-修改elasticsearch.yml配置文件
+#### 1.2.2 节点1
+
+1. 清理数据
+
 ```bash
-cd /opt
-mkdir logs data
-# 授权日志目录
-chown -R elsearch:elsearch ./logs ./data
-vi /opt/elasticsearch-7.6.2-9201/config/elasticsearch.yml
-vi /opt/elasticsearch-7.6.2-9202/config/elasticsearch.yml
-vi /opt/elasticsearch-7.6.2-9203/config/elasticsearch.yml
+rm -rfv /home/elastic/elasticsearch-7.6.2-9201/data/*
+rm -rfv /home/elastic/elasticsearch-7.6.2-9201/logs/*
 ```
 
-9201
+2. 修改配置
+
+```bash
+cd /home/elastic/elasticsearch-7.6.2-9201/config
+vi elasticsearch.yml
+```
+
+配置内容
+
 ```conf
 cluster.name: elasticsearch
 node.name: node-1
@@ -129,13 +135,30 @@ transport.tcp.port: 9700
 node.max_local_storage_nodes: 3
 discovery.seed_hosts: ["localhost:9700","localhost:9800","localhost:9900"]
 cluster.initial_master_nodes: ["node-1","node-2","node-3"]
-path.data: /opt/data
-path.logs: /opt/logs
+path.data: /home/elastic/elasticsearch-7.6.2-9201/data
+path.logs: /home/elastic/elasticsearch-7.6.2-9201/logs
 http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-9202
+#### 1.2.3 节点2
+
+1. 清理数据
+
+```bash
+rm -rfv /home/elastic/elasticsearch-7.6.2-9202/data/*
+rm -rfv /home/elastic/elasticsearch-7.6.2-9202/logs/*
+```
+
+2. 修改配置
+
+```bash
+cd /home/elastic/elasticsearch-7.6.2-9202/config
+vi elasticsearch.yml
+```
+
+配置内容
+
 ```conf
 cluster.name: elasticsearch
 node.name: node-2
@@ -145,15 +168,32 @@ network.host: 0.0.0.0
 http.port: 9202
 transport.tcp.port: 9800
 node.max_local_storage_nodes: 3
-discovery.seed_hosts: ["localhost:9700","localhost:9800","localhost:9900"]
+discovery.seed_hosts: ["127.0.0.1:9700","127.0.0.1:9800","127.0.0.1:9900"]
 cluster.initial_master_nodes: ["node-1","node-2","node-3"]
-path.data: /opt/data
-path.logs: /opt/logs
+path.data: /home/elastic/elasticsearch-7.6.2-9202/data
+path.logs: /home/elastic/elasticsearch-7.6.2-9202/logs
 http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-9203
+#### 1.2.4 节点3
+
+1. 清理数据
+
+```bash
+rm -rfv /home/elastic/elasticsearch-7.6.2-9203/data/*
+rm -rfv /home/elastic/elasticsearch-7.6.2-9203/logs/*
+```
+
+2. 修改配置
+
+```bash
+cd /home/elastic/elasticsearch-7.6.2-9203/config
+vi elasticsearch.yml
+```
+
+配置内容
+
 ```conf
 cluster.name: elasticsearch
 node.name: node-3
@@ -165,39 +205,20 @@ transport.tcp.port: 9900
 node.max_local_storage_nodes: 3
 discovery.seed_hosts: ["localhost:9700","localhost:9800","localhost:9900"]
 cluster.initial_master_nodes: ["node-1","node-2","node-3"]
-path.data: /opt/data
-path.logs: /opt/logs
+path.data: /home/elastic/elasticsearch-7.6.2-9203/data
+path.logs: /home/elastic/elasticsearch-7.6.2-9203/logs
 http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-执行授权
-```bash
-在root用户下执行
-chown -R elsearch:elsearch /opt/elasticsearch-7.6.2-9201
-chown -R elsearch:elsearch /opt/elasticsearch-7.6.2-9202
-chown -R elsearch:elsearch /opt/elasticsearch-7.6.2-9203
+#### 1.2.5 启动服务
 
-# 如果有的日志文件授权失败，在root执行
-cd /opt/elasticsearch-7.6.2-9201
-chown -R elsearch:elsearch logs
-cd /opt/elasticsearch-7.6.2-9202
-chown -R elsearch:elsearch logs
-cd /opt/elasticsearch-7.6.2-9203
-chown -R elsearch:elsearch logs
-```
-
-启动elasticsearch
 ```bash
 su - elsearch
-cd /opt/elasticsearch-7.6.2-9201/bin/
-./elasticsearch -d
-cd /opt/elasticsearch-7.6.2-9202/bin/
-./elasticsearch -d
-cd /opt/elasticsearch-7.6.2-9203/bin/
-./elasticsearch -d
+/home/elastic/elasticsearch-7.6.2-9201/bin/elasticsearch -d
+/home/elastic/elasticsearch-7.6.2-9202/bin/elasticsearch -d
+/home/elastic/elasticsearch-7.6.2-9203/bin/elasticsearch -d
 ```
-
 
 ### 1.3 插件
 
@@ -261,6 +282,8 @@ mv kibana-7.6.2-linux-x86_64 kibana-7.6.2
 ```
 
 ### 2.2 目录授权
+
+使用root执行
 
 ```bash
 chown -R elastic:elastic /home/elastic
