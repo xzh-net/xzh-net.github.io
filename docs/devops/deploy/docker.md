@@ -1044,34 +1044,36 @@ docker run -d --name emqx-ee -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084
 
 #### 3.8.1 Elasticsearch
 
+1. 拉取镜像
+
 ```bash
 docker pull elasticsearch:7.6.2
 ```
 
-- 修改虚拟内存区域大小，否则会因为过小而无法启动:
+2. 临时修改虚拟内存区域大小，否则会因为过小而无法启动
 
 ```bash
 sysctl -w vm.max_map_count=262144
 ```
 
-- 使用如下命令启动Elasticsearch服务：
+3. 目录授权
+
+```bash
+chmod 777 /data/elasticsearch/data/
+```
+
+4. 启动服务
 
 ```bash
 docker run -p 9200:9200 -p 9300:9300 --name elasticsearch \
 -e "discovery.type=single-node" \
 -e "cluster.name=elasticsearch" \
--v /mydata/elasticsearch/plugins:/usr/share/elasticsearch/plugins \
--v /mydata/elasticsearch/data:/usr/share/elasticsearch/data \
+-v /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins \
+-v /data/elasticsearch/data:/usr/share/elasticsearch/data \
 -d elasticsearch:7.6.2
 ```
 
-- 启动时会发现`/usr/share/elasticsearch/data`目录没有访问权限，只需要修改`/mydata/elasticsearch/data`目录的权限，再重新启动即可；
-
-```bash
-chmod 777 /mydata/elasticsearch/data/
-```
-
-- 安装中文分词器IKAnalyzer，并重新启动：
+5. 安装中文分词器IKAnalyzer
 
 ```bash
 docker exec -it elasticsearch /bin/bash
@@ -1081,13 +1083,13 @@ docker restart elasticsearch
 http://192.168.3.200:9200/_cat/plugins
 ```
 
-- 安装elasticsearch-head插件
+6. 安装elasticsearch-head插件
 
 ```bash
 docker run -d -p 9100:9100 docker.io/mobz/elasticsearch-head:5
 ```
 
-elasticsearch.yml，在文件末尾加入以下配置
+elasticsearch.yml，在文件末尾加入以下配置开启跨域
 
 ```yml
 http.cors.enabled: true
