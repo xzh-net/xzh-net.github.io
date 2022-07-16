@@ -298,7 +298,7 @@ vi kibana.yml
 # 编辑
 server.port: 5601
 server.host: "0.0.0.0"  # kibana安装服务器
-elasticsearch.hosts: ["http://127.0.0.1:9200"]  # elasticsearch安装服务器
+elasticsearch.hosts: ["http://127.0.0.1:9200"]  # elasticsearch服务器，连接集群使用 ，分割
 ```
 
 ### 2.4 启动服务
