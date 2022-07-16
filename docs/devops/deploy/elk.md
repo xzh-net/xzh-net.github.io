@@ -250,15 +250,53 @@ cd /home/elastic/elasticsearch-7.6.2/bin
 ./elasticsearch -d
 ```
 
+## 2. Kibana
 
-
-## 2. Logstash
-
-## 3. Kibana
+### 2.1 下载解压
 
 ```bash
+cd /opt/software
+tar -zxvf kibana-7.6.2-linux-x86_64.tar.gz -C /home/elastic/
+mv kibana-7.6.2-linux-x86_64 kibana-7.6.2
+```
 
-# 创建索引
+### 2.2 目录授权
+
+```bash
+chown -R elastic:elastic /home/elastic
+```
+
+### 2.3 修改配置
+
+```bash
+su - elastic
+cd /home/elastic/kibana-7.6.2/config
+vi kibana.yml
+# 编辑
+server.port: 5601
+server.host: "0.0.0.0"  # kibana安装服务器
+elasticsearch.hosts: ["http://127.0.0.1:9200"]  # elasticsearch安装服务器
+```
+
+### 2.4 启动服务
+
+```bash
+cd /home/elastic/kibana-7.6.2/bin
+./kibana &
+lsof -i:5601
+```
+
+### 2.5 客户端测试
+
+#### 2.5.1 访问地址
+
+http://localhost:5601
+
+#### 2.5.2 基本命令
+
+1. 创建索引
+
+```bash
 PUT /mytest/
 {
   "settings": {
@@ -268,22 +306,34 @@ PUT /mytest/
     }
   }
 }
+```
 
-# 查看索引配置
+2. 查看索引
+
+```bash
 GET mytest/_settings
+```
 
-# 删除索引
+3. 删除索引
+
+```bash
 DELETE /mytest/
+```
 
-# 添加数据
+4. 添加数据
+
+```bash
 POST /mytest/_doc
 {
   "title": "我的苹果手机和你的安卓手机，我们都有身份证",
   "images": "http://image.leyou.com/12479122.jpg",
   "price": 598
 }
+```
 
-# 排序查询
+5. 排序查询
+
+```bash
 get mytest/_search
 {
   "query": {
@@ -295,8 +345,11 @@ get mytest/_search
     }
   ]
 }　
+```
 
-# 过滤查询
+6. 过滤查询
+
+```bash
 get mytest/_search
 {
   "query": {
@@ -305,14 +358,19 @@ get mytest/_search
     }
   }
 }
+```
 
-# 测试分词器
+7. 测试分词器
+
+```bash
 POST /_analyze
 {
   "text": "我的苹果手机和你的安卓手机，我们都有身份证",
   "analyzer": "ik_smart"
 }
-
 ```
+
+## 3. Logstash
+
 
 ## 4. Filebeat
