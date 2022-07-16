@@ -288,13 +288,9 @@ lsof -i:5601
 
 ### 2.5 客户端测试
 
-#### 2.5.1 访问地址
+访问地址：http://localhost:5601
 
-http://localhost:5601
-
-#### 2.5.2 基本命令
-
-1. 创建索引
+#### 2.5.1 创建索引
 
 ```bash
 PUT /mytest/
@@ -308,19 +304,19 @@ PUT /mytest/
 }
 ```
 
-2. 查看索引
+#### 2.5.2 查看索引
 
 ```bash
 GET mytest/_settings
 ```
 
-3. 删除索引
+#### 2.5.3 删除索引
 
 ```bash
 DELETE /mytest/
 ```
 
-4. 添加数据
+#### 2.5.4 添加数据
 
 ```bash
 POST /mytest/_doc
@@ -331,7 +327,7 @@ POST /mytest/_doc
 }
 ```
 
-5. 排序查询
+#### 2.5.5 排序查询
 
 ```bash
 get mytest/_search
@@ -347,7 +343,7 @@ get mytest/_search
 }　
 ```
 
-6. 过滤查询
+#### 2.5.6 过滤查询
 
 ```bash
 get mytest/_search
@@ -360,7 +356,7 @@ get mytest/_search
 }
 ```
 
-7. 测试分词器
+#### 2.5.7 测试分词器
 
 ```bash
 POST /_analyze
