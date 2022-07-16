@@ -1482,10 +1482,11 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 
 ### 4.1 Java
 
-1. yum安装jdk
+#### 4.1.1 JDK
+
+1. yum安装
 
 ```bash
-yum install java-1.8.0-openjdk* -y
 yum install java-1.8.0-openjdk
 vim /etc/profile
 
@@ -1494,7 +1495,7 @@ export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 ```
 
-2. 解压安装jdk
+2. 压缩包安装
 
 ```bash
 cd /opt/software
@@ -1507,7 +1508,9 @@ export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 ```
 
-3. Maven安装
+#### 4.1.2 Maven
+
+1. 解压配置
 
 ```bash
 tar -xzf apache-maven-3.6.2-bin.tar.gz    # 解压
@@ -1522,7 +1525,7 @@ source /etc/profile   # 配置生效
 mvn -v                # 查找Maven版本
 ```
 
-4. Maven仓库
+2. Maven仓库
 
 ```xml
 <localRepository>/opt/repository</localRepository>
