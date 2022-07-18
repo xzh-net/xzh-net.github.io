@@ -1099,11 +1099,14 @@ http.cors.allow-origin: "*"
 
 #### 3.8.2 Logstash
 
+1. 拉取镜像
+
 ```bash
 docker pull logstash:7.6.2
 ```
 
-- 创建logstash.conf文件
+2. 创建logstash.conf
+
 ```
 input {
   tcp {
@@ -1156,22 +1159,22 @@ output {
 }
 ```
 
-- 创建`/mydata/logstash`目录，并将Logstash的配置文件`logstash.conf`拷贝到该目录；
+3. 创建`/data/logstash`目录，并将Logstash的配置文件`logstash.conf`拷贝到该目录；
 
 ```bash
-mkdir /mydata/logstash
+mkdir /data/logstash
 ```
 
-- 使用如下命令启动Logstash服务；
+4. 使用如下命令启动Logstash服务；
 
 ```bash
 docker run --name logstash -p 4560:4560 -p 4561:4561 -p 4562:4562 -p 4563:4563 \
 --link elasticsearch:es \
--v /mydata/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf \
+-v /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf \
 -d logstash:7.6.2
 ```
 
-- 进入容器内部，安装`json_lines`插件。
+5. 进入容器内部，安装`json_lines`插件。
 
 ```bash
 docker exec -it logstash /bin/bash
@@ -1181,7 +1184,7 @@ logstash-plugin install logstash-codec-json_lines
 
 #### 3.8.3 Kibana
 
-- 访问地址：http://192.168.3.200:5601
+访问地址：http://192.168.3.200:5601
 
 ```bash
 docker pull kibana:7.6.2
@@ -1191,7 +1194,6 @@ docker run --name kibana -p 5601:5601 \
 -e "elasticsearch.hosts=http://es:9200" \
 -d kibana:7.6.2
 ```
-
 
 ### 3.9 持续集成
 
