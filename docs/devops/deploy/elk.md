@@ -284,6 +284,7 @@ cd /home/elastic/elasticsearch-7.6.2/bin
 ```bash
 cd /opt/software
 tar -zxvf kibana-7.6.2-linux-x86_64.tar.gz -C /home/elastic/
+cd /home/elastic/
 mv kibana-7.6.2-linux-x86_64 kibana-7.6.2
 ```
 
@@ -495,3 +496,196 @@ lsof -i:4560,4561,4562,4563
 
 
 ## 4. Filebeat
+
+### 4.1 下载解压
+
+```bash
+cd /opt/software
+tar -zxvf filebeat-7.6.2-linux-x86_64.tar.gz -C /home/elastic/
+cd /home/elastic/
+mv filebeat-7.6.2-linux-x86_64 filebeat-7.6.2
+```
+
+### 4.2 目录授权
+
+使用root执行
+
+```bash
+chown -R elastic:elastic /home/elastic
+```
+
+### 4.3 修改配置
+
+#### 4.3.1 filebeat
+
+```bash
+su - elastic
+cd /home/elastic/filebeat-7.6.2
+cp -p filebeat.yml filebeat.yml.bak
+
+vi filebeat.yml
+####################
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /home/elastic/logs/application/*/*.log
+  exclude_lines: ['\sDEBUG\s\d']
+  exclude_files: ['sc-admin.*.log$']
+  fields:
+    docType: sys-log
+    project: microservices-platform
+  multiline:
+    pattern: '^\[\S+:\S+:\d{2,}] '
+    negate: true
+    match: after
+- type: log
+  enabled: true
+  paths:
+    - /home/elastic/logs/point/*.log
+  fields:
+    docType: point-log
+    project: microservices-platform
+####################
+hosts: ["172.17.17.194:5044"]
+bulk_max_size: 2048
+```
+
+#### 4.3.2 logstash规则文件
+
+```bash
+
+mkdir /opt/elk/logstash/patterns
+vi my_patterns
+# 内容如下
+# user-center
+MYAPPNAME [0-9a-zA-Z._-]*
+# RMI TCP Connection(2)-127.0.0.1
+MYTHREADNAME ([0-9a-zA-Z._-]|\(|\)|\s)*
+```
+
+
+#### 4.3.3 logstash
+
+```bash
+input {
+  beats {
+    port => 5044
+  }
+}
+
+filter {
+  if [fields][docType] == "sys-log" {
+    grok {
+      patterns_dir => ["patterns"]
+      match => { "message" => "\[%{NOTSPACE:appName}:%{IP:serverIp}:%{NOTSPACE:serverPort}\] %{TIMESTAMP_ISO8601:logTime} %{LOGLEVEL:logLevel} %{WORD:pid} \[%{MYAPPNAME:traceId}-%{MYAPPNAME:spanId}\] \[%{MYTHREADNAME:threadName}\] %{NOTSPACE:classname} %{GREEDYDATA:message}" }
+      overwrite => ["message"]
+    }
+    date {
+      match => ["logTime","yyyy-MM-dd HH:mm:ss.SSS Z"]
+    }
+    date {
+      match => ["logTime","yyyy-MM-dd HH:mm:ss.SSS"]
+      target => "timestamp"
+      locale => "en"
+      timezone => "+08:00"
+    }
+    mutate {
+      remove_field => "logTime"
+      remove_field => "@version"
+      remove_field => "host"
+      remove_field => "offset"
+    }
+  }
+  if [fields][docType] == "point-log" {
+    grok {
+      patterns_dir => ["/opt/logstash-7.6.1/patterns"]
+      match => {
+        "message" => "%{TIMESTAMP_ISO8601:logTime}\|%{MYAPPNAME:appName}\|%{WORD:resouceid}\|%{MYAPPNAME:type}\|%{GREEDYDATA:object}"
+      }
+    }
+    kv {
+        source => "object"
+        field_split => "&"
+        value_split => "="
+    }
+    date {
+      match => ["logTime","yyyy-MM-dd HH:mm:ss.SSS Z"]
+    }
+    date {
+      match => ["logTime","yyyy-MM-dd HH:mm:ss.SSS"]
+      target => "timestamp"
+      locale => "en"
+      timezone => "+08:00"
+    }
+    mutate {
+      remove_field => "message"
+      remove_field => "logTime"
+      remove_field => "@version"
+      remove_field => "host"
+      remove_field => "offset"
+    }
+  }
+  if [fields][docType] == "mysqlslowlogs" {
+    grok {
+        match => [
+          "message", "^#\s+User@Host:\s+%{USER:user}\[[^\]]+\]\s+@\s+(?:(?<clienthost>\S*) )?\[(?:%{IP:clientip})?\]\s+Id:\s+%{NUMBER:id}\n# Query_time: %{NUMBER:query_time}\s+Lock_time: %{NUMBER:lock_time}\s+Rows_sent: %{NUMBER:rows_sent}\s+Rows_examined: %{NUMBER:rows_examined}\nuse\s(?<dbname>\w+);\nSET\s+timestamp=%{NUMBER:timestamp_mysql};\n(?<query_str>[\s\S]*)",
+          "message", "^#\s+User@Host:\s+%{USER:user}\[[^\]]+\]\s+@\s+(?:(?<clienthost>\S*) )?\[(?:%{IP:clientip})?\]\s+Id:\s+%{NUMBER:id}\n# Query_time: %{NUMBER:query_time}\s+Lock_time: %{NUMBER:lock_time}\s+Rows_sent: %{NUMBER:rows_sent}\s+Rows_examined: %{NUMBER:rows_examined}\nSET\s+timestamp=%{NUMBER:timestamp_mysql};\n(?<query_str>[\s\S]*)",
+          "message", "^#\s+User@Host:\s+%{USER:user}\[[^\]]+\]\s+@\s+(?:(?<clienthost>\S*) )?\[(?:%{IP:clientip})?\]\n# Query_time: %{NUMBER:query_time}\s+Lock_time: %{NUMBER:lock_time}\s+Rows_sent: %{NUMBER:rows_sent}\s+Rows_examined: %{NUMBER:rows_examined}\nuse\s(?<dbname>\w+);\nSET\s+timestamp=%{NUMBER:timestamp_mysql};\n(?<query_str>[\s\S]*)",
+          "message", "^#\s+User@Host:\s+%{USER:user}\[[^\]]+\]\s+@\s+(?:(?<clienthost>\S*) )?\[(?:%{IP:clientip})?\]\n# Query_time: %{NUMBER:query_time}\s+Lock_time: %{NUMBER:lock_time}\s+Rows_sent: %{NUMBER:rows_sent}\s+Rows_examined: %{NUMBER:rows_examined}\nSET\s+timestamp=%{NUMBER:timestamp_mysql};\n(?<query_str>[\s\S]*)"
+        ]
+    }
+    date {
+      match => ["timestamp_mysql","yyyy-MM-dd HH:mm:ss.SSS","UNIX"]
+    }
+    date {
+      match => ["timestamp_mysql","yyyy-MM-dd HH:mm:ss.SSS","UNIX"]
+      target => "timestamp"
+    }
+    mutate {
+      convert => ["query_time", "float"]
+      convert => ["lock_time", "float"]
+      convert => ["rows_sent", "integer"]
+      convert => ["rows_examined", "integer"]
+      remove_field => "message"
+      remove_field => "timestamp_mysql"
+      remove_field => "@version"
+    }
+  }
+}
+
+output {
+  if [fields][docType] == "sys-log" {
+    elasticsearch {
+      hosts => ["http://localhost:9200"]
+      user => "elastic"
+      password => "qEnNfKNujqNrOPD9q5kb"
+      index => "sys-log-%{+YYYY.MM.dd}"
+    }
+  }
+  if [fields][docType] == "point-log" {
+    elasticsearch {
+      hosts => ["http://localhost:9200"]
+      user => "elastic"
+      password => "qEnNfKNujqNrOPD9q5kb"
+      index => "point-log-%{+YYYY.MM.dd}"
+      routing => "%{type}"
+    }
+  }
+  if [fields][docType] == "mysqlslowlogs" {
+    elasticsearch {
+      hosts => ["http://localhost:9200"]
+      user => "elastic"
+      password => "qEnNfKNujqNrOPD9q5kb"
+      index => "mysql-slowlog-%{+YYYY.MM.dd}"
+    }
+  }
+}
+```
+
+### 4.4 启动服务
+
+```bash
+cd /home/elastic/filebeat-7.6.2
+./filebeat -c filebeat.yml -e
+```
