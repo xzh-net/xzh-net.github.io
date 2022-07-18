@@ -42,7 +42,6 @@ vi /etc/security/limits.conf
 # 末尾添加
 elastic soft nofile 65536
 elastic hard nofile 65536
-*  hard    nproc     4096
 ```
 
 2. 修改用户线程数
@@ -50,6 +49,8 @@ elastic hard nofile 65536
 ```bash
 vi /etc/security/limits.d/20-nproc.conf
 # 编辑
+elastic soft nofile 65536
+elastic hard nofile 65536
 * soft nproc 65535
 ```
 
@@ -87,7 +88,7 @@ cd /home/elastic/elasticsearch-7.6.2/bin
 ./elasticsearch -d  # 后台启动
 ```
 
-#### 1.1.6 验证服务
+#### 1.1.6 验证
 
 ```bash
 ps aux|grep elasticsearch
@@ -219,6 +220,11 @@ su - elsearch
 /home/elastic/elasticsearch-7.6.2-9202/bin/elasticsearch -d
 /home/elastic/elasticsearch-7.6.2-9203/bin/elasticsearch -d
 ```
+
+#### 1.2.6 验证集群
+
+http://172.17.17.194:9201/_cat/nodes
+
 
 ### 1.3 插件
 
