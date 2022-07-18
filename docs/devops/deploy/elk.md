@@ -397,5 +397,101 @@ POST /_analyze
 
 ## 3. Logstash
 
+### 3.1 下载解压
+
+```bash
+cd /opt/software
+tar -zxvf logstash-7.6.2.tar.gz -C /home/elastic/
+```
+
+### 3.2 目录授权
+
+使用root执行
+
+```bash
+chown -R elastic:elastic /home/elastic
+```
+
+### 3.3 修改配置
+
+```bash
+su - elastic
+cd /home/elastic/logstash-7.6.2/config
+cp -p logstash-sample.conf logstash.conf
+vi logstash.conf
+
+# 编辑
+input {
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4560
+    codec => json_lines
+    type => "debug"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4561
+    codec => json_lines
+    type => "error"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4562
+    codec => json_lines
+    type => "business"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4563
+    codec => json_lines
+    type => "common"
+  }
+}
+filter{
+  if [type] == "common" {
+    mutate {
+      remove_field => "port"
+      remove_field => "host"
+      remove_field => "@version"
+    }
+    json {
+      source => "message"
+      remove_field => ["message"]
+    }
+  }
+}
+output {
+  elasticsearch {
+    hosts => ["172.17.17.194:9201","172.17.17.194:9202","172.17.17.194:9203"]
+    index => "springboot-%{type}-%{+YYYY.MM.dd}"
+  }
+}
+```
+
+### 3.4 安装插件
+
+#### 3.4.1 json_lines
+
+```bash
+cd /home/elastic/logstash-7.6.2/bin
+./logstash-plugin install logstash-codec-json_lines
+```
+
+### 3.5 启动服务
+
+```bash
+cd /home/elastic/logstash-7.6.2/bin
+./logstash -f ../config/logstash.conf
+lsof -i:4560,4561,4562,4563
+```
+
+### 3.6 客户端测试
+
+访问地址：http://localhost:5601
+
 
 ## 4. Filebeat
