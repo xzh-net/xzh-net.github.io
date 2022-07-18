@@ -148,7 +148,7 @@ netstat -lntp|grep -E "zabbix|http|mysql|php"
 
 访问地址：http://192.168.3.200/zabbix
 - 默认账号：Admin
-- 默认密码：zabbix+
+- 默认密码：zabbix
 
 ## 5. 客户端
 
@@ -221,7 +221,7 @@ zabbix_get -s '192.168.3.201' -p 10050 -k 'agent.ping'
 ```bash
 vi /etc/zabbix/zabbix_agent2.conf
 # 修改
-Include=/etc/zabbix/zabbix_agent2.d/*.conf:q!
+Include=/etc/zabbix/zabbix_agent2.d/*.conf
 UnsafeUserParameters=1
 ```
 
