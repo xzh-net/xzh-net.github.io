@@ -568,20 +568,19 @@ server
 
 ### 3.5 二级路径
 
-```text
-server 
- {
-	listen 80;
-	server_name  www.xuzhihao.net;
-	charset utf-8; 
-	index index.html;
-	location / {
-		root D:/webapp;
-	}
-    location /dashboard {
-    	alias D:/dashboard;
+```conf
+server {
+    listen 80;
+    server_name  www.xuzhihao.net;
+    charset utf-8; 
+    index index.html;
+    location / {
+        root /home/project;
     }
-	location /blob/ {
+    location /emoji/ {
+        alias /home/project/;   # 必须以斜线结尾，实际路径/home/project/emoji/
+    }
+    location /blob/ {
         proxy_redirect off;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
