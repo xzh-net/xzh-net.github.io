@@ -1074,19 +1074,61 @@ vi /etc/httpd/conf.d/vhost.conf
 
 ### 1.12 iptables
 
+#### 1.12.1 安装
+
 ```bash
-systemctl status iptables    # 查看防火墙状态
+yum install iptables-services
 
-# -I：添加，-D：删除。INPUT表示入站，***.***.***.*** 表示要封停的IP，DROP表示放弃连接。
-iptables -I INPUT -s 211.0.0.0/8 -j DROP    # 封整段
-iptables -I INPUT -s 211.1.0.0/16 -j DROP   # 封IP段
-iptables -I INPUT -s 61.37.80.0/24 -j DROP
-iptables -I INPUT -s 61.37.81.0/24 -j DROP
+systemctl start iptables
+systemctl enable iptables
+systemctl status iptables
+/etc/init.d/iptables stop
 
-iptables -D INPUT -s 192.168.3.202 -j DROP        # 解封一个IP
-iptables -I INPUT -p tcp --dport 9090 -j ACCEPT   # 开启9090端口的访问
-iptables -I INPUT -s 192.168.3.202 -p TCP –dport 80 -j ACCEPT   # 只允许192.168.3.202访问80端口
+vi /etc/sysconfig/iptables
+systemctl restart iptables
 ```
+
+#### 1.12.2 filter
+
+1. 匹配规则
+
+```bash
+-s 192.168.134.0/24   	 	# 源地址
+-d 192.168.134.1	    	# 目标地址
+-p tcp|upd|icmp		    	# 协议
+-i lo		    			# input 从lo接口进入的数据包
+-o eth0             		# output 从eth0出去的数据包
+-p tcp --dport 80   	    # 目标端口是80,必须和-p tcp|udp 连用
+-p udp --dport 53   	    # 目标端口是53/udp
+```
+
+```bash
+iptables -t filter -F                                   # 清空filter表的所有规则
+iptables -t filter -L --line-numbers                    # 查看规则编号
+iptables -t filter -A INPUT -s 10.1.1.3 -j ACCEPT       # 允许源地址为10.1.1.3进入
+iptables -t filter -A INPUT ! -s 10.1.1.3 -j ACCEPT     # 不允许源地址为10.1.1.3进入
+iptables -I INPUT -s 211.0.0.0/8 -j DROP                # 封整段
+iptables -I INPUT -s 211.1.0.0/16 -j DROP               # 封IP段
+iptables -I INPUT -s 61.37.81.0/24 -j DROP              # 封IP段
+
+iptables -t filter -A INPUT -s 10.1.1.3 -j ACCEPT       # 允许源地址为10.1.1.3进入
+iptables -t filter -A INPUT ! -s 10.1.1.3 -j ACCEPT     # 不允许源地址为10.1.1.3进入
+iptables -t filter -A INPUT -s 10.1.1.3 -j DROP         # 拒绝源地址为10.1.1.3进入
+iptables -t filter -A OUTPUT -d 10.1.1.3 -j DROP        # 丢弃到达目标地址为10.1.1.3的包
+iptables -t filter -A OUTPUT ! -d 10.1.1.3 -j ACCEPT    # 丢弃到达目标地址为10.1.1.3的包
+iptables -t filter -A INPUT -d 10.1.1.2 -j DROP         # 丢弃所有到目标地址10.1.1.2的包	
+iptables -t filter -A OUTPUT -s 10.1.1.2 -j ACCEPT      # 源地址为10.1.1.2出去的包全部允许
+
+iptables -A INPUT -s 10.1.1.2 -p tcp --dport 80 -j ACCEPT   # 只允许10.1.1.2 9090端口的访问
+iptables -A INPUT -s 10.1.1.2 -p tcp --dport 20:21 -j ACCEPT
+iptables -D INPUT -s 192.168.3.202 -j DROP                  # 解封一个IP
+```
+
+#### 1.12.3 nat
+
+#### 1.12.4 mangle
+
+#### 1.12.5 raw
 
 ### 1.13 firewalld
 
