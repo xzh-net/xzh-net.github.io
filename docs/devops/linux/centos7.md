@@ -1090,17 +1090,19 @@ systemctl restart iptables
 
 #### 1.12.2 filter
 
-1. 匹配规则
+1. 处理动作
 
 ```bash
--s 192.168.134.0/24   	 	# 源地址
--d 192.168.134.1	    	# 目标地址
--p tcp|upd|icmp		    	# 协议
--i lo		    			# input 从lo接口进入的数据包
--o eth0             		# output 从eth0出去的数据包
--p tcp --dport 80   	    # 目标端口是80,必须和-p tcp|udp 连用
--p udp --dport 53   	    # 目标端口是53/udp
+-s 192.168.134.0/24     # 源地址
+-d 192.168.134.1        # 目标地址
+-p tcp|upd|icmp         # 协议
+-i lo                   # input 从lo接口进入的数据包
+-o eth0                 # output 从eth0出去的数据包
+-p tcp --dport 80       # 目标端口是80,必须和-p tcp|udp 连用
+-p udp --dport 53       # 目标端口是53/udp
 ```
+
+2. 语法示例
 
 ```bash
 iptables -t filter -F                                   # 清空filter表的所有规则
@@ -1119,12 +1121,34 @@ iptables -t filter -A OUTPUT ! -d 10.1.1.3 -j ACCEPT    # 丢弃到达目标地�
 iptables -t filter -A INPUT -d 10.1.1.2 -j DROP         # 丢弃所有到目标地址10.1.1.2的包	
 iptables -t filter -A OUTPUT -s 10.1.1.2 -j ACCEPT      # 源地址为10.1.1.2出去的包全部允许
 
-iptables -A INPUT -s 10.1.1.2 -p tcp --dport 80 -j ACCEPT   # 只允许10.1.1.2 9090端口的访问
-iptables -A INPUT -s 10.1.1.2 -p tcp --dport 20:21 -j ACCEPT
-iptables -D INPUT -s 192.168.3.202 -j DROP                  # 解封一个IP
+iptables -A INPUT -s 10.1.1.2 -p tcp --dport 80 -j ACCEPT       # 只允许10.1.1.2 9090端口的访问
+iptables -A INPUT -s 10.1.1.2 -p tcp --dport 20:21,2000:300 -j ACCEPT                   # 指定连续端口
+iptables -t filter -I INPUT -s 10.1.1.2 -p tcp -m multiport --dports 22,80 -j ACCEPT    # 指定多个不连续端口
+iptables -t filter -A INPUT -m iprange --src-range 10.1.1.2-10.1.1.5 -j ACCEPT          # 指定网段范围
 ```
 
 #### 1.12.3 nat
+
+1. 匹配规则
+
+```bash
+-j SNAT         # 源地址转换 POSTROUTING
+-j DNAT         # 目标地址转换 PREROUTING
+-j MASQUERADE   # 地址伪装
+```
+
+2. SNAT
+
+```bash
+iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -j SNAT --to 2.2.2.1  # 内访外
+iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -j MASQUERADE
+```
+
+3. DNAT
+
+```bash
+iptables -t nat -A PREROUTING -d 2.2.2.1 -p tcp --dport 80 -j DNAT --to 10.1.1.3    # 外访内
+```
 
 #### 1.12.4 mangle
 
@@ -1146,6 +1170,8 @@ firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开�
 firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
 firewall-cmd --reload                                    # 重载防火墙配置
 ```
+
+### 1.14 puppet
 
 ## 2. 命令
 
