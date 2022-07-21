@@ -1552,7 +1552,7 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 
 #### 4.1.1 JDK
 
-1. yum安装
+1. 在线安装
 
 ```bash
 yum install java-1.8.0-openjdk
@@ -1563,7 +1563,7 @@ export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 ```
 
-2. 压缩包安装
+2. 解压安装
 
 ```bash
 cd /opt/software
@@ -1578,48 +1578,58 @@ source /etc/profile   # 配置生效
 
 #### 4.1.2 Maven
 
-1. 解压配置
+1. 上传解压
 
 ```bash
-tar -xzf apache-maven-3.6.2-bin.tar.gz    # 解压
-mkdir -p /opt/maven                       # 创建目录
-mv apache-maven-3.6.2/* /opt/maven        # 移动文件
-
-vi /etc/profile
-export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
-export MAVEN_HOME=/opt/maven
-export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin
-source /etc/profile   # 配置生效
-mvn -v                # 查找Maven版本
+cd /opt/software
+tar -xzf apache-maven-3.5.4-bin.tar.gz -C /opt    # 解压
 ```
 
-2. Maven仓库
+2. 配置环境变量
+
+```bash
+vim /etc/profile
+# 添加
+export MAVEN_HOME=/opt/apache-maven-3.5.4
+export MAVEN_OPTS="-Xms4096m -Xmx4096m"
+export PATH=:$MAVEN_HOME/bin:$PATH
+
+# 生效
+source /etc/profile
+mvn -v
+```
+
+3. 配置仓库
+
+```bash
+vim /opt/apache-maven-3.5.4/conf/settings.xml
+```
 
 ```xml
 <localRepository>/opt/repository</localRepository>
-  <mirrors>
-        <!-- 阿里云仓库 -->
-        <mirror>
-            <id>alimaven</id>
-            <mirrorOf>central</mirrorOf>
-            <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
-        </mirror>
-        <!-- 中央仓库1 -->
-        <mirror>
-            <id>repo1</id>
-            <mirrorOf>central</mirrorOf>
-            <name>Human Readable Name for this Mirror.</name>
-            <url>http://repo1.maven.org/maven2/</url>
-        </mirror>
-        <!-- 中央仓库2 -->
-        <mirror>
-            <id>repo2</id>
-            <mirrorOf>central</mirrorOf>
-            <name>Human Readable Name for this Mirror.</name>
-            <url>http://repo2.maven.org/maven2/</url>
-        </mirror>
-  </mirrors>
+<mirrors>
+    <!-- 阿里云仓库 -->
+    <mirror>
+        <id>alimaven</id>
+        <mirrorOf>central</mirrorOf>
+        <name>aliyun maven</name>
+        <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
+    </mirror>
+    <!-- 中央仓库1 -->
+    <mirror>
+        <id>repo1</id>
+        <mirrorOf>central</mirrorOf>
+        <name>Human Readable Name for this Mirror.</name>
+        <url>http://repo1.maven.org/maven2/</url>
+    </mirror>
+    <!-- 中央仓库2 -->
+    <mirror>
+        <id>repo2</id>
+        <mirrorOf>central</mirrorOf>
+        <name>Human Readable Name for this Mirror.</name>
+        <url>http://repo2.maven.org/maven2/</url>
+    </mirror>
+</mirrors>
 ```
 
 
