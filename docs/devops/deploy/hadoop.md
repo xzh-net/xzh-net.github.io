@@ -1,116 +1,75 @@
 # Hadoop 3.1.4
 
-## 1. Hadoop3编译安装
+## 1.安装
 
-基础环境
-```bash
-bin/hadoop checknative
-mkdir -p /export/server/    # 软件安装路径
-mkdir -p /export/data/      # 数据存储路径
-mkdir -p /export/software/  # 软件包存放路径
-```
+### 1.1 编译安装
 
-### 1.1 安装编译相关的依赖
+#### 1.1.1 安装依赖
 
 ```bash
 yum install gcc gcc-c++
-yum install make cmake
+yum install make cmake  # 这里cmake版本推荐为3.6版本以上，版本低源码无法编译！可手动安装
 yum install autoconf automake libtool curl
 yum install lzo-devel zlib-devel openssl openssl-devel ncurses-devel
 yum install snappy snappy-devel bzip2 bzip2-devel lzo lzo-devel lzop libXtst
 ```
 
-### 1.2 手动安装cmake 
+#### 1.1.2 安装cmake
 
 ```bash
-yum erase cmake                 # yum卸载已安装cmake 版本低
-tar zxvf cmake-3.13.5.tar.gz    # 解压
-cd /export/server/cmake-3.13.5  # 编译安装
+yum erase cmake         # yum卸载版本低cmake
+cd /opt/software/ 
+tar zxvf cmake-3.13.5.tar.gz  -C /opt
+cd /opt/cmake-3.13.5
+# 编译安装
 ./configure
 make && make install
-cmake -version                  # 验证,如果没有正确显示版本 请断开SSH连接 重写登录
+cmake -version
 ```
 
-### 1.3 手动安装snappy
+如果编译失败提示找不到`GLIBCXX_3.4.21`，就升级gcc9以后，将libstdc++.so.6复制到指定替换旧文件即可
 
 ```bash
-#卸载已经安装的
-cd /usr/local/lib
-rm -rf libsnappy*
-#上传解压
-tar zxvf snappy-1.1.3.tar.gz 
-#编译安装
-cd /export/server/snappy-1.1.3
+find / -name "libstdc++.so*"
+strings /opt/gcc9/lib64/libstdc++.so.6|grep GLIBCXX
+/opt/gcc9/lib64/libstdc++.so.6 /lib64/
+```
+
+#### 1.1.3 安装snappy
+
+```bash 
+cd /usr/local/lib   
+rm -rf libsnappy*   # 卸载已经安装的
+# 上传解压
+cd /opt/software/ 
+tar zxvf snappy-1.1.3.tar.gz -C /opt
+cd /opt/snappy-1.1.3
+# 编译安装
 ./configure
 make && make install
-#验证是否安装
-[root@node4 snappy-1.1.3]# ls -lh /usr/local/lib |grep snappy
--rw-r--r-- 1 root root 511K Nov  4 17:13 libsnappy.a
--rwxr-xr-x 1 root root  955 Nov  4 17:13 libsnappy.la
-lrwxrwxrwx 1 root root   18 Nov  4 17:13 libsnappy.so -> libsnappy.so.1.3.0
-lrwxrwxrwx 1 root root   18 Nov  4 17:13 libsnappy.so.1 -> libsnappy.so.1.3.0
--rwxr-xr-x 1 root root 253K Nov  4 17:13 libsnappy.so.1.3.0
+# 验证是否安装
+ls -lh /usr/local/lib |grep snappy
 ```
 
-### 1.4 安装配置JDK1.8
+#### 1.1.4 安装jdk
 
 ```bash
-#解压安装包
-tar zxvf jdk-8u65-linux-x64.tar.gz
-
-#配置环境变量
-vim /etc/profile
-
-export JAVA_HOME=/export/server/jdk1.8.0_65
-export PATH=$PATH:$JAVA_HOME/bin
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-
-source /etc/profile
-
-#验证是否安装成功
 java -version
 ```
 
-### 1.5 安装配置maven
+#### 1.1.5 安装配置maven
 
 ```bash
-#解压安装包
-tar zxvf apache-maven-3.5.4-bin.tar.gz
-
-#配置环境变量
-vim /etc/profile
-
-export MAVEN_HOME=/export/server/apache-maven-3.5.4
-export MAVEN_OPTS="-Xms4096m -Xmx4096m"
-export PATH=:$MAVEN_HOME/bin:$PATH
-
-source /etc/profile
-
-#验证是否安装成功
-[root@node4 ~]# mvn -v
-Apache Maven 3.5.4
-
-#添加maven 阿里云仓库地址 加快国内编译速度
-vim /export/server/apache-maven-3.5.4/conf/settings.xml
-
-<mirrors>
-     <mirror>
-           <id>alimaven</id>
-           <name>aliyun maven</name>
-           <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-           <mirrorOf>central</mirrorOf>
-      </mirror>
-</mirrors>
+mvn -v
 ```
 
-### 1.6 安装ProtocolBuffer 2.5.0
+#### 1.1.6 安装ProtocolBuffer
 
 ```bash
-#解压
-tar zxvf protobuf-2.5.0.tar.gz
-
-#编译安装
-cd /export/server/protobuf-2.5.0
+cd /opt/software/ 
+tar zxvf protobuf-2.5.0.tar.gz -C /opt
+# 编译安装
+cd /opt/protobuf-2.5.0
 ./configure
 make && make install
 
@@ -118,25 +77,31 @@ make && make install
 protoc --version
 ```
 
-### 1.7 编译hadoop
+#### 1.1.7 编译hadoop
 
 ```bash
-#上传解压源码包
-tar zxvf hadoop-3.1.4-src.tar.gz
-
-#编译
-cd /export/server/hadoop-3.1.4-src
-
+cd /opt/software/ 
+tar zxvf hadoop-3.1.4-src.tar.gz -C /opt
+# 编译
+cd /opt/hadoop-3.1.4-src
 mvn clean package -Pdist,native -DskipTests -Dtar -Dbundle.snappy -Dsnappy.lib=/usr/local/lib
-
-#参数说明：
-Pdist,native    # 把重新编译生成的hadoop动态库；
-DskipTests      # 跳过测试
-Dtar            # 最后把文件以tar打包
-Dbundle.snappy  # 添加snappy压缩支持【默认官网下载的是不支持的】
-Dsnappy.lib=/usr/local/lib # 指snappy在编译机器上安装后的库路径
 ```
 
+参数说明：
+
+```bash
+Pdist,native        # 把重新编译生成的hadoop动态库；
+DskipTests          # 跳过测试
+Dtar                # 最后把文件以tar打包
+Dbundle.snappy      # 添加snappy压缩支持【默认官网下载的是不支持的】
+Dsnappy.lib=/usr/local/lib  # 指snappy在编译机器上安装后的库路径
+```
+
+编译之后的安装包路径
+
+```bash
+/opt/hadoop-3.1.4-src/hadoop-dist/target
+```
 
 ## 2. Hadoopn集群安装
 
