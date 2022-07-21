@@ -27,12 +27,12 @@ make && make install
 cmake -version
 ```
 
-如果编译失败提示找不到`GLIBCXX_3.4.21`，就升级gcc9以后，将libstdc++.so.6复制到指定替换旧文件即可
+如果编译失败提示找不到`GLIBCXX_3.4.21`，就升级gcc9以后，将libstdc++.so.6复制到提示路径下替换旧文件即可
 
 ```bash
 find / -name "libstdc++.so*"
 strings /opt/gcc9/lib64/libstdc++.so.6|grep GLIBCXX
-/opt/gcc9/lib64/libstdc++.so.6 /lib64/
+cp -r /opt/gcc9/lib64/libstdc++.so.6 /lib64/
 ```
 
 #### 1.1.3 安装snappy
