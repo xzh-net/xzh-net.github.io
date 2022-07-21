@@ -1,10 +1,8 @@
 # Hadoop 3.1.4
 
-## 1.安装
+## 1.编译
 
-### 1.1 编译安装
-
-#### 1.1.1 安装依赖
+### 1.1 安装依赖
 
 ```bash
 yum install gcc gcc-c++
@@ -14,7 +12,7 @@ yum install lzo-devel zlib-devel openssl openssl-devel ncurses-devel
 yum install snappy snappy-devel bzip2 bzip2-devel lzo lzo-devel lzop libXtst
 ```
 
-#### 1.1.2 安装cmake
+### 1.2 安装cmake
 
 ```bash
 yum erase cmake         # yum卸载版本低cmake
@@ -35,7 +33,7 @@ strings /opt/gcc9/lib64/libstdc++.so.6|grep GLIBCXX
 cp -r /opt/gcc9/lib64/libstdc++.so.6 /lib64/
 ```
 
-#### 1.1.3 安装snappy
+### 1.3 安装snappy
 
 ```bash 
 cd /usr/local/lib   
@@ -51,19 +49,19 @@ make && make install
 ls -lh /usr/local/lib |grep snappy
 ```
 
-#### 1.1.4 安装jdk
+### 1.4 安装jdk
 
 ```bash
 java -version
 ```
 
-#### 1.1.5 安装配置maven
+### 1.5 安装配置maven
 
 ```bash
 mvn -v
 ```
 
-#### 1.1.6 安装ProtocolBuffer
+### 1.6 安装ProtocolBuffer
 
 ```bash
 cd /opt/software/ 
@@ -77,7 +75,7 @@ make && make install
 protoc --version
 ```
 
-#### 1.1.7 编译hadoop
+### 1.7 编译hadoop
 
 ```bash
 cd /opt/software/ 
@@ -103,30 +101,93 @@ Dsnappy.lib=/usr/local/lib  # 指snappy在编译机器上安装后的库路径
 /opt/hadoop-3.1.4-src/hadoop-dist/target
 ```
 
-## 2. Hadoopn集群安装
+## 2. 集群搭建
 
-节点规划
-- node1   namenode datanode resourcemanager nodemanager
-- node2   secondarynamenode datanode nodemanager 
-- node3   datanode nodemanager
 
-### 2.1.1 配置环境（hadoop-env.sh）
+### 2.1 集群角色规划
+
+- node01 namenode datanode resourcemanager nodemanager
+- node02 secondarynamenode datanode nodemanager 
+- node03 datanode nodemanager
+
+### 2.2 基础环境准备(三台机器)
+
+#### 2.2.1 host映射
 
 ```bash
-cd /export/software
-
-tar -xvzf hadoop-3.1.4.tar.gz -C ../server  # 解压
-mkdir -p /export/server/hadoop-3.1.4/data/namenode
-mkdir -p /export/server/hadoop-3.1.4/data/datanode
-mkdir -p /export/data/hadoop-3.1.4
-cd /export/server/hadoop-3.1.4/etc/hadoop/
-vim hadoop-env.sh
+hostnamectl set-hostname node01.xuzhihao.net
+hostnamectl set-hostname node02.xuzhihao.net
+hostnamectl set-hostname node03.xuzhihao.net
 ```
 
-```yaml
-# 配置JAVA_HOME
-export JAVA_HOME=/export/server/jdk1.8.0_65
-# 设置用户以执行对应角色shell命令
+#### 2.2.2 域名映射
+
+```bash
+vim /etc/hosts
+# 添加
+192.168.123.201 node01 node01.xuzhihao.net
+192.168.123.202 node02 node02.xuzhihao.net
+192.168.123.203 node03 node03.xuzhihao.net
+```
+
+#### 2.2.3 关闭防火墙
+
+```bash
+systemctl stop firewalld.service 
+systemctl disable firewalld.service
+```
+
+#### 2.2.4 免密登录
+
+```bash
+ssh-keygen # 3个回车 生成公钥、私钥
+# 192.168.123.201 执行
+ssh-copy-id node01
+ssh-copy-id node02
+ssh-copy-id node03
+```
+
+#### 2.2.5 集群时间同步
+
+```bash
+yum -y install ntpdate
+ntpdate ntp4.aliyun.com
+```
+
+#### 2.2.6 安装jdk
+
+```bash
+java -version
+```
+
+### 2.3 上传安装包
+
+#### 2.3.1 解压
+
+```bash
+cd /opt/software
+tar -zxvf hadoop-3.1.4-bin-snappy-CentOS7.tar.gz -C /opt
+```
+
+#### 2.3.2 创建目录
+
+```bash
+mkdir -p /opt/software/     # 安装包存放路径，已创建
+mkdir -p /opt/              # 软件安装路径，已创建
+mkdir -p /opt/hadoop-3.1.4/data/    # 数据存储路径
+mkdir -p /opt/hadoop-3.1.4/tmp/     # 临时数据存储路径
+```
+
+### 2.4 修改配置
+
+#### 2.4.1 hadoop-env.sh
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+vim hadoop-env.sh
+# 编辑内容
+export JAVA_HOME=/usr/local/jdk1.8.0_211
+# 添加到末尾，设置用户以执行对应角色shell命令
 export HDFS_NAMENODE_USER=root
 export HDFS_DATANODE_USER=root
 export HDFS_SECONDARYNAMENODE_USER=root
@@ -134,24 +195,24 @@ export YARN_RESOURCEMANAGER_USER=root
 export YARN_NODEMANAGER_USER=root 
 ```
 
-### 2.1.2 配置NameNode（core-site.xml）
+#### 2.4.2 core-site.xml
 
 ```bash
-cd /export/server/hadoop-3.1.4/etc/hadoop/
+cd /opt/hadoop-3.1.4/etc/hadoop/
 vim core-site.xml
-```
-```yaml
+
+# 添加到configuration区间
 <!-- 默认文件系统的名称。通过URI中schema区分不同文件系统。-->
 <!-- file:///本地文件系统 hdfs:// hadoop分布式文件系统 gfs://。-->
 <!-- hdfs文件系统访问地址：http://nn_host:8020。-->
 <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://node1.itcast.cn:8020</value>
+    <value>hdfs://node01.xuzhihao.net:8020</value>
 </property>
 <!-- hadoop本地数据存储目录 format时自动生成 -->
 <property>
     <name>hadoop.tmp.dir</name>
-    <value>/export/data/hadoop-3.1.4</value>
+    <value>/opt/hadoop-3.1.4/tmp</value>
 </property>
 <!-- 在Web UI访问HDFS使用的用户名。-->
 <property>
@@ -160,27 +221,27 @@ vim core-site.xml
 </property>
 ```
 
-### 2.1.3 配置HDFS路径（hdfs-site.xml）
+#### 2.4.3 hdfs-site.xml
 
 ```bash
-cd /export/server/hadoop-3.1.4/etc/hadoop/
+cd /opt/hadoop-3.1.4/etc/hadoop/
 vim hdfs-site.xml
-```
-```yaml
+
+# 添加到configuration区间
 <!-- 设定SNN运行主机和端口。-->
 <property>
     <name>dfs.namenode.secondary.http-address</name>
-    <value>node2.itcast.cn:9868</value>
+    <value>node02.xuzhihao.net:9868</value>
 </property>
 ```
 
-### 2.1.4 配置MapReduce（mapred-site.xml）
+#### 2.4.4 mapred-site.xml
 
 ```bash
-cd /export/server/hadoop-3.1.4/etc/hadoop/
+cd /opt/hadoop-3.1.4/etc/hadoop/
 vim mapred-site.xml
-```
-```yaml
+
+# 添加到configuration区间
 <!-- mr程序默认运行方式。yarn集群模式 local本地模式-->
 <property>
   <name>mapreduce.framework.name</name>
@@ -203,17 +264,17 @@ vim mapred-site.xml
 </property>
 ```
 
-### 2.1.5 配置YARN（yarn-site.xml）
+#### 2.4.5 yarn-site.xml
 
 ```bash
-cd /export/server/hadoop-3.1.4/etc/hadoop/
+cd /opt/hadoop-3.1.4/etc/hadoop/
 vim yarn-site.xml
-```
-```yaml
+
+# 添加到configuration区间
 <!-- yarn集群主角色RM运行机器。-->
 <property>
     <name>yarn.resourcemanager.hostname</name>
-    <value>node1.itcast.cn</value>
+    <value>node01.xuzhihao.net</value>
 </property>
 <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
 <property>
@@ -237,46 +298,52 @@ vim yarn-site.xml
 </property>
 ```
 
-### 2.1.6 配置从节点（workers）
+#### 2.4.6 配置从角色
 
 ```bash
-cd /export/server/hadoop-3.1.4/etc/hadoop/
+cd /opt/hadoop-3.1.4/etc/hadoop/
 vim workers
-```
 
-```yaml
 # 删除第一行localhost，然后添加以下三行
-node1.itcast.cn
-node2.itcast.cn
-node3.itcast.cn
+node01.xuzhihao.net
+node02.xuzhihao.net
+node03.xuzhihao.net
 ```
 
-### 2.1.7 分发安装包
+### 2.5 分发安装包
 
 ```bash
-cd /export/server/
-scp -r hadoop-3.1.4 root@node2:/export/server/
-scp -r hadoop-3.1.4 root@node3:/export/server/
+cd /opt/hadoop-3.1.4
+scp -r /opt/hadoop-3.1.4 root@node02.xuzhihao.net:$PWD
+scp -r /opt/hadoop-3.1.4 root@node03.xuzhihao.net:$PWD
 ```
 
-### 2.1.8 配置Hadoop环境变量
+### 2.6 设置Hadoop环境变量
 
 ```bash
 vim /etc/profile
-export HADOOP_HOME=/export/server/hadoop-3.1.4
+export HADOOP_HOME=/opt/hadoop-3.1.4
 export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 source /etc/profile
 
-scp /etc/profile root@node2:/etc/
-scp /etc/profile root@node3:/etc/
+scp /etc/profile root@node02:/etc/
+scp /etc/profile root@node03:/etc/
+
+# 三台机器验证
+source /etc/profile
+hadoop 
 ```
 
-### 2.1.9 格式化启动
+### 2.7 格式化启动
+
+#### 2.7.1 初始化集群
 
 ```bash
-hdfs namenode -format itcast-hadoop
+hdfs namenode -format xzh-hadoop
 ```
-单节点启动
+
+#### 2.7.2 单节点启动
+
 ```bash
 # HDFS集群
 hdfs --daemon start namenode|datanode|secondarynamenode
@@ -285,8 +352,17 @@ hdfs --daemon stop  namenode|datanode|secondarynamenode
 yarn --daemon start resourcemanager|nodemanager
 yarn --daemon stop  resourcemanager|nodemanager
 ```
-一键启动
+
 ```bash
+hdfs --daemon start namenode|datanode           # 192.168.123.201
+hdfs --daemon start datanode|secondarynamenode  # 192.168.123.202
+hdfs --daemon start datanode                    # 192.168.123.203
+```
+
+#### 2.7.3 一键启动
+
+```bash
+cd /opt/hadoop-3.1.4/sbin
 # HDFS集群
 start-dfs.sh 
 stop-dfs.sh 
@@ -298,13 +374,11 @@ start-all.sh
 stop-all.sh 
 ```
 
-### 2.1.10 Web UI
+### 2.8 Web UI
 
 HDFS集群 http://namenode_host:9870
 
 YARN集群 http://resourcemanager_host:8088
-
-
 
 ## 3. Hive
 
