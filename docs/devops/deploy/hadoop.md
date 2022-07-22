@@ -354,9 +354,18 @@ yarn --daemon stop  resourcemanager|nodemanager
 ```
 
 ```bash
-hdfs --daemon start namenode|datanode           # 192.168.123.201
-hdfs --daemon start datanode|secondarynamenode  # 192.168.123.202
-hdfs --daemon start datanode                    # 192.168.123.203
+# 192.168.123.201
+hdfs --daemon start namenode
+hdfs --daemon start datanode
+yarn --daemon start resourcemanager
+yarn --daemon start nodemanager
+# 192.168.123.202
+hdfs --daemon start datanode
+hdfs --daemon start secondarynamenode
+yarn --daemon start nodemanager
+# 192.168.123.203
+hdfs --daemon start datanode
+yarn --daemon start nodemanager
 ```
 
 #### 2.7.3 一键启动
@@ -376,9 +385,9 @@ stop-all.sh
 
 ### 2.8 Web UI
 
-HDFS集群 http://namenode_host:9870
+HDFS集群：http://namenode_host:9870
 
-YARN集群 http://resourcemanager_host:8088
+YARN集群：http://resourcemanager_host:8088
 
 ## 3. Hive
 
