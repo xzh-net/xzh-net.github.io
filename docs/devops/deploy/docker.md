@@ -701,17 +701,12 @@ docker run -dit --name hadoop-docker \
 ```
 
 ```bash
-docker exec -it [容器id] /bin/bash
-cd /usr/local/hadoop-2.7.0/
-# 将 input 文件夹中的所有文件作为输入，筛选当中符合正则表达式 dfs[a-z.]+ 的单词并统计出现的次数，最后输出结果到 output 文件夹中
-bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar grep input output 'dfs[a-z.]+'
-# 查看结果
-bin/hdfs dfs -cat output/*
-
+docker exec -it [containerid] /bin/bash
 # 配置环境
 vi /etc/profile
 export HADOOP_HOME="/usr/local/hadoop-2.7.0"
 export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
+
 source /etc/profile
 
 # 统计高频词出现次数

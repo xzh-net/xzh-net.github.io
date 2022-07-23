@@ -112,7 +112,7 @@ Dsnappy.lib=/usr/local/lib  # 指snappy在编译机器上安装后的库路径
 
 ### 2.2 基础环境准备(三台机器)
 
-#### 2.2.1 host映射
+#### 2.2.1 hosts映射
 
 ```bash
 hostnamectl set-hostname node01.xuzhihao.net
@@ -374,11 +374,42 @@ start-all.sh
 stop-all.sh 
 ```
 
-### 2.8 Web UI
+### 2.8 客户端测试
+
+#### 2.8.1 Web UI
 
 HDFS集群 http://namenode_host:9870
 
 YARN集群 http://resourcemanager_host:8088
+
+#### 2.8.2 基准测试
+
+```bash
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -write -nrFiles 10  -fileSize 10MB
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -read -nrFiles 10  -fileSize 10MB
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -clean
+```
+
+#### 2.8.3 测试
+
+1. HDFS
+
+```bash
+hadoop fs -mkdir /test
+hadoop fs -put zookeeper.out /test
+hadoop fs -ls /
+```
+
+2. MapReduce+YARN 
+
+统计高频词出现次数
+
+```bash
+hadoop fs -mkdir -p /wordcount/input
+hadoop fs -put a.txt /wordcount/input # 创建a.txt并编辑内容
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.1.4.jar wordcount /wordcount/input /wordcount/output
+hadoop fs -cat /wordcount/output/part-r-00000
+```
 
 ## 3. Hive
 
