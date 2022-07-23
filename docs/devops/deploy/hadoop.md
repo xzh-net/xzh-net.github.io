@@ -391,15 +391,7 @@ HDFS集群：http://namenode_host:9870
 
 YARN集群：http://resourcemanager_host:8088
 
-#### 2.8.2 基准测试
-
-```bash
-hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -write -nrFiles 10  -fileSize 10MB
-hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -read -nrFiles 10  -fileSize 10MB
-hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -clean
-```
-
-#### 2.8.3 测试
+#### 2.8.2 功能体验
 
 1. HDFS
 
@@ -418,6 +410,41 @@ hadoop fs -mkdir -p /wordcount/input
 hadoop fs -put a.txt /wordcount/input # 创建a.txt并编辑内容
 hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.1.4.jar wordcount /wordcount/input /wordcount/output
 hadoop fs -cat /wordcount/output/part-r-00000
+```
+
+#### 2.8.3 基准测试
+
+```bash
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -write -nrFiles 10  -fileSize 10MB
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -read -nrFiles 10  -fileSize 10MB
+hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -clean
+```
+
+## 3. shell命令
+
+https://hadoop.apache.org/docs/r3.1.4/hadoop-project-dist/hadoop-common/FileSystemShell.html
+
+```bash
+hadoop fs -mkdir /source        # 用于存储原始采集数据
+hadoop fs -mkdir /common        # 用于存储公共数据集，例如：IP库、省份信息、经纬度等 
+hadoop fs -mkdir /workspace     # 工作空间，存储各团队计算出来的结果数据
+hadoop fs -mkdir /tmp           # 存储临时数据，每周清理一次
+hadoop fs -mkdir /warehous      # 存储hive数据仓库中的数据
+
+hadoop fs -ls -h -R /tmp        # 查看指定目录下内容 -h 显示size -R 递归
+hadoop fs -put a.txt /tmp       # 上传文件
+hadoop fs -moveFromLocal  a.txt /tmp    # 上传后删除本地文件
+hadoop fs -cat /tmp/a.txt               # 文件查看，大文件慎用
+hadoop fs -head /tmp/a.txt              # 查看文件前1KB的内容
+hadoop fs -tail -f /tmp/a.txt           # 查看文件后1KB的内容 -f 动态查看
+hadoop fs -get /tmp/a.txt  ./           # 下载文件到当前路径 -f 覆盖 -p 保留权限和访问修改时间
+hadoop fs -getmerge [-nl] [-skip-empty-file] /tmp/* ./   # 合并下载并再末尾添加换行符
+hadoop fs -cp /tmp/a.txt /tmp/b.txt     # 文件拷贝 -f 覆盖
+hadoop fs -appendToFile c.txt /tmp/a.txt    # 文件追加
+hadoop fs -df -h /tmp                   # 查看hdfs磁盘空间
+hadoop fs -du -s -h -v /tmp/a.txt       # 查看文件使用的空间
+hadoop fs -mv /tmp/a.txt /source/b.txt  # 文件移动
+hadoop fs -setrep -w 2 /tmp/a.txt       # 修改文件副本数 -R 递归 -w 客户端等待副本修改完毕
 ```
 
 ## 3. Hive
