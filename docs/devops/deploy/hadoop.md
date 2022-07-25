@@ -175,7 +175,6 @@ tar -zxvf hadoop-3.1.4-bin-snappy-CentOS7.tar.gz -C /opt
 mkdir -p /opt/software/     # 安装包存放路径，已创建
 mkdir -p /opt/              # 软件安装路径，已创建
 mkdir -p /opt/hadoop-3.1.4/data/    # 数据存储路径
-mkdir -p /opt/hadoop-3.1.4/tmp/     # 临时数据存储路径
 ```
 
 ### 2.4 修改配置
@@ -212,7 +211,7 @@ vim core-site.xml
 <!-- hadoop本地数据存储目录 format时自动生成 -->
 <property>
     <name>hadoop.tmp.dir</name>
-    <value>/opt/hadoop-3.1.4/tmp</value>
+    <value>/opt/hadoop-3.1.4/data</value>
 </property>
 <!-- 在Web UI访问HDFS使用的用户名。-->
 <property>
