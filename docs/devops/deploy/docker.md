@@ -716,8 +716,9 @@ hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar wordcount 
 hadoop fs -cat /wordcount/output/part-r-00000
 ```
 
+
 ```lua
-组件	节点	默认端口	配置	用途说明
+组件	  节点	   默认端口	      配置	        用途说明
 HDFS	DataNode	50010	dfs.datanode.address	datanode服务端口，用于数据传输
 HDFS	DataNode	50075	dfs.datanode.http.address	http服务的端口
 HDFS	DataNode	50475	dfs.datanode.https.address	https服务的端口
