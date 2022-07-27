@@ -446,6 +446,80 @@ hadoop fs -mv /tmp/a.txt /source/b.txt  # 文件移动
 hadoop fs -setrep -w 2 /tmp/a.txt       # 修改文件副本数 -R 递归 -w 客户端等待副本修改完毕
 ```
 
+## 4. 组件
+
+### 4.1 WebHDFS
+
+HDFS Web UI，其文件浏览功能底层就是基于WebHDFS来操作HDFS实现的
+
+?> 官方参数说明：https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File
+
+#### 4.1.1 使用示例
+
+1. 查看目录下文件
+
+```bash
+http://192.168.2.201:9870/webhdfs/v1/?op=LISTSTATUS
+```
+
+该操作表示要查看根目录下的所有文件以及目录，相当于 `hadoop fs -ls /`
+
+2. 读取指定文件内容
+
+```bash
+http://192.168.2.201:9870/webhdfs/v1/test/a.txt?op=OPEN&noredirect=false
+```
+
+3. 上传文件
+
+发送put请求
+
+```bash
+http://192.168.2.201:9870/webhdfs/v1/test/b.txt?op=CREATE&overwrite=true&replication=2&noredirect=true
+```
+
+点击连接跳转，body参数选择二进制，选择上传文件
+
+### 4.2 HttpFS 网关代理服务
+
+#### 4.2.1 开启服务
+
+1. 修改core-site.xml
+
+```bash
+vi /opt/hadoop-3.1.4/etc/hadoop/core-site.xml
+# 添加
+<property>
+    <name>hadoop.proxyuser.root.hosts</name>
+    <value>*</value>
+</property>
+<property>
+    <name>hadoop.proxyuser.root.groups</name>
+    <value>*</value>
+</property>
+```
+
+2. 分发重启服务
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop
+scp core-site.xml node02:/opt/hadoop-3.1.4/etc/hadoop/
+scp core-site.xml node03:/opt/hadoop-3.1.4/etc/hadoop/
+
+cd /opt/hadoop-3.1.4/sbin
+./stop-all.sh
+./start-all.sh
+
+hdfs --daemon start httpfs  # 启动httpfs
+```
+
+#### 4.2.2 访问地址
+
+http://192.168.2.201:14000/static/index.html
+
+http://192.168.2.201:14000/webhdfs/v1?user.name=root&op=LISTSTATUS
+
+
 ## 3. Hive
 
 Apache Hive是一款建立在Hadoop之上的开源数据仓库系统，可以将存储在Hadoop文件中的结构化、半结构化数据文件映射为一张数据库表，基于表提供了一种类似SQL的查询模型，称为Hive查询语言（HQL），用于访问和分析存储在Hadoop文件中的大型数据集。
