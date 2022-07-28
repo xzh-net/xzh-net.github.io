@@ -679,25 +679,22 @@ blk_write_time	double precision	 	该语句花在写入块上的总时间，以�
 ```
 
 ```sql
--- 最耗时 SQL，单次调用最耗时 SQL TOP 5
-select userid::regrole, dbid, query from pg_stat_statements order by mean_time desc limit 5;  
--- 最耗时的5条数据，最后一列表示命中率
-SELECT query, calls, total_time, rows, 100.0 * shared_blks_hit /nullif(shared_blks_hit + shared_blks_read, 0) AS hit_percent FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
+-- 查询单次调用最耗 IO SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time)/calls DESC LIMIT 5;
+-- 查询总最耗 IO SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time) DESC LIMIT 5;
 
--- 最耗IO SQL，单次调用最耗IO SQL TOP 5
-select userid::regrole, dbid, query from pg_stat_statements order by (blk_read_time+blk_write_time)/calls desc limit 5;  
--- 总最耗IO SQL TOP 5
-select userid::regrole, dbid, query from pg_stat_statements order by (blk_read_time+blk_write_time) desc limit 5;  
+-- 查询单次调用最耗时 SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 5;
+-- 查询总最耗时 SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
 
 -- 响应时间抖动最严重 SQL
 select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
-
 -- 最耗共享内存 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by (shared_blks_hit+shared_blks_dirtied) desc limit 5;  
-
+select userid::regrole, dbid, query from pg_stat_statements order by (shared_blks_hit+shared_blks_dirtied) desc limit 5;
 -- 最耗临时空间 SQL
 select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_written desc limit 5;  
-
 -- 清理历史统计信息
 select pg_stat_statements_reset(); 
 ```
