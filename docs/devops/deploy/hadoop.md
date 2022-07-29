@@ -419,6 +419,97 @@ hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobc
 hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.1.4-tests.jar TestDFSIO -clean
 ```
 
+### 2.9 动态扩容
+
+在新机器完成以下操作
+
+#### 2.9.1 hosts映射
+
+```bash
+hostnamectl set-hostname node04.xuzhihao.net
+```
+
+#### 2.9.2 域名映射
+
+```bash
+# 在所有节点操作
+vim /etc/hosts
+# 添加
+192.168.123.201 node01 node01.xuzhihao.net
+192.168.123.202 node02 node02.xuzhihao.net
+192.168.123.203 node03 node03.xuzhihao.net
+192.168.123.204 node04 node04.xuzhihao.net
+```
+
+#### 2.9.3 关闭防火墙
+
+```bash
+systemctl stop firewalld.service 
+systemctl disable firewalld.service
+```
+
+#### 2.9.4 免密登录
+
+```bash
+# 192.168.123.204 执行
+ssh-keygen
+# 192.168.123.201 执行
+ssh-copy-id node04
+```
+
+#### 2.9.5 集群时间同步
+
+```bash
+yum -y install ntpdate
+ntpdate ntp4.aliyun.com
+```
+
+#### 2.9.6 安装jdk
+
+```bash
+java -version
+```
+
+#### 2.9.7 内容分发
+
+1. 环境变量
+
+```bash
+# 192.168.123.201执行
+scp /etc/profile root@node04:/etc/
+```
+
+2. 软件包
+
+```bash
+# 192.168.123.201执行
+cd /opt/hadoop-3.1.4
+scp -r /opt/hadoop-3.1.4 root@node04.xuzhihao.net:$PWD
+```
+
+!>注意：安装包不要包含数据，拷贝后在新节点执行删除数据操作
+
+```bash
+rm -rf /opt/hadoop-3.1.4/data
+```
+
+#### 2.9.8 启动节点
+
+```bash
+hdfs --daemon start namenode
+```
+
+#### 2.9.9 DataNode负载均衡
+
+```bash
+# 在主节点执行
+hdfs dfsadmin -setBalancerBandwidth 104857600   # 设置带宽
+hdfs balancer -threshold 5                      # 均衡比例
+```
+
+#### 2.9.10 Web页面查看情况
+
+
 ## 3. shell命令
 
 https://hadoop.apache.org/docs/r3.1.4/hadoop-project-dist/hadoop-common/FileSystemShell.html
