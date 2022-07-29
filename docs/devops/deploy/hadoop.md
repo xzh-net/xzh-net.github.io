@@ -232,6 +232,11 @@ vim hdfs-site.xml
     <name>dfs.namenode.secondary.http-address</name>
     <value>node02.xuzhihao.net:9868</value>
 </property>
+# 此处为节点下线做准备
+<property>
+	<name>dfs.hosts.exclude</name>
+	<value>/opt/hadoop-3.1.4/etc/hadoop/excludes</value>
+</property>
 ```
 
 #### 2.4.4 mapred-site.xml
@@ -508,6 +513,36 @@ hdfs balancer -threshold 5                      # 均衡比例
 ```
 
 #### 2.9.10 Web页面查看情况
+
+### 2.10 节点退役
+
+#### 2.10.1 修改dfs.hosts.exclude
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+vim exclude
+
+# 添加下线节点
+node04.xuzhihao.net
+```
+
+!>注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役
+
+#### 2.10.2 节点刷新
+
+```bash
+# 在namenode节点执行
+hdfs dfsadmin -refreshNodes
+```
+
+Web页面查看情况等待节点状态变成decommissioned表示所有块已经复制完毕
+
+#### 2.10.3 关闭节点
+
+```bash
+hdfs --daemon stop datanode
+hdfs balancer -threshold 5      # 重新执行负载均衡
+```
 
 
 ## 3. shell命令
