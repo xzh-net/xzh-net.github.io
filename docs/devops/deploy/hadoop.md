@@ -112,7 +112,7 @@ Dsnappy.lib=/usr/local/lib  # 指snappy在编译机器上安装后的库路径
 
 ### 2.2 基础环境准备(三台机器)
 
-#### 2.2.1 hosts映射
+#### 2.2.1 修改主机名
 
 ```bash
 hostnamectl set-hostname node01.xuzhihao.net
@@ -120,7 +120,7 @@ hostnamectl set-hostname node02.xuzhihao.net
 hostnamectl set-hostname node03.xuzhihao.net
 ```
 
-#### 2.2.2 域名映射
+#### 2.2.2 hosts映射
 
 ```bash
 vim /etc/hosts
@@ -174,7 +174,7 @@ tar -zxvf hadoop-3.1.4-bin-snappy-CentOS7.tar.gz -C /opt
 ```bash
 mkdir -p /opt/software/     # 安装包存放路径，已创建
 mkdir -p /opt/              # 软件安装路径，已创建
-mkdir -p /opt/hadoop-3.1.4/data/    # 数据存储路径
+mkdir -p /opt/data/         # 数据存储路径
 ```
 
 ### 2.4 修改配置
@@ -211,7 +211,7 @@ vim core-site.xml
 <!-- hadoop本地数据存储目录 format时自动生成 -->
 <property>
     <name>hadoop.tmp.dir</name>
-    <value>/opt/hadoop-3.1.4/data</value>
+    <value>/opt/data</value>
 </property>
 <!-- 在Web UI访问HDFS使用的用户名。-->
 <property>
@@ -302,7 +302,7 @@ vim yarn-site.xml
 </property>
 ```
 
-#### 2.4.6 配置从角色
+#### 2.4.6 workers
 
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
@@ -426,56 +426,11 @@ hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobc
 
 ### 2.9 动态扩容
 
-在新机器完成以下操作
+#### 2.9.1 基础环境准备
 
-#### 2.9.1 hosts映射
+见2.2 基础环境准备，在新机器完成以上操作
 
-```bash
-hostnamectl set-hostname node04.xuzhihao.net
-```
-
-#### 2.9.2 域名映射
-
-```bash
-# 在所有节点操作
-vim /etc/hosts
-# 添加
-192.168.123.201 node01 node01.xuzhihao.net
-192.168.123.202 node02 node02.xuzhihao.net
-192.168.123.203 node03 node03.xuzhihao.net
-192.168.123.204 node04 node04.xuzhihao.net
-```
-
-#### 2.9.3 关闭防火墙
-
-```bash
-systemctl stop firewalld.service 
-systemctl disable firewalld.service
-```
-
-#### 2.9.4 免密登录
-
-```bash
-# 192.168.123.204 执行
-ssh-keygen
-# 192.168.123.201 执行
-ssh-copy-id node04
-```
-
-#### 2.9.5 集群时间同步
-
-```bash
-yum -y install ntpdate
-ntpdate ntp4.aliyun.com
-```
-
-#### 2.9.6 安装jdk
-
-```bash
-java -version
-```
-
-#### 2.9.7 内容分发
+#### 2.9.2 内容分发
 
 1. 环境变量
 
@@ -492,27 +447,21 @@ cd /opt/hadoop-3.1.4
 scp -r /opt/hadoop-3.1.4 root@node04.xuzhihao.net:$PWD
 ```
 
-!>注意：安装包不要包含数据，拷贝后在新节点执行删除数据操作
-
-```bash
-rm -rf /opt/hadoop-3.1.4/data
-```
-
-#### 2.9.8 启动节点
+#### 2.9.3 启动节点
 
 ```bash
 hdfs --daemon start namenode
 ```
 
-#### 2.9.9 DataNode负载均衡
+#### 2.9.4 DataNode负载均衡
 
 ```bash
 # 在主节点执行
-hdfs dfsadmin -setBalancerBandwidth 104857600   # 设置带宽
+hdfs dfsadmin -setBalancerBandwidth 104857600   # 设置带宽100M
 hdfs balancer -threshold 5                      # 均衡比例
 ```
 
-#### 2.9.10 Web页面查看情况
+#### 2.9.5 Web页面查看情况
 
 ### 2.10 节点退役
 
@@ -544,10 +493,227 @@ hdfs --daemon stop datanode
 hdfs balancer -threshold 5      # 重新执行负载均衡
 ```
 
+## 3. HDFS HA
 
-## 3. shell命令
+![](../../assets/_images/devops/deploy/hadoop/1.png)
+
+### 3.1 基础环境准备
+
+见 2.2 基础环境准备
+
+### 3.2 安装zookeeper集群
+
+### 3.3 上传安装包
+
+#### 3.3.1 解压
+
+```bash
+cd /opt/software
+tar -zxvf hadoop-3.1.4-bin-snappy-CentOS7.tar.gz -C /opt
+```
+
+#### 3.3.2 创建目录
+
+```bash
+mkdir -p /opt/software/     # 安装包存放路径，已创建
+mkdir -p /opt/              # 软件安装路径，已创建
+mkdir -p /opt/journaldata/  # 数据存储路径
+```
+
+### 3.4 修改配置
+
+#### 3.4.1 hadoop-env.sh
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+vim hadoop-env.sh
+# 编辑内容
+export JAVA_HOME=/usr/local/jdk1.8.0_211
+# 添加到末尾，设置用户以执行对应角色shell命令
+export HDFS_NAMENODE_USER=root
+export HDFS_DATANODE_USER=root
+export HDFS_JOURNALNODE_USER=root
+export HDFS_ZKFC_USER=root
+```
+
+#### 3.4.2 core-site.xml
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+vim core-site.xml
+
+# 添加到configuration区间
+<property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://mycluster</value>
+</property>
+<property>
+    <name>hadoop.tmp.dir</name>
+    <value>/opt/data</value>
+</property>
+
+<!-- ZooKeeper集群的地址和端口-->
+<property>
+    <name>ha.zookeeper.quorum</name>
+    <value>node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181</value>
+</property>
+```
+
+#### 3.4.3 hdfs-site.xml
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+vim hdfs-site.xml
+
+# 添加到configuration区间
+<!--指定hdfs的nameservice为mycluster，需要和core-site.xml中的保持一致 -->
+<property>
+    <name>dfs.nameservices</name>
+    <value>mycluster</value>
+</property>
+<!-- mycluster下面有两个NameNode，分别是nn1，nn2 -->
+<property>
+    <name>dfs.ha.namenodes.mycluster</name>
+    <value>nn1,nn2</value>
+</property>
+
+<!-- nn1的RPC通信地址 -->
+<property>
+    <name>dfs.namenode.rpc-address.mycluster.nn1</name>
+    <value>node01.xuzhihao.net:8020</value>
+</property>
+
+<!-- nn1的http通信地址 -->
+<property>
+    <name>dfs.namenode.http-address.mycluster.nn1</name>
+    <value>node1.xuzhihao.net:9870</value>
+</property>
+
+<!-- nn2的RPC通信地址 -->
+<property>
+    <name>dfs.namenode.rpc-address.mycluster.nn2</name>
+    <value>node02.xuzhihao.net:8020</value>
+</property>
+
+<!-- nn2的http通信地址 -->
+<property>
+    <name>dfs.namenode.http-address.mycluster.nn2</name>
+    <value>node02.xuzhihao.net:9870</value>
+</property>
+
+<!-- 指定NameNode的edits元数据在JournalNode上的存放位置 -->
+<property>
+    <name>dfs.namenode.shared.edits.dir</name>
+    <value>qjournal://node01.xuzhihao.net:8485;node01.xuzhihao.net:8485;node01.xuzhihao.net:8485/mycluster</value>
+</property>
+
+<!-- 指定JournalNode在本地磁盘存放数据的位置 -->
+<property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value>/opt/journaldata</value>
+</property>
+
+<!-- 开启NameNode失败自动切换 -->
+<property>
+    <name>dfs.ha.automatic-failover.enabled</name>
+    <value>true</value>
+</property>
+
+<!-- 指定该集群出故障时，哪个实现类负责执行故障切换 -->
+<property>
+    <name>dfs.client.failover.proxy.provider.mycluster</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+</property>
+
+<!-- 配置隔离机制方法-->
+<property>
+    <name>dfs.ha.fencing.methods</name>
+    <value>sshfence</value>
+</property>
+
+<!-- 使用sshfence隔离机制时需要ssh免登陆 -->
+<property>
+    <name>dfs.ha.fencing.ssh.private-key-files</name>
+    <value>/root/.ssh/id_rsa</value>
+</property>
+
+<!-- 配置sshfence隔离机制超时时间 -->
+<property>
+    <name>dfs.ha.fencing.ssh.connect-timeout</name>
+    <value>30000</value>
+</property>
+```
+
+#### 3.4.4 workers
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+vim workers
+
+# 删除第一行localhost，然后添加以下三行
+node01.xuzhihao.net
+node02.xuzhihao.net
+node03.xuzhihao.net
+```
+
+### 3.5 分发安装包
+
+```bash
+cd /opt/hadoop-3.1.4
+scp -r /opt/hadoop-3.1.4 root@node02.xuzhihao.net:$PWD
+scp -r /opt/hadoop-3.1.4 root@node03.xuzhihao.net:$PWD
+```
+
+### 3.6 启动集群
+
+#### 3.6.1 启动zk
+
+```bash
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh status
+```
+
+#### 3.6.2 启动journalnode
+
+```bash
+hdfs --daemon start journalnode # 三台机器
+```
+			
+#### 3.6.3 格式化namenode
+
+```bash
+hdfs namenode –format           # node01初始化集群
+hdfs --daemon start namenode    # node01启动namenode
+hdfs namenode -bootstrapStandby # node02同步元数据
+hdfs --daemon start namenode    # node02启动namenode
+```
+
+#### 3.6.4 格式化ZKFC
+
+```bash
+hdfs zkfc -formatZK     # active上执行
+```
+
+#### 3.6.5 启动HDFS
+
+```bash
+cd /opt/hadoop-3.1.4/sbin
+start-dfs.sh
+```
+
+#### 3.6.6 启动YARN（可选）
+
+#### 3.6.7 检查集群状态
+
+```bash
+hdfs dfsadmin -report
+```
+
+## 4. shell命令
 
 https://hadoop.apache.org/docs/r3.1.4/hadoop-project-dist/hadoop-common/FileSystemShell.html
+
+### 4.1 hdfs
 
 ```bash
 hadoop fs -mkdir /source        # 用于存储原始采集数据
@@ -572,15 +738,25 @@ hadoop fs -mv /tmp/a.txt /source/b.txt  # 文件移动
 hadoop fs -setrep -w 2 /tmp/a.txt       # 修改文件副本数 -R 递归 -w 客户端等待副本修改完毕
 ```
 
-## 4. 组件
+### 4.2 集群
 
-### 4.1 WebHDFS
+```bash
+hdfs dfsadmin -safemode get     # 手动获取安全模式状态信息
+hdfs dfsadmin -safemode enter   # 进入安全模式
+hdfs dfsadmin -safemode leave   # 离开安全模式
+
+
+```
+
+## 5. 组件
+
+### 5.1 WebHDFS
 
 HDFS Web UI，其文件浏览功能底层就是基于WebHDFS来操作HDFS实现的
 
 ?> 官方参数说明：https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File
 
-#### 4.1.1 使用示例
+#### 5.1.1 使用示例
 
 1. 查看目录下文件
 
@@ -606,9 +782,9 @@ http://192.168.2.201:9870/webhdfs/v1/test/b.txt?op=CREATE&overwrite=true&replica
 
 点击连接跳转，body参数选择二进制，选择上传文件
 
-### 4.2 HttpFS 网关代理服务
+### 5.2 HttpFS 网关代理服务
 
-#### 4.2.1 开启服务
+#### 5.2.1 开启服务
 
 1. 修改core-site.xml
 
@@ -639,14 +815,15 @@ cd /opt/hadoop-3.1.4/sbin
 hdfs --daemon start httpfs  # 启动httpfs
 ```
 
-#### 4.2.2 访问地址
+#### 5.2.2 访问地址
 
 http://192.168.2.201:14000/static/index.html
 
 http://192.168.2.201:14000/webhdfs/v1?user.name=root&op=LISTSTATUS
 
 
-## 3. Hive
+
+## 6. Hive
 
 Apache Hive是一款建立在Hadoop之上的开源数据仓库系统，可以将存储在Hadoop文件中的结构化、半结构化数据文件映射为一张数据库表，基于表提供了一种类似SQL的查询模型，称为Hive查询语言（HQL），用于访问和分析存储在Hadoop文件中的大型数据集。
 Hive核心是将HQL转换为MapReduce程序，然后将程序提交到Hadoop群集执行。Hive由Facebook实现并开源
@@ -655,9 +832,9 @@ Hive不是分布式安装运行的软件，其分布式的特性主要借由Hado
 
 hive 3.1.2对应hadoop3.1.4
 
-### 3.1 安装部署
+### 6.1 安装部署
 
-#### 3.1.1 内嵌模式
+#### 6.1.1 内嵌模式
 ```bash
 #--------------------Hive安装配置----------------------
 # 上传解压安装包
@@ -686,7 +863,7 @@ bin/schematool -dbType derby -initSchema
 bin/hive
 ```
 
-#### 3.1.2 本地模式
+#### 6.1.2 本地模式
 ```bash
 #--------------------Hive安装配置----------------------
 # 上传解压安装包
@@ -760,7 +937,7 @@ bin/hive
 ```
 
 
-#### 3.1.3 远程模式
+#### 6.1.3 远程模式
 
 远程模式比本地模式需要单独启动metastore服务
 ```bash
