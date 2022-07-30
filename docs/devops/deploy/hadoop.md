@@ -6,7 +6,6 @@
 
 ```bash
 yum install gcc gcc-c++
-yum install make cmake  # 这里cmake版本推荐为3.6版本以上，版本低源码无法编译！可手动安装
 yum install autoconf automake libtool curl
 yum install lzo-devel zlib-devel openssl openssl-devel ncurses-devel
 yum install snappy snappy-devel bzip2 bzip2-devel lzo lzo-devel lzop libXtst
@@ -547,6 +546,8 @@ vim core-site.xml
     <name>fs.defaultFS</name>
     <value>hdfs://mycluster</value>
 </property>
+
+<!-- hadoop数据存储目录-->
 <property>
     <name>hadoop.tmp.dir</name>
     <value>/opt/data</value>
@@ -556,6 +557,12 @@ vim core-site.xml
 <property>
     <name>ha.zookeeper.quorum</name>
     <value>node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181</value>
+</property>
+
+<!-- 在Web UI访问HDFS使用的用户名。-->
+<property>
+    <name>hadoop.http.staticuser.user</name>
+    <value>root</value>
 </property>
 ```
 
@@ -586,7 +593,7 @@ vim hdfs-site.xml
 <!-- nn1的http通信地址 -->
 <property>
     <name>dfs.namenode.http-address.mycluster.nn1</name>
-    <value>node1.xuzhihao.net:9870</value>
+    <value>node01.xuzhihao.net:9870</value>
 </property>
 
 <!-- nn2的RPC通信地址 -->
@@ -604,7 +611,7 @@ vim hdfs-site.xml
 <!-- 指定NameNode的edits元数据在JournalNode上的存放位置 -->
 <property>
     <name>dfs.namenode.shared.edits.dir</name>
-    <value>qjournal://node01.xuzhihao.net:8485;node01.xuzhihao.net:8485;node01.xuzhihao.net:8485/mycluster</value>
+    <value>qjournal://node01.xuzhihao.net:8485;node02.xuzhihao.net:8485;node03.xuzhihao.net:8485/mycluster</value>
 </property>
 
 <!-- 指定JournalNode在本地磁盘存放数据的位置 -->
@@ -642,6 +649,13 @@ vim hdfs-site.xml
     <name>dfs.ha.fencing.ssh.connect-timeout</name>
     <value>30000</value>
 </property>
+```
+
+!> 远程补刀需要namenode互相免密登录，同时安装psmisc
+
+```bash
+ssh-copy-id node01  # 在node02节点执行
+yum install psmisc -y
 ```
 
 #### 3.4.4 workers
@@ -682,10 +696,9 @@ hdfs --daemon start journalnode # 三台机器
 #### 3.6.3 格式化namenode
 
 ```bash
-hdfs namenode –format           # node01初始化集群
-hdfs --daemon start namenode    # node01启动namenode
-hdfs namenode -bootstrapStandby # node02同步元数据
-hdfs --daemon start namenode    # node02启动namenode
+hdfs namenode -format xzh-hadoop    # node01初始化集群
+hdfs --daemon start namenode        # node01启动namenode
+hdfs namenode -bootstrapStandby     # node02同步元数据
 ```
 
 #### 3.6.4 格式化ZKFC
