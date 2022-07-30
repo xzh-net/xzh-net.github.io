@@ -6,20 +6,23 @@ Kettle是一款开源的ETL工具，纯java编写，可以在Window、Linux、Un
 3. 厨房(Kitchen batkitchen.sh) : 利用Kitchen可以使用命令行调用job
 4. 菜单(Carte.bat/ Carte.sh): Carte是一 个轻量级的Web容器，用于建立专用、远程的ETL Server。
 
-
 ## 1. 下载
 
 ### 1.1 jdk1.8
+
+https://www.oracle.com/java/technologies/downloads/
 
 ### 1.2 kettle
 
 https://sourceforge.net/projects/pentaho/files/Data%20Integration/
 
-### 1.3 数据库驱动
+### 1.3 驱动
+
+https://dev.mysql.com/downloads/connector/j/
 
 将mysql驱动和oracle驱动放在kettle包下面的lib包下面即可
 
-## 2. 设置
+## 2. 连接设置
 
 下载完成解压到任意路径，打开文件夹，找到Spoon.bat，创建桌面快捷方式，打开
 
@@ -93,3 +96,15 @@ SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 
 
 ### 3.3 定时调度
+
+#### 3.3.1 转换
+
+文件 → 新建 → 作业(J)新建一个作业(job)，并保存点击面板左侧的核心对象 ，选择通用文件夹下的START和转换并把它拖到右侧的编辑区中，按住shift画线连接“START”和“转换”
+
+![](../../assets/_images/java/tools/etl/11.png)
+
+![](../../assets/_images/java/tools/etl/12.png)
+
+#### 3.3.2 运行
+
+![](../../assets/_images/java/tools/etl/13.png)
