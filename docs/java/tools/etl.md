@@ -101,8 +101,6 @@ SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 
 #### 2.4.1 转换
 
-文件 → 新建 → 作业(J)新建一个作业(job)，并保存点击面板左侧的核心对象 ，选择通用文件夹下的START和转换并把它拖到右侧的编辑区中，按住shift画线连接“START”和“转换”
-
 ![](../../assets/_images/java/tools/etl/11.png)
 
 ![](../../assets/_images/java/tools/etl/12.png)
