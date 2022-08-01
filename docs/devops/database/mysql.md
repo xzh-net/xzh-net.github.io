@@ -4,7 +4,15 @@
 
 ### 1.1 单机
 
-#### 1.1.1 上传解压
+#### 1.1.1 卸载mariadb
+
+```bash
+rpm -qa|grep mariadb
+rpm -qa | grep -i mysql
+rpm -e mysql-community-server-5.7.29-1.el7.x86_64 --nodeps
+```
+
+#### 1.1.2 上传解压
 
 ```bash
 cd /opt/software/
@@ -13,20 +21,15 @@ wget https://cdn.mysql.com/archives/mysql-5.7/mysql-5.7.29-1.el7.x86_64.rpm-bund
 tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
 ```
 
-#### 1.1.2 安装
+#### 1.1.3 执行安装
 
 ```bash
-# 卸载版本
-rpm -qa|grep mariadb
-rpm -qa | grep -i mysql
-rpm -e mysql-community-server-5.7.29-1.el7.x86_64 --nodeps
-
 yum -y install libaio
 cd /opt/software/mysql
 rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm mysql-community-libs-5.7.29-1.el7.x86_64.rpm mysql-community-client-5.7.29-1.el7.x86_64.rpm mysql-community-server-5.7.29-1.el7.x86_64.rpm
 ```
 
-#### 1.1.3 修改配置
+#### 1.1.4 修改配置
 
 ```bash
 vim /etc/my.cnf
@@ -40,7 +43,7 @@ log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
 ```
 
-#### 1.1.4 初始化
+#### 1.1.5 初始化
 
 ```bash
 mysqld --initialize 					# 初始化mysql
@@ -49,7 +52,7 @@ cat /var/log/mysqld.log | grep password	# 初始密码
 systemctl start mysqld.service      	# 启动mysql
 ```
 
-#### 1.1.5 启动服务
+#### 1.1.6 启动服务
 
 ```bash
 systemctl start mysqld
@@ -59,7 +62,7 @@ systemctl enable  mysqld    # 设置开机启动
 ps aux | grep mysqld        
 ```
 
-#### 1.1.6 创建用户
+#### 1.1.7 客户端测试
 
 ```bash
 mysql -u root -p
@@ -68,7 +71,7 @@ grant all privileges on *.* to 'root' @'%' identified by '123456';
 flush privileges;
 ```
 
-#### 1.1.7 卸载服务
+#### 1.1.7 完全卸载
 
 1. 停止服务
 
@@ -90,9 +93,11 @@ rpm -qa | grep -i mysql
 ```bash
 find / -name mysql
 
+# 删除目录
 rm -rf /var/lib/mysql
 rm -rf /var/lib/mysql/mysql
 rm -rf /usr/share/mysql
+# 删除默认配置日志
 rm -rf /etc/my.cnf
 rm -rf /var/log/mysqld.log
 ```
@@ -188,7 +193,7 @@ mysql -uroot -p1q2w3e4r -e "show variables like 'log_bin%'";
 
 ## 3. 表操作
 
-1. 获取所有表结构信息
+### 3.1 获取所有表结构信息
    
 ```sql
 select table_name tableName, engine engine, table_comment tableComment, create_time createTime from
@@ -198,14 +203,14 @@ select table_name tableName, engine engine, table_comment tableComment, create_t
 		order by create_time desc
 ```
 
-2. 获取表名及备注sql
+### 3.2 获取表名及备注sql
 
 ```sql
 select table_name tableName, engine, table_comment tableComment, create_time createTime from information_schema.tables
         where table_schema = (select database()) and table_name = #{tableName}
 ```
 
-3. 获取指定表的字段名称主键等
+### 3.3 获取指定表的字段名称主键等
 
 ```sql
 select column_name columnName, data_type dataType, column_comment columnComment, column_key columnKey, extra from information_schema.columns
