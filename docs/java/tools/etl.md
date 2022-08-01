@@ -22,7 +22,10 @@ https://dev.mysql.com/downloads/connector/j/
 
 将mysql驱动和oracle驱动放在kettle包下面的lib包下面即可
 
-## 2. 连接设置
+
+## 2. 快速体验
+
+### 2.1 DB连接
 
 下载完成解压到任意路径，打开文件夹，找到Spoon.bat，创建桌面快捷方式，打开
 
@@ -37,27 +40,25 @@ https://dev.mysql.com/downloads/connector/j/
 ![](../../assets/_images/java/tools/etl/3.png)
 
 
-## 3. 应用
+### 2.2 导出Excel
 
-### 3.1 导出Excel
-
-1. 表输入
+#### 2.2.1 表输入
    
 ![](../../assets/_images/java/tools/etl/5.png)
 
-2. Excel输出
+#### 2.2.2 Excel输出
 
 ![](../../assets/_images/java/tools/etl/6.png)
 
 设置保存位置和导出字段
 
-3. 关联
+#### 2.2.3 关联
 
 按住【Shift】，鼠标左键点击【表输入】，向右拉到【Excel输出】上即可连接二者然后【Ctrl+S】保存转换
 
-### 3.2 调用存储过程
+### 2.3 调用存储过程
 
-1. sql
+#### 2.3.1 sql
 
 ```sql
 CREATE TABLE TEST(
@@ -74,7 +75,7 @@ BEGIN
 END;
 ```
 
-2. 添加
+#### 2.3.2 添加控件
 
 在右侧【核心对象】中搜索【表输入】，【调用DB存储过程】将其拖到新创建的转换中
 
@@ -87,7 +88,7 @@ SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 ![](../../assets/_images/java/tools/etl/7.png)
 
 
-3. 设置转换
+#### 2.3.3 设置转换
 
 右键点击转换空白处，打开【转换设置】->【命名参数】， 配置调用存储过程要使用的输入参数（与【表输入】的SQL语句中的变量参数一致）
 
@@ -96,9 +97,9 @@ SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 ![](../../assets/_images/java/tools/etl/10.png)
 
 
-### 3.3 定时调度
+### 2.4 定时调度
 
-#### 3.3.1 转换
+#### 2.4.1 转换
 
 文件 → 新建 → 作业(J)新建一个作业(job)，并保存点击面板左侧的核心对象 ，选择通用文件夹下的START和转换并把它拖到右侧的编辑区中，按住shift画线连接“START”和“转换”
 
@@ -106,6 +107,6 @@ SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 
 ![](../../assets/_images/java/tools/etl/12.png)
 
-#### 3.3.2 运行
+#### 2.4.2 运行
 
 ![](../../assets/_images/java/tools/etl/13.png)
