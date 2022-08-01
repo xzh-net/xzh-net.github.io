@@ -205,46 +205,51 @@ show tables;
 
 ### 1.4 远程模式
 
-远程模式比本地模式需要单独启动metastore服务
+#### 1.4.1 上传解压
+
 ```bash
-#--------------------Hive安装配置----------------------
-# 上传解压安装包
-cd /export/server/
-tar zxvf apache-hive-3.1.2-bin.tar.gz
-mv apache-hive-3.1.2-bin hive
+cd /opt/software
+tar zxvf apache-hive-3.1.2-bin.tar.gz -C /opt
+cd /opt
+mv apache-hive-3.1.2-bin apache-hive-3.1.2
+```
 
-#解决hadoop、hive之间guava版本差异
-cd /export/server/hive
+#### 1.4.2 解决版本冲突
+
+```bash
+cd /opt/apache-hive-3.1.2
 rm -rf lib/guava-19.0.jar
-cp /export/server/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
+cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
+```
 
-#添加mysql jdbc驱动到hive安装包lib/文件下
-mysql-connector-java-5.1.32.jar
+将mysql-connector-java-5.1.32.jar拷贝到hive安装包lib/文件下
 
-#修改hive环境变量文件 添加HADOOP_HOME
-cd /export/server/hive/conf/
+#### 1.4.3 修改配置
+
+1. 设置hive环境变量
+
+```bash
+cd /opt/apache-hive-3.1.2/conf/
 mv hive-env.sh.template hive-env.sh
 vim hive-env.sh
-export HADOOP_HOME=/export/server/hadoop-3.1.4
-export HIVE_CONF_DIR=/export/server/hive/conf
-export HIVE_AUX_JARS_PATH=/export/server/hive/lib
+# 编辑内容
+export HADOOP_HOME=/opt/hadoop-3.1.4
+export HIVE_CONF_DIR=/opt/apache-hive-3.1.2/conf
+export HIVE_AUX_JARS_PATH=/opt/apache-hive-3.1.2/lib
+```
 
-#新增hive-site.xml 配置mysql等相关信息
+2. 新增hive-site.xml配置mysql
+
+```bash
+cd /opt/apache-hive-3.1.2/conf/
 vim hive-site.xml
 
-
-#初始化metadata
-cd /export/server/hive
-bin/schematool -initSchema -dbType mysql -verbos
-#初始化成功会在mysql中创建74张表
-
-
-#-----------------hive-site.xml--------------
+# 插入
 <configuration>
     <!-- 存储元数据mysql相关配置 -->
     <property>
         <name>javax.jdo.option.ConnectionURL</name>
-        <value> jdbc:mysql://node1:3306/hive?createDatabaseIfNotExist=true&amp;useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
+        <value> jdbc:mysql://node01:3306/hive?createDatabaseIfNotExist=true&amp;useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
     </property>
 
     <property>
@@ -265,13 +270,13 @@ bin/schematool -initSchema -dbType mysql -verbos
     <!-- H2S运行绑定host -->
     <property>
         <name>hive.server2.thrift.bind.host</name>
-        <value>node1</value>
+        <value>node01</value>
     </property>
 
     <!-- 远程模式部署metastore 服务地址 -->
     <property>
         <name>hive.metastore.uris</name>
-        <value>thrift://node1:9083</value>
+        <value>thrift://node01:9083</value>
     </property>
 
     <!-- 关闭元数据存储授权  -->
@@ -286,17 +291,30 @@ bin/schematool -initSchema -dbType mysql -verbos
         <value>false</value>
     </property>
 </configuration>
+```
 
 
+#### 1.4.4 初始化metadata
 
-#-----------------Metastore Hiveserver2启动----
-#前台启动  关闭ctrl+c
-/export/server/hive/bin/hive --service metastore
+```bash
+cd /opt/apache-hive-3.1.2
+bin/schematool -initSchema -dbType mysql -verbos
+```
 
-#后台启动 进程挂起  关闭使用jps + kill
-#输入命令回车执行 再次回车 进程将挂起后台
-nohup /export/server/hive/bin/hive --service metastore &
+初始化成功会在mysql中创建74张表
 
-#前台启动开启debug日志
-/export/server/hive/bin/hive --service metastore --hiveconf hive.root.logger=DEBUG,console
+#### 1.4.5 启动metastore
+
+```bash
+/opt/apache-hive-3.1.2/bin/hive --service metastore             # 前台启动
+/opt/apache-hive-3.1.2/bin/hive --service metastore --hiveconf hive.root.logger=DEBUG,console   # 前台启动开启debug日志
+nohup /opt/apache-hive-3.1.2/bin/hive --service metastore &     # 后台启动
+```
+
+#### 1.4.6 客户端测试
+
+```sql
+show databases;
+create database test;
+show tables;
 ```
