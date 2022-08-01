@@ -78,13 +78,14 @@ END;
 
 在右侧【核心对象】中搜索【表输入】，【调用DB存储过程】将其拖到新创建的转换中
 
-![](../../assets/_images/java/tools/etl/7.png)
-
 ![](../../assets/_images/java/tools/etl/8.png)
 
 ```sql
 SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 ```
+
+![](../../assets/_images/java/tools/etl/7.png)
+
 
 3. 设置转换
 
