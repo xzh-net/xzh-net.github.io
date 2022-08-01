@@ -66,8 +66,8 @@ ps aux | grep mysqld
 
 ```bash
 mysql -u root -p
-set password = password('123456');
-grant all privileges on *.* to 'root' @'%' identified by '123456';
+set password = password('hadoop');
+grant all privileges on *.* to 'root' @'%' identified by 'hadoop';
 flush privileges;
 ```
 
