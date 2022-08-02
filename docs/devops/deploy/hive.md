@@ -305,7 +305,9 @@ bin/schematool -initSchema -dbType mysql -verbos
 
 初始化成功会在mysql中创建74张表
 
-#### 1.4.5 启动metastore
+#### 1.4.5 启动服务
+
+1. 启动metastore
 
 ```bash
 /opt/apache-hive-3.1.2/bin/hive --service metastore             # 前台启动
@@ -313,7 +315,66 @@ bin/schematool -initSchema -dbType mysql -verbos
 nohup /opt/apache-hive-3.1.2/bin/hive --service metastore &     # 后台启动
 ```
 
-#### 1.4.6 客户端测试
+2. 启动hiveserver2
+
+```bash
+nohup /opt/apache-hive-3.1.2/bin/hive --service hiveserver2  & 
+```
+
+### 1.5 客户端
+
+#### 1.5.1 上传解压
+
+```bash
+cd /opt/software
+tar zxvf apache-hive-3.1.2-bin.tar.gz -C /opt
+cd /opt
+mv apache-hive-3.1.2-bin apache-hive-3.1.2
+```
+
+#### 1.5.2 解决版本冲突
+
+```bash
+cd /opt/apache-hive-3.1.2
+rm -rf lib/guava-19.0.jar
+cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
+```
+
+#### 1.5.3 修改配置
+
+1. 设置hive环境变量
+
+```bash
+cd /opt/apache-hive-3.1.2/conf/
+mv hive-env.sh.template hive-env.sh
+vim hive-env.sh
+# 编辑内容
+export HADOOP_HOME=/opt/hadoop-3.1.4
+export HIVE_CONF_DIR=/opt/apache-hive-3.1.2/conf
+export HIVE_AUX_JARS_PATH=/opt/apache-hive-3.1.2/lib
+```
+
+2. 新增hive-site.xml配置mysql
+
+```bash
+cd /opt/apache-hive-3.1.2/conf/
+vim hive-site.xml
+
+# 插入
+<configuration>
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://node01:9083</value>
+    </property>
+</configuration>
+```
+
+#### 1.5.4 测试
+
+```bash
+/opt/apache-hive-3.1.2/bin/beeline
+! connect jdbc:hive2://node01:10000 # 户名root 密码为空
+```
 
 ```sql
 show databases;
