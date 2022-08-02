@@ -781,7 +781,7 @@ cat /etc/rsyslog.conf.bak | grep -v "#" | grep -v "^$" > /etc/rsyslog.conf  # �
 /var/log/xferlog    # ftp服务的日志
 /var/log/secure     # 网络连接及系统登录的安全信息
 /var/log/cron       # 定时任务的日志
-/var/log/wtmp       # 记录所有的登入和登出  last -f 查看
+/var/log/wtmp       # 记录所有的登入和登出  last -f 查看，或者使用 who -u /var/log/wtmp
 /var/log/btmp       # 记录失败的登入尝试
 ```
 
