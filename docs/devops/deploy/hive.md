@@ -117,9 +117,10 @@ mv apache-hive-3.1.2-bin apache-hive-3.1.2
 cd /opt/apache-hive-3.1.2
 rm -rf lib/guava-19.0.jar
 cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
-```
 
-将mysql-connector-java-5.1.32.jar拷贝到hive安装包lib/文件下
+# mysql驱动拷贝到hive安装包lib/文件下
+cp /opt/software/mysql/mysql-connector-java-5.1.32.jar ./lib/
+```
 
 #### 1.3.4 修改配置
 
@@ -220,9 +221,10 @@ mv apache-hive-3.1.2-bin apache-hive-3.1.2
 cd /opt/apache-hive-3.1.2
 rm -rf lib/guava-19.0.jar
 cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
-```
 
-将mysql-connector-java-5.1.32.jar拷贝到hive安装包lib/文件下
+# mysql驱动拷贝到hive安装包lib/文件下
+cp /opt/software/mysql/mysql-connector-java-5.1.32.jar ./lib/
+```
 
 #### 1.4.3 修改配置
 
