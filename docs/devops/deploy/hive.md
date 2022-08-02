@@ -379,5 +379,11 @@ vim hive-site.xml
 ```sql
 show databases;
 create database test;
+use test;
 show tables;
+create table t_student(id int,name varchar(255));
+insert into table t_student values(1,"zhangsan");
+select * from t_student;
 ```
+
+MR验证：http://192.168.2.201:8088/cluster
