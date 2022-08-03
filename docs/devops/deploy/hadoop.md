@@ -317,8 +317,8 @@ node03.xuzhihao.net
 
 ```bash
 cd /opt/hadoop-3.1.4
-scp -r /opt/hadoop-3.1.4 root@node02.xuzhihao.net:$PWD
-scp -r /opt/hadoop-3.1.4 root@node03.xuzhihao.net:$PWD
+scp -r /opt/hadoop-3.1.4 root@node02:$PWD
+scp -r /opt/hadoop-3.1.4 root@node03:$PWD
 ```
 
 ### 2.6 设置Hadoop环境变量
@@ -676,8 +676,8 @@ node03.xuzhihao.net
 
 ```bash
 cd /opt/hadoop-3.1.4
-scp -r /opt/hadoop-3.1.4 root@node02.xuzhihao.net:$PWD
-scp -r /opt/hadoop-3.1.4 root@node03.xuzhihao.net:$PWD
+scp -r /opt/hadoop-3.1.4 root@node02:$PWD
+scp -r /opt/hadoop-3.1.4 root@node03:$PWD
 ```
 
 ### 3.6 启动集群
