@@ -67,7 +67,7 @@ JDK1.4 accept和recv都会产生阻塞
 ![](../../assets/_images/java//network/io/bio3.png)
 
 ```bash
-strace -ff -o out /usr/java/jdk1.8.0_181/bin/java BioServer,
+strace -ff -o out /usr/java/jdk1.8.0_202/bin/java BioServer,
 ```
 
 JDK1.8 使用非阻塞模型poll
