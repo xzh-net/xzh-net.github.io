@@ -18,7 +18,7 @@ tar -xvzf hbase-2.1.0.tar.gz -C ../server/
 cd /export/server/hbase-2.1.0/conf
 vim hbase-env.sh
 # 第28行
-export JAVA_HOME=/export/server/jdk1.8.0_241/
+export JAVA_HOME=/export/server/jdk1.8.0_202/
 export HBASE_MANAGES_ZK=false
 ```
 
