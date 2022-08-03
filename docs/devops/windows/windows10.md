@@ -24,7 +24,7 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
 
 ```java
 JAVA_HOME
-D:\java\jdk1.8.0_40
+D:\java\jdk1.8.0_202
 MAVEN_HOME
 D:\java\apache-maven-3.6.0
 GRADLE_HOME
