@@ -124,9 +124,9 @@ hostnamectl set-hostname node03.xuzhihao.net
 ```bash
 vim /etc/hosts
 # 添加
-192.168.123.201 node01 node01.xuzhihao.net
-192.168.123.202 node02 node02.xuzhihao.net
-192.168.123.203 node03 node03.xuzhihao.net
+192.168.2.201 node01 node01.xuzhihao.net
+192.168.2.202 node02 node02.xuzhihao.net
+192.168.2.203 node03 node03.xuzhihao.net
 ```
 
 #### 2.2.3 关闭防火墙
@@ -140,7 +140,7 @@ systemctl disable firewalld.service
 
 ```bash
 ssh-keygen # 3个回车 生成公钥、私钥
-# 192.168.123.201 执行
+# 192.168.2.201 执行
 ssh-copy-id node02
 ssh-copy-id node03
 ssh-copy-id node01
@@ -357,16 +357,16 @@ yarn --daemon stop  resourcemanager|nodemanager
 ```
 
 ```bash
-# 192.168.123.201
+# 192.168.2.201
 hdfs --daemon start namenode
 hdfs --daemon start datanode
 yarn --daemon start resourcemanager
 yarn --daemon start nodemanager
-# 192.168.123.202
+# 192.168.2.202
 hdfs --daemon start datanode
 hdfs --daemon start secondarynamenode
 yarn --daemon start nodemanager
-# 192.168.123.203
+# 192.168.2.203
 hdfs --daemon start datanode
 yarn --daemon start nodemanager
 ```
@@ -434,14 +434,14 @@ hadoop jar /opt/hadoop-3.1.4/share/hadoop/mapreduce/hadoop-mapreduce-client-jobc
 1. 环境变量
 
 ```bash
-# 192.168.123.201执行
+# 192.168.2.201执行
 scp /etc/profile root@node04:/etc/
 ```
 
 2. 软件包
 
 ```bash
-# 192.168.123.201执行
+# 192.168.2.201执行
 cd /opt/hadoop-3.1.4
 scp -r /opt/hadoop-3.1.4 root@node04.xuzhihao.net:$PWD
 ```
