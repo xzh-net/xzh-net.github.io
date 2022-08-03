@@ -184,7 +184,7 @@ mkdir -p /opt/data/         # 数据存储路径
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim hadoop-env.sh
 # 编辑内容
-export JAVA_HOME=/usr/local/jdk1.8.0_211
+export JAVA_HOME=/usr/local/jdk1.8.0_202
 # 添加到末尾，设置用户以执行对应角色shell命令
 export HDFS_NAMENODE_USER=root
 export HDFS_DATANODE_USER=root
@@ -529,7 +529,7 @@ mkdir -p /opt/journaldata/  # 数据存储路径
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim hadoop-env.sh
 # 编辑内容
-export JAVA_HOME=/usr/local/jdk1.8.0_211
+export JAVA_HOME=/usr/local/jdk1.8.0_202
 # 添加到末尾，设置用户以执行对应角色shell命令
 export HDFS_NAMENODE_USER=root
 export HDFS_DATANODE_USER=root
