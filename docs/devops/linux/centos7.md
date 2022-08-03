@@ -1582,6 +1582,10 @@ vim /etc/profile
 export JAVA_HOME=/usr/local/jdk1.8.0_211
 export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
+
+# 免密分发
+scp /etc/profile root@node02:/etc/
+scp -r /usr/local/jdk1.8.0_211  root@node02:/usr/local/
 ```
 
 #### 4.1.2 Maven
