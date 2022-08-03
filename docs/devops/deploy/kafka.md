@@ -173,7 +173,7 @@ ${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/serve
 for host in node01 node02 node03
 do
     echo =============== $host ===============
-    ssh $host /usr/local/jdk1.8.0_211/bin/jps 
+    ssh $host /usr/local/jdk1.8.0_202/bin/jps 
 done
 
 ```
