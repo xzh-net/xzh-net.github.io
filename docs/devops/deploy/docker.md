@@ -429,10 +429,10 @@ RUN echo "root:root" | chpasswd
 RUN yum -y install net-tools
 
 # install java
-ADD http://mirrors.linuxeye.com/jdk/jdk-8u221-linux-x64.tar.gz /usr/local/
+ADD http://mirrors.linuxeye.com/jdk/jdk-8u202-linux-x64.tar.gz /usr/local/
 RUN cd /usr/local && tar -zxvf jdk-8u221-linux-x64.tar.gz && ls -lna
 
-ENV JAVA_HOME /usr/local/jdk1.8.0_221
+ENV JAVA_HOME /usr/local/jdk1.8.0_202
 ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV PATH $PATH:${JAVA_HOME}/bin
 
