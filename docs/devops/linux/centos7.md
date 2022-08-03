@@ -1576,8 +1576,7 @@ source /etc/profile   # 配置生效
 ```bash
 # Oracle最后一个商用免费版本
 cd /opt/software
-tar -zxvf jdk-8u202-linux-x64.tar.gz
-mv jdk1.8.0_202/ /usr/local/
+tar -zxvf jdk-8u202-linux-x64.tar.gz -C /usr/local/
 vim /etc/profile
 
 export JAVA_HOME=/usr/local/jdk1.8.0_202

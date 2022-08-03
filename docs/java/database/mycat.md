@@ -84,11 +84,11 @@ flush privileges;
 A. 上传JDK的安装包到Linux的root目录下
 	alt + p -----------> put D:/jdk-8u202-linux-x64.tar.gz
 	
-B. 解压压缩包 , 到 /usr/share 目录下
-	tar -zxvf jdk-8u202-linux-x64.tar.gz -C /usr/share/
+B. 解压压缩包 , 到 /usr/local 目录下
+	tar -zxvf jdk-8u202-linux-x64.tar.gz -C /usr/local/
 
 C. 配置PATH环境变量 , 在该配置文件(/etc/profile)的最后加入如下配置
-	export JAVA_HOME=/usr/share/jdk1.8.0_202
+	export JAVA_HOME=/usr/local/jdk1.8.0_202
 	export PATH=$PATH:$JAVA_HOME/bin
 ```
 
