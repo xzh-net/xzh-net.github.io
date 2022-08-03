@@ -141,9 +141,9 @@ systemctl disable firewalld.service
 ```bash
 ssh-keygen # 3个回车 生成公钥、私钥
 # 192.168.123.201 执行
-ssh-copy-id node01
 ssh-copy-id node02
 ssh-copy-id node03
+ssh-copy-id node01
 ```
 
 #### 2.2.5 集群时间同步

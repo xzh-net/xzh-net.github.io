@@ -1239,7 +1239,15 @@ find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往�
 find ./ -type f | xargs rm -rf;                     # 当前路径下文件类全部删除
 find ./ -type f -delete;                            # 当前路径下文件类全部删除
 find . -inum 2891596 -exec rm -i {} \;              # 通过inode号交互式删除文件
-find ./ -inum 105267651 -delete                     
+find ./ -inum 105267651 -delete
+
+# root用户下无法使用chattr
+cp /usr/bin/chattr /usr/bin/chattr2
+chmod 755 /usr/bin/chattr2
+chattr2 -i /usr/bin/chattr
+chmod 755 /usr/bin/chattr
+ls -la /usr/bin/chattr  
+lsattr /usr/bin/chattr
 ```
 
 ### 2.3 磁盘
