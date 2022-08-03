@@ -1575,17 +1575,17 @@ source /etc/profile   # 配置生效
 
 ```bash
 cd /opt/software
-tar -zxvf jdk-8u211-linux-x64.tar.gz
-mv jdk1.8.0_211/ /usr/local/
+tar -zxvf jdk-8u202-linux-x64.tar.gz
+mv jdk1.8.0_202/ /usr/local/
 vim /etc/profile
 
-export JAVA_HOME=/usr/local/jdk1.8.0_211
+export JAVA_HOME=/usr/local/jdk1.8.0_202
 export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile   # 配置生效
 
 # 免密分发
 scp /etc/profile root@node02:/etc/
-scp -r /usr/local/jdk1.8.0_211  root@node02:/usr/local/
+scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 ```
 
 #### 4.1.2 Maven
