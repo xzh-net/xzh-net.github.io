@@ -321,9 +321,11 @@ nohup /opt/apache-hive-3.1.2/bin/hive --service metastore &     # 后台启动
 nohup /opt/apache-hive-3.1.2/bin/hive --service hiveserver2  & 
 ```
 
-### 1.5 客户端
+## 2. 客户端
 
-#### 1.5.1 上传解压
+### 2.1 beeline
+
+#### 2.1.1 上传解压
 
 ```bash
 cd /opt/software
@@ -332,7 +334,7 @@ cd /opt
 mv apache-hive-3.1.2-bin apache-hive-3.1.2
 ```
 
-#### 1.5.2 解决版本冲突
+#### 2.2.2 解决版本冲突
 
 ```bash
 cd /opt/apache-hive-3.1.2
@@ -340,7 +342,7 @@ rm -rf lib/guava-19.0.jar
 cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
 ```
 
-#### 1.5.3 修改配置
+#### 2.2.3 修改配置
 
 1. 设置hive环境变量
 
@@ -369,7 +371,7 @@ vim hive-site.xml
 </configuration>
 ```
 
-#### 1.5.4 测试
+#### 2.2.4 测试
 
 ```bash
 /opt/apache-hive-3.1.2/bin/beeline
@@ -388,6 +390,61 @@ select * from t_student;
 
 MR验证：http://192.168.2.201:8088/cluster
 
-## 2. 可视化工具
+### 2.2 结构化数据映射
+
+#### 2.2.1 创建数据
+
+```bash
+cd /data
+vi user.txt
+```
+
+```txt
+1,zhangsan,18,beijing
+2,lisi,25,shanghai
+3,allen,30,shanghai
+4,woon,15,nanjing
+5,james,45,hangzhou
+6,tony,26,beijing
+```
+
+#### 2.2.2 创建表结构
+
+```sql
+create table t_user(id int,name varchar(255),age int,city varchar(255))
+row format delimited
+fields terminated by ',';
+```
+
+#### 2.2.3 上传数据
+
+```bash
+hadoop fs -put user.txt /user/hive/warehouse/test.db/t_user
+hadoop fs -ls /user/hive/warehouse/test.db/t_user
+```
+
+#### 2.2.4 验证
+
+```bash
+select * from t_user;
+```
+
+### 2.3 IDEA
+
+添加插件
+
+![](../../assets/_images/devops/deploy/hive/idea1.png)
+
+设置连接
+
+![](../../assets/_images/devops/deploy/hive/idea2.png)
+
+设置驱动
+
+![](../../assets/_images/devops/deploy/hive/idea3.png)
+
+验证数据
+
+![](../../assets/_images/devops/deploy/hive/idea4.png)
 
 ## 3. DDL
