@@ -1403,6 +1403,10 @@ sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/lo
 3. 配置文件
 
 ```conf
+set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202    # windows设置catalina.bat
+```
+
+```conf
 <?xml version="1.0" encoding="UTF-8"?>
 <Server port="8005" shutdown="SHUTDOWN">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
