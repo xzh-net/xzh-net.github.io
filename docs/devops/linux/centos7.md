@@ -1651,7 +1651,7 @@ scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 
 ```bash
 cd /opt/software
-tar -xzf apache-maven-3.5.4-bin.tar.gz -C /opt    # 解压
+tar -xzf apache-maven-3.6.3-bin.tar.gz -C /opt    # 解压
 ```
 
 2. 配置环境变量
@@ -1659,7 +1659,7 @@ tar -xzf apache-maven-3.5.4-bin.tar.gz -C /opt    # 解压
 ```bash
 vim /etc/profile
 # 添加
-export MAVEN_HOME=/opt/apache-maven-3.5.4
+export MAVEN_HOME=/opt/apache-maven-3.6.3
 export MAVEN_OPTS="-Xms4096m -Xmx4096m"
 export PATH=:$MAVEN_HOME/bin:$PATH
 
@@ -1671,7 +1671,7 @@ mvn -v
 3. 配置仓库
 
 ```bash
-vim /opt/apache-maven-3.5.4/conf/settings.xml
+vim /opt/apache-maven-3.6.3/conf/settings.xml
 ```
 
 ```xml

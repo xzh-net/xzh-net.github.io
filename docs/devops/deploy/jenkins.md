@@ -5,7 +5,7 @@
 | 名称 | IP地址 | 安装的软件 |
 | :---------- | :---------- | :---------------------------------- |
 | 代码托管服务器    | 172.17.17.196 | Gitlab-12.4.2 |
-| 持续集成服务器    | 172.17.17.200 | Jenkins-2.332，JDK1.8，Maven3.6.2，Git，SonarQube |
+| 持续集成服务器    | 172.17.17.200 | Jenkins-2.332，JDK1.8，Maven3.6.3，Git，SonarQube |
 | 应用测试服务器    | 172.17.17.196 | JDK1.8，Tomcat8.5 |
 
 ### 1.1 Gitlab安装
@@ -254,14 +254,14 @@ ssh-keygen -t rsa
 #### 1.6.1 Maven安装
 
 上传Maven上传到持续集成服务器172.17.17.200
+
 ```bash
-tar -xzf apache-maven-3.6.2-bin.tar.gz # 解压
-mkdir -p /opt/maven                    # 创建目录
-mv apache-maven-3.6.2/* /opt/maven     # 移动文件
+cd /opt/software
+tar -xzf apache-maven-3.6.3-bin.tar.gz -C /opt # 解压
 
 vi /etc/profile
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
-export MAVEN_HOME=/opt/maven
+export MAVEN_HOME=/opt/apache-maven-3.6.3
 export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin
 
 source /etc/profile                   # 配置生效
@@ -287,16 +287,16 @@ Manage Jenkins->Configure System->Global Properties ，添加三个全局变量J
 1. 修改Maven的settings.xml
 
 ```bash
-mkdir /root/repo # 仓库目录
-vi /opt/maven/conf/settings.xml
+mkdir /opt/repository # 仓库目录
+vi /opt/apache-maven-3.6.3/conf/settings.xml
 ```
 
-本地仓库改为：/root/repo/
+本地仓库改为：/opt/repository/
 
 添加阿里云私服地址：http://maven.aliyun.com/nexus/content/groups/public
 
 ```xml
-<localRepository>/root/repo/</localRepository>
+<localRepository>/opt/repository/</localRepository>
 <mirrors>
     <mirror>
             <id>nexus-aliyun</id>
