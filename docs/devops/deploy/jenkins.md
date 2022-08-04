@@ -325,11 +325,10 @@ vi /opt/maven/conf/settings.xml
 上传tomcat上传到应用服务器172.17.17.196
 
 ```bash
-yum install java-1.8.0-openjdk* -y          # 安装JDK（已完成）
-tar -xzf apache-tomcat-8.5.47.tar.gz        # 解压
-mkdir -p /opt/tomcat                        # 创建目录
-mv /root/apache-tomcat-8.5.47/* /opt/tomcat # 移动
-/opt/tomcat/bin/startup.sh                  # 启动
+yum install java-1.8.0-openjdk* -y              # 安装JDK（已完成）
+cd /opt/software/
+tar -xzf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
+/opt/apache-tomcat-8.5.66/bin/startup.sh        # 启动
 ```
 
 ?> 地址为：http://172.17.17.196/8080
@@ -339,7 +338,7 @@ mv /root/apache-tomcat-8.5.47/* /opt/tomcat # 移动
 默认情况下Tomcat是没有配置用户角色权限的，后续Jenkins部署项目到Tomcat服务器，需要用到Tomcat的用户，所以修改tomcat以下配置，添加用户及权限
 
 ```bash
-vi /opt/tomcat/conf/tomcat-users.xml
+vi /opt/apache-tomcat-8.5.66/conf/tomcat-users.xml
 
 <tomcat-users>
 <role rolename="tomcat"/>
@@ -355,7 +354,7 @@ vi /opt/tomcat/conf/tomcat-users.xml
 
 用户和密码都是：tomcat，为了能够刚才配置的用户登录到Tomcat，还需要修改以下配置
 ```bash
-vi /opt/tomcat/webapps/manager/META-INF/context.xml
+vi /opt/apache-tomcat-8.5.66/webapps/manager/META-INF/context.xml
 
 <!--
 <Valve className="org.apache.catalina.valves.RemoteAddrValve"
