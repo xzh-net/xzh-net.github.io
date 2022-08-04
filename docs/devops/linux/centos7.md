@@ -1381,23 +1381,76 @@ nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 1. 启动
 
 ```bash
-sh /data/tomcat_webapp_3001/bin/shutdown.sh
+sh /opt/apache-tomcat-8.5.66/bin/shutdown.sh
 sleep 2s
-ps -ef | grep tomcat_webapp_3001 | grep -v grep | awk '{print $2}'| xargs kill -9
+ps -ef | grep apache-tomcat-8.5.66 | grep -v grep | awk '{print $2}'| xargs kill -9
 sleep 1s
-sh /data/tomcat_webapp_3001/bin/startup.sh;tail -f /data/tomcat_webapp_3001/logs/catalina.out
+sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
 ```
 
 2. war部署
 
 ```bash
-sh /opt/tomcat/bin/shutdown.sh
+sh /opt/apache-tomcat-8.5.66/bin/shutdown.sh
 sleep 2s
-ps -ef | grep /opt/tomcat/ | grep -v grep | awk '{print $2}'| xargs kill -9
+ps -ef | grep /opt/apache-tomcat-8.5.66/ | grep -v grep | awk '{print $2}'| xargs kill -9
 sleep 1s
-rm -rf /opt/tomcat/webapps/servlet*
-cp -r /opt/tomcat/code/servlet-2.war /opt/tomcat/webapps/servlet.war
-sh /opt/tomcat/bin/startup.sh;tail -f /opt/tomcat/logs/catalina.out
+rm -rf /opt/apache-tomcat-8.5.66/webapps/servlet*
+cp -r /opt/apache-tomcat-8.5.66/code/servlet-2.war /opt/apache-tomcat-8.5.66/webapps/servlet.war
+sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
+```
+
+3. 配置文件
+
+```conf
+<?xml version="1.0" encoding="UTF-8"?>
+<Server port="8005" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+  <GlobalNamingResources>
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
+  <Service name="Catalina">
+	<Connector port="8080" protocol="org.apache.coyote.http11.Http11Nio2Protocol"
+		   connectionTimeout="30000"
+		   URIEncoding="UTF-8"
+		   minSpareThreads="100"
+		   maxThreads="4096"
+		   acceptCount="10000"
+		   enableLookups="false"   
+		   disableUploadTimeout="true"
+		   redirectPort="8443" />
+    <Engine name="Catalina" defaultHost="localhost">
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+               resourceName="UserDatabase"/>
+      </Realm>
+      <Host name="localhost"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access_log" suffix=".txt"
+               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+				<Context path="/" docBase="/data/"  reloadable="true" privileged="true" sessionCookieName="web"/>
+				<Context path="/mobile" docBase="/data/mobile"  reloadable="true" privileged="true" sessionCookieName="mobile"/>
+      </Host>
+	  <Host name="node.hwcq.online"  appBase="webapps1"
+            unpackWARs="true" autoDeploy="true">
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access_log" suffix=".txt"
+               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+				<Context path="/" docBase=""  reloadable="true" privileged="true" sessionCookieName="web"/>
+				<Context path="/mobile" docBase="mobile"  reloadable="true" privileged="true" sessionCookieName="mobile"/>
+      </Host>
+    </Engine>
+  </Service>
+</Server>
 ```
 
 #### 2.6.3 Spring Boot
