@@ -1402,7 +1402,7 @@ sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/lo
 
 3. 配置文件
 
-```conf
+```bash
 set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202    # windows设置catalina.bat
 ```
 
