@@ -1376,7 +1376,7 @@ nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &
 ```
 
 
-#### 2.6.2 tomcat
+#### 2.6.2 Tomcat 8
 
 1. 启动
 
