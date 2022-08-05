@@ -577,8 +577,11 @@ server {
     location / {
         root /home/project;
     }
-    location /emoji/ {
-        alias /home/project/;   # 必须以斜线结尾，实际路径/home/project/emoji/
+    location /download/ {               # root表示存在的物理路径
+        root  /home/project/;
+    }
+    location /emoji/ {                  # alias表示虚拟的路径，任意更改
+        alias /home/project/emoji/;     # 必须以斜线结尾，实际路径http://127.0.0.1/emoji/index.json
     }
     location /blob/ {
         proxy_redirect off;
