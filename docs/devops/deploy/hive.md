@@ -412,6 +412,20 @@ MR验证：http://192.168.2.201:8088/cluster
 
 ### 3.1 表操作
 
+完整语法树
+
+```sql
+CREATE [TEMPORARY] [EXTERNAL] TABLE [IF NOT EXISTS] [db_name.]table_name
+[(col_name data_type [COMMENT col_comment], ... ]
+[COMMENT table_comment]
+[PARTITIONED BY (col_name data_type [COMMENT col_comment], ...)]
+[CLUSTERED BY (col_name, col_name, ...) [SORTED BY (col_name [ASC|DESC], ...)] INTO num_buckets BUCKETS]
+[ROW FORMAT DELIMITED|SERDE serde_name WITH SERDEPROPERTIES (property_name=property_value,...)]
+[STORED AS file_format]
+[LOCATION hdfs_path]
+[TBLPROPERTIES (property_name=property_value, ...)];
+```
+
 #### 3.1.1 结构化数据
 
 1. 创建表结构
@@ -447,7 +461,7 @@ hadoop fs -ls /user/hive/warehouse/test.db/t_user
 select * from t_user;
 ```
 
-#### 3.1.1 复杂数据表
+#### 3.1.2 复杂数据表
 
 1. 创建表结构
 
