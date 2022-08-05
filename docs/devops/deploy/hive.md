@@ -390,46 +390,7 @@ select * from t_student;
 
 MR验证：http://192.168.2.201:8088/cluster
 
-### 2.2 结构化数据映射
-
-#### 2.2.1 创建数据
-
-```bash
-cd /data
-vi user.txt
-```
-
-```txt
-1,zhangsan,18,beijing
-2,lisi,25,shanghai
-3,allen,30,shanghai
-4,woon,15,nanjing
-5,james,45,hangzhou
-6,tony,26,beijing
-```
-
-#### 2.2.2 创建表结构
-
-```sql
-create table t_user(id int,name varchar(255),age int,city varchar(255))
-row format delimited
-fields terminated by ',';
-```
-
-#### 2.2.3 上传数据
-
-```bash
-hadoop fs -put user.txt /user/hive/warehouse/test.db/t_user
-hadoop fs -ls /user/hive/warehouse/test.db/t_user
-```
-
-#### 2.2.4 验证
-
-```bash
-select * from t_user;
-```
-
-### 2.3 IDEA
+### 2.2 IDEA
 
 添加插件
 
@@ -448,3 +409,87 @@ select * from t_user;
 ![](../../assets/_images/devops/deploy/hive/idea4.png)
 
 ## 3. DDL
+
+### 3.1 表操作
+
+#### 3.1.1 结构化数据
+
+1. 创建表结构
+
+```sql
+create table t_user(id int,name varchar(255),age int,city varchar(255))
+row format delimited
+fields terminated by ',';
+```
+
+2. 上传文件
+
+```txt
+1,zhangsan,18,beijing
+2,lisi,25,shanghai
+3,allen,30,shanghai
+4,woon,15,nanjing
+5,james,45,hangzhou
+6,tony,26,beijing
+```
+
+```bash
+cd /hivedata
+vi user.txt
+
+hadoop fs -put user.txt /user/hive/warehouse/test.db/t_user
+hadoop fs -ls /user/hive/warehouse/test.db/t_user
+```
+
+3. 验证
+
+```bash
+select * from t_user;
+```
+
+#### 3.1.1 复杂数据表
+
+1. 创建表结构
+
+```sql
+create database honor_of_kings;
+use honor_of_kings;
+
+create table t_hot_hero_skin_price(
+    id int,
+    name string,
+    win_rate int,
+    skin_price map<string,int>
+)
+row format delimited
+fields terminated by ','            --字段之间分隔符
+collection items terminated by '-'  --集合元素之间分隔符
+map keys terminated by ':' ;        --集合元素kv之间分隔符;
+
+
+```
+
+2. 上传文件
+
+```txt
+1,孙悟空,53,西部大镖客:288-大圣娶亲:888-全息碎片:0-至尊宝:888-地狱火:1688
+2,鲁班七号,54,木偶奇遇记:288-福禄兄弟:288-黑桃队长:60-电玩小子:2288-星空梦想:0
+3,后裔,53,精灵王:288-阿尔法小队:588-辉光之辰:888-黄金射手座:1688-如梦令:1314
+4,铠,52,龙域领主:288-曙光守护者:1776
+5,韩信,52,飞衡:1788-逐梦之影:888-白龙吟:1188-教廷特使:0-街头霸王:888
+```
+
+字段：id、name(英雄名称)、win_rate(胜率)、skin_price(皮肤及价格)
+
+```bash
+cd /hivedata
+vi hot_hero_skin_price.txt
+
+hadoop fs -put hot_hero_skin_price.txt /user/hive/warehouse/honor_of_kings.db/t_hot_hero_skin_price
+```
+
+3. 查询
+
+```sql
+select * from t_hot_hero_skin_price
+```
