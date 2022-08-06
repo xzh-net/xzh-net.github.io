@@ -410,8 +410,6 @@ MR验证：http://192.168.2.201:8088/cluster
 
 ## 3. DDL
 
-### 3.1 表操作
-
 完整语法树
 
 ```sql
@@ -426,9 +424,9 @@ CREATE [TEMPORARY] [EXTERNAL] TABLE [IF NOT EXISTS] [db_name.]table_name
 [TBLPROPERTIES (property_name=property_value, ...)];
 ```
 
-#### 3.1.1 结构化数据
+### 3.1 原生数据类型表
 
-1. 创建表结构
+#### 3.1.1 创建表结构
 
 ```sql
 create table t_user(id int,name varchar(255),age int,city varchar(255))
@@ -436,7 +434,7 @@ row format delimited
 fields terminated by ',';
 ```
 
-2. 上传文件
+#### 3.1.2 上传文件
 
 ```txt
 1,zhangsan,18,beijing
@@ -455,15 +453,15 @@ hadoop fs -put user.txt /user/hive/warehouse/test.db/t_user
 hadoop fs -ls /user/hive/warehouse/test.db/t_user
 ```
 
-3. 验证
+#### 3.1.3 数据验证
 
 ```bash
 select * from t_user;
 ```
 
-#### 3.1.2 复杂数据表
+### 3.2 复杂数据类型表
 
-1. 创建表结构
+#### 3.2.1 创建表结构
 
 ```sql
 create database honor_of_kings;
@@ -479,11 +477,9 @@ row format delimited
 fields terminated by ','            --字段之间分隔符
 collection items terminated by '-'  --集合元素之间分隔符
 map keys terminated by ':' ;        --集合元素kv之间分隔符;
-
-
 ```
 
-2. 上传文件
+#### 3.2.2 上传文件
 
 ```txt
 1,孙悟空,53,西部大镖客:288-大圣娶亲:888-全息碎片:0-至尊宝:888-地狱火:1688
@@ -502,8 +498,218 @@ vi hot_hero_skin_price.txt
 hadoop fs -put hot_hero_skin_price.txt /user/hive/warehouse/honor_of_kings.db/t_hot_hero_skin_price
 ```
 
-3. 查询
+#### 3.2.3 数据验证
 
 ```sql
 select * from t_hot_hero_skin_price
 ```
+
+### 3.3 内、外部表
+
+#### 3.3.1 内部表
+
+内部表（Internal table）也称为被Hive拥有和管理的托管表（Managed table）。默认情况下创建的表就是内部表，Hive拥有该表的结构和文件，类似于RDBMS中的表
+
+#### 3.3.2 外部表
+
+外部表（External table）中的数据不是Hive拥有或管理的。要创建一个外部表，需要使用EXTERNAL语法关键字。删除外部表只会删除元数据，而不会删除实际数据。在Hive外部仍然可以访问实际数据。`External`关键字与是否使用`location`关键字无关。
+
+1. 创建表
+
+```sql
+create external table student_ext(
+    num int,
+    name string,
+    sex string,
+    age int,
+    dept string)
+row format delimited
+fields terminated by ','
+location '/stu';
+```
+
+2. 查看表信息
+
+```sql
+describe formatted student_ext
+```
+
+### 3.4 分区表
+
+#### 3.4.1 单分区表
+
+1. 以role角色作为分区字段创建表
+
+```sql
+create table t_all_hero_part(
+       id int,
+       name string,
+       hp_max int,
+       mp_max int,
+       attack_max int,
+       defense_max int,
+       attack_range string,
+       role_main string,
+       role_assist string
+) partitioned by (role string)
+row format delimited
+fields terminated by "\t";
+```
+
+2. 上传数据
+
+战士warrior.txt
+
+```txt
+52	刘备	6900	1742	363	381	remotely	warrior
+53	钟无艳	7000	1760	318	409	melee	warrior	tank
+54	吕布	7344	0	343	390	melee	warrior	tank
+55	亚瑟	8050	0	346	400	melee	warrior	tank
+56	雅典娜	6264	1732	327	418	melee	warrior	tank
+57	关羽	7107	10	343	386	melee	warrior	tank
+58	露娜	6612	1836	335	375	melee	warrior	mage
+59	花木兰	5397	100	362	349	melee	warrior	assassin
+60	赵云	6732	1760	380	394	melee	warrior	assassin
+61	杨戬	7420	1694	325	428	melee	warrior
+62	达摩	7140	1694	355	415	melee	warrior
+63	孙悟空	6585	1760	349	385	melee	warrior	assassin
+64	曹操	7473	0	361	371	melee	warrior
+65	典韦	7516	1774	345	402	melee	warrior
+66	宫本武藏	6210	0	330	391	melee	warrior
+67	老夫子	7155	5	329	409	melee	warrior
+68	哪吒	7268	1808	320	408	melee	warrior
+69	铠	6700	1784	328	388	melee	warrior	tank
+```
+
+坦克tank.txt
+
+```txt
+42	夏侯惇	7350	1746	321	397	melee	tank	warrior
+43	张飞	8341	100	301	504	melee	tank	support
+44	牛魔	8476	1926	273	394	melee	tank	support
+45	程咬金	8611	0	316	504	melee	tank	warrior
+46	廉颇	9328	1708	286	514	melee	tank
+47	东皇太一	7669	1926	286	360	melee	tank
+48	白起	8638	1666	288	430	melee	tank
+49	刘邦	8073	1940	302	504	melee	tank	support
+50	刘禅	8581	1694	295	459	melee	tank
+51	项羽	8057	1694	306	494	melee	tank
+```
+
+法师mage.txt
+
+```txt
+17	芈月	6164	100	289	361	remotely	mage	tank
+18	嬴政	5471	1946	309	295	remotely	mage
+19	武则天	5037	1988	297	348	remotely	mage
+20	甄姬	5584	2002	296	330	remotely	mage
+21	妲己	5824	2016	293	326	remotely	mage
+22	干将莫邪	5583	1946	292	323	remotely	mage
+23	姜子牙	5399	2002	317	342	remotely	mage	support
+24	王昭君	5429	1960	296	305	remotely	mage
+25	诸葛亮	5655	1988	287	330	remotely	mage
+26	安琪拉	5994	1960	293	315	remotely	mage
+27	小乔	5916	1988	263	309	remotely	mage
+28	周瑜	5513	1974	298	320	remotely	mage
+29	张良	5799	1988	293	320	remotely	mage
+30	高渐离	6165	1988	290	343	remotely	mage
+31	扁鹊	6703	2016	309	374	remotely	mage	support
+32	墨子	7176	1722	328	475	melee	mage	tank
+33	不知火舞	6014	200	293	336	melee	mage	assassin
+34	貂蝉	5611	1960	287	330	melee	mage	assassin
+35	钟馗	6280	1988	278	390	melee	mage	warrior
+```
+
+3. 静态分区
+
+```bash
+load data local inpath '/hivedata/warrior.txt' into table t_all_hero_part partition(role='zhanshi');
+load data local inpath '/hivedata/mage.txt' into table t_all_hero_part partition(role='fashi');
+load data local inpath '/hivedata/tank.txt' into table t_all_hero_part partition(role='tanke');
+```
+
+4. 数据验证
+
+```sql
+--先基于分区过滤 再查询
+select count(*) from t_all_hero_part where role="zhanshi" and hp_max >6000;
+```
+
+#### 3.4.2 双分区表
+
+1. 创建分区表
+
+```sql
+--双分区表，按省份和市分区
+create table t_user_province_city (id int, name string,age int) partitioned by (province string, city string);
+--双分区表的使用  使用分区进行过滤 减少全表扫描 提高查询效率
+select * from t_user_province_city where  province= "zhejiang" and city ="hangzhou";
+```
+
+#### 3.4.3 动态分区表
+
+1. 设置开启动态分区
+
+```bash
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+```
+
+2. 创建动态分区表
+
+```sql
+create table t_all_hero_part_dynamic(
+    id int,
+    name string,
+    hp_max int,
+    mp_max int,
+    attack_max int,
+    defense_max int,
+    attack_range string,
+    role_main string,
+    role_assist string
+) partitioned by (role string)
+row format delimited
+fields terminated by "\t";
+```
+
+3. 提前将所有数据导入到临时表中
+
+```sql
+create table t_all_hero(
+   id int,
+   name string,
+   hp_max int,
+   mp_max int,
+   attack_max int,
+   defense_max int,
+   attack_range string,
+   role_main string,
+   role_assist string
+)
+row format delimited
+fields terminated by "\t";
+```
+
+```bash
+hadoop fs -put warrior.txt warrior.txt mage.txt /user/hive/warehouse/test.db/t_all_hero
+```
+
+4. 执行动态分区插入
+
+```sql
+insert into table t_all_hero_part_dynamic partition(role) 
+select tmp.*,tmp.role_main from t_all_hero tmp;
+```
+
+5. 数据验证
+
+```sql
+select * from t_all_hero_part_dynamic
+```
+
+### 3.5 分桶表
+
+### 3.6 事务表
+
+### 3.7 视图
