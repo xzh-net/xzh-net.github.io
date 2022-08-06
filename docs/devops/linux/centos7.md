@@ -428,6 +428,16 @@ ssh-copy-id -i id_rsa.pub root@192.168.3.203
 # 192.168.3.202,192.168.3.203 如果提示没有权限
 cd /root/.ssh
 chmod 600 authorized_keys
+
+# root用户下无法使用chattr
+cp /usr/bin/chattr /usr/bin/chattr2
+chmod 755 /usr/bin/chattr2
+chattr2 -i /usr/bin/chattr
+chmod 755 /usr/bin/chattr
+ls -la /usr/bin/chattr  
+
+lsattr authorized_keys      # 查看属性
+chattr -ia authorized_keys  # 清理属性
 ```
 
 ### 1.5 FTP
@@ -1202,7 +1212,7 @@ shutdown -r now # 重启
 ![](../../assets/_images/devops/linux/centos7/resetpwd.png)
 
 ```bash
-# 忘记root密码，开机狂按E，按图修改后按Ctrl+x重启入输入
+# 忘记root密码，开机狂按E，按图修改后按Ctrl+x重启输入
 echo "123456" | passwd --stdin root
 touch /.autorable
 exec /sbin/init
@@ -1249,14 +1259,6 @@ find ./ -type f | xargs rm -rf;                     # 当前路径下文件类�
 find ./ -type f -delete;                            # 当前路径下文件类全部删除
 find . -inum 2891596 -exec rm -i {} \;              # 通过inode号交互式删除文件
 find ./ -inum 105267651 -delete
-
-# root用户下无法使用chattr
-cp /usr/bin/chattr /usr/bin/chattr2
-chmod 755 /usr/bin/chattr2
-chattr2 -i /usr/bin/chattr
-chmod 755 /usr/bin/chattr
-ls -la /usr/bin/chattr  
-lsattr /usr/bin/chattr
 ```
 
 ### 2.3 磁盘
