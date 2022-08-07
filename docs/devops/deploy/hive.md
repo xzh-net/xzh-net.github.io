@@ -710,6 +710,210 @@ select * from t_all_hero_part_dynamic
 
 ### 3.5 分桶表
 
+#### 3.5.1 开启分桶
+
+```bash
+#从Hive2.0开始不再需要设置
+set hive.enforce.bucketing=true;
+```
+
+#### 3.5.2 创建分桶表
+
+```sql
+CREATE TABLE test.t_usa_covid19_bucket(
+      count_date string,
+      county string,
+      state string,
+      fips int,
+      cases int,
+      deaths int)
+CLUSTERED BY(state) INTO 5 BUCKETS; --分桶的字段一定要是表中已经存在的字段
+
+
+--根据state州分为5桶 每个桶内根据cases确诊病例数倒序排序
+CREATE TABLE test.t_usa_covid19_bucket_sort(
+     count_date string,
+     county string,
+     state string,
+     fips int,
+     cases int,
+     deaths int)
+CLUSTERED BY(state)
+sorted by (cases desc) INTO 5 BUCKETS;--指定每个分桶内部根据 cases倒序排序
+```
+
+#### 3.5.3 上传数据
+
+数据样例：
+
+```txt
+2021-01-28,La Plata,Colorado,08067,2673,34
+2021-01-28,Lake,Colorado,08065,502,0
+2021-01-28,Larimer,Colorado,08069,17834,189
+2021-01-28,Las Animas,Colorado,08071,907,11
+2021-01-28,Lincoln,Colorado,08073,889,3
+2021-01-28,Logan,Colorado,08075,3610,58
+2021-01-28,Mesa,Colorado,08077,11822,168
+2021-01-28,Mineral,Colorado,08079,57,1
+2021-01-28,Moffat,Colorado,08081,617,22
+2021-01-28,Montezuma,Colorado,08083,1616,21
+2021-01-28,Montrose,Colorado,08085,2956,43
+2021-01-28,Morgan,Colorado,08087,2349,88
+2021-01-28,Otero,Colorado,08089,1786,59
+2021-01-28,Ouray,Colorado,08091,195,3
+2021-01-28,Park,Colorado,08093,479,5
+```
+
+上传文件
+
+```bash
+hadoop fs -put us-covid19-counties.dat /user/hive/warehouse/test.db/t_usa_covid19
+```
+
+把源数据加载到普通hive表中
+
+```sql
+drop table if exists t_usa_covid19;
+CREATE TABLE itheima.t_usa_covid19(
+       count_date string,
+       county string,
+       state string,
+       fips int,
+       cases int,
+       deaths int)
+row format delimited fields terminated by ",";
+```
+
+#### 3.5.4 数据转换
+
+```sql
+insert into t_usa_covid19_bucket select * from t_usa_covid19;
+```
+
+#### 3.5.5 数据验证
+
+除了数据的验证，还需要到hadoop文件夹下验证是否按照分桶表结构将文件拆分成小文件
+
+```sql
+select * from t_usa_covid19_bucket;
+select * from t_usa_covid19_bucket where state="New York";
+```
+
 ### 3.6 事务表
 
+#### 3.6.1 开启事务
+
+```bash
+# 可以使用set设置当前session生效 也可以配置在hive-site.xml中
+set hive.support.concurrency = true;        # Hive是否支持并发
+set hive.enforce.bucketing = true;          # 从Hive2.0开始不再需要，是否开启分桶功能
+set hive.exec.dynamic.partition.mode = nonstrict;                       # 动态分区模式  非严格
+set hive.txn.manager = org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;  # 事务处理类
+set hive.compactor.initiator.on = true;                                 # 是否在Metastore实例上运行启动线程和清理线程
+set hive.compactor.worker.threads = 1;                                  # 在此metastore实例上运行多少个压缩程序工作线程。
+```
+
+#### 3.6.2 创建事务表
+
+```sql
+drop table if exists trans_student;
+create table trans_student(
+   id int,
+   name String,
+   age int
+)clustered by (id) into 2 buckets stored as orc TBLPROPERTIES('transactional'='true');
+```
+
+注意：事务表创建几个要素：开启参数、分桶表、存储格式orc、表属性
+
+
 ### 3.7 视图
+
+#### 3.7.1 创建视图
+
+```sql
+create view v_usa_covid19 as select count_date, county,state,deaths from t_usa_covid19 limit 5;
+show create table v_usa_covid19;    --查看视图定义
+show views; --hive v2.2.0之后支持
+```
+
+#### 3.7.2 修改视图
+
+```sql
+drop view v_usa_covid19_from_view;                                              --删除视图
+alter view v_usa_covid19 set TBLPROPERTIES ('comment' = 'This is a view');      --更改视图属性
+alter view v_usa_covid19 as  select county,deaths from t_usa_covid19 limit 2;   --更改视图定义
+```
+
+### 3.8 物化视图
+
+#### 3.8.1 开启事务
+
+```bash
+# 可以使用set设置当前session生效 也可以配置在hive-site.xml中
+set hive.support.concurrency = true;        # Hive是否支持并发
+set hive.enforce.bucketing = true;          # 从Hive2.0开始不再需要，是否开启分桶功能
+set hive.exec.dynamic.partition.mode = nonstrict;                       # 动态分区模式  非严格
+set hive.txn.manager = org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;  # 事务处理类
+set hive.compactor.initiator.on = true;                                 # 是否在Metastore实例上运行启动线程和清理线程
+set hive.compactor.worker.threads = 1;                                  # 在此metastore实例上运行多少个压缩程序工作线程。
+```
+
+#### 3.8.2 创建事务表
+
+```sql
+drop table if exists  student_trans;
+CREATE TABLE student_trans (
+      sno int,
+      sname string,
+      sdept string)
+clustered by (sno) into 2 buckets stored as orc TBLPROPERTIES('transactional'='true');
+```
+
+#### 3.8.3 数据导入
+
+导入数据到student_trans中
+
+```sql
+insert overwrite table student_trans
+select num,name,dept
+from student;
+
+select * from student_trans;
+```
+
+#### 3.8.4 创建物化视图
+
+```sql
+CREATE MATERIALIZED VIEW student_trans_agg
+AS SELECT sdept, count(*) as sdept_cnt from student_trans group by sdept;
+
+show tables;
+show materialized views;
+```
+
+#### 3.8.5 数据验证
+
+没有创建物化视图之前是MR程序进行聚合，创建以后由于会命中物化视图，重写query查询物化视图，查询速度会加快（没有启动MR，只是普通的table scan）
+
+```sql
+SELECT sdept, count(*) as sdept_cnt from student_trans group by sdept;
+```
+
+查询执行计划可以发现 查询被自动重写为TableScan alias: test.student_trans_agg，转换成了对物化视图的查询，提高了查询效率
+
+```sql
+explain SELECT sdept, count(*) as sdept_cnt from student_trans group by sdept;
+```
+
+验证禁用物化视图自动重写
+
+```sql
+ALTER MATERIALIZED VIEW student_trans_agg DISABLE REWRITE;
+```
+
+删除物化视图
+
+```sql
+drop materialized view student_trans_agg;
+```
