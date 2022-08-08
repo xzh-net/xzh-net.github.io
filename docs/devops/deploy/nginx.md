@@ -1115,20 +1115,28 @@ openssl req -new -x509 -key server.key -out server.crt -days 3650
 
 ```bash
 curl https://get.acme.sh | sh -s email=xcg992224@163.com
-acme.sh --version
+~/.acme.sh/acme.sh --version
+~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 ```
 
-#### 4.2.2 生成证书
+#### 4.2.2 dns模式
 
 ```bash
 export Ali_Key="Ali_Key"
 export Ali_Secret="Ali_Secret"
 source ~/.bashrc
-/root/.acme.sh/acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --debug  # 单证书
-/root/.acme.sh/acme.sh --issue --dns dns_ali -d *.hwcq.online                            # 泛域证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --debug  # 单证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d *.hwcq.online                            # 泛域证书
 ```
 
-#### 4.2.3 分配证书
+#### 4.2.3 webroot模式
+
+```bash
+~/.acme.sh/acme.sh --issue -d zk.hwcq.online --nginx
+```
+
+
+#### 4.2.4 分配证书
 
 ```bash
 acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
