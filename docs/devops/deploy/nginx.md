@@ -1105,33 +1105,46 @@ openssl genrsa -des3 -out server.key 2048
 openssl req -new -x509 -key server.key -out server.crt -days 3650
 ```
 
-### 4.2 阿里云
+### 4.2 Let’s Encrypt自动申请
 
-- 阿里云上可以申请的免费证书目前只有支持单个域名的DV级SSL证书。比如说你有`blog.xuzhihao.net`和`api.xuzhihao.net`两个二级域名需要使用HTTPS，就需要申请两个SSL证书。
+`acme.sh`脚本实现了acme协议, 可以从`Let’s Encrypt`生成免费的证书。一般证书有效期是1年，过期需要重新申请，使用脚本可以实现到期自动申请，再也不用担心证书过期了
 
-![](../../assets/_images/devops/deploy/nginx/nginx_https_start_05.png)
+- 官网：https://github.com/acmesh-official/acme.sh
 
+#### 4.2.1 安装
+
+```bash
+curl https://get.acme.sh | sh -s email=xcg992224@163.com
+acme.sh --version
 ```
-#SSL配置
-ssl_certificate      /usr/share/nginx/html/ssl/blog/blog.xuzhihao.net.pem; # 配置证书
-ssl_certificate_key  /usr/share/nginx/html/ssl/blog/blog.xuzhihao.net.key; # 配置证书私钥
+
+#### 4.2.2 生成证书
+
+```bash
+export Ali_Key="Ali_Key"
+export Ali_Secret="Ali_Secret"
+source ~/.bashrc
+/root/.acme.sh/acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --debug  # 单证书
+/root/.acme.sh/acme.sh --issue --dns dns_ali -d *.hwcq.online                            # 泛域证书
 ```
 
-### 4.3 FreeSSL
+#### 4.2.3 分配证书
 
-https://freessl.cn/ 选择双域名离线生成
+```bash
+acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
+acme.sh --issue --dns dns_ali -d *.hwcq.online --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
+```
 
-![](../../assets/_images/devops/deploy/nginx/nginx_https_start_08.png)
+修改nginx配置配置文件
 
-
-### 4.4 自动申请
-
-- `acme.sh`脚本实现了`acme`协议, 可以从`letsencrypt`生成免费的证书。一般我们申请的证书有效期都是1年，过期就要重新申请了，使用`acme.sh`脚本可以实现到期自动申请，再也不用担心证书过期了！
-
-![](../../assets/_images/devops/deploy/nginx/nginx_https_start_09.png)
-
-- 附上官网地址：https://github.com/acmesh-official/acme.sh
-
+```conf
+ssl_certificate /etc/nginx/cert.d/cert.pem;
+ssl_certificate_key /etc/nginx/cert.d/key.pem;
+ssl_session_cache shared:SSL:1m;
+ssl_session_timeout  10m;
+ssl_ciphers HIGH:!aNULL:!MD5;
+ssl_prefer_server_ciphers on;
+```
 
 ## 5. OpenRestry
 
