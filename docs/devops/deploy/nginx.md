@@ -1119,7 +1119,9 @@ curl https://get.acme.sh | sh -s email=xcg992224@163.com
 ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 ```
 
-#### 4.2.2 dns模式
+#### 4.2.2 生成证书
+
+1. dns模式
 
 ```bash
 export Ali_Key="Ali_Key"
@@ -1129,10 +1131,10 @@ source ~/.bashrc
 ~/.acme.sh/acme.sh --issue --dns dns_ali -d *.hwcq.online                            # 泛域证书
 ```
 
-#### 4.2.3 webroot模式
+2. http模式
 
 ```bash
-~/.acme.sh/acme.sh --issue -d zk.hwcq.online --nginx
+~/.acme.sh/acme.sh --issue -d zk.hwcq.online --webroot /var/www
 ```
 
 
