@@ -1411,11 +1411,7 @@ cp -r /opt/apache-tomcat-8.5.66/code/servlet-2.war /opt/apache-tomcat-8.5.66/web
 sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
 ```
 
-3. 配置文件
-
-```bash
-set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202    # windows设置catalina.bat
-```
+3. 配置多个虚拟主机
 
 ```conf
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1466,6 +1462,26 @@ set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202    # windows设置catalina.bat
     </Engine>
   </Service>
 </Server>
+```
+
+Nginx修改对应配置
+
+```conf
+server {
+	listen 80;
+	server_name www.hwcq.online;
+	location / {
+		proxy_pass http://192.168.2.200:8080;
+	}
+}
+
+server {
+	listen 80;
+	server_name node.hwcq.online;
+	location / {
+		proxy_pass http://192.168.2.200:8080;
+	}
+}
 ```
 
 #### 2.6.3 Spring Boot
