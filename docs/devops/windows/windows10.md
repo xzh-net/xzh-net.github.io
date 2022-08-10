@@ -37,6 +37,12 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
+windows设置catalina.bat
+
+```bash
+set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202
+```
+
 ### 3.2 Golang
 
 下载地址：https://golang.google.cn/dl/
