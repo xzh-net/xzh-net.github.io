@@ -1451,7 +1451,7 @@ sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/lo
 				<Context path="/" docBase="/data/"  reloadable="true" privileged="true" sessionCookieName="web"/>
 				<Context path="/mobile" docBase="/data/mobile"  reloadable="true" privileged="true" sessionCookieName="mobile"/>
       </Host>
-	  <Host name="node.hwcq.online"  appBase="webapps1"
+	  <Host name="www.xzh.com"  appBase="webapps1"
             unpackWARs="true" autoDeploy="true">
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access_log" suffix=".txt"
@@ -1479,9 +1479,14 @@ server {
 	listen 80;
 	server_name node.hwcq.online;
 	location / {
-		proxy_pass http://192.168.2.200:8080;
+		proxy_pass http://www.xzh.com:8080;
 	}
 }
+```
+
+```bash
+vi /etc/hosts
+192.168.2.200 www.xzh.com
 ```
 
 #### 2.6.3 Spring Boot
