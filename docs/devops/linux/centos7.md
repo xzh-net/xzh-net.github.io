@@ -250,6 +250,7 @@ systemctl enable named
 echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
 
 nslookup www.hwcq.online
+nslookup -type=txt www.hwcq.online  # 验证txt值
 dig @172.17.17.201 www.hwcq.online
 host www.hwcq.online
 ```
