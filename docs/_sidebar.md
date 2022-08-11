@@ -35,8 +35,8 @@
   - [TURN Server](devops/deploy/turnserver)
   - [Hadoop](devops/deploy/hadoop)
   - [Hive](devops/deploy/hive)
-  - [HBase](devops/database/hbase)
-  - [ClickHouse](devops/database/clickhouse)
+  - [HBase](devops/deploy/hbase)
+  - [ClickHouse](devops/deploy/clickhouse)
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
