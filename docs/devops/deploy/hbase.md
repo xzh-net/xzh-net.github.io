@@ -17,7 +17,7 @@ tar -xvzf hbase-2.4.11-bin.tar.gz -C /opt
 ```bash
 cd /opt/hbase-2.4.11/conf
 vim hbase-env.sh
-# 第28行
+# 编辑内容
 export JAVA_HOME=/usr/local/jdk1.8.0_202
 export HBASE_MANAGES_ZK=false
 ```
@@ -30,15 +30,15 @@ vim hbase-site.xml
 
 ```xml
 <configuration>
-    <!-- HBase数据在HDFS中的存放的路径 -->
-    <property>
-        <name>hbase.rootdir</name>
-        <value>hdfs://node01.xuzhihao.net:8020/hbase</value>
-    </property>
     <!-- Hbase的运行模式。false是单机模式，true是分布式模式。若为false,Hbase和Zookeeper会运行在同一个JVM里面 -->
     <property>
         <name>hbase.cluster.distributed</name>
         <value>true</value>
+    </property>
+    <!-- HBase数据在HDFS中的存放的路径 -->
+    <property>
+        <name>hbase.rootdir</name>
+        <value>hdfs://node01.xuzhihao.net:8020/hbase</value>
     </property>
     <!-- ZooKeeper的地址 -->
     <property>
@@ -50,7 +50,12 @@ vim hbase-site.xml
         <name>hbase.zookeeper.property.dataDir</name>
         <value>/opt/data/zookeeper/data</value>
     </property>
-    <!--  V2.1版本，在分布式情况下, 设置为false -->
+    <!--Hbase临时数据存储的地方 默认是 ./tmp -->
+    <property>
+        <name>hbase.tmp.dir</name>
+        <value>/opt/hbase-2.4.11/data</value>
+    </property>
+    <!--  分布式情况下, 设置为false -->
     <property>
         <name>hbase.unsafe.stream.capability.enforce</name>
         <value>false</value>
@@ -105,7 +110,6 @@ scp -r /opt/hbase-2.4.11 node03.xuzhihao.net:$PWD
 ### 1.6 启动服务
 
 ```bash
-cd /export/onekey
 /opt/shell/zk.sh start  # 启动zk
 start-dfs.sh            # 启动hadoop
 start-hbase.sh          # 启动hbase
@@ -195,7 +199,7 @@ http://phoenix.apache.org/download.html
 
 ```bash
 cd /opt/software
-tar -xvzf apache-phoenix-5.0.0-HBase-2.0-bin.tar.gz -C /opt
+tar -xvzf phoenix-hbase-2.4-5.1.2-bin.tar.gz -C /opt
 mv /opt/phoenix-hbase-2.4-5.1.2-bin /opt/phoenix-hbase-2.4-5.1.2
 ```
 
