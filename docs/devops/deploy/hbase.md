@@ -50,6 +50,11 @@ vim hbase-site.xml
         <name>hbase.zookeeper.property.dataDir</name>
         <value>/opt/data/zookeeper/data</value>
     </property>
+    <!--Hbase临时数据存储的地方 默认是 ./tmp -->
+    <property>
+        <name>hbase.tmp.dir</name>
+        <value>/opt/hbase-2.4.11/data</value>
+    </property>
     <!--  分布式情况下, 设置为false -->
     <property>
         <name>hbase.unsafe.stream.capability.enforce</name>
