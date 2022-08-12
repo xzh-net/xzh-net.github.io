@@ -147,7 +147,7 @@ vim hive-site.xml
     <!-- 存储元数据mysql相关配置 -->
     <property>
         <name>javax.jdo.option.ConnectionURL</name>
-        <value> jdbc:mysql://node01:3306/hive?createDatabaseIfNotExist=true&amp;useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
+        <value>jdbc:mysql://node01:3306/hive?createDatabaseIfNotExist=true&amp;useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
     </property>
 
     <property>
