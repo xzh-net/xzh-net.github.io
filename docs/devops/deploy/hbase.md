@@ -96,8 +96,10 @@ hbase
 
 ### 1.4 解决版本冲突
 
+解决HBase和Hadoop的log4j兼容性问题，修改HBase的jar包，使用Hadoop的jar
+
 ```bash
-cp $HBASE_HOME/lib/client-facing-thirdparty/htrace-core-3.1.0-incubating.jar $HBASE_HOME/lib/
+mv /opt/hbase-2.4.11/lib/client-facing-thirdparty/slf4j-reload4j-1.7.33.jar /opt/hbase-2.4.11/lib/client-facing-thirdparty/slf4j-reload4j-1.7.33.jar.bak
 ```
 
 ### 1.5 分发安装包
@@ -109,6 +111,15 @@ scp -r /opt/hbase-2.4.11 node03.xuzhihao.net:$PWD
 ```
 
 ### 1.6 启动服务
+
+1. 单点启动
+
+```bash
+hbase-daemon.sh start master
+hbase-daemon.sh start regionserver
+```
+
+2. 集群启动
 
 ```bash
 /opt/shell/zk.sh start  # 启动zk
@@ -126,64 +137,119 @@ hbase shell
 
 WebUI：http://node01.xuzhihao.net:16010/master-status
 
+
+### 1.8 Master高可用
+
+#### 1.8.1 停止服务
+
+```bash
+stop-hbase.sh
+```
+
+#### 1.8.2 添加Master节点
+
+```bash
+cd /opt/hbase-2.4.11/conf
+vi backup-masters
+# 添加
+node02.xuzhihao.net
+node03.xuzhihao.net
+```
+
+#### 1.8.3 配置分发
+
+```bash
+scp backup-masters node02:/opt/hbase-2.4.11/conf
+scp backup-masters node03:/opt/hbase-2.4.11/conf/
+```
+
+#### 1.8.4 验证高可用
+
+```bash
+start-hbase.sh
+```
+
+启动集群后，在node02出现HMaster节点，访问地址：http://node02.xuzhihao.net:16010/master-status， 不过此时处于备用状态，当手动kill掉node01机器的HMaster节点，node02的HMaster节点变成可用状态
+
+```bash
+hbase-daemon.sh start master    # 重启node01上的HMaster
+```
+
+
 ## 2. 命令
 
+### 2.1 DDL
+
+#### 2.1.1 命名空间
+
 ```shell
-# 表操作
-create "ORDER_INFO", 'C1', 'C2'      # 创建订单表ORDER_INFO，有一个列蔟为C1，C2
-create "MOMO_CHAT:MSG", "C1"         # 指定命名空间创建表
-alter 'ORDER_INFO', 'C3'             # 新增列蔟C3
-alter 'ORDER_INFO', 'delete' => 'C3' # 删除列簇 C3
+create_namespace 'xzh'         # 创建命名空间
+list_namespace                 # 查看所有命名空间
+drop_namespace 'xzh'           # 删除命名空间
+describe_namespace 'xzh'       # 查看某个具体的命名空间
+```
 
-alter "MOMO_CHAT:MSG", {NAME => "C1", COMPRESSION => "GZ"}  # 指定修改某个表的列蔟，它的压缩方式
-create 'MOMO_CHAT:MSG', {NAME => "C1", COMPRESSION => "GZ"}, { NUMREGIONS => 6, SPLITALGO => 'HexStringSplit'} # 在创建表时需要指定预分区
+#### 2.1.2 表操作
 
-create_namespace 'MOMO_CHAT'         # 创建一个命名空间
-list_namespace                       # 查看命名空间
-drop_namespace 'MOMO_CHAT'           # 删除之前的命名空间
-describe_namespace 'MOMO_CHAT'       # 查看某个具体的命名空间
-describe_namespace 'default'
+```shell
+create "ORDER_INFO", 'B1', 'C1'         # 创建订单表ORDER_INFO，有一个列蔟为B1，C1
+create "xzh:MSG", "C1"                  # 指定命名空间创建表
+describe 'xzh:MSG'                      # 查看表详细信息
+alter 'ORDER_INFO', 'C2'                # 新增列蔟C3
+alter 'ORDER_INFO', 'delete' => 'C3'    # 删除列簇 C3
+alter "xzh:MSG", {NAME => "C1", COMPRESSION => "GZ"}  # 指定修改某个表的列蔟，它的压缩方式
+create 'xzh:MSG', {NAME => "C1", COMPRESSION => "GZ"}, { NUMREGIONS => 6, SPLITALGO => 'HexStringSplit'} # 在创建表时需要指定预分区
+disable "ORDER_INFO"                    # 禁用表
+drop "ORDER_INFO"                       # 删除表
+```
 
-disable "ORDER_INFO"                 # 禁用表
-drop "ORDER_INFO"                    # 删除表
-disable "MOMO_CHAT:MSG" 
-drop "MOMO_CHAT:MSG"
+### 2.2 DML
 
+#### 2.2.1 插入数据
+
+```shell
 # 添加数据 put '表名','ROWKEY','列蔟名:列名','值'
 put "ORDER_INFO", "000001", "C1:STATUS", "已提交"
+put "ORDER_INFO", "000001", "C1:PAYWAY", "1"
 put "ORDER_INFO", "000001", "C1:PAY_MONEY", 4070
-put "ORDER_INFO", "000001", "C1:PAYWAY", 1
 put "ORDER_INFO", "000001", "C1:USER_ID", "4944191"
 put "ORDER_INFO", "000001", "C1:OPERATION_DATE", "2020-04-25 12:09:16"
-put "ORDER_INFO", "000001", "C1:CATEGORY", "手机;"
+```
 
-# 查询操作
+#### 2.2.2 读取数据
+
+```shell
+# 单条查询
 get "ORDER_INFO", "000001" # 查询ORDER_INFO rowkey为：000001
 get "ORDER_INFO", "000001", {FORMATTER => 'toString'}   # 指定字符集
-put "ORDER_INFO", "000001", "C1:STATUS", "已付款" # 更新状态
+get "ORDER_INFO", "000001", {COLUMN => 'C1:PAY_MONEY'}  # 查询指定列族下指定列的值
+count "ORDER_INFO"  # 查询记录数
+```
 
+```shell
+# scan操作
+scan "ORDER_INFO", {FORMATTER => 'toString'}                # 查询订单所有数据
+scan "ORDER_INFO", {FORMATTER => 'toString', LIMIT => 3}    # 查询订单数据（只显示3条）
+scan "ORDER_INFO", {FORMATTER => 'toString', LIMIT => 3, COLUMNS => ['C1:STATUS', 'C1:OPERATION_DATE']}                         # 显示指定列，只显示3条
+scan "ORDER_INFO", {ROWPREFIXFILTER => '000001',FORMATTER => 'toString', LIMIT => 3, COLUMNS => ['C1:STATUS', 'C1:PAYWAY']}     # {ROWPREFIXFILTER => 'rowkey'}
+scan "ORDER_INFO", {FILTER => "RowFilter(=,'binary:000001')", COLUMNS => ['C1:STATUS', 'C1:PAYWAY'], FORMATTER => 'toString'}   # Scan + Filter 只查询订单的ID为：000001、订单状态以及支付方式
+scan "ORDER_INFO", {FILTER => "SingleColumnValueFilter('C1', 'STATUS', =, 'binary:已付款')", FORMATTER => 'toString'}            # 查询状态为「已付款」的订单
+scan "ORDER_INFO", {FILTER => "SingleColumnValueFilter('C1', 'PAYWAY', =, 'binary:1') AND SingleColumnValueFilter('C1', 'PAY_MONEY', >, 'binary:3000')", FORMATTER => 'toString'}   # 查询支付方式为1，且金额大于3000的订单
+```
+
+#### 2.2.3 删除数据
+
+```shell
 # 删除操作
 delete "ORDER_INFO", "000001", "C1:STATUS" # 删除列
 deleteall "ORDER_INFO", "000001"    # 删除所有列
+```
 
-count "ORDER_INFO"  # 查询记录数
 
-# scan操作
-scan "ORDER_INFO", {FORMATTER => 'toString'}    # 查询订单所有数据
-scan "ORDER_INFO", {FORMATTER => 'toString', LIMIT => 3} # 查询订单数据（只显示3条）
-scan "ORDER_INFO", {FORMATTER => 'toString', LIMIT => 3, COLUMNS => ['C1:STATUS', 'C1:PAYWAY']} # 显示指定列 只显示3条
 
-# scan '表名', {ROWPREFIXFILTER => 'rowkey'}
-scan "ORDER_INFO", {ROWPREFIXFILTER => '02602f66-adc7-40d4-8485-76b5632b5b53',FORMATTER => 'toString', LIMIT => 3, COLUMNS => ['C1:STATUS', 'C1:PAYWAY']}
 
-# Scan + Filter 只查询订单的ID为：02602f66-adc7-40d4-8485-76b5632b5b53、订单状态以及支付方式
-scan "ORDER_INFO", {FILTER => "RowFilter(=,'binary:02602f66-adc7-40d4-8485-76b5632b5b53')", COLUMNS => ['C1:STATUS', 'C1:PAYWAY'], FORMATTER => 'toString'}
+```shell
 
-# 查询状态为「已付款」的订单
-scan "ORDER_INFO", {FILTER => "SingleColumnValueFilter('C1', 'STATUS', =, 'binary:已付款')", FORMATTER => 'toString'}
-
-# 查询支付方式为1，且金额大于3000的订单
-scan "ORDER_INFO", {FILTER => "SingleColumnValueFilter('C1', 'PAYWAY', =, 'binary:1') AND SingleColumnValueFilter('C1', 'PAY_MONEY', >, 'binary:3000')", FORMATTER => 'toString'}
 
 # HBase的计数器 对0000000020新闻01:00 - 02:00访问计数+1
 get_counter 'NEWS_VISIT_CNT','0000000020_01:00-02:00', 'C1:CNT'
