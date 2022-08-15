@@ -45,11 +45,6 @@ vim hbase-site.xml
         <name>hbase.zookeeper.quorum</name>
         <value>node01.xuzhihao.net,node02.xuzhihao.net,node03.xuzhihao.net</value>
     </property>
-    <!-- ZooKeeper快照的存储位置 -->
-    <property>
-        <name>hbase.zookeeper.property.dataDir</name>
-        <value>/opt/data/zookeeper/data</value>
-    </property>
     <!--Hbase临时数据存储的地方 默认是 ./tmp -->
     <property>
         <name>hbase.tmp.dir</name>
@@ -61,7 +56,6 @@ vim hbase-site.xml
         <value>false</value>
     </property>
 </configuration>
-
 ```
 
 #### 1.2.3 修改regionservers
@@ -245,17 +239,6 @@ delete "ORDER_INFO", "000001", "C1:STATUS" # 删除列
 deleteall "ORDER_INFO", "000001"    # 删除所有列
 ```
 
-
-
-
-```shell
-
-
-# HBase的计数器 对0000000020新闻01:00 - 02:00访问计数+1
-get_counter 'NEWS_VISIT_CNT','0000000020_01:00-02:00', 'C1:CNT'
-incr 'NEWS_VISIT_CNT','0000000020_01:00-02:00','C1:CNT'
-```
-
 ## 3. Phoenix 5.1.2
 
 ### 3.1 安装
@@ -273,14 +256,29 @@ mv /opt/phoenix-hbase-2.4-5.1.2-bin /opt/phoenix-hbase-2.4-5.1.2
 #### 3.1.2 拷贝jar包
 
 ```bash
-cp /opt/phoenix-hbase-2.4-5.1.2/phoenix-*.jar /opt/hbase-2.4.11/lib/  # 拷贝jar包到hbase lib目录 
-# 分发jar
+# 拷贝jar包到hbase，lib目录 
+cp /opt/phoenix-hbase-2.4-5.1.2/phoenix-*.jar /opt/hbase-2.4.11/lib/  
+
+# 分发lib
 cd /opt/hbase-2.4.11/lib/
 scp phoenix-*.jar node02.xuzhihao.net:$PWD
 scp phoenix-*.jar node03.xuzhihao.net:$PWD
 ```
 
-#### 3.1.3 修改配置文件
+#### 3.1.3 设置环境变量
+
+```bash
+vi /etc/profile
+export PHOENIX_HOME=/opt/phoenix-hbase-2.4-5.1.2
+export PHOENIX_CLASSPATH=$PHOENIX_HOME
+export PATH=$PATH:$PHOENIX_HOME/bin
+source /etc/profile
+
+scp /etc/profile root@node02:/etc/
+scp /etc/profile root@node03:/etc/
+```
+
+#### 3.1.4 二级索引
 
 ```
 cd /opt/hbase-2.4.11/conf/
@@ -288,12 +286,6 @@ vim hbase-site.xml
 ```
 
 ```xml
-<!-- 将以下配置添加到 hbase-site.xml 后边 -->
-<!-- 支持HBase命名空间映射 -->
-<property>
-    <name>phoenix.schema.isNamespaceMappingEnabled</name>
-    <value>true</value>
-</property>
 <!-- 支持索引预写日志编码 -->
 <property>
     <name>hbase.regionserver.wal.codec</name>
@@ -307,90 +299,80 @@ vim hbase-site.xml
 cp /opt/hbase-2.4.11/conf/hbase-site.xml /opt/phoenix-hbase-2.4-5.1.2/bin/
 ```
 
-#### 3.1.4 配置分发
+#### 3.1.5 配置分发
+
+1. 分发hbase
 
 ```bash
-# 将hbase-site.xml分发到每个节点
-scp hbase-site.xml node02.xuzhihao.net:$PWD
-scp hbase-site.xml node03.xuzhihao.net:$PWD
+cd /opt/hbase-2.4.11/conf
+scp -r hbase-site.xml node02.xuzhihao.net:$PWD
+scp -r hbase-site.xml node03.xuzhihao.net:$PWD
 ```
 
-#### 3.1.5 重启HBase
+2. 分发phoenix
+
+```bash
+cd /opt/phoenix-hbase-2.4-5.1.2
+scp -r /opt/phoenix-hbase-2.4-5.1.2 node02.xuzhihao.net:$PWD
+scp -r /opt/phoenix-hbase-2.4-5.1.2 node03.xuzhihao.net:$PWD
+```
+
+#### 3.1.6 重启HBase
 
 ```bash
 stop-hbase.sh
 start-hbase.sh
 ```
 
-#### 3.1.6 启动Phoenix客户端
+#### 3.1.7 连接Phoenix
 
 ```bash
 cd /opt/phoenix-hbase-2.4-5.1.2
-bin/sqlline.py zk:2181
+bin/sqlline.py node01:2181
 ```
 
-#### 3.1.7 数据验证
+### 3.2 命令
 
-
-
-### 3.2 语法
+https://phoenix.apache.org/language/index.html
 
 #### 3.2.1 表操作
 
-```bash
-# 1. 创建表（订单明细表）
-create table if not exists ORDER_DTL(
-    id varchar primary key,
-    C1.status varchar,
-    C1.money double,
-    C1.pay_way integer,
-    C1.user_id varchar,
-    C1.operation_time varchar,
-    C1.category varchar
-);
+```sql
+-- 创建表，直接指定单个列作为 RowKey，在phoenix中，表名等会自动转换为大写，若要小写，使用双引号
+CREATE TABLE IF NOT EXISTS student(
+id VARCHAR primary key,
+name VARCHAR,
+age BIGINT,
+addr VARCHAR);
 
-# 2. 删除表
-drop table if exists ORDER_DTL;
+drop table if exists student; -- 删除表
 
-# 3. 创建表（小写）
-create table if not exists ORDER_DTL(
-    "id" varchar primary key,
-    "C1"."status" varchar,
-    "C1"."money" double,
-    "C1"."pay_way" integer,
-    "C1"."user_id" varchar,
-    "C1"."operation_time" varchar,
-    "C1"."category" varchar
-);
+-- 创建表，指定多个列的联合作为 RowKey
+CREATE TABLE IF NOT EXISTS "student" (
+id VARCHAR NOT NULL,
+name VARCHAR NOT NULL,
+age BIGINT,
+addr VARCHAR
+CONSTRAINT my_pk PRIMARY KEY (id, name)) column_encoded_bytes=0;
 
-select "id" from ORDER_DTL;
-
-# 4. 插入一条数据，双引号表示引用一个表或者字段，单引号表示字符串
-upsert into "ORDER_DTL" values('000001', '已提交', 4070, 1, '4944191', '2020-04-25 12:09:16', '手机;');
-
-# 5. 更新数据，将ID为'000001'的订单状态修改为已付款
-upsert into "ORDER_DTL"("id", "C1"."status") values('000001', '已付款');
-
-# 6. 指定ID查询数据
-select * from "ORDER_DTL" where "id" = '000001';
-
-# 7. 删除指定ID的数据
-delete from "ORDER_DTL" where "id" = '000001';
-
-# 8. 查询表中一共有多少条数据
-select count(*) from "ORDER_DTL";
-# 第一页
-select * from "ORDER_DTL" limit 10 offset 0;
-# 第二页
-select * from "ORDER_DTL" limit 10 offset 10;
-# 第三页
-select * from "ORDER_DTL" limit 10 offset 20;
+-- 插入数据
+upsert into student values('1001','zhangsan', 10, 'beijing');
+-- 查询记录
+select * from student;
+select * from student where id='1001';
+select count(*) from student;
+select * from student limit 10 offset 0;
+-- 删除记录
+delete from student where id='1001';
+-- 删除表
+drop table student;
 ```
 
 #### 3.2.2 预分区
 
-```bash
-# 1. 使用指定rowkey来进行预分区
+1. 使用指定rowkey来进行预分区
+
+```sql
 drop table if exists ORDER_DTL;
 create table if not exists ORDER_DTL(
     "id" varchar primary key,
@@ -403,8 +385,11 @@ create table if not exists ORDER_DTL(
 ) 
 CONPRESSION='GZ'
 SPLIT ON ('3','5','7');
+```
 
-# 2. 直接指定Region的数量来进行预分区
+2. 指定Region的数量来进行预分区
+
+```sql
 drop table if exists ORDER_DTL;
 create table if not exists ORDER_DTL(
     "id" varchar primary key,
@@ -417,78 +402,39 @@ create table if not exists ORDER_DTL(
 ) 
 CONPRESSION='GZ',
 SALT_BUCKETS=10;
-
-# 3. 创建二级索引，根据用户ID来查询订单的ID以及对应的支付金额，建立一个覆盖索引，加快查询
-create index IDX_USER_ID on ORDER_DTL(C1."user_id") include ("id", C1."money");
-
-# 4. 删除索引
-drop index IDX_USER_ID on ORDER_DTL;
-
-# 5. 强制使用索引查询
-explain select /*+ INDEX(ORDER_DTL IDX_USER_ID) */ * from ORDER_DTL where "user_id" = '8237476';
-
-# 6. 建立本地索引
-# 因为我们要在很多的列上建立索引，所以不太使用使用覆盖索引
-create local index IDX_LOCAL_ORDER_DTL_MULTI_IDX on ORDER_DTL("id", C1."status", C1."money", C1."pay_way", C1."user_id") ;
-explain select * from ORDER_DTL WHERE C1."status" = '已提交';
-explain select * from ORDER_DTL WHERE C1."pay_way" = 1;
-
 ```
 
 #### 3.2.3 视图映射
 
-```bash
-# 1. 建立HBase已经有的表和Phoenix视图的映射
-create view if not exists "MOMO_CHAT"."MSG"(
+1. 只读视图
+
+Phoenix创建的视图是只读的，所以只能用来做查询，无法通过视图对数据进行修改等操作
+
+```sql
+create view if not exists "test" (
     id varchar primary key,
-    "C1"."msg_time" varchar,
-    "C1"."sender_nickyname" varchar,
-    "C1"."sender_account" varchar,
-    "C1"."sender_sex" varchar,
-    "C1"."sender_ip" varchar,
-    "C1"."sender_os" varchar,
-    "C1"."sender_phone_type" varchar,
-    "C1"."sender_network" varchar,
-    "C1"."sender_gps" varchar,
-    "C1"."receiver_nickyname" varchar,
-    "C1"."receiver_ip" varchar,
-    "C1"."receiver_account" varchar,
-    "C1"."receiver_os" varchar,
-    "C1"."receiver_phone_type" varchar,
-    "C1"."receiver_network" varchar,
-    "C1"."receiver_gps" varchar,
-    "C1"."receiver_sex" varchar,
-    "C1"."msg_type" varchar,
-    "C1"."distance" varchar,
-    "C1"."message" varchar
+    "info1"."name" varchar,
+    "info2"."address" varchar
 );
+```
 
-# 查询一条数据
-select * from "MOMO_CHAT"."MSG" limit 1;
+2. 映射已有表
 
-# 根据日期、发送人账号、接收人账号查询历史消息
-#日期查询：2020-09-10 11:28:05
-select
-    *
-from
-    "MOMO_CHAT"."MSG"
-where
-    substr("msg_time", 0, 10) = '2020-09-10'
-and "sender_account" = '13514684105'
-and "receiver_account" = '13869783495';
+创建Phoenix表来隐射HBase中已经存在的数据。删除Phoenix中的表，HBase中被映射的表也会被删除
 
--- 10 rows selected (5.648 seconds)
+```sql
+create 'test','info1','info2'  -- hbase中的表
+```
 
-select * from "MOMO_CHAT"."MSG" where substr("msg_time", 0, 10) = '2020-09-10' and "sender_account" = '13514684105' and "receiver_account" = '13869783495';
+```sql
+create table "test" (
+    id varchar primary key,
+    "info1"."cdate" varchar,
+    "info1"."name" varchar,
+    "info2"."address" varchar
+) column_encoded_bytes=0;
 
-# 2. 创建本地索引
-CREATE LOCAL INDEX LOCAL_IDX_MOMO_MSG ON MOMO_CHAT.MSG(substr("msg_time", 0, 10), "sender_account", "receiver_account");
-drop index LOCAL_IDX_MOMO_MSG ON MOMO_CHAT.MSG;
-
-0 rows selected (0.251 seconds)
-
-explain select * from "MOMO_CHAT"."MSG" where substr("msg_time", 0, 10) = '2020-09-10' and "sender_account" = '13514684105' and "receiver_account" = '13869783495';
-
-# 3. 删除索引
-drop index LOCAL_IDX_MOMO_MSG on MOMO_CHAT.MSG;
+CREATE LOCAL INDEX LOCAL_IDX_TEST ON test(substr("cdate", 0, 10), "name");  -- 创建本地索引
+drop index LOCAL_IDX_TEST on test;  -- 删除索引
+explain select * from "test" where substr("cdate", 0, 10) = '2022-08-15' and "name" = 'zhangsan' ; -- 执行计划
 ```
