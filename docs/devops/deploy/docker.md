@@ -691,7 +691,7 @@ docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   minio/minio:RELEASE.2022-01-04T07-41-07Z server /data --console-address ":9001"
 ```
 
-#### 3.5.3 Hadoop
+#### 3.5.3 Hadoop 2.x
 
 ```bash
 docker run -dit --name hadoop-docker \
@@ -701,24 +701,22 @@ docker run -dit --name hadoop-docker \
 ```
 
 ```bash
-docker exec -it [containerid] /bin/bash
+docker exec -it hadoop-docker /bin/bash
 # 配置环境
 vi /etc/profile
-export HADOOP_HOME="/usr/local/hadoop-2.7.0"
+export HADOOP_HOME="/usr/local/hadoop-2.7.1"
 export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
 
 source /etc/profile
-
 # 统计高频词出现次数
 hadoop fs -mkdir -p /wordcount/input
 hadoop fs -put a.txt /wordcount/input # 创建a.txt并编辑内容
-hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar wordcount /wordcount/input /wordcount/output
+hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar wordcount /wordcount/input /wordcount/output
 hadoop fs -cat /wordcount/output/part-r-00000
 ```
 
-
 ```lua
-组件	  节点	   默认端口	      配置	        用途说明
+组件	节点	默认端口	配置	用途说明
 HDFS	DataNode	50010	dfs.datanode.address	datanode服务端口，用于数据传输
 HDFS	DataNode	50075	dfs.datanode.http.address	http服务的端口
 HDFS	DataNode	50475	dfs.datanode.https.address	https服务的端口
@@ -746,8 +744,8 @@ HBase	RegionServer	60030	hbase.regionserver.info.port	http服务端口
 HBase	HQuorumPeer	2181	hbase.zookeeper.property.clientPort	HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
 HBase	HQuorumPeer	2888	hbase.zookeeper.peerport	HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
 HBase	HQuorumPeer	3888	hbase.zookeeper.leaderport	HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
-Hive	Metastore	9083	/etc/default/hive-metastore中export PORT=<port>来更新默认端口	
-Hive	HiveServer	10000	/etc/hive/conf/hive-env.sh中export HIVE_SERVER2_THRIFT_PORT=<port>来更新默认端口	
+Hive	Metastore	9083	/etc/default/hive-metastore中export PORT=<port>来更新默认端口	 
+Hive	HiveServer	10000	/etc/hive/conf/hive-env.sh中export HIVE_SERVER2_THRIFT_PORT=<port>来更新默认端口	 
 ZooKeeper	Server	2181	/etc/zookeeper/conf/zoo.cfg中clientPort=<port>	对客户端提供服务的端口
 ZooKeeper	Server	2888	/etc/zookeeper/conf/zoo.cfg中server.x=[hostname]:nnnnn[:nnnnn]，标蓝部分	follower用来连接到leader，只在leader上监听该端口。
 ZooKeeper	Server	3888	/etc/zookeeper/conf/zoo.cfg中server.x=[hostname]:nnnnn[:nnnnn]，标蓝部分	用于leader选举的。只在electionAlg是1,2或3(默认)时需要。
