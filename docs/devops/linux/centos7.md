@@ -1694,7 +1694,7 @@ vim /etc/profile
 # 添加
 export MAVEN_HOME=/opt/apache-maven-3.6.3
 export MAVEN_OPTS="-Xms4096m -Xmx4096m"
-export PATH=:$MAVEN_HOME/bin:$PATH
+export PATH=$PATH:$MAVEN_HOME/bin
 
 # 生效
 source /etc/profile
