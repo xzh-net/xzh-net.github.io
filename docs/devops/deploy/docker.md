@@ -1638,10 +1638,10 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 #### 4.1.1 jar
 
-1. 编写Dockerfile文件
+1. 创建Dockerfile
 
 ```bash
-vim Dockerfile
+vi Dockerfile
 ```
 
 ```bash
@@ -1655,7 +1655,7 @@ EXPOSE 9001
 ENTRYPOINT ["java","-jar","/app.jar"]
 ```
 
-2. build构建
+2. 构建镜像
 
 ```bash
 docker build --build-arg JAR_FILE=test-sso.jar -t test-sso:1.0 . # -f :指定要使用的Dockerfile路径；
@@ -1668,10 +1668,10 @@ uname -a        # 查看内核
 
 #### 4.1.2 tomcat
 
-1. 编写Dockerfile文件
+1. 创建Dockerfile
 
 ```bash
-vim Dockerfile
+vi Dockerfile
 ```
 
 ```bash
@@ -1695,7 +1695,7 @@ EXPOSE 8080
 CMD /opt/apache-tomcat-8.5.66/bin/startup.sh && tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
 ```
 
-2. build构建
+2. 构建镜像
 
 ```bash
 docker build -t xzh/tomcat8 .
@@ -1705,10 +1705,10 @@ docker exec -it [containerid] /bin/bash                # 进入容器
 
 #### 4.1.3 turnserver
 
-1. 编写Dockerfile文件
+1. 创建Dockerfile
 
 ```bash
-vim Dockerfile
+vi Dockerfile
 ```
 
 ```bash
@@ -1783,13 +1783,149 @@ exec /usr/bin/turnserver "$@"
 ```
 
 
-3. build构建
+3. 构建镜像
  
 ```bash
 chmod -R 777 /home/coturn
 sudo docker build --tag coturn .
 sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 ```
+
+#### 4.1.4 hadoop
+
+1. 构建centos7-ssh-sync
+
+```bash
+cd /opt/software/docker/centos7-ssh-sync-dockerfile
+vi Dockerfile
+```
+
+```bash
+FROM centos:7
+MAINTAINER Jensen
+
+#install vim & net-tools
+RUN yum -y install vim
+RUN yum -y install net-tools
+
+#install rsync
+RUN yum -y install rsync
+
+#安装ssh
+RUN yum install -y openssh-server sudo
+RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
+RUN yum  install -y openssh-clients
+
+#配置root名
+#123456是ssh密码
+RUN echo "root:123456" | chpasswd
+RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
+#生成ssh key
+RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+
+#配置sshd服务
+RUN mkdir /var/run/sshd
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+```
+
+```bash
+docker build -f Dockerfile -t centos7-ssh-sync .
+```
+
+2. 构建centos7-hadoop
+
+```bash
+cd /opt/software/docker/centos7-hadoop-dockerfile
+vi Dockerfile
+```
+
+```bash
+FROM centos7-ssh-sync
+MAINTAINER xzh
+
+# install jdk8
+ADD jdk-8u202-linux-x64.tar.gz /usr/local/
+ENV JAVA_HOME /usr/local/jdk1.8.0_202
+ENV PATH $PATH:$JAVA_HOME/bin
+
+# install hadoop3.1.4
+ADD hadoop-3.1.4-bin-snappy-CentOS7.tar.gz /usr/local/
+ENV HADOOP_HOME /usr/local/hadoop-3.1.4
+ENV PATH $PATH:$HADOOP_HOME/bin
+ENV PATH $PATH:$HADOOP_HOME/sbin
+
+WORKDIR /usr/local
+```
+
+```bash
+docker build -f Dockerfile -t centos7-hadoop .
+```
+
+3. 运行
+
+```bash
+docker run -dit --name hadoop01 -p 9870:9870 -p 8088:8088 -p 9000:9000 -p 14000:14000 --restart=always --privileged=true centos7-hadoop
+```
+
+4. 测试
+
+```bash
+docker exec -it hadoop01 /bin/bash
+hadoop version
+java -version
+```
+
+5. 伪集群
+
+```bash
+cd /usr/local/hadoop-3.1.4/etc/hadoop
+```
+
+```bash
+vi hadoop-env.sh 
+# 编辑内容
+export JAVA_HOME=/usr/local/jdk1.8.0_202
+# 添加到末尾，设置用户以执行对应角色shell命令
+export HDFS_NAMENODE_USER=root
+export HDFS_DATANODE_USER=root
+export HDFS_SECONDARYNAMENODE_USER=root
+export YARN_RESOURCEMANAGER_USER=root
+export YARN_NODEMANAGER_USER=root 
+```
+
+```bash
+vi core-site.xml
+# 编辑内容
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://localhost:9000</value>
+    </property>
+</configuration>
+```
+
+```bash
+vi hdfs-site.xml
+# 编辑内容
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+</configuration>
+```
+
+```bash
+ssh-keygen
+ssh-copy-id localhost
+hdfs namenode -format
+start-dfs.sh
+jps
+```
+
+访问地址：http://ip:9870
 
 ### 4.2 容器构建
 
