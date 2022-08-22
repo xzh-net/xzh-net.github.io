@@ -496,9 +496,15 @@ hdfs balancer -threshold 5      # 重新执行负载均衡
 
 ![](../../assets/_images/devops/deploy/hadoop/1.png)
 
-### 3.1 基础环境准备
+### 3.1 集群规划
 
-见 2.2 基础环境准备
+```lua
+node01  namenode  zkfc  datanode  zookeeper  journal node
+node02  namenode  zkfc  datanode  zookeeper  journal node
+node03                  datanode  zookeeper  journal node
+```
+
+基础环境准备见2.2 
 
 ### 3.2 安装zookeeper集群
 
