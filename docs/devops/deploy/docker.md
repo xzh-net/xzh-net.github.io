@@ -1903,6 +1903,10 @@ vi core-site.xml
         <name>fs.defaultFS</name>
         <value>hdfs://localhost:9000</value>
     </property>
+    <property>
+        <name>hadoop.http.staticuser.user</name>
+        <value>root</value>
+    </property>
 </configuration>
 ```
 
