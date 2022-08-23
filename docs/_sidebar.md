@@ -43,6 +43,7 @@
   - [使用ZeroBrane Studio调试lua脚本](java/tools/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
   - [ETL工具kettle部署及应用](java/tools/etl)
+  - [离线数据同步工具DataX](java/tools/datax)
 
 - 学习笔记
   - [解决方案](java/project/scheme)
