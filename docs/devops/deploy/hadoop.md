@@ -341,7 +341,7 @@ hadoop
 #### 2.7.1 初始化集群
 
 ```bash
-hdfs namenode -format xzh-hadoop
+hdfs namenode -format
 ```
 
 #### 2.7.2 单节点启动
