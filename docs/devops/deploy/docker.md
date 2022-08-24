@@ -1869,7 +1869,8 @@ docker build -f Dockerfile -t centos7-hadoop3 .
 docker run -dit --name hadoop01 -p 1022:22 \
 -p 8020:8020 -p 9870:9870 -p 9871:9871 \
 -p 9866:9866 -p 9864:9864 -p 9865:9865 \
--p 8088:8088 -p 9000:9000 -p 14000:14000 --restart=always --privileged=true centos7-hadoop3
+-p 8088:8088 \
+-p 14000:14000 --restart=always --privileged=true centos7-hadoop3
 ```
 
 4. 测试
@@ -1904,7 +1905,7 @@ vi core-site.xml
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
+        <value>hdfs://localhost:8020</value>
     </property>
     <property>
         <name>hadoop.http.staticuser.user</name>
