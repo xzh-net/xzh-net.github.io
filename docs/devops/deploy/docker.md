@@ -1802,7 +1802,7 @@ vi Dockerfile
 
 ```bash
 FROM centos:7
-MAINTAINER Jensen
+MAINTAINER xzh
 
 #install vim & net-tools
 RUN yum -y install vim
@@ -1837,7 +1837,7 @@ docker build -f Dockerfile -t centos7-ssh-sync .
 2. 构建centos7-hadoop
 
 ```bash
-cd /opt/software/docker/centos7-hadoop-dockerfile
+cd /opt/software/docker/centos7-hadoop3-dockerfile
 vi Dockerfile
 ```
 
@@ -1860,13 +1860,16 @@ WORKDIR /usr/local
 ```
 
 ```bash
-docker build -f Dockerfile -t centos7-hadoop .
+docker build -f Dockerfile -t centos7-hadoop3 .
 ```
 
 3. 运行
 
 ```bash
-docker run -dit --name hadoop01 -p 9870:9870 -p 8088:8088 -p 9000:9000 -p 14000:14000 --restart=always --privileged=true centos7-hadoop
+docker run -dit --name hadoop01 -p 1022:22 \
+-p 8020:8020 -p 9870:9870 -p 9871:9871 \
+-p 9866:9866 -p 9864:9864 -p 9865:9865 \
+-p 8088:8088 -p 9000:9000 -p 14000:14000 --restart=always --privileged=true centos7-hadoop3
 ```
 
 4. 测试
@@ -1925,7 +1928,7 @@ vi hdfs-site.xml
 ssh-keygen
 ssh-copy-id localhost
 hdfs namenode -format
-start-dfs.sh
+start-all.sh
 jps
 ```
 
