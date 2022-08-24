@@ -127,7 +127,7 @@ vi mysql2hdfs.json
                         ],  
                         "defaultFS": "hdfs://bbfc6fd4f77c:8020",
                         "fieldDelimiter": "\t", 
-                        "fileName": "pms_product.txt",
+                        "fileName": "mysql_pms_product.txt",
                         "fileType": "text", 
                         "path": "/datax", 
                         "writeMode": "append"
@@ -211,7 +211,78 @@ vi hdfs2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/hdfs2mysql.json
 ```
 
-### 3.4 Oracle导入数据到Mysql
+### 3.4 Oracle导入数据到HDFS
+
+```bash
+python /opt/datax/bin/datax.py -r oraclereader -w hdfswriter  # 模板
+cd /opt/datax/job
+vi oracle2hdfs.json
+```
+
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "oraclereader", 
+                    "parameter": {
+                        "column": ["ID","NAME","CREATE_TIME"], 
+                        "splitPk": "ID",
+                        "where" : "BRAND_NAME is not null",
+                        "connection": [
+                            {
+                                "jdbcUrl": ["jdbc:oracle:thin:@172.17.17.37:1521:ORCL"], 
+                                "table": ["pms_product"]
+                            }
+                        ], 
+                        "username": "VJSP_JSWZ_191111",
+                        "password": "123456" 
+                    }
+                }, 
+                "writer": {
+                    "name": "hdfswriter", 
+                    "parameter": {
+                        "column": [
+                            {
+                                "name":"id",
+                                "type":"int"
+                            },  
+                            {
+                                "name":"name",
+                                "type":"string"
+                            },
+                            {
+                                "name":"create_time",
+                                "type":"string"
+                            }    
+                        ], 
+                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "fieldDelimiter": "\t",
+                        "fileName": "orac_product.txt",
+                        "fileType": "text",
+                        "path": "/datax",
+                        "writeMode": "append"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "3"
+            }
+        }
+    }
+}
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/oracle2hdfs.json
+```
+
+### 3.5 Oracle导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r oraclereader -w mysqlwriter  # 模板
@@ -302,26 +373,150 @@ CREATE TABLE `pms_product_bak` (
 /opt/datax/bin/datax.py /opt/datax/job/oracle2mysql.json
 ```
 
-### 3.5 Oracle导入数据到HDFS
+### 3.6 MongoDB导入数据到HDFS
 
+```bash
+python /opt/datax/bin/datax.py -r mongodbreader -w hdfswriter   # 模板
+cd /opt/datax/job
+vi mongdb2hdfs.json
+```
 
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "mongodbreader", 
+                    "parameter": {
+                        "address": ["127.0.0.1:27017"], 
+                        "collectionName": "test", 
+                        "column": [
+                            {
+                                "name":"name",
+                                "type":"string"
+                            },
+                            {
+                                "name":"url",
+                                "type":"string"
+                            }
+                        ], 
+                        "dbName": "xzh", 
+                        "userName": "", 
+                        "userPassword": ""
+                    }
+                }, 
+                "writer": {
+                    "name": "hdfswriter", 
+                    "parameter": {
+                        "column": [
+                            {
+                                "name":"name",
+                                "type":"string"
+                            },
+                            {
+                                "name":"url",
+                                "type":"string"
+                            }
+                        ], 
+                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "fieldDelimiter": "\t", 
+                        "fileName": "mongo_pms_product.txt",
+                        "fileType": "text", 
+                        "path": "/datax", 
+                        "writeMode": "append"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
 
+执行
 
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/mongdb2hdfs.json
+```
 
+### 3.7 MongoDB导入数据到Mysql
 
+```bash
+python /opt/datax/bin/datax.py -r mongodbreader -w mysqlwriter  # 模板
+cd /opt/datax/job
+vi mongodb2mysql.json
+```
 
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "mongodbreader", 
+                    "parameter": {
+                        "address": ["127.0.0.1:27017"], 
+                        "collectionName": "test", 
+                        "column": [
+                            {
+                                "name":"name",
+                                "type":"string"
+                            },
+                            {
+                                "name":"url",
+                                "type":"string"
+                            }
+                        ], 
+                        "dbName": "xzh", 
+                        "userName": "", 
+                        "userPassword": ""
+                    }
+                }, 
+                "writer": {
+                    "name": "mysqlwriter", 
+                    "parameter": {
+                        "column": [
+                            "name",
+                            "url"
+                        ], 
+                        "connection": [
+                            {
+                            "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall",
+                            "table": ["test"]
+                            }
+                        ],
+                        "username": "root",
+                        "password": "root",
+                        "writeMode": "insert"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
 
-### 3.3 Mysql导入数据到Hbase
-### 3.4 Mysql数据导出到Mysql
+执行
 
-### 3.7 MongoDB导入数据到HDFS
-### 3.8 MongoDB导入数据到Mysql
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/mongodb2mysql.json
+```
 
-### 3.9 SQLServer导入数据到HDFS
-### 3.10 SQLServer导入到Mysql
+### 3.8 SQLServer导入数据到HDFS
+### 3.9 SQLServer导入到Mysql
 
-### 3.11 DB2导入数据到HDFS
-### 3.12 DB2导入数据到Mysql
+### 3.x Mysql导入数据到Hbase
+### 3.x Mysql数据导出到Mysql
 
-### 3.13 Hbase导入数据到HDFS
-### 3.14 Hbase导入数据到Mysql
+### 3.x Hbase导入数据到HDFS
+### 3.x Hbase导入数据到Mysql
