@@ -428,7 +428,12 @@ docker run -d -p 8086:8086 \
 
 ```bash
 docker pull harisekhon/hbase:2.1
-docker run -dti --name hbase -p 16010:16010 -p 2181:2181 harisekhon/hbase:2.1
+docker run -dti --name hbase2 -h hbase2 \
+-p 2181:2181 \
+-p 8080:8080 -p 8085:8085 -p 9090:9090 -p 9095:9095 \
+-p 16000:16000 -p 16010:16010 -p 16020:16020 -p 16030:16030 \
+harisekhon/hbase:2.1
+
 docker exec -it hbase2 /bin/bash
 hbase shell
 ```
