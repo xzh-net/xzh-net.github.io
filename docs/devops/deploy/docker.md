@@ -433,6 +433,19 @@ docker exec -it hbase2 /bin/bash
 hbase shell
 ```
 
+```sql
+create 'test', 'c1'
+scan 'test'
+put 'test','10010','c1:name','zhangsan'
+get "test", "10010"
+put 'test','10010','c1:sex','man'
+describe 'test'
+count 'test'
+truncate 'test'
+delete "test", "10010", "c1:sex"
+deleteall "test", "10010"
+```
+
 #### 3.3.7 TDengine
 
 ```bash
