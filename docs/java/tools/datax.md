@@ -221,61 +221,69 @@ vi mysql2hbase.json
 
 ```xml
 {
-	"job": {
-		"content": [{
-			"reader": {
-				"name": "mysqlreader",
-				"parameter": {
-					"password": "root",
-					"username": "root",
-					"connection": [{
-						"jdbc:mysql://172.17.17.137:3306/mall"
-						"querySql": ["select id, name, create_time from pms_product_bak where brand_name is not null"]
-					}]
-				}
-			},
-			"writer": {
-				"name": "hbase11xwriter",
-				"parameter": {
-					"mode": "normal",
-					"table": "mysql_pms_product_bak",
-					"column": [{
-						"name": "f:id",
-						"type": "string",
-						"index": 0
-					}, {
-						"name": "f:name",
-						"type": "string",
-						"index": 1
-					}],
-					"encoding": "utf-8",
-					"hbaseConfig": {
-						"hbase.zookeeper.quorum": "192.168.20.91:2181",
-						"zookeeper.znode.parent": "/hbase"
-					},
-					"rowkeyColumn": [{
-						"name": "f:id",
-						"type": "string",
-						"index": 0
-					}, {
-						"name": "f:name",
-						"type": "string",
-						"index": 1
-					}]
-				}
-			}
-		}],
-		"setting": {
-			"speed": {
-				"channel": 1
-			},
-			"errorLimit": {
-				"record": 0,
-				"percentage": 0.02
-			}
-		}
-	}
+    "job": {
+        "content": [{
+            "reader": {
+                "name": "mysqlreader",
+                "parameter": {
+                    "password": "root",
+                    "username": "root",
+                    "connection": [{
+                        "jdbcUrl": ["jdbc:mysql://172.17.17.137:3306/mall"], 
+                        "querySql": [
+                            "select id, name, create_time from pms_product_bak where brand_name is not null"
+                        ]
+                    }]
+                }
+            },
+            "writer": {
+                "name": "hbase11xwriter",
+                "parameter": {
+                    "mode": "normal",
+                    "table": "test",
+                    "column": [{
+                        "name": "c1:id",
+                        "type": "string",
+                        "index": 0
+                    }, {
+                        "name": "c1:name",
+                        "type": "string",
+                        "index": 1
+                    }],
+                    "encoding": "utf-8",
+                    "hbaseConfig": {
+                        "hbase.zookeeper.quorum": "hbase2:2181",
+                        "zookeeper.znode.parent": "/hbase"
+                    },
+                    "rowkeyColumn": [{
+                        "name": "c1:id",
+                        "type": "string",
+                        "index": 0
+                    }, {
+                        "name": "c1:name",
+                        "type": "string",
+                        "index": 1
+                    }]
+                }
+            }
+        }],
+        "setting": {
+            "speed": {
+                "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        }
+    }
 }
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/mysql2hbase.json
 ```
 
 ### 3.5 Oracle导入数据到HDFS
