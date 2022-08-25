@@ -49,7 +49,7 @@ vi stream2stream.json
                             },
                             {
                                 "type":"string",
-                                "value":"你好，我们都是好孩子"
+                                "value":"我们都是好孩子"
                             }
                         ], 
                         "sliceRecordCount": "10"
@@ -236,7 +236,7 @@ vi oracle2hdfs.json
                                 "table": ["pms_product"]
                             }
                         ], 
-                        "username": "VJSP_JSWZ_191111",
+                        "username": "DATAX",
                         "password": "123456" 
                     }
                 }, 
@@ -307,7 +307,7 @@ vi oracle2mysql.json
                                 "table": ["pms_product"]
                             }
                         ], 
-                        "username": "VJSP_JSWZ_191111",
+                        "username": "DATAX",
                         "password": "123456" 
                     }
                 }, 
@@ -349,21 +349,20 @@ vi oracle2mysql.json
 
 ```sql
 -- oracle
-create table PMS_PRODUCT
-(
-  id          INTEGER,
-  name        VARCHAR2(200),
-  brand_name  VARCHAR2(200),
-  create_time DATE default sysdate
+create table PMS_PRODUCT (
+    id          INTEGER,
+    name        VARCHAR2(200),
+    brand_name  VARCHAR2(200),
+    create_time DATE default sysdate
 )
 
 -- mysql
 CREATE TABLE `pms_product_bak` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) NOT NULL,
-  `brand_name` varchar(255) DEFAULT NULL COMMENT '品牌名称',
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `name` varchar(64) NOT NULL,
+    `brand_name` varchar(255) DEFAULT NULL COMMENT '品牌名称',
+    `create_time` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) 
 ```
 
@@ -401,7 +400,7 @@ vi mongdb2hdfs.json
                                 "type":"string"
                             }
                         ], 
-                        "dbName": "xzh", 
+                        "dbName": "datax", 
                         "userName": "", 
                         "userPassword": ""
                     }
@@ -472,7 +471,7 @@ vi mongodb2mysql.json
                                 "type":"string"
                             }
                         ], 
-                        "dbName": "xzh", 
+                        "dbName": "datax", 
                         "userName": "", 
                         "userPassword": ""
                     }
@@ -513,7 +512,170 @@ vi mongodb2mysql.json
 ```
 
 ### 3.8 SQLServer导入数据到HDFS
+
+
+```bash
+python /opt/datax/bin/datax.py -r sqlserverreader -w hdfswriter  # 模板
+cd /opt/datax/job
+vi sqlserver2hdfs.json
+```
+
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "sqlserverreader", 
+                    "parameter": {
+                        "column": [
+                            "id", 
+                            "name",
+                            "create_time"
+                        ],  
+                        "connection": [
+                            {
+                                "jdbcUrl": ["jdbc:sqlserver://127.0.0.1:1433;DatabaseName=datax"], 
+                                "table": ["pms_product"]
+                            }
+                        ], 
+                        "password": "Pass@w0rd", 
+                        "username": "SA"
+                    }
+                }, 
+                "writer": {
+                    "name": "hdfswriter", 
+                    "parameter": {
+                        "column": [
+                            {
+                                "name":"id",
+                                "type":"string"
+                            },
+                            {
+                                "name":"name",
+                                "type":"string"
+                            },
+                            {
+                                "name":"create_time",
+                                "type":"string"
+                            }
+                        ], 
+                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "fieldDelimiter": "\t", 
+                        "fileName": "mssql_pms_product.txt",
+                        "fileType": "text", 
+                        "path": "/datax", 
+                        "writeMode": "append"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
+
+建表语句
+
+```sql
+-- sqlserver
+create table pms_product (
+    id int,
+    name varchar(100),   
+    brand_name varchar(100),  
+    create_time datetime
+)
+
+-- mysql
+CREATE TABLE `pms_product_bak` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `name` varchar(64) NOT NULL,
+    `brand_name` varchar(255) DEFAULT NULL COMMENT '品牌名称',
+    `create_time` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) 
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/sqlserver2hdfs.json
+```
+
 ### 3.9 SQLServer导入到Mysql
+
+```bash
+python /opt/datax/bin/datax.py -r sqlserverreader -w mysqlwriter  # 模板
+cd /opt/datax/job
+vi sqlserver2mysql.json
+```
+
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "sqlserverreader", 
+                    "parameter": {
+                        "column": ["id","name","create_time"], 
+                        "splitPk": "id",
+                        "where" : "create_time is not null", 
+                        "connection": [
+                            {
+                                "jdbcUrl": ["jdbc:sqlserver://127.0.0.1:1433;DatabaseName=datax"], 
+                                "table": ["pms_product"]
+                            }
+                        ], 
+                        "password": "Pass@w0rd", 
+                        "username": "SA"
+                    }
+                }, 
+                "writer": {
+                    "name": "mysqlwriter", 
+                    "parameter": {
+                        "column": [ 
+                            "id",
+                            "name",
+                            "create_time"
+                           
+                        ], 
+                        "connection": [
+                            {
+                                "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall?useUnicode=true&characterEncoding=UTF-8", 
+                                "table": ["pms_product_bak"]
+                            }
+                        ], 
+                        "username": "root", 
+                        "password": "root", 
+                        "preSql": [], 
+                        "session": ["set session sql_mode='ANSI'"], 
+                        "writeMode": "update"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/sqlserver2mysql.json
+```
+
+### 3.x PostgreSQL导入数据到HDFS
+### 3.x PostgreSQL导入到Mysql
 
 ### 3.x Mysql导入数据到Hbase
 ### 3.x Mysql数据导出到Mysql
