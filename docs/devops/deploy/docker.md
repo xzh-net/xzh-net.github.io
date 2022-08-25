@@ -424,7 +424,7 @@ docker run -d -p 8086:8086 \
       influxdb:2.0.6
 ```
 
-#### 3.3.6 HBase
+#### 3.3.6 HBase 2.x
 
 ```bash
 docker pull harisekhon/hbase:2.1
