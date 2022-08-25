@@ -722,9 +722,11 @@ docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
 
 ```bash
 docker run -dit --name hadoop-docker \
- -p 8020:8020 -p 8088:8088 -p 8040:8040 -p 8042:8042 \
- -p 50070:50070 -p 49707:49707 -p 50010:50010 -p 50075:50075 \
- -p 50090:50090 sequenceiq/hadoop-docker:2.7.1 /etc/bootstrap.sh -bash
+ -p 8020:8020 -p 50070:50070 -p 50470:50470 \
+ -p 50010:50010 -p 50075:50075 -p 50475:50475 \
+ -p 8088:8088 \
+ -p 8040:8040 -p 8041:8041 -p 8042:8042 \
+ sequenceiq/hadoop-docker:2.7.1 /etc/bootstrap.sh -bash
 ```
 
 ```bash
