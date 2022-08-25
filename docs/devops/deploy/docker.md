@@ -1913,7 +1913,7 @@ docker build -f Dockerfile -t centos7-hadoop3 .
 3. 运行
 
 ```bash
-docker run -dit --name hadoop01 -p 1022:22 \
+docker run -dit --name hadoop01 -h hadoop01 -p 1022:22 \
 -p 8020:8020 -p 9870:9870 -p 9871:9871 \
 -p 9866:9866 -p 9864:9864 -p 9865:9865 \
 -p 8088:8088 \
@@ -1952,7 +1952,7 @@ vi core-site.xml
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://localhost:8020</value>
+        <value>hdfs://hadoop01:8020</value>
     </property>
     <property>
         <name>hadoop.http.staticuser.user</name>
