@@ -428,8 +428,8 @@ docker run -d -p 8086:8086 \
 
 ```bash
 docker pull harisekhon/hbase:2.1
-docker run -dti --name hbase -p 16010:16010 harisekhon/hbase:2.1
-docker exec -it hbase /bin/bash
+docker run -dti --name hbase -p 16010:16010 -p 2181:2181 harisekhon/hbase:2.1
+docker exec -it hbase2 /bin/bash
 hbase shell
 ```
 
@@ -1820,7 +1820,7 @@ sudo docker build --tag coturn .
 sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 ```
 
-#### 4.1.4 hadoop
+#### 4.1.4 hadoop 3.x
 
 1. 构建centos7-ssh-sync
 
