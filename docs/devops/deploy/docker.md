@@ -304,6 +304,33 @@ grant connect,resource to xzh0610;
 grant dba to xzh0610;  #  授予dba权限后，这个用户能操作所有用户的表
 ```
 
+#### 3.2.4 SQL Server
+
+```bash
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@w0rd" \
+   -p 1433:1433 --name mssql -h mssql \
+   -d mcr.microsoft.com/mssql/server:2019-latest
+
+docker exec -it mssql "bash"
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Pass@w0rd"
+```
+
+```sql
+create database datax
+go
+create table pms_product (
+    id int,
+    name varchar(100),   
+    brand_name varchar(100),  
+    create_time datetime
+)
+go
+insert into pms_product values (1,'nnn','xxx',getdate())
+go
+select * from pms_product
+go
+```
+
 ### 3.3 非关系型数据库
 
 #### 3.3.1 Memcached
