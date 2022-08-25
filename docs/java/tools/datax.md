@@ -79,7 +79,68 @@ vi stream2stream.json
 /opt/datax/bin/datax.py /opt/datax/job/stream2stream.json
 ```
 
-### 3.2 Mysql导入数据到HDFS
+### 3.2 HDFS导入数据到Mysql
+
+```bash
+python /opt/datax/bin/datax.py -r hdfsreader -w mysqlwriter  # 模板
+cd /opt/datax/job
+vi hdfs2mysql.json
+```
+
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "hdfsreader", 
+                    "parameter": {
+                        "column": [
+                            "*"
+                        ], 
+                        "defaultFS": "hdfs://bbfc6fd4f77c:8020", 
+                        "fieldDelimiter": "\t", 
+                        "path": "/datax/pms_product.txt",
+                        "fileType": "text", 
+                        "encoding": "UTF-8"
+                    }
+                }, 
+                "writer": {
+                    "name": "mysqlwriter", 
+                    "parameter": {
+                        "column": [
+                            "id",
+                            "name"
+                        ],
+                        "connection": [
+                            {
+                                "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall", 
+                                "table": ["pms_product_bak"]
+                            }
+                        ], 
+                        "password": "root",  
+                        "username": "root", 
+                        "writeMode": "insert"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/hdfs2mysql.json
+```
+
+### 3.3 Mysql导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r mysqlreader -w hdfswriter  # 模板
@@ -150,68 +211,74 @@ vi mysql2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/mysql2hdfs.json
 ```
 
-### 3.3 HDFS导入数据到Mysql
+### 3.4 Mysql导入数据到Hbase
 
 ```bash
-python /opt/datax/bin/datax.py -r hdfsreader -w mysqlwriter  # 模板
+python /opt/datax/bin/datax.py -r mysqlreader -w hbase11xwriter  # 模板
 cd /opt/datax/job
-vi hdfs2mysql.json
+vi mysql2hbase.json
 ```
 
 ```xml
 {
-    "job": {
-        "content": [
-            {
-                "reader": {
-                    "name": "hdfsreader", 
-                    "parameter": {
-                        "column": [
-                            "*"
-                        ], 
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020", 
-                        "fieldDelimiter": "\t", 
-                        "path": "/datax/pms_product.txt",
-                        "fileType": "text", 
-                        "encoding": "UTF-8"
-                    }
-                }, 
-                "writer": {
-                    "name": "mysqlwriter", 
-                    "parameter": {
-                        "column": [
-                            "id",
-                            "name"
-                        ],
-                        "connection": [
-                            {
-                                "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall", 
-                                "table": ["pms_product_bak"]
-                            }
-                        ], 
-                        "password": "root",  
-                        "username": "root", 
-                        "writeMode": "insert"
-                    }
-                }
-            }
-        ], 
-        "setting": {
-            "speed": {
-                "channel": "1"
-            }
-        }
-    }
+	"job": {
+		"content": [{
+			"reader": {
+				"name": "mysqlreader",
+				"parameter": {
+					"password": "root",
+					"username": "root",
+					"connection": [{
+						"jdbc:mysql://172.17.17.137:3306/mall"
+						"querySql": ["select id, name, create_time from pms_product_bak where brand_name is not null"]
+					}]
+				}
+			},
+			"writer": {
+				"name": "hbase11xwriter",
+				"parameter": {
+					"mode": "normal",
+					"table": "mysql_pms_product_bak",
+					"column": [{
+						"name": "f:id",
+						"type": "string",
+						"index": 0
+					}, {
+						"name": "f:name",
+						"type": "string",
+						"index": 1
+					}],
+					"encoding": "utf-8",
+					"hbaseConfig": {
+						"hbase.zookeeper.quorum": "192.168.20.91:2181",
+						"zookeeper.znode.parent": "/hbase"
+					},
+					"rowkeyColumn": [{
+						"name": "f:id",
+						"type": "string",
+						"index": 0
+					}, {
+						"name": "f:name",
+						"type": "string",
+						"index": 1
+					}]
+				}
+			}
+		}],
+		"setting": {
+			"speed": {
+				"channel": 1
+			},
+			"errorLimit": {
+				"record": 0,
+				"percentage": 0.02
+			}
+		}
+	}
 }
 ```
 
-执行
-
-```bash
-/opt/datax/bin/datax.py /opt/datax/job/hdfs2mysql.json
-```
-
-### 3.4 Oracle导入数据到HDFS
+### 3.5 Oracle导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r oraclereader -w hdfswriter  # 模板
@@ -282,7 +349,7 @@ vi oracle2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/oracle2hdfs.json
 ```
 
-### 3.5 Oracle导入数据到Mysql
+### 3.6 Oracle导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r oraclereader -w mysqlwriter  # 模板
@@ -372,7 +439,7 @@ CREATE TABLE `pms_product_bak` (
 /opt/datax/bin/datax.py /opt/datax/job/oracle2mysql.json
 ```
 
-### 3.6 MongoDB导入数据到HDFS
+### 3.7 MongoDB导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r mongodbreader -w hdfswriter   # 模板
@@ -443,7 +510,7 @@ vi mongdb2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/mongdb2hdfs.json
 ```
 
-### 3.7 MongoDB导入数据到Mysql
+### 3.8 MongoDB导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r mongodbreader -w mysqlwriter  # 模板
@@ -511,7 +578,7 @@ vi mongodb2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/mongodb2mysql.json
 ```
 
-### 3.8 SQLServer导入数据到HDFS
+### 3.9 SQLServer导入数据到HDFS
 
 
 ```bash
@@ -606,7 +673,7 @@ CREATE TABLE `pms_product_bak` (
 /opt/datax/bin/datax.py /opt/datax/job/sqlserver2hdfs.json
 ```
 
-### 3.9 SQLServer导入到Mysql
+### 3.10 SQLServer导入到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r sqlserverreader -w mysqlwriter  # 模板
@@ -674,7 +741,7 @@ vi sqlserver2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/sqlserver2mysql.json
 ```
 
-### 3.10 PostgreSQL导入数据到HDFS
+### 3.11 PostgreSQL导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r postgresqlreader -w hdfswriter  # 模板
@@ -757,7 +824,7 @@ create table pms_product (
 /opt/datax/bin/datax.py /opt/datax/job/postgresql2hdfs.json
 ```
 
-### 3.11 PostgreSQL导入到Mysql
+### 3.12 PostgreSQL导入到Mysql
 
 
 ```bash
@@ -824,8 +891,8 @@ vi postgresql2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/postgresql2mysql.json
 ```
 
-### 3.x Mysql导入数据到Hbase
-### 3.x Mysql数据导出到Mysql
+
+
 
 ### 3.x Hbase导入数据到HDFS
 ### 3.x Hbase导入数据到Mysql
