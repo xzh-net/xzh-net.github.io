@@ -58,9 +58,22 @@ source /etc/profile
 
 ```bash
 sqlcmd -S localhost -U SA -p 1234Qwer
+```
 
-CREATE DATABASE [Test]
-GO
+```sql
+create database datax
+go
+create table pms_product (
+    id int,
+    name varchar(100),   
+    brand_name varchar(100),  
+    create_time datetime
+)
+go
+insert into pms_product values (1,'nnn','xxx',getdate())
+go
+select * from pms_product
+go
 ```
 
 #### 1.1.6 服务端卸载
