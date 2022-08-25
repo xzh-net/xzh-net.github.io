@@ -674,8 +674,155 @@ vi sqlserver2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/sqlserver2mysql.json
 ```
 
-### 3.x PostgreSQL导入数据到HDFS
-### 3.x PostgreSQL导入到Mysql
+### 3.10 PostgreSQL导入数据到HDFS
+
+```bash
+python /opt/datax/bin/datax.py -r postgresqlreader -w hdfswriter  # 模板
+cd /opt/datax/job
+vi postgresql2hdfs.json
+```
+
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "postgresqlreader", 
+                    "parameter": {
+                        "connection": [
+                            {
+                                "jdbcUrl": ["jdbc:postgresql://172.17.17.29:5432/datax"], 
+                                "querySql": [
+                                    "select id,name,create_time from pms_product where id > 5;"
+                                ]
+                            }
+                        ], 
+                        "password": "postgres", 
+                        "username": "postgres"
+                    }
+                }, 
+                "writer": {
+                    "name": "hdfswriter", 
+                    "parameter": {
+                        "column": [
+                            {
+                                "name":"id",
+                                "type":"string"
+                            },
+                            {
+                                "name":"name",
+                                "type":"string"
+                            },
+                            {
+                                "name":"create_time",
+                                "type":"string"
+                            }
+                        ], 
+                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "fieldDelimiter": "\t", 
+                        "fileName": "postgre_pms_product.txt",
+                        "fileType": "text", 
+                        "path": "/datax", 
+                        "writeMode": "append"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
+
+建表语句
+
+```sql
+-- postgresql
+create table pms_product (
+    id INT8 NOT NULL,
+    name varchar(100),   
+    brand_name varchar(100),  
+    create_time timestamptz,
+    PRIMARY KEY (id)
+)
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/postgresql2hdfs.json
+```
+
+### 3.11 PostgreSQL导入到Mysql
+
+
+```bash
+python /opt/datax/bin/datax.py -r postgresqlreader -w mysqlwriter  # 模板
+cd /opt/datax/job
+vi postgresql2mysql.json
+```
+
+```xml
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "postgresqlreader", 
+                    "parameter": {
+                        "connection": [
+                            {
+                                "jdbcUrl": ["jdbc:postgresql://172.17.17.29:5432/ec_dome_0"], 
+                                "querySql": [
+                                    "select id,name,create_time from pms_product where id > 5;"
+                                ]
+                            }
+                        ], 
+                        "password": "vjsp2020", 
+                        "username": "postgres"
+                    }
+                }, 
+                "writer": {
+                    "name": "mysqlwriter", 
+                    "parameter": {
+                        "column": [ 
+                            "id",
+                            "name",
+                            "create_time"
+                        ], 
+                        "connection": [
+                            {
+                                "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall?useUnicode=true&characterEncoding=UTF-8", 
+                                "table": ["pms_product_bak"]
+                            }
+                        ], 
+                        "username": "root", 
+                        "password": "root", 
+                        "preSql": [], 
+                        "session": ["set session sql_mode='ANSI'"], 
+                        "writeMode": "update"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/postgresql2mysql.json
+```
 
 ### 3.x Mysql导入数据到Hbase
 ### 3.x Mysql数据导出到Mysql
