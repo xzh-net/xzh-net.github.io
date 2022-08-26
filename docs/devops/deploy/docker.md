@@ -1922,7 +1922,7 @@ docker run -dit --name hadoop3 -h hadoop3 -p 1022:22 \
 4. 测试
 
 ```bash
-docker exec -it hadoop01 /bin/bash
+docker exec -it hadoop3 /bin/bash
 hadoop version
 java -version
 ```
