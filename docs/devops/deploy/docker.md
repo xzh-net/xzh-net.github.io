@@ -1973,7 +1973,7 @@ vi hdfs-site.xml
 
 ```bash
 ssh-keygen
-ssh-copy-id localhost
+ssh-copy-id hadoop3
 hdfs namenode -format
 start-all.sh
 jps
