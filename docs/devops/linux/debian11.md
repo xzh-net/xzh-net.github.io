@@ -1,4 +1,4 @@
-# debian 11
+# Debian 11
 
 ## 1. 命令
 

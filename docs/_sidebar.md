@@ -2,7 +2,7 @@
   - [CentOS 7](devops/linux/centos7)
   - [Redhat 7](devops/linux/rhel7)
   - [Rocky 8.5](devops/linux/rocky85)
-  - [debian 11](devops/linux/debian11)
+  - [Debian 11](devops/linux/debian11)
   - [Windows 10](devops/windows/windows10)
 
 - 数据库
