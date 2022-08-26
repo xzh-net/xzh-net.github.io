@@ -834,7 +834,6 @@ create table pms_product (
 
 ### 3.12 PostgreSQL导入到Mysql
 
-
 ```bash
 python /opt/datax/bin/datax.py -r postgresqlreader -w mysqlwriter  # 模板
 cd /opt/datax/job
@@ -899,8 +898,22 @@ vi postgresql2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/postgresql2mysql.json
 ```
 
+### 3.13 Hbase导入数据到HDFS
 
+```bash
+python /opt/datax/bin/datax.py -r postgresqlreader -w mysqlwriter  # 模板
+cd /opt/datax/job
+vi hbase2hdfs.json
+```
 
+```xml
 
-### 3.x Hbase导入数据到HDFS
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/hbase2hdfs.json
+```
+
 ### 3.x Hbase导入数据到Mysql
