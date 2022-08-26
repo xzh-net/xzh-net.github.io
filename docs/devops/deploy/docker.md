@@ -427,7 +427,6 @@ docker run -d -p 8086:8086 \
 #### 3.3.6 HBase 2.x
 
 ```bash
-docker pull harisekhon/hbase:2.1
 docker run -dti --name hbase2 -h hbase2 \
 -p 2181:2181 \
 -p 8080:8080 -p 8085:8085 -p 9090:9090 -p 9095:9095 \
@@ -440,11 +439,11 @@ hbase shell
 
 ```sql
 create 'test', 'c1'
-scan 'test'
+describe 'test'
 put 'test','10010','c1:name','zhangsan'
 get "test", "10010"
 put 'test','10010','c1:sex','man'
-describe 'test'
+scan "test", {FORMATTER => 'toString'} 
 count 'test'
 truncate 'test'
 delete "test", "10010", "c1:sex"
@@ -739,7 +738,7 @@ docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
 #### 3.5.3 Hadoop 2.x
 
 ```bash
-docker run -dit --name hadoop-docker \
+docker run -dit --name hadoop2 -h hadoop2 \
  -p 9000:9000 -p 8020:8020 -p 50070:50070 -p 50470:50470 \
  -p 50010:50010 -p 50075:50075 -p 50475:50475 \
  -p 8088:8088 \
@@ -748,7 +747,7 @@ docker run -dit --name hadoop-docker \
 ```
 
 ```bash
-docker exec -it hadoop-docker /bin/bash
+docker exec -it hadoop2 /bin/bash
 # 配置环境
 vi /etc/profile
 export HADOOP_HOME="/usr/local/hadoop-2.7.1"
@@ -1913,7 +1912,7 @@ docker build -f Dockerfile -t centos7-hadoop3 .
 3. 运行
 
 ```bash
-docker run -dit --name hadoop01 -h hadoop01 -p 1022:22 \
+docker run -dit --name hadoop3 -h hadoop3 -p 1022:22 \
 -p 8020:8020 -p 9870:9870 -p 9871:9871 \
 -p 9866:9866 -p 9864:9864 -p 9865:9865 \
 -p 8088:8088 \
