@@ -98,7 +98,7 @@ vi hdfs2mysql.json
                         "column": [
                             "*"
                         ], 
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020", 
+                        "defaultFS": "hdfs://hadoop2:9000", 
                         "fieldDelimiter": "\t", 
                         "path": "/datax/pms_product.txt",
                         "fileType": "text", 
@@ -186,7 +186,7 @@ vi mysql2hdfs.json
                                 "type":"string"
                             }   
                         ],  
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "defaultFS": "hdfs://hadoop2:9000",
                         "fieldDelimiter": "\t", 
                         "fileName": "mysql_pms_product.txt",
                         "fileType": "text", 
@@ -332,7 +332,7 @@ vi oracle2hdfs.json
                                 "type":"string"
                             }    
                         ], 
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "defaultFS": "hdfs://hadoop2:9000",
                         "fieldDelimiter": "\t",
                         "fileName": "orac_product.txt",
                         "fileType": "text",
@@ -493,7 +493,7 @@ vi mongdb2hdfs.json
                                 "type":"string"
                             }
                         ], 
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "defaultFS": "hdfs://hadoop2:9000",
                         "fieldDelimiter": "\t", 
                         "fileName": "mongo_pms_product.txt",
                         "fileType": "text", 
@@ -635,7 +635,7 @@ vi sqlserver2hdfs.json
                                 "type":"string"
                             }
                         ], 
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "defaultFS": "hdfs://hadoop2:9000",
                         "fieldDelimiter": "\t", 
                         "fileName": "mssql_pms_product.txt",
                         "fileType": "text", 
@@ -794,7 +794,7 @@ vi postgresql2hdfs.json
                                 "type":"string"
                             }
                         ], 
-                        "defaultFS": "hdfs://bbfc6fd4f77c:8020",
+                        "defaultFS": "hdfs://hadoop2:9000",
                         "fieldDelimiter": "\t", 
                         "fileName": "postgre_pms_product.txt",
                         "fileType": "text", 
@@ -901,13 +901,67 @@ vi postgresql2mysql.json
 ### 3.13 Hbase导入数据到HDFS
 
 ```bash
-python /opt/datax/bin/datax.py -r postgresqlreader -w mysqlwriter  # 模板
+python /opt/datax/bin/datax.py -r hbase11xreader -w hdfswriter  # 模板
 cd /opt/datax/job
 vi hbase2hdfs.json
 ```
 
 ```xml
-
+{
+    "job": {
+        "content": [{
+            "reader": {
+                "name": "hbase11xreader",
+                "parameter": {
+                    "mode": "normal",
+                    "table": "test",
+                    "column": [{
+                        "name": "c1:id",
+                        "type": "string"
+                    }, {
+                        "name": "c1:name",
+                        "type": "string"
+                    }],
+                    "encoding": "utf-8",
+                    "hbaseConfig": {
+                        "hbase.zookeeper.quorum": "hbase2:2181",
+                        "zookeeper.znode.parent": "/hbase"
+                    }
+                }
+            },
+            "writer": {
+                "name": "hdfswriter",
+                "parameter": {
+                    "column": [
+                        {
+                            "name":"id",
+                            "type":"int"
+                        }, 
+                        {
+                            "name":"name",
+                            "type":"string"
+                        }
+                    ],  
+                    "defaultFS": "hdfs://hadoop2:9000",
+                    "fieldDelimiter": "\t", 
+                    "fileName": "hbase_pms_product.txt",
+                    "fileType": "text", 
+                    "path": "/datax", 
+                    "writeMode": "append"
+                }   
+            } 
+        }],
+        "setting": {
+            "speed": {
+                "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        }
+    }
+}
 ```
 
 执行
@@ -916,4 +970,68 @@ vi hbase2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/hbase2hdfs.json
 ```
 
-### 3.x Hbase导入数据到Mysql
+### 3.4 Hbase导入数据到Mysql
+
+```bash
+python /opt/datax/bin/datax.py -r hbase11xreader -w mysqlwriter  # 模板
+cd /opt/datax/job
+vi hbase2mysql.json
+```
+
+```xml
+{
+    "job": {
+        "content": [{
+            "reader": {
+                "name": "hbase11xreader",
+                "parameter": {
+                    "mode": "normal",
+                    "table": "test",
+                    "column": [{
+                        "name": "c1:id",
+                        "type": "string"
+                    }, {
+                        "name": "c1:name",
+                        "type": "string"
+                    }],
+                    "encoding": "utf-8",
+                    "hbaseConfig": {
+                        "hbase.zookeeper.quorum": "hbase2:2181",
+                        "zookeeper.znode.parent": "/hbase"
+                    }
+                }
+            },
+            "writer": {
+                "name": "mysqlwriter",
+                "parameter": {
+                    "column": ["id", "name"],
+                    "connection": [
+                        {
+                            "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall", 
+                            "table": ["pms_product_bak"]
+                        }
+                    ],
+                    "password": "root",
+                    "username": "root",
+                    "writeMode": "insert"
+                }
+            }
+        }],
+        "setting": {
+            "speed": {
+                "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        }
+    }
+}
+```
+
+执行
+
+```bash
+/opt/datax/bin/datax.py /opt/datax/job/hbase2mysql.json
+```
