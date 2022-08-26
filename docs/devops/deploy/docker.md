@@ -1951,7 +1951,7 @@ vi core-site.xml
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://hadoop01:8020</value>
+        <value>hdfs://hadoop3:8020</value>
     </property>
     <property>
         <name>hadoop.http.staticuser.user</name>
