@@ -1,4 +1,4 @@
-# Spark 3.2.0
+# Spark 3.2.2
 
 ## 1. 安装
 
@@ -6,12 +6,13 @@
 
 ```bash
 mkdir -p /opt/software
-cd /opt/software 
-tar -xvzf hbase-2.4.11-bin.tar.gz -C /opt
+cd /opt/software
 ```
 
 ### 1.2 Local模式
 
 ### 1.3 StandAlone模式
 
-### 1.3 Yarn模式
+### 1.3 StandAlone-HA模式
+
+### 1.3 On-Yarn模式

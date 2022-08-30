@@ -36,6 +36,7 @@
   - [Hadoop](devops/deploy/hadoop)
   - [Hive](devops/deploy/hive)
   - [HBase](devops/deploy/hbase)
+  - [Spark](devops/deploy/spark)
   - [PySpark](devops/deploy/pyspark)
   - [ClickHouse](devops/deploy/clickhouse)
 
