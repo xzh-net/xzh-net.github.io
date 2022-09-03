@@ -272,3 +272,217 @@ http://node01:9870/explorer.html#/test/output2022
 
 
 ### 1.4 On-Yarn模式
+
+#### 1.4.1 配置yarn历史服务器并关闭资源检查
+
+```bash
+vi /opt/hadoop-3.1.4/etc/hadoop/yarn-site.xml
+```
+
+```xml
+<configuration>
+    <!-- 配置yarn主节点的位置 -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>node01.xuzhihao.net</value>
+    </property>
+    <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <!-- 每个容器请求的最小内存资源（以MB为单位）。-->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>512</value>
+    </property>
+    <!-- 每个容器请求的最大内存资源（以MB为单位）。-->
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>2048</value>
+    </property>
+    <!-- 容器虚拟内存与物理内存之间的比率。-->
+    <property>
+        <name>yarn.nodemanager.vmem-pmem-ratio</name>
+        <value>4</value>
+    </property>
+    <!-- 开启日志聚合功能 -->
+    <property>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
+    </property>
+    <!-- 设置聚合日志在hdfs上的保存时间 -->
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>604800</value>
+    </property>
+    <!-- 设置yarn历史服务器地址 -->
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://node01:19888/jobhistory/logs</value>
+    </property>
+    <!-- 关闭yarn内存检查 -->
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+    </property>
+</configuration>
+```
+
+#### 1.4.2 Yarn配置分发
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+scp -r yarn-site.xml root@node02:$PWD
+scp -r yarn-site.xml root@node03:$PWD
+```
+
+#### 1.4.3 启动Yarn集群
+
+```bash
+start-yarn.sh
+start-hdfs.sh
+/opt/hadoop-3.1.4/sbin/stop-yarn.sh
+# 全部启动
+start-all.sh
+```
+
+#### 1.4.4 配置Spark的历史服务器和Yarn的整合
+
+1. 修改spark-defaults.conf
+
+```bash
+cd /opt/spark/conf
+cp spark-defaults.conf.template spark-defaults.conf
+vi spark-defaults.conf
+```
+
+添加内容：
+
+```conf
+spark.eventLog.enabled                  true
+spark.eventLog.dir                      hdfs://node01:8020/sparklog/
+spark.eventLog.compress                 true
+spark.yarn.historyServer.address        node01:18080
+```
+
+2. 修改spark-env.sh
+
+```bash
+cd /opt/spark/conf
+vi spark-env.sh
+```
+
+```bash
+## 配置spark历史日志存储地址
+SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=hdfs://node01:8020/sparklog/ -Dspark.history.fs.cleaner.enabled=true"
+```
+
+3. 修改日志级别
+
+```bash
+cd /opt/spark/conf
+cp log4j.properties.template log4j.properties
+vim log4j.properties
+# 将log4j.rootCategory=INFO, console修改为
+log4j.rootCategory=WARN, console
+```
+
+#### 1.4.5 Spark配置分发
+
+```bash
+cd /opt/spark/conf
+scp -r spark-env.sh root@node02:$PWD
+scp -r spark-env.sh root@node03:$PWD
+scp -r spark-defaults.conf root@node02:$PWD
+scp -r spark-defaults.conf root@node03:$PWD
+scp -r log4j.properties root@node02:$PWD
+scp -r log4j.properties root@node03:$PWD
+```
+
+#### 1.4.6 配置依赖的Spark的jar包
+
+1. 创建目录
+
+```bash
+hadoop fs -mkdir -p /sparklog       # 创建日志目录
+hadoop fs -mkdir -p /spark/jars/    # 创建jar包目录
+```
+
+2. 上传jar包
+
+```bash
+hadoop fs -put /opt/spark/jars/* /spark/jars/
+```
+
+3. 在node1上修改spark-defaults.conf
+
+```bash
+vi /opt/spark/conf/spark-defaults.conf
+#添加内容
+spark.yarn.jars  hdfs://node01:8020/spark/jars/*
+```
+
+4. 分发同步
+
+```
+cd /opt/spark/conf
+scp -r spark-defaults.conf root@node02:$PWD
+scp -r spark-defaults.conf root@node03:$PWD
+```
+
+#### 1.4.7 启动服务
+
+```bash
+# 在node01执行命令
+mr-jobhistory-daemon.sh start historyserver     # 启动MRHistoryServer
+/opt/spark/sbin/start-history-server.sh         # 启动Spark HistoryServer
+```
+
+验证服务
+
+- MRHistoryServer服务WEB UI页面：http://node01:19888
+- Spark HistoryServer服务WEB UI页面：http://node01:18080/
+
+#### 1.4.8 客户端测试
+
+1. client模式
+
+```bash
+SPARK_HOME=/opt/spark
+${SPARK_HOME}/bin/spark-submit \
+--master yarn  \
+--deploy-mode client \
+--driver-memory 512m \
+--driver-cores 1 \
+--executor-memory 512m \
+--num-executors 2 \
+--executor-cores 1 \
+--class org.apache.spark.examples.SparkPi \
+${SPARK_HOME}/examples/jars/spark-examples_2.12-3.1.3.jar \
+10
+```
+
+验证：http://node01:8088/cluster ，点击`history`进入：http://node01:18080/history 的历史页面
+
+
+2. cluster模式
+
+```bash
+SPARK_HOME=/opt/spark
+${SPARK_HOME}/bin/spark-submit \
+--master yarn \
+--deploy-mode cluster \
+--driver-memory 512m \
+--executor-memory 512m \
+--num-executors 1 \
+--class org.apache.spark.examples.SparkPi \
+${SPARK_HOME}/examples/jars/spark-examples_2.12-3.1.3.jar \
+10
+```
+
+验证：http://node01:8088/cluster ，点击`id`后的`logs`进入：http://node01:19888/jobhistory/logs 的历史页面
