@@ -197,8 +197,10 @@ export YARN_NODEMANAGER_USER=root
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim core-site.xml
+```
 
-# 添加到configuration区间
+```xml
+<!-- 添加到configuration区间 -->
 <!-- 默认文件系统的名称。通过URI中schema区分不同文件系统。-->
 <!-- file:///本地文件系统 hdfs:// hadoop分布式文件系统 gfs://。-->
 <!-- hdfs文件系统访问地址：http://nn_host:8020。-->
@@ -223,8 +225,10 @@ vim core-site.xml
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim hdfs-site.xml
+```
 
-# 添加到configuration区间
+```xml
+<!-- 添加到configuration区间 -->
 <!-- 设定SNN运行主机和端口。-->
 <property>
     <name>dfs.namenode.secondary.http-address</name>
@@ -242,8 +246,10 @@ vim hdfs-site.xml
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim mapred-site.xml
+```
 
-# 添加到configuration区间
+```xml
+<!-- 添加到configuration区间 -->
 <!-- mr程序默认运行方式。yarn集群模式 local本地模式-->
 <property>
   <name>mapreduce.framework.name</name>
@@ -271,8 +277,10 @@ vim mapred-site.xml
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim yarn-site.xml
+```
 
-# 添加到configuration区间
+```xml
+<!-- 添加到configuration区间 -->
 <!-- yarn集群主角色RM运行机器。-->
 <property>
     <name>yarn.resourcemanager.hostname</name>
@@ -547,8 +555,10 @@ export HDFS_ZKFC_USER=root
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim core-site.xml
+```
 
-# 添加到configuration区间
+```xml
+<!-- 添加到configuration区间 -->
 <property>
     <name>fs.defaultFS</name>
     <value>hdfs://mycluster</value>
@@ -578,9 +588,11 @@ vim core-site.xml
 ```bash
 cd /opt/hadoop-3.1.4/etc/hadoop/
 vim hdfs-site.xml
+```
 
-# 添加到configuration区间
-<!--指定hdfs的nameservice为mycluster，需要和core-site.xml中的保持一致 -->
+```xml
+<!-- 添加到configuration区间 -->
+<!-- 指定hdfs的nameservice为mycluster，需要和core-site.xml中的保持一致 -->
 <property>
     <name>dfs.nameservices</name>
     <value>mycluster</value>
@@ -810,7 +822,9 @@ http://192.168.2.201:9870/webhdfs/v1/test/b.txt?op=CREATE&overwrite=true&replica
 
 ```bash
 vi /opt/hadoop-3.1.4/etc/hadoop/core-site.xml
-# 添加
+```
+
+```xml
 <property>
     <name>hadoop.proxyuser.root.hosts</name>
     <value>*</value>
