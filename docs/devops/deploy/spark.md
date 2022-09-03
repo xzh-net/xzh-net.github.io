@@ -168,7 +168,7 @@ http://node01:9870/explorer.html#/test/output2022
 
 ```lua
 node01  master
-node02  worker/slave
+node02  master worker/slave
 node03  worker/slave
 ```
 
