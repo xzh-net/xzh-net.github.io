@@ -127,3 +127,16 @@ conda deactivate                    # 退出虚拟环境
 conda remove -n name --all          # 删除名为name的虚拟环境
 pip install pyhive pyspark jieba -i https://pypi.tuna.tsinghua.edu.cn/simple    # 在虚拟环境内安装包
 ```
+
+### 2.5 Scala
+
+下载地址：https://www.scala-lang.org/download/2.12.16.html
+
+#### 2.1.1 设置环境变量
+
+```java
+SCALA_HOME
+D:\scala\scala-2.12.16
+PATH
+%SCALA_HOME%\bin
+```
