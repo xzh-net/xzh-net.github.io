@@ -499,7 +499,7 @@ cd /usr/local/rocketmq/rocketmq-4.9.2/bin
 nohup sh mqbroker -c /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-a-s.properties &
 ```
 
-## 2. 监控
+## 2. 可视化监控
 
 ### 2.1 下载
 
