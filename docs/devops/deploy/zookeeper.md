@@ -110,8 +110,8 @@ server.3=node03:2888:3888
 
 ```bash
 cd /opt/apache-zookeeper-3.7.0
-scp -r /opt/apache-zookeeper-3.7.0 root@node02:$PWD
-scp -r /opt/apache-zookeeper-3.7.0 root@node03:$PWD
+scp -r /opt/apache-zookeeper-3.7.0 node02:$PWD
+scp -r /opt/apache-zookeeper-3.7.0 node03:$PWD
 ```
 
 #### 1.2.6 修改配置
