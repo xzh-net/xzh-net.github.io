@@ -42,6 +42,7 @@ syncLimit=5
 dataDir=/opt/apache-zookeeper-3.7.0/data
 dataLogDir=/opt/apache-zookeeper-3.7.0/logs
 clientPort=2181
+admin.serverPort=8089
 ```
 
 #### 1.1.4 启动服务
@@ -101,6 +102,7 @@ syncLimit=5
 dataDir=/opt/apache-zookeeper-3.7.0/data
 dataLogDir=/opt/apache-zookeeper-3.7.0/logs
 clientPort=2181
+admin.serverPort=8089
 server.1=node01:2888:3888
 server.2=node02:2888:3888
 server.3=node03:2888:3888
