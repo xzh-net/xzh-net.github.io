@@ -57,8 +57,8 @@ vim bookkeeper.conf
 
 ```conf
 advertisedAddress=node01.xuzhihao.net
-journalDirectory=/opt/apache-pulsar-2.10.1/tmp/journal
-ledgerDirectories=/opt/apache-pulsar-2.10.1/tmp/ledger
+journalDirectory=/opt/apache-pulsar-2.10.1/data/bookkeeper/journal
+ledgerDirectories=/opt/apache-pulsar-2.10.1/data/bookkeeper/ledgers
 zkServers=node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181
 ```
 
@@ -103,7 +103,6 @@ vim broker.conf
 advertisedAddress=node02.xuzhihao.net
 ```
 
-
 2. node03节点执行
 
 ```bash
@@ -139,8 +138,8 @@ cd /opt/apache-pulsar-2.10.1/bin
 --web-service-url-tls https://node01.xuzhihao.net:8443,node02.xuzhihao.net:8443,node03.xuzhihao.net:8443 \
 --broker-service-url pulsar://node01.xuzhihao.net:6650,node02.xuzhihao.net:6650,node03.xuzhihao.net:6650 \
 --broker-service-url-tls pulsar+ssl://node01.xuzhihao.net::6651,node02.xuzhihao.net:6651,node03.xuzhihao.net:6651
-# 接着初始化bookkeeper集群: 若出现提示输入Y/N: 请输入Y
-./bookkeeper shell metaformat
+
+./bookkeeper shell metaformat   # 初始化bookkeeper集群: 若出现提示输入Y/N: 请输入Y
 ```
 
 #### 1.2.9 集群模式启动
@@ -158,7 +157,7 @@ cd /opt/apache-pulsar-2.10.1/bin
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-daemon start broker    # 三个节点都需要依次启动
-./pulsar-admin brokers list     # 验证是否启动
+./pulsar-admin brokers list pulsar-cluster  # 验证是否启动
 ```
 
 #### 1.2.10 集群模式测试
