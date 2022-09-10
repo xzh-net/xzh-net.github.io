@@ -1037,27 +1037,35 @@ messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
 ```
 
 拉取镜像
+
 ```bash
 docker pull rocketmqinc/rocketmq:4.4.0
 docker pull apacherocketmq/rocketmq-dashboard:1.0.0
 ```
 
-namesrv
+启动namesrv
+
 ```bash
 docker run -d -p 9876:9876 -v /mydata/rocketmq/data/namesrv/logs:/root/logs -v /mydata/rocketmq/data/namesrv/store:/root/store --name rmqnamesrv -e "MAX_POSSIBLE_HEAP=100000000" rocketmqinc/rocketmq:4.4.0 sh mqnamesrv
 ```
 
-broker
+启动broker
+
 ```
 docker run -d -p 10911:10911 -p 10909:10909 -v  /mydata/rocketmq/data/broker/logs:/root/logs -v  /mydata/rocketmq/data/broker/store:/root/store -v  /mydata/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf --name rmqbroker --link rmqnamesrv:namesrv -e "NAMESRV_ADDR=namesrv:9876" -e "MAX_POSSIBLE_HEAP=200000000" rocketmqinc/rocketmq:4.4.0 sh mqbroker -c /opt/rocketmq-4.4.0/conf/broker.conf
 ```
 
-dashboard
+启动dashboard
+
 ```bash
 docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=172.17.17.200:9876" -p 9080:8080 -t apacherocketmq/rocketmq-dashboard:1.0.0
 ```
 
 #### 3.7.4 Kafka
+
+```
+docker pull wurstmeister/kafka:2.13-2.8.1
+```
 
 ```bash
 docker run -itd --name kafka -p 9092:9092 \
@@ -1066,21 +1074,62 @@ docker run -itd --name kafka -p 9092:9092 \
   -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
   -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.17.17.200:9092 \
   -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
-  -t wurstmeister/kafka
+  -t wurstmeister/kafka:2.13-2.8.1
 ```
 
 ```bash
 docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.200:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
 ```
 
-#### 3.7.5 EMQ
+#### 3.7.5 Pulsar
+
+
+```bash
+docker pull apachepulsar/pulsar:2.8.4
+docker run -dit \
+    -p 6650:6650 \
+    -p 8080:8080 \
+    -v pulsardata:/data/pulsar/data \
+    -v pulsarconf:/data/pulsar/conf \
+    --name pulsar-standalone \
+    apachepulsar/pulsar:2.8.4 \
+    bin/pulsar standalone
+```
+
+```bash
+docker pull apachepulsar/pulsar-manager:v0.2.0
+docker run -dit \
+    -p 9527:9527 -p 7750:7750 \
+    -e SPRING_CONFIGURATION_FILE=/pulsar-manager/pulsar-manager/application.properties \
+    --link pulsar-standalone \
+    apachepulsar/pulsar-manager:v0.2.0
+```
+
+添加管理员
+
+```bash
+CSRF_TOKEN=$(curl http://localhost:7750/pulsar-manager/csrf-token)
+
+curl \
+    -H "X-XSRF-TOKEN: $CSRF_TOKEN" \
+    -H "Cookie: XSRF-TOKEN=$CSRF_TOKEN;" \
+    -H 'Content-Type: application/json' \
+    -X PUT http://localhost:7750/pulsar-manager/users/superuser \
+    -d '{"name": "admin", "password": "12345678", "description": "admin", "email": "username@test.org"}'
+```
+
+访问地址：http://192.168.2.201:9527
+
+添加Environment连接集群：http://192.168.2.201:8080
+
+
+#### 3.7.6 EMQ
 
 ```bash
 docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx:4.3.10        # 开源版
 docker run -d --name emqx-ee -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx-ee:4.2.9   # 企业版
 ```
 
-#### 3.7.6 Pulsar
 
 
 ### 3.8 Elastic Stack
