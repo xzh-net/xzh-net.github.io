@@ -53,32 +53,48 @@ jps
 
 ### 1.2 集群
 
-#### 1.2.1 环境变量设置
+#### 1.2.1 基础环境准备
 
-将192.168.3.201单机复制三台，每台机器设置hostname
+将192.168.20.201单机复制三台，每台机器设置hostname
 
 ```bash
-hostnamectl set-hostname node01 # 192.168.3.201 
-hostnamectl set-hostname node02 # 192.168.3.202
-hostnamectl set-hostname node03 # 192.168.3.203 
+hostnamectl set-hostname node01 # 192.168.20.201 
+hostnamectl set-hostname node02 # 192.168.20.202
+hostnamectl set-hostname node03 # 192.168.20.203 
 ```
 
 三台机器配置host
 
 ```bash
 vi /etc/hosts
-192.168.3.201 node01
-192.168.3.202 node02
-192.168.3.203 node03
+192.168.20.201 node01
+192.168.20.202 node02
+192.168.20.203 node03
 ```
 
-#### 1.2.2 修改配置
+#### 1.2.2 设置环境变量
 
-其中2888为集群通信端口，3888为选举端口，三台进行集群配置
+```bash
+vi /etc/profile
+export ZK_HOME=/opt/apache-zookeeper-3.7.0
+export PATH=$PATH:$ZK_HOME/bin
+source /etc/profile
+```
+
+#### 1.2.3 环境变量分发
+
+```bash
+scp /etc/profile root@node02:/etc/
+scp /etc/profile root@node03:/etc/
+```
+
+#### 1.2.4 修改配置
 
 ```bash
 vi /opt/apache-zookeeper-3.7.0/conf/zoo.cfg
+```
 
+```conf
 tickTime=2000
 initLimit=10
 syncLimit=5
@@ -90,23 +106,32 @@ server.2=node02:2888:3888
 server.3=node03:2888:3888
 ```
 
-每台机器设置各自myid
-```bash 
-touch /opt/apache-zookeeper-3.7.0/data/myid & echo 1 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.201 
-touch /opt/apache-zookeeper-3.7.0/data/myid & echo 2 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.202 
-touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.3.203 
+#### 1.2.5 分发安装包
+
+```bash
+cd /opt/apache-zookeeper-3.7.0
+scp -r /opt/apache-zookeeper-3.7.0 root@node02:$PWD
+scp -r /opt/apache-zookeeper-3.7.0 root@node03:$PWD
 ```
 
-#### 1.2.3 启动服务
+#### 1.2.6 修改配置
 
-启动集群就是分别启动每个实例。
+每台机器设置各自myid
+
+```bash 
+touch /opt/apache-zookeeper-3.7.0/data/myid & echo 1 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.20.201 
+touch /opt/apache-zookeeper-3.7.0/data/myid & echo 2 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.20.202 
+touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.20.203 
+```
+
+#### 1.2.7 启动服务
 
 ```shell
-/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start   # 每个节点分别启动
 /opt/apache-zookeeper-3.7.0/bin/zkServer.sh status  # 检测节点状态
 ```
 
-#### 1.2.4 客户端测试
+#### 1.2.8 客户端测试
 
 PrettyZoo
 
@@ -140,9 +165,9 @@ rmr    /app1                    # 递归删除
 
 ```bash
 # 快照文件snapshot的目录
-dataDir=/data/zookeeper/data
+dataDir=/opt/apache-zookeeper-3.7.0/data
 # 事务日志的目录
-dataLogDir=/data/zookeeper/datalogs
+dataLogDir=/opt/apache-zookeeper-3.7.0/logs
 # 可以开启自动清理机制,自动清理tx log日志 频率是小时
 autopurge.purgeInterval=48
 # 需要保留的文件数目。默认是保留3个
