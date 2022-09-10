@@ -169,3 +169,49 @@ cd /opt/apache-pulsar-2.10.1/bin
 ```
 
 ## 2. 可视化监控
+
+下载地址：https://archive.apache.org/dist/pulsar/pulsar-manager/pulsar-manager-0.2.0/apache-pulsar-manager-0.2.0-bin.tar.gz
+
+### 2.1 上传解压
+
+```bash
+cd /opt/software
+tar -zxvf apache-pulsar-manager-0.2.0-bin.tar.gz -C /opt
+```
+
+### 2.2 修改配置
+
+```bash
+cd /opt/pulsar-manager/
+tar -xvf pulsar-manager.tar
+cd pulsar-manager
+cp -r ../dist ui
+```
+
+### 2.3 启动服务
+
+```bash
+/opt/pulsar-manager/pulsar-manager/bin/pulsar-manager
+
+/opt/pulsar-manager/pulsar-manager
+nohup bin/pulsar-manager >> pulsar-manager.log 2>&1 &   # 后台启动
+```
+
+### 2.4 设置管理员
+
+```bash
+CSRF_TOKEN=$(curl http://localhost:7750/pulsar-manager/csrf-token)
+
+curl \
+    -H "X-XSRF-TOKEN: $CSRF_TOKEN" \
+    -H "Cookie: XSRF-TOKEN=$CSRF_TOKEN;" \
+    -H 'Content-Type: application/json' \
+    -X PUT http://localhost:7750/pulsar-manager/users/superuser \
+    -d '{"name": "admin", "password": "12345678", "description": "admin", "email": "username@test.org"}'
+```
+
+### 2.5 添加集群
+
+访问地址：http://192.168.2.201:7750/ui/index.html
+
+添加Environment连接集群：http://192.168.2.201:8080,192.168.2.202:8080,192.168.2.203:8080
