@@ -279,7 +279,7 @@ case $1 in
 esac
 ```
 
-## 3. 监控
+## 3. 可视化监控
 
 下载地址：http://download.kafka-eagle.org/
 
