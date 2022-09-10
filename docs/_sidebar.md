@@ -30,6 +30,7 @@
   - [Kafka](devops/deploy/kafka)
   - [RabbitMQ](devops/deploy/rabbitmq)
   - [RocketMQ](devops/deploy/rocketmq)
+  - [Pulsar](devops/deploy/pulsar)
   - [Debezium](devops/deploy/debezium)
   - [Simple RTMP Server](devops/deploy/srs)
   - [TURN Server](devops/deploy/turnserver)
