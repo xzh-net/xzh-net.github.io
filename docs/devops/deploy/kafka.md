@@ -209,7 +209,13 @@ case $1 in
 }
 ;;
 esac
+```
 
+```bash
+vi /etc/profile.d/my_env.sh
+# 添加
+export JAVA_HOME=/usr/local/jdk1.8.0_202
+export PATH=$PATH:$JAVA_HOME/bin
 ```
 
 
