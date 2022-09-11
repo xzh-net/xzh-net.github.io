@@ -193,7 +193,7 @@ cp -r ../dist ui
 ```bash
 /opt/pulsar-manager/pulsar-manager/bin/pulsar-manager
 
-/opt/pulsar-manager/pulsar-manager
+cd /opt/pulsar-manager/pulsar-manager
 nohup bin/pulsar-manager >> pulsar-manager.log 2>&1 &   # 后台启动
 ```
 
@@ -212,6 +212,129 @@ curl \
 
 ### 2.5 添加集群
 
-访问地址：http://192.168.2.201:7750/ui/index.html
+#### 2.5.1 访问地址
 
-添加Environment连接集群：http://192.168.2.201:8080,192.168.2.202:8080,192.168.2.203:8080
+http://192.168.2.201:7750/ui/index.html
+
+#### 2.5.2 添加集群
+
+http://192.168.2.201:8080,192.168.2.202:8080,192.168.2.203:8080
+
+#### 2.5.3 Clusters无法显示
+
+```bash
+cd /opt/apache-pulsar-2.10.1
+bin/pulsar-admin clusters list
+bin/pulsar-admin clusters update pulsar-cluster --url http://192.168.2.201:8080
+```
+
+重启pulsar-manager重新添加集群
+
+## 3. Admin API
+
+https://pulsar.apache.org/docs/next/admin-api-overview
+
+### 3.1 Clusters集群
+
+
+### 3.2 Tenants租户
+
+```bash
+cd /opt/apache-pulsar-2.10.1/bin
+./pulsar-admin tenants list                 # 获取租户列表
+./pulsar-admin tenants create my-tenant     # 创建租户
+./pulsar-admin tenants create my-tenant -r role1
+./pulsar-admin tenants create my-tenant --admin-roles role1,role2,role3     # 可以使用-r 或者 --admin-roles标志分配管理角色
+./pulsar-admin tenants get my-tenant        # 获取租户配置
+./pulsar-admin tenants update my-tenant -r "dev"     # 修改租户
+./pulsar-admin tenants delete my-tenant     # 删除租户，如果库下已经有名称空间, 是无法删除的，需要先删除名称空间
+```
+
+### 3.2 Brokers
+
+
+### 3.3 NameSpace命名空间
+
+```bash
+cd /opt/apache-pulsar-2.10.1/bin
+./pulsar-admin namespaces create my-tenant/test-namespace       # 创建命名空间
+./pulsar-admin namespaces list my-tenant                        # 获取所有的名称空间列表
+./pulsar-admin namespaces delete my-tenant/test-namespace       # 删除命名空间
+./pulsar-admin namespaces policies my-tenant/test-namespace     # 获取名称空间相关的配置策略
+
+# 集群配置
+./pulsar-admin namespaces set-clusters my-tenant/test-namespace --clusters cl2      # 设置复制集群，cl2为目标集群
+./pulsar-admin namespaces get-clusters my-tenant/test-namespace                     # 获取给定命名空间复制集群的列表
+
+# 配置backlog quota策略
+./pulsar-admin namespaces set-backlog-quota --limit 10G --limitTime 36000 --policy producer_request_hold my-tenant/test-namespace
+./pulsar-admin namespaces get-backlog-quotas my-tenant/test-namespace       # 获取backlog quota策略
+./pulsar-admin namespaces remove-backlog-quota my-tenant/test-namespace     # 移除backlog quota策略
+# 参数说明：
+# producer_request_hold:broker暂停运行，并且不再持久化生产请求负载。
+# producer_exception:broker抛出异常，并与客户端断开连接。
+# consumer_backlog_eviction:broker丢弃积压消息。
+
+# 设置持久化策略
+./pulsar-admin namespaces set-persistence --bookkeeper-ack-quorum 2 --bookkeeper-ensemble 3 --bookkeeper-write-quorum 2 --ml-mark-delete-max-rate 0 my-tenant/test-namespace    
+pulsar-admin namespaces get-persistence my-tenant/test-namespace     # 获取持久化策略
+# 参数说明：
+# bookkeeper-ack-quorum:每个entry在等待的acks(有保证的副本)数量，默认值：0
+# bookkeeper-ensemble:单个topic使用的bookie数量，默认值：0
+# bookkeeper-write-quorum：每个entry要写入的次数，默认值：0
+# ml-mark-delete-max-rate:标记删除操作的限制速率（0.0表示无限制），默认值：0.0
+
+# 设置消息存活策略
+./pulsar-admin namespaces set-message-ttl --messageTTL 100 my-tenant/test-namespace     # 设置消息存活时间
+./pulsar-admin namespaces get-message-ttl my-tenant/test-namespace                      # 获取消息的存活时间
+./pulsar-admin namespaces remove-message-ttl my-tenant/test-namespace                   # 删除消息的存活时间
+
+# 消息速率设置
+./pulsar-admin namespaces set-dispatch-rate my-tenant/test-namespace --msg-dispatch-rate 1000 --byte-dispatch-rate 1048576 --dispatch-rate-period 1     # 设置Topic的消息发送的速率
+./pulsar-admin namespaces get-dispatch-rate my-tenant/test-namespace    # 获取消息发送的速率
+# 参数说明: 
+# msg-dispatch-rate 每秒钟发送的消息数量
+# byte-dispatch-rate 每秒钟发送的总字节数
+# dispatch-rate-period 设置发送的速率，比如1表示每秒钟
+
+./pulsar-admin namespaces set-subscription-dispatch-rate my-tenant/test-namespace --msg-dispatch-rate 1000 --byte-dispatch-rate 1048576 --dispatch-rate-period 1    # 设置Topic的消息接收的速率
+./pulsar-admin namespaces get-subscription-dispatch-rate my-tenant/test-namespace   # 获取消息接收的速率
+
+./pulsar-admin namespaces set-replicator-dispatch-rate my-tenant/test-namespace --msg-dispatch-rate 1000 --byte-dispatch-rate 1048576 --dispatch-rate-period 1      # 设置Topic的消息复制集群的速率
+./pulsar-admin namespaces get-replicator-dispatch-rate my-tenant/test-namespace     # 获取Topic的消息复制集群的速率
+```
+
+### 3.4 Permissions授权
+
+```bash
+cd /opt/apache-pulsar-2.10.1/bin
+./pulsar-admin namespaces grant-permission my-tenant/test-namespace --actions produce,consume --role admin10    # 授予权限
+./pulsar-admin namespaces permissions my-tenant/test-namespace                          # 获取权限
+./pulsar-admin namespaces revoke-permission my-tenant/test-namespace --role admin10     # 撤销权限
+```
+
+### 3.5 Topic主题
+
+```bash
+cd /opt/apache-pulsar-2.10.1/bin
+persistent://tenant/namespace/topic         # 持久化topic地址的命名格式
+non-persistent://tenant/namespace/topic     # 非持久化topic地址的命名格式
+./pulsar-admin topics list my-tenant/test-namespace     # 列出当前某个名称空间下的所有Topic
+
+./pulsar-admin topics create persistent://my-tenant/test-namespace/my-topic   # 创建一个没有分区的topic
+./pulsar-admin topics delete persistent://my-tenant/test-namespace/my-topic   # 删除没有分区的topic
+
+./pulsar-admin topics create-partitioned-topic persistent://my-tenant/test-namespace/my-topic2 --partitions 4       # 创建一个有分区的topic
+# 注意：不管有没有分区，topic创建后，如果没有任何操作，60秒后pulsar会认为此topic是不活动的，会自动进行删除，以避免产生垃圾数据。
+# brokerdeleteinactivetopicsenabenabled:默认值为true，表示是否自动删除topic
+# brokerdeleteinactivetopicsfrequencyseconds:默认值为60s，表示检测未活动的时间。
+./pulsar-admin topics update-partitioned-topic persistent://my-tenant/test-namespace/my-topic2 --partitions 8       # 更新topic分区的数量
+./pulsar-admin topics delete-partitioned-topic persistent://my-tenant/test-namespace/my-topic2                      # 删除有分区的topic
+```
+
+
+### 3.6 Functions
+
+### 3.7 Package
+
+### 3.8 Transactions
