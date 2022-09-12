@@ -236,6 +236,25 @@ https://pulsar.apache.org/docs/next/admin-api-overview
 
 ### 3.1 Clusters集群
 
+```bash
+cd /opt/apache-pulsar-2.10.1
+./pulsar-admin clusters list                # 获取所有集群
+./pulsar-admin clusters create cluster-1 --url http://node01:8080 --broker-url pulsar://node01:6650   # 创建集群
+
+# 集群初始化
+./pulsar initialize-cluster-metadata \
+  --cluster cluster-1 \
+  --configuration-metadata-store zk:node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181/pulsar-cluster-1 \
+  --metadata-store zk:node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181/pulsar-cluster-1 \
+  --web-service-url http://node01.xuzhihao.net:8080,node02.xuzhihao.net:8080,node03.xuzhihao.net:8080 \
+  --web-service-url-tls https://node01.xuzhihao.net:8443,node02.xuzhihao.net:8443,node03.xuzhihao.net:8443 \
+  --broker-service-url pulsar://node01.xuzhihao.net:6650,node02.xuzhihao.net:6650,node03.xuzhihao.net:6650 \
+  --broker-service-url-tls pulsar+ssl://node01.xuzhihao.net::6651,node02.xuzhihao.net:6651,node03.xuzhihao.net:6651
+
+./pulsar-admin clusters get cluster-1       # 获取集群配置
+./pulsar-admin clusters update cluster-1 --url http://node01.xuzhihao.net:8080 --broker-url pulsar://node01.xuzhihao.net:6650       # 修改集群配置
+./pulsar-admin clusters delete cluster-1    # 删除集群
+```
 
 ### 3.2 Tenants租户
 
@@ -252,6 +271,11 @@ cd /opt/apache-pulsar-2.10.1/bin
 
 ### 3.2 Brokers
 
+```bash
+cd /opt/apache-pulsar-2.10.1/bin
+./pulsar-admin brokers list use             # 获取所有可用的brokers
+./pulsar-admin brokers leader-broker        # 获取leader broker的信息
+```
 
 ### 3.3 NameSpace命名空间
 
@@ -331,7 +355,6 @@ non-persistent://tenant/namespace/topic     # 非持久化topic地址的命名�
 ./pulsar-admin topics update-partitioned-topic persistent://my-tenant/test-namespace/my-topic2 --partitions 8       # 更新topic分区的数量
 ./pulsar-admin topics delete-partitioned-topic persistent://my-tenant/test-namespace/my-topic2                      # 删除有分区的topic
 ```
-
 
 ### 3.6 Functions
 
