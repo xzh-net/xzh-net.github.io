@@ -269,7 +269,7 @@ cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-admin tenants delete my-tenant     # 删除租户，如果库下已经有名称空间, 是无法删除的，需要先删除名称空间
 ```
 
-### 3.2 Brokers
+### 3.3 Brokers
 
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
@@ -277,7 +277,7 @@ cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-admin brokers leader-broker        # 获取leader broker的信息
 ```
 
-### 3.3 NameSpace命名空间
+### 3.4 NameSpace命名空间
 
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
@@ -328,7 +328,7 @@ pulsar-admin namespaces get-persistence my-tenant/test-namespace     # 获取持
 ./pulsar-admin namespaces get-replicator-dispatch-rate my-tenant/test-namespace     # 获取Topic的消息复制集群的速率
 ```
 
-### 3.4 Permissions授权
+### 3.5 Permissions授权
 
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
@@ -337,7 +337,7 @@ cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-admin namespaces revoke-permission my-tenant/test-namespace --role admin10     # 撤销权限
 ```
 
-### 3.5 Topic主题
+### 3.6 Topic主题
 
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
@@ -356,8 +356,8 @@ non-persistent://tenant/namespace/topic     # 非持久化topic地址的命名�
 ./pulsar-admin topics delete-partitioned-topic persistent://my-tenant/test-namespace/my-topic2                      # 删除有分区的topic
 ```
 
-### 3.6 Functions
+### 3.7 Functions
 
-### 3.7 Package
+### 3.8 Package
 
-### 3.8 Transactions
+### 3.9 Transactions
