@@ -420,6 +420,45 @@ cd /opt/apache-pulsar-2.10.1
 bin/pulsar-client produce persistent://public/default/exclamation-input --messages '我是个大盗贼'
 ```
 
+#### 3.7.6 自定义function
+
+代码地址：
+
+1. 创建function
+
+```bash
+cd /export/server/pulsar_2.8.1/
+bin/pulsar-admin functions create \
+--jar examples/pulsar-1.0-SNAPSHOT.jar \
+--classname net.xzh.pulsar.functions.FormatDateFunction \
+--inputs persistent://public/default/test_input \
+--output persistent://public/default/test_output \
+--tenant public \
+--namespace default \
+--name FormatDateTest
+```
+
+2. 触发测试
+
+```bash
+bin/pulsar-admin functions trigger --name FormatDateTest --trigger-value "2022/09/13 23/12/30"
+```
+
+3. 启动消费者
+
+```bash
+cd /opt/apache-pulsar-2.10.1
+bin/pulsar-client consume persistent://public/default/test_output -s 'test'
+```
+
+
+4. 发送测试消息
+
+```bash
+cd /opt/apache-pulsar-2.10.1
+bin/pulsar-client produce persistent://public/default/test_input --messages '2022/09/13 23/12/30'
+```
+
 
 ### 3.8 Package
 
