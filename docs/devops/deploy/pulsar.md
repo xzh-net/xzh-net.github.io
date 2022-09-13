@@ -358,6 +358,69 @@ non-persistent://tenant/namespace/topic     # 非持久化topic地址的命名�
 
 ### 3.7 Functions
 
+#### 3.7.1 修改配置
+
+```bash
+cd /opt/apache-pulsar-2.10.1/conf
+vim broker.conf
+# 编辑内容
+functionsWorkerEnabled=true   # 三台节点都需要调整
+```
+
+重启服务
+
+```bash
+bin/pulsar-daemon stop broker
+bin/pulsar-daemon start broker
+```
+
+#### 3.7.2 创建function
+
+```bash
+cd /opt/apache-pulsar-2.10.1
+bin/pulsar-admin functions create \
+--jar examples/api-examples.jar \
+--classname org.apache.pulsar.functions.api.examples.ExclamationFunction \
+--inputs persistent://public/default/exclamation-input \
+--output persistent://public/default/exclamation-output \
+--tenant public \
+--namespace default \
+--name hello-fun
+```
+
+```bash
+
+bin/pulsar-admin functions update --tenant public --namespace default --name hello-fun --output persistent://public/default/update-output-topic   # 修改函数
+bin/pulsar-admin functions start --tenant public --namespace default --name hello-fun       # 启动函数
+bin/pulsar-admin functions stop --tenant public --namespace default --name hello-fun        # 停止函数
+bin/pulsar-admin functions restart --tenant public --namespace default --name hello-fun     # 重启函数
+bin/pulsar-admin functions list --tenant public --namespace default                         # 列出所有函数
+bin/pulsar-admin functions delete --tenant public --namespace default --name hello-fun      # 删除函数
+bin/pulsar-admin functions stats --tenant public --namespace default --name hello-fun       # 获取函数统计信息
+```
+
+#### 3.7.3 检查触发函数
+
+```bash
+bin/pulsar-admin functions trigger --name hello-fun --trigger-value "hello world"
+```
+
+#### 3.7.4 启动消费者
+
+```bash
+cd /opt/apache-pulsar-2.10.1
+bin/pulsar-client consume persistent://public/default/exclamation-output -s 'test'
+```
+
+
+#### 3.7.5 发送测试消息
+
+```bash
+cd /opt/apache-pulsar-2.10.1
+bin/pulsar-client produce persistent://public/default/exclamation-input --messages '我是个大盗贼'
+```
+
+
 ### 3.8 Package
 
 ### 3.9 Transactions
