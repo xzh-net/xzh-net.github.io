@@ -486,3 +486,10 @@ ${SPARK_HOME}/examples/jars/spark-examples_2.12-3.1.3.jar \
 ```
 
 验证：http://node01:8088/cluster ，点击`id`后的`logs`进入：http://node01:19888/jobhistory/logs 的历史页面
+
+
+#### 1.4.9 自定义jar开发
+
+ 参考代码：https://github.com/apache/spark/tree/master/examples/src/main/scala/org/apache/spark/examples
+
+ 代码地址：https://github.com/xzh-net/spark-learn/tree/main/spark3-test

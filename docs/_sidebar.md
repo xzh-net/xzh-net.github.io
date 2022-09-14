@@ -38,13 +38,14 @@
   - [Hive](devops/deploy/hive)
   - [HBase](devops/deploy/hbase)
   - [Spark](devops/deploy/spark)
-  - [PySpark](devops/deploy/pyspark)
+  - [Flink](devops/deploy/flink)
   - [ClickHouse](devops/deploy/clickhouse)
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
   - [使用ZeroBrane Studio调试lua脚本](java/tools/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
+  - [Sacla IDEA 开发配置教程](java/tools/scala)
   - [ETL工具kettle部署及应用](java/tools/etl)
   - [离线数据同步工具DataX](java/tools/datax)
 
