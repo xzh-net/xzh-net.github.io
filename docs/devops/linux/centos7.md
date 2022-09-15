@@ -1377,14 +1377,13 @@ gcc --version
 #### 2.6.1 常用命令
 
 ```bash
-# solr后台运行,并且有nohup.out输出
-nohup java -Djetty.port=8080 -jar /opt/solr-4.7.2/example/start.jar &
+nohup java -Djetty.port=8080 -jar /opt/solr-4.7.2/example/start.jar &               # solr后台运行,并且有nohup.out输出
+nohup /opt/openfire/bin/openfire.sh >/dev/null &                                    # openfire后台运行, 不输出任何日志
+nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &     # sentinel后台运行, 并将错误信息做标准输出到日志中
+```
 
-# openfire后台运行, 不输出任何日志
-nohup /opt/openfire/bin/openfire.sh >/dev/null &    
-
-# sentinel后台运行, 并将错误信息做标准输出到日志中
-nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 & 
+```bash
+for i in {2..3}; do scp -r flink node$i:$PWD; done
 ```
 
 
