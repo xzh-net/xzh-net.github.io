@@ -22,7 +22,7 @@ chown -R root /opt/spark
 chgrp -R root /opt/spark
 ```
 
-#### 1.1.3 测试
+#### 1.1.3 客户端测试
 
 1. 启动spark交互式窗口
 
@@ -133,7 +133,7 @@ jps
 - spark集群web-ui界面端口：http://node01:8080/
 - spark提交任务时的通信端口：spark://node01:7077/
 
-#### 1.2.6 测试
+#### 1.2.6 客户端测试
 
 1. 启动spark-shell
 
@@ -241,7 +241,7 @@ jps
 - node01节点web-ui界面端口：http://node01:8080/
 - node02节点web-ui界面端口：http://node02:8080/
 
-#### 1.3.7 测试
+#### 1.3.7 客户端测试
 
 1. 启动spark-shell
 
