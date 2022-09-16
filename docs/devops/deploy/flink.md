@@ -214,7 +214,8 @@ jobmanager.archive.fs.dir: hdfs://node01:8020/flink/completed-jobs/
 historyserver.web.address: node01
 historyserver.web.port: 8082
 historyserver.archive.fs.dir: hdfs://node01:8020/flink/completed-jobs/
-# 添加内容
+
+# 添加HA
 state.backend: filesystem
 state.backend.fs.checkpointdir: hdfs://node01:8020/flink-checkpoints
 high-availability: zookeeper
@@ -303,6 +304,15 @@ jobmanager.rpc.address: node02
 
 
 #### 1.3.11 客户端测试
+
+1. 执行官方示例
+
+```bash
+/opt/flink-1.12.0/bin/flink run /opt/flink-1.12.0/examples/batch/WordCount.jar
+```
+
+kill 掉node01的`StandaloneSessionClusterEntrypoint`以后再次执行，仍然可以通过`http://node02:8081/#/job/completed`看到执行结果，说明HA生效
+
 
 
 
