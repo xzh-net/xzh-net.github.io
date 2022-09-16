@@ -176,6 +176,11 @@ node03  worker/slave
 
 见[Zookeeper 3.7.0](devops/deploy/zookeeper)搭建
 
+```bash
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start   # 每个节点分别启动
+/opt/apache-zookeeper-3.7.0/bin/zkServer.sh status  # 检测节点状态
+```
+
 #### 1.3.3 配置workers
 
 ```bash
