@@ -729,6 +729,18 @@ server {
 }
 ```
 
+二级转发
+
+```conf
+server {
+    listen       80;
+    server_name  www.xuzhihao.net;
+    location /console/ {
+        rewrite ^/(.*)$ http://www.hwcq.online/$1 permanent;
+    }
+}
+```
+
 ### 3.10 web缓存
 
 ```conf
