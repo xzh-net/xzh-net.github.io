@@ -314,6 +314,125 @@ jobmanager.rpc.address: node02
 kill 掉node01的`StandaloneSessionClusterEntrypoint`以后再次执行，仍然可以通过`http://node02:8081/#/job/completed`看到执行结果，说明HA生效
 
 
-
-
 ### 1.4 On-Yarn模式
+
+
+#### 1.4.1 HDFS修改配置
+
+1. 关闭内存检查
+
+```bash
+vi /opt/hadoop-3.1.4/etc/hadoop/yarn-site.xml
+```
+
+```xml
+<configuration>
+    <!-- 配置yarn主节点的位置 -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>node01.xuzhihao.net</value>
+    </property>
+    <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <!-- 每个容器请求的最小内存资源（以MB为单位）。-->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>512</value>
+    </property>
+    <!-- 每个容器请求的最大内存资源（以MB为单位）。-->
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>2048</value>
+    </property>
+    <!-- 容器虚拟内存与物理内存之间的比率。-->
+    <property>
+        <name>yarn.nodemanager.vmem-pmem-ratio</name>
+        <value>4</value>
+    </property>
+    <!-- 开启日志聚合功能 -->
+    <property>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
+    </property>
+    <!-- 设置聚合日志在hdfs上的保存时间 -->
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>604800</value>
+    </property>
+    <!-- 设置yarn历史服务器地址 -->
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://node01:19888/jobhistory/logs</value>
+    </property>
+    <!-- 关闭yarn内存检查 -->
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+    </property>
+</configuration>
+```
+
+
+#### 1.4.2 Yarn配置分发
+
+```bash
+cd /opt/hadoop-3.1.4/etc/hadoop/
+scp -r yarn-site.xml root@node02:$PWD
+scp -r yarn-site.xml root@node03:$PWD
+```
+
+#### 1.4.3 启动HDFS
+
+```bash
+start-all.sh
+```
+
+#### 1.4.4 Session会话模式
+
+1. 启动服务
+
+```bash
+/opt/flink-1.12.0/bin/yarn-session.sh -n 2 -tm 800 -s 1 -d
+```
+
+参描说明：申请2个CPU、1600M内存
+   - -n 表示申请2个容器，这里指的就是多少个taskmanager
+   - -tm 表示每个TaskManager的内存大小
+   - -s 表示每个TaskManager的slots数量
+   - -d 表示以后台程序方式运行
+
+2. 提交任务
+
+```bash
+/opt/flink-1.12.0/bin/flink run /opt/flink-1.12.0/examples/batch/WordCount.jar
+```
+
+3. 查看结果
+
+通过`http://node01.xuzhihao.net:8088/cluster`点击`history`进入flink管理界面查看执行结果
+
+4. 关闭yarn-session
+
+```bash
+yarn application -kill application_1663258751200_0002
+```
+
+#### 1.4.5 Job分离模式
+
+1. 提交任务
+
+```bash
+/opt/flink-1.12.0/bin/flink run -m yarn-cluster -yjm 1024 -ytm 1024 /opt/flink-1.12.0/examples/batch/WordCount.jar
+```
+
+参描说明：
+   - -m  jobmanager的地址
+   - -yjm 1024 指定jobmanager的内存信息
+   - -ytm 1024 指定taskmanager的内存信息
