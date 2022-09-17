@@ -278,7 +278,9 @@ http://node01:9870/explorer.html#/test/output2022
 
 ### 1.4 On-Yarn模式
 
-#### 1.4.1 配置yarn历史服务器并关闭资源检查
+#### 1.4.1 HDFS修改配置
+
+1. 关闭内存检查
 
 ```bash
 vi /opt/hadoop-3.1.4/etc/hadoop/yarn-site.xml
@@ -346,13 +348,9 @@ scp -r yarn-site.xml root@node02:$PWD
 scp -r yarn-site.xml root@node03:$PWD
 ```
 
-#### 1.4.3 启动Yarn集群
+#### 1.4.3 启动HDFS
 
 ```bash
-start-yarn.sh
-start-hdfs.sh
-/opt/hadoop-3.1.4/sbin/stop-yarn.sh
-# 全部启动
 start-all.sh
 ```
 
