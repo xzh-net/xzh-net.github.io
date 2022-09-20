@@ -1315,8 +1315,9 @@ rouate add -net 192.168.2.0/24 dev eth0         # 对一个网络添加一个新
 2. 端口检测
 
 ```bash
-yum install nc
+yum install -y nc
 
+nc -lk 44444    # 开启监听模式
 nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok
 nc -v -w 10 -z 192.168.20.183 7443
 nc -v -w 2 -z 127.0.0.1 7000-7500
