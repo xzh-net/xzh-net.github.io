@@ -1,5 +1,7 @@
 # Elastic (ELK) Stack 7.6.2
 
+Elastic Stack是由ELK演化而来，分别是Elasticsearch、logstash、kibana
+
 - https://www.elastic.co/downloads/elasticsearch
 - https://elasticsearch.cn/download/
 

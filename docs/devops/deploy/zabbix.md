@@ -1,7 +1,8 @@
 # Zabbix 5.0 LTS for CentOS 7, MySQL, Apache
 
-https://www.zabbix.com/download
+Zabbix是一个基于WEB界面的提供分布式系统监视以及网络监视功能的企业级的开源解决方案
 
+网站地址：https://www.zabbix.com/download
 
 ## 1. 准备工作
 
