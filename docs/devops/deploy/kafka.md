@@ -1,5 +1,7 @@
 # Kafka 2.13-3.1.0
 
+Apache Kafka 是一个开源分布式事件流平台
+
 官方网站：https://kafka.apache.org
 
 ## 1. 安装

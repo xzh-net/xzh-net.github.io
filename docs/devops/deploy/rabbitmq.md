@@ -1,5 +1,9 @@
 # RabbitMQ 3.9.12
 
+RabbitMQ是一个开源的消息代理的队列服务器，用来通过普通协议在完全不同的应用之间共享数据。是使用Erlang语言来编写的，基于AMQP协议
+
+网站地址：https://www.rabbitmq.com/
+
 ## 1. 安装
 
 ### 1.1 RPM安装
