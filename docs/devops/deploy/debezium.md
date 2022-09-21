@@ -1,5 +1,7 @@
 # Debezium 1.7.2
 
+Debezium 构建在Apache Kafka之上，并提供与Kafka Connect兼容的连接器，用于监控特定的数据库管理系统
+
 官方网站：https://debezium.io/
 
 ## 1. 安装

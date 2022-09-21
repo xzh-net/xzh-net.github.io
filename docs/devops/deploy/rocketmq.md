@@ -1,18 +1,24 @@
 # RocketMQ 4.9.2
 
+Apache RocketMQ是一个分布式消息和流媒体平台，具有低延迟、高性能和可靠性、万亿级容量和灵活的可扩展性
+
+网站地址：https://rocketmq.apache.org/
+
 ## 1. 安装
 
 ### 1.1 单机
 
-#### 1.1.1 下载
+#### 1.1.1 上传解压
 
-https://rocketmq.apache.org/
+```bash
+cd /opt/software
+unzip -d /opt rocketmq-all-4.9.2-source-release.zip
+```
 
 #### 1.1.2 编译
 
 ```bash
-unzip rocketmq-all-4.9.2-source-release.zip
-cd rocketmq-all-4.9.2/
+cd /opt/rocketmq-all-4.9.2/
 mvn -Prelease-all -DskipTests clean install -U
 cd distribution/target/rocketmq-4.9.2/rocketmq-4.9.2
 ```
