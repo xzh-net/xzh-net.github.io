@@ -1,5 +1,7 @@
 # HBase 2.4.11
 
+Apache Hbase是一个开源的、分布式的、带版本的、非关系型数据库，模仿谷歌的BigTable。BigTable使用Google File System作为分布式数据存储，同理Hbase使用HDFS，当你需要随机地实时读写大数据时使用Hbase。它的目标是管理超级大表-数十亿行X数百万列
+
 ## 1. 安装
 
 ### 1.1 上传安装包
