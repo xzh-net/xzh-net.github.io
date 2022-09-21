@@ -24,6 +24,8 @@
   - [Gitlab](devops/deploy/gitlab)
   - [Jenkins](devops/deploy/jenkins)
   - [Zabbix](devops/deploy/zabbix)
+  - [Simple RTMP Server](devops/deploy/srs)
+  - [TURN Server](devops/deploy/turnserver)
   - [Prometheus](devops/deploy/prometheus)
   - [Elastic Stack](devops/deploy/elk)
   - [Zookeeper](devops/deploy/zookeeper)
@@ -32,13 +34,12 @@
   - [RocketMQ](devops/deploy/rocketmq)
   - [Pulsar](devops/deploy/pulsar)
   - [Debezium](devops/deploy/debezium)
-  - [Simple RTMP Server](devops/deploy/srs)
-  - [TURN Server](devops/deploy/turnserver)
   - [Hadoop](devops/deploy/hadoop)
   - [Hive](devops/deploy/hive)
   - [HBase](devops/deploy/hbase)
   - [Spark](devops/deploy/spark)
   - [Flink](devops/deploy/flink)
+  - [Flume](devops/deploy/flume) 
   - [ClickHouse](devops/deploy/clickhouse)
 
 - 开发工具
