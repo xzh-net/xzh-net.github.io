@@ -832,60 +832,56 @@ create table pms_product (
 /opt/datax/bin/datax.py /opt/datax/job/postgresql2hdfs.json
 ```
 
-### 3.12 PostgreSQL导入到Mysql
+### 3.12 PostgreSQL导入数据到PostgreSQL
 
 ```bash
-python /opt/datax/bin/datax.py -r postgresqlreader -w mysqlwriter  # 模板
+python /opt/datax/bin/datax.py -r postgresqlreader -w postgresqlwriter  # 模板
 cd /opt/datax/job
-vi postgresql2mysql.json
+vi postgresql2postgresql.json
 ```
 
 ```xml
 {
     "job": {
-        "content": [
-            {
-                "reader": {
-                    "name": "postgresqlreader", 
-                    "parameter": {
-                        "connection": [
-                            {
-                                "jdbcUrl": ["jdbc:postgresql://172.17.17.29:5432/ec_dome_0"], 
-                                "querySql": [
-                                    "select id,name,create_time from pms_product where id > 5;"
-                                ]
-                            }
-                        ], 
-                        "password": "vjsp2020", 
-                        "username": "postgres"
-                    }
-                }, 
-                "writer": {
-                    "name": "mysqlwriter", 
-                    "parameter": {
-                        "column": [ 
-                            "id",
-                            "name",
-                            "create_time"
-                        ], 
-                        "connection": [
-                            {
-                                "jdbcUrl": "jdbc:mysql://172.17.17.137:3306/mall?useUnicode=true&characterEncoding=UTF-8", 
-                                "table": ["pms_product_bak"]
-                            }
-                        ], 
-                        "username": "root", 
-                        "password": "root", 
-                        "preSql": [], 
-                        "session": ["set session sql_mode='ANSI'"], 
-                        "writeMode": "update"
-                    }
+        "content": [{
+            "reader": {
+                "name": "postgresqlreader",
+                "parameter": {
+                    "connection": [{
+                        "jdbcUrl": ["jdbc:postgresql://172.17.17.39:5432/vjsp_digit"],
+                        "querySql": [
+                            "SELECT t1.id,t4.pcode,t3.name,to_timestamp(t1.begin_time,'yyyy-MM-dd hh24:mi:ss') as begin_time,num,TO_CHAR(TO_DATE(t1.begin_time, 'yyyy/MM/dd'), 'yyyy-MM') AS work_date,TO_CHAR(TO_DATE(t1.begin_time, 'yyyy/MM/dd'), 'yyyy') AS year FROM team_task_work_time t1 INNER JOIN team_task t2 ON t1.task_code = t2.code LEFT JOIN team_member t3 ON t1.member_code = t3.code INNER JOIN team_project t4 ON t2.project_code = t4.code AND t4.deleted = 0;"
+                        ]
+                    }],
+                    "password": "postgres",
+                    "username": "postgres"
+                }
+            },
+            "writer": {
+                "name": "postgresqlwriter",
+                "parameter": {
+                    "column": [
+                        "ts_id",
+                        "project_code",
+                        "user_name",
+                        "createtime",
+                        "count",
+                        "work_date",
+                        "year"
+                    ],
+                    "connection": [{
+                        "jdbcUrl": "jdbc:postgresql://172.17.17.116:5432/VJSP40011321",
+                        "table": ["VJSP_IOT_PROJECT_WORK"]
+                    }],
+                    "preSql": ["delete from @table"],
+                    "password": "Vjsp@2022",
+                    "username": "postgres"
                 }
             }
-        ], 
+        }],
         "setting": {
             "speed": {
-                "channel": "1"
+                "channel": "10"
             }
         }
     }
