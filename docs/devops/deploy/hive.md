@@ -74,21 +74,31 @@ export HIVE_CONF_DIR=/opt/apache-hive-3.1.2/conf
 export HIVE_AUX_JARS_PATH=/opt/apache-hive-3.1.2/lib
 ```
 
-#### 1.2.4 初始化metadata
+#### 1.2.4 设置日志保存路径
+
+```bash
+cd /opt/apache-hive-3.1.2/conf/
+mv hive-log4j2.properties.template hive-log4j2.properties
+vim hive-log4j2.properties
+# 编辑
+property.hive.log.dir = /opt/apache-hive-3.1.2/logs
+```
+
+#### 1.2.5 初始化metadata
 
 ```bash
 cd /opt/apache-hive-3.1.2
 bin/schematool -dbType derby -initSchema
 ```
 
-#### 1.2.5 启动hive服务
+#### 1.2.6 启动hive服务
 
 ```bash
 cd /opt/apache-hive-3.1.2
 bin/hive
 ```
 
-#### 1.2.6 客户端测试
+#### 1.2.7 客户端测试
 
 ```sql
 show databases;
