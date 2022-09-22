@@ -51,7 +51,7 @@ export PATH JAVA_HOME HADOOP_HOME
 
 #### 1.1.4 监控端口数据测试
 
-1. 创建Flume Agent配置文件
+1. 创建flume-netcat-logger.conf文件
 
 ```bash
 cd /opt/flume/
