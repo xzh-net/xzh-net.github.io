@@ -35,6 +35,7 @@ export JAVA_HOME=/usr/local/jdk1.8.0_202
 
 ```bash
 rm /opt/flume/lib/guava11.0.2.jar
+cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar /opt/flume/lib/
 ```
 
 #### 1.1.3 配置环境变量
@@ -79,7 +80,7 @@ a1.sources.r1.channels = c1
 a1.sinks.k1.channel = c1
 ```
 
-2. 启动flume端口
+2. 启动flume
 
 ```bash
 cd /opt/flume/
@@ -96,6 +97,73 @@ sudo netstat -nlp | grep 44444  # 检测端口占用
 nc localhost 44444      # 发送数据
 ```
 
+#### 1.1.5 实时监控单个文件写入hdfs
+
+1. 创建flume-file-hdfs.conf文件
+
+```bash
+cd /opt/flume/job
+vim flume-file-hdfs.conf
+```
+
+```conf
+# Name the components on this agent
+a2.sources = r2
+a2.sinks = k2
+a2.channels = c2
+# Describe/configure the source
+a2.sources.r2.type = exec
+a2.sources.r2.command = tail -F /opt/apache-hive-3.1.2/logs/hive.log
+# Describe the sink
+a2.sinks.k2.type = hdfs
+a2.sinks.k2.hdfs.path = hdfs://node01:8020/flume/%Y%m%d/%H
+#上传文件的前缀
+a2.sinks.k2.hdfs.filePrefix = logs-
+#是否按照时间滚动文件夹
+a2.sinks.k2.hdfs.round = true
+#多少时间单位创建一个新的文件夹
+a2.sinks.k2.hdfs.roundValue = 1
+#重新定义时间单位
+a2.sinks.k2.hdfs.roundUnit = hour
+#是否使用本地时间戳
+a2.sinks.k2.hdfs.useLocalTimeStamp = true
+#积攒多少个 Event 才 flush 到 HDFS 一次
+a2.sinks.k2.hdfs.batchSize = 100
+#设置文件类型，可支持压缩
+a2.sinks.k2.hdfs.fileType = DataStream
+#多久生成一个新的文件
+a2.sinks.k2.hdfs.rollInterval = 60
+#设置每个文件的滚动大小
+a2.sinks.k2.hdfs.rollSize = 134217700
+#文件的滚动与 Event 数量无关
+a2.sinks.k2.hdfs.rollCount = 0
+# Use a channel which buffers events in memory
+a2.channels.c2.type = memory
+a2.channels.c2.capacity = 1000
+a2.channels.c2.transactionCapacity = 100
+# Bind the source and sink to the channel
+a2.sources.r2.channels = c2
+a2.sinks.k2.channel = c2
+```
+
+2. 启动flume
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a2 --conf-file job/flume-file-hdfs.conf
+```
+
+3. 开启Hadoop和Hive并操作Hive产生日志
+
+```bash
+start-all.sh                # 开启hadoop
+cd /opt/apache-hive-3.1.2   # 启动hive
+bin/hive
+```
 
 
+#### 1.1.6 实时监控单个追加文件
+
+#### 1.1.7 实时监控单个追加文件
+ 
 ### 1.2 集群
