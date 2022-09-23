@@ -315,3 +315,79 @@ echo log2 >> log2.txt
 访问地址：http://node01:9870/
  
 ### 1.2 集群
+
+## 2. 源码
+
+### 2.1 修改flume-taildir-source
+
+问题描述：在数仓项目中，使用Flume的TairDir Source监控日志文件，当文件更名之后会重新读取该文件造成重复
+
+解决办法：
+  - 使用不更名打印日志框架（logback），每天会新生成一个日志文件，文件后面会加上当天的日期信息，所以不会重复
+  - 修改源码，让TairDir Source判断文件时只看iNode的值
+
+#### 2.1.1 修改TailFile
+
+org.apache.flume.source.taildir.TailFile
+
+```java
+public boolean updatePos(String path, long inode, long pos) throws IOException {
+    //update by xzh
+    //if (this.inode == inode && this.path.equals(path)) {
+    if (this.inode == inode)
+      setPos(pos);
+      updateFilePos(pos);
+      logger.info("Updated position, file: " + path + ", inode: " + inode + ", pos: " + pos);
+      return true;
+    }
+    return false;
+  }
+```
+
+#### 2.1.2 修改ReliableTaildirEventReader
+
+org.apache.flume.source.taildir.ReliableTaildirEventReader
+
+```java
+public List<Long> updateTailFiles(boolean skipToEnd) throws IOException {
+    updateTime = System.currentTimeMillis();
+    List<Long> updatedInodes = Lists.newArrayList();
+
+    for (TaildirMatcher taildir : taildirCache) {
+      Map<String, String> headers = headerTable.row(taildir.getFileGroup());
+
+      for (File f : taildir.getMatchingFiles()) {
+        long inode;
+        try {
+          inode = getInode(f);
+        } catch (NoSuchFileException e) {
+          logger.info("File has been deleted in the meantime: " + e.getMessage());
+          continue;
+        }
+        TailFile tf = tailFiles.get(inode);
+        //update by xzh
+        //if (tf == null || !tf.getPath().equals(f.getAbsolutePath())) {
+        if (tf == null)    
+          long startPos = skipToEnd ? f.length() : 0;
+          tf = openFile(f, headers, inode, startPos);
+        } else {
+          boolean updated = tf.getLastUpdated() < f.lastModified() || tf.getPos() != f.length();
+          if (updated) {
+            if (tf.getRaf() == null) {
+              tf = openFile(f, headers, inode, tf.getPos());
+            }
+            if (f.length() < tf.getPos()) {
+              logger.info("Pos " + tf.getPos() + " is larger than file size! "
+                  + "Restarting from pos 0, file: " + tf.getPath() + ", inode: " + inode);
+              tf.updatePos(tf.getPath(), inode, 0);
+            }
+          }
+          tf.setNeedTail(updated);
+        }
+        tailFiles.put(inode, tf);
+        updatedInodes.add(inode);
+      }
+    }
+    return updatedInodes;
+  }
+```
