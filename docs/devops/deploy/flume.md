@@ -161,8 +161,12 @@ cd /opt/apache-hive-3.1.2   # 启动hive
 bin/hive
 ```
 
+4. 查看HDFS上的数据
 
-#### 1.1.6 实时监控单个追加文件
+访问地址：http://node01:9870/
+
+
+#### 1.1.6 实时监控目录下多个新文件
 
 
 1. 创建flume-dir-hdfs.conf文件
@@ -235,6 +239,79 @@ cp /opt/words.txt /opt/flume/upload/
 
 访问地址：http://node01:9870/
 
-#### 1.1.7 实时监控单个追加文件
+#### 1.1.7 实时监控目录下的多个追加文件
+
+1. 创建flume-taildir-hdfs.conf文件
+
+```bash
+cd /opt/flume/job
+vim flume-taildir-hdfs.conf
+```
+
+```conf
+a3.sources = r3
+a3.sinks = k3
+a3.channels = c3
+# Describe/configure the source
+a3.sources.r3.type = TAILDIR
+a3.sources.r3.positionFile = /opt/flume/tail_dir.json
+a3.sources.r3.filegroups = f1 f2
+a3.sources.r3.filegroups.f1 = /opt/flume/files/.*file.*
+a3.sources.r3.filegroups.f2 = /opt/flume/files2/.*log.*
+# Describe the sink
+a3.sinks.k3.type = hdfs
+a3.sinks.k3.hdfs.path =hdfs://node01:8020/flume/upload2/%Y%m%d/%H
+#上传文件的前缀
+a3.sinks.k3.hdfs.filePrefix = upload-
+#是否按照时间滚动文件夹
+a3.sinks.k3.hdfs.round = true
+#多少时间单位创建一个新的文件夹
+a3.sinks.k3.hdfs.roundValue = 1
+#重新定义时间单位
+a3.sinks.k3.hdfs.roundUnit = hour
+#是否使用本地时间戳
+a3.sinks.k3.hdfs.useLocalTimeStamp = true
+#积攒多少个 Event 才 flush 到 HDFS 一次
+a3.sinks.k3.hdfs.batchSize = 100
+#设置文件类型，可支持压缩
+a3.sinks.k3.hdfs.fileType = DataStream
+#多久生成一个新的文件
+a3.sinks.k3.hdfs.rollInterval = 60
+#设置每个文件的滚动大小大概是 128M
+a3.sinks.k3.hdfs.rollSize = 134217700
+#文件的滚动与 Event 数量无关
+a3.sinks.k3.hdfs.rollCount = 0
+# Use a channel which buffers events in memory
+a3.channels.c3.type = memory
+a3.channels.c3.capacity = 1000
+a3.channels.c3.transactionCapacity = 100
+# Bind the source and sink to the channel
+a3.sources.r3.channels = c3
+a3.sinks.k3.channel = c3
+```
+
+2. 启动flume
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-taildir-hdfs.conf
+```
+
+3. 写入文件
+
+```bash
+cd /opt/flume/
+mkdir files files2
+cd /opt/flume/files 
+echo file1 >> file1.txt
+echo file2 >> file2.txt
+# 每个文件夹组下的文件对应一个hdfs文件
+cd /opt/flume/files2 
+echo log2 >> log2.txt
+```
+
+4. 查看HDFS上的数据
+
+访问地址：http://node01:9870/
  
 ### 1.2 集群
