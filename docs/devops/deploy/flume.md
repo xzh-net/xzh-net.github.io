@@ -97,7 +97,7 @@ sudo netstat -nlp | grep 44444  # 检测端口占用
 nc localhost 44444      # 发送数据
 ```
 
-#### 1.1.5 实时监控单个文件写入hdfs
+#### 1.1.5 实时监控单个文件写入HDFS
 
 1. 创建flume-file-hdfs.conf文件
 
@@ -163,6 +163,77 @@ bin/hive
 
 
 #### 1.1.6 实时监控单个追加文件
+
+
+1. 创建flume-dir-hdfs.conf文件
+
+```bash
+cd /opt/flume/job
+vim flume-dir-hdfs.conf
+```
+
+```conf
+a3.sources = r3
+a3.sinks = k3
+a3.channels = c3
+# Describe/configure the source
+a3.sources.r3.type = spooldir
+a3.sources.r3.spoolDir = /opt/flume/upload
+a3.sources.r3.fileSuffix = .COMPLETED
+a3.sources.r3.fileHeader = true
+#忽略所有以.tmp 结尾的文件，不上传
+a3.sources.r3.ignorePattern = ([^ ]*\.tmp)
+# Describe the sink
+a3.sinks.k3.type = hdfs
+a3.sinks.k3.hdfs.path =hdfs://node01:8020/flume/upload/%Y%m%d/%H
+#上传文件的前缀
+a3.sinks.k3.hdfs.filePrefix = upload-
+#是否按照时间滚动文件夹
+a3.sinks.k3.hdfs.round = true
+#多少时间单位创建一个新的文件夹
+a3.sinks.k3.hdfs.roundValue = 1
+#重新定义时间单位
+a3.sinks.k3.hdfs.roundUnit = hour
+#是否使用本地时间戳
+a3.sinks.k3.hdfs.useLocalTimeStamp = true
+#积攒多少个 Event 才 flush 到 HDFS 一次
+a3.sinks.k3.hdfs.batchSize = 100
+#设置文件类型，可支持压缩
+a3.sinks.k3.hdfs.fileType = DataStream
+#多久生成一个新的文件
+a3.sinks.k3.hdfs.rollInterval = 60
+#设置每个文件的滚动大小大概是 128M
+a3.sinks.k3.hdfs.rollSize = 134217700
+#文件的滚动与 Event 数量无关
+a3.sinks.k3.hdfs.rollCount = 0
+# Use a channel which buffers events in memory
+a3.channels.c3.type = memory
+a3.channels.c3.capacity = 1000
+a3.channels.c3.transactionCapacity = 100
+# Bind the source and sink to the channel
+a3.sources.r3.channels = c3
+a3.sinks.k3.channel = c3
+```
+
+2. 启动flume
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-dir-hdfs.conf
+```
+
+3. 向upload文件夹中添加文件
+
+!> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
+
+```bash
+vi /opt/words.txt
+cp /opt/words.txt /opt/flume/upload/
+```
+
+4. 查看HDFS上的数据
+
+访问地址：http://node01:9870/
 
 #### 1.1.7 实时监控单个追加文件
  
