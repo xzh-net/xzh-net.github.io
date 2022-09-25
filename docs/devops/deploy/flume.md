@@ -48,9 +48,15 @@ PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 export PATH JAVA_HOME HADOOP_HOME
 ```
 
-### 1.4 监控端口数据测试
+```bash
+source /etc/profile
+```
 
-#### 1.4.1 创建flume-netcat-logger.conf文件
+## 2. 案例
+
+### 2.1 监控端口数据测试
+
+#### 2.1.1 创建flume-netcat-logger.conf文件
 
 ```bash
 cd /opt/flume/
@@ -79,7 +85,7 @@ a1.sources.r1.channels = c1
 a1.sinks.k1.channel = c1
 ```
 
-#### 1.4.2 启动flume
+#### 2.1.2 启动flume
 
 ```bash
 cd /opt/flume/
@@ -88,7 +94,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/flume-netcat-logger.co
 bin/flume-ng agent -c conf/ -n a1 -f job/flume-netcat-logger.conf -Dflume.root.logger=INFO,console
 ```
 
-#### 1.4.3 发送数据
+#### 2.1.3 发送数据
 
 ```bash
 sudo yum install -y nc  # 安装
@@ -96,9 +102,9 @@ sudo netstat -nlp | grep 44444  # 检测端口占用
 nc localhost 44444      # 发送数据
 ```
 
-### 1.5 实时监控单个文件写入HDFS
+### 2.2 实时监控单个文件写入HDFS
 
-#### 1.5.1 创建flume-file-hdfs.conf文件
+#### 2.2.1 创建flume-file-hdfs.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -145,14 +151,14 @@ a2.sources.r2.channels = c2
 a2.sinks.k2.channel = c2
 ```
 
-#### 1.5.2 启动flume
+#### 2.2.2 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a2 --conf-file job/flume-file-hdfs.conf
 ```
 
-#### 1.5.3 开启Hadoop和Hive并操作Hive产生日志
+#### 2.2.3 开启Hadoop和Hive并操作Hive产生日志
 
 ```bash
 start-all.sh                # 开启hadoop
@@ -160,15 +166,15 @@ cd /opt/apache-hive-3.1.2   # 启动hive
 bin/hive
 ```
 
-#### 1.5.4 查看HDFS上的数据
+#### 2.2.4 查看HDFS上的数据
 
 访问地址：http://node01:9870/
 
 
-### 1.6 实时监控目录下多个新文件
+### 2.3 实时监控目录下多个新文件
 
 
-#### 1.6.1 创建flume-dir-hdfs.conf文件
+#### 2.3.1 创建flume-dir-hdfs.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -218,14 +224,14 @@ a3.sources.r3.channels = c3
 a3.sinks.k3.channel = c3
 ```
 
-#### 1.6.2 启动flume
+#### 2.3.2 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-dir-hdfs.conf
 ```
 
-#### 1.6.3 向upload文件夹中添加文件
+#### 2.3.3 向upload文件夹中添加文件
 
 !> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
 
@@ -234,13 +240,13 @@ vi /opt/words.txt
 cp /opt/words.txt /opt/flume/upload/
 ```
 
-#### 1.6.4 查看HDFS上的数据
+#### 2.3.4 查看HDFS上的数据
 
 访问地址：http://node01:9870/
 
-### 1.7 实时监控目录下的多个追加文件
+### 2.4 实时监控目录下的多个追加文件
 
-#### 1.7.1 创建flume-taildir-hdfs.conf文件
+#### 2.4.1 创建flume-taildir-hdfs.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -289,14 +295,14 @@ a3.sources.r3.channels = c3
 a3.sinks.k3.channel = c3
 ```
 
-#### 1.7.2 启动flume
+#### 2.4.2 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-taildir-hdfs.conf
 ```
 
-#### 1.7.3 写入文件
+#### 2.4.3 写入文件
 
 ```bash
 cd /opt/flume/
@@ -309,22 +315,22 @@ cd /opt/flume/files2
 echo log2 >> log2.txt
 ```
 
-#### 1.7.4 查看HDFS上的数据
+#### 2.4.4 查看HDFS上的数据
 
 访问地址：http://node01:9870/
  
 
-### 1.8 采集数据到pulsar
+### 2.5 采集数据到pulsar
 
 代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/pulsar-flume-ng-sink
 
-#### 1.8.1 上传jar
+#### 2.5.1 上传jar
 
 ```bash
 cp /opt/software/flume-ng-pulsar-sink-1.9.0.jar /opt/flume/lib/
 ```
 
-#### 1.8.2 创建flume-netcat-pulsar.conf文件
+#### 2.5.2 创建flume-netcat-pulsar.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -356,33 +362,451 @@ a1.sources.r1.channels = c1
 a1.sinks.k1.channel = c1
 ```
 
-#### 1.8.3 启动flume
+#### 2.5.3 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a1 --conf-file job/flume-netcat-pulsar.conf
 ```
 
-#### 1.8.4 发送数据
+#### 2.5.4 发送数据
 
 ```bash
 nc localhost 44444
 ```
 
-#### 1.8.5 监听数据
+#### 2.5.5 监听数据
 
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-client consume persistent://public/default/test -s "consumer-test"  
 ```
 
-## 1.2 复制和多路复用
-## 1.3 负载均衡和故障转移
-## 1.4 聚合
+### 2.6 复制和多路复用
 
-## 2. 源码
+#### 2.6.1 需求
 
-### 2.1 修改flume-taildir-source
+使用Flume-1监控文件变动，Flume-1将变动内容传递给Flume-2，Flume-2负责存储到HDFS。同时Flume-1将变动内容传递给Flume-3，Flume-3负责输出到Local FileSystem
+
+#### 2.6.2 创建flume-file-flume.conf
+
+```bash
+cd /opt/flume/job/group1
+vim flume-file-flume.conf
+```
+
+```conf
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+# 将数据流复制给所有 channel
+a1.sources.r1.selector.type = replicating
+# Describe/configure the source
+a1.sources.r1.type = exec
+a1.sources.r1.command = tail -F /opt/apache-hive-3.1.2/logs/hive.log
+a1.sources.r1.shell = /bin/bash -c
+# Describe the sink
+# sink 端的 avro 是一个数据发送者
+a1.sinks.k1.type = avro
+a1.sinks.k1.hostname = node01
+a1.sinks.k1.port = 4141
+a1.sinks.k2.type = avro
+a1.sinks.k2.hostname = node01
+a1.sinks.k2.port = 4142
+# Describe the channel
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1 c2
+a1.sinks.k1.channel = c1
+a1.sinks.k2.channel = c2
+```
+
+#### 2.6.3 创建flume-flume-hdfs.conf
+
+```bash
+cd /opt/flume/job/group1
+vim flume-flume-hdfs.conf
+```
+
+```conf
+# Name the components on this agent
+a2.sources = r1
+a2.sinks = k1
+a2.channels = c1
+# Describe/configure the source
+# source 端的 avro 是一个数据接收服务
+a2.sources.r1.type = avro
+a2.sources.r1.bind = node01
+a2.sources.r1.port = 4141
+# Describe the sink
+a2.sinks.k1.type = hdfs
+a2.sinks.k1.hdfs.path = hdfs://node01:8020/flume2/%Y%m%d/%H
+#上传文件的前缀
+a2.sinks.k1.hdfs.filePrefix = flume2-
+#是否按照时间滚动文件夹
+a2.sinks.k1.hdfs.round = true
+#多少时间单位创建一个新的文件夹
+a2.sinks.k1.hdfs.roundValue = 1
+#重新定义时间单位
+a2.sinks.k1.hdfs.roundUnit = hour
+#是否使用本地时间戳
+a2.sinks.k1.hdfs.useLocalTimeStamp = true
+#积攒多少个 Event 才 flush 到 HDFS 一次
+a2.sinks.k1.hdfs.batchSize = 100
+#设置文件类型，可支持压缩
+a2.sinks.k1.hdfs.fileType = DataStream
+#多久生成一个新的文件
+a2.sinks.k1.hdfs.rollInterval = 30
+#设置每个文件的滚动大小大概是 128M
+a2.sinks.k1.hdfs.rollSize = 134217700
+#文件的滚动与 Event 数量无关
+a2.sinks.k1.hdfs.rollCount = 0
+# Describe the channel
+a2.channels.c1.type = memory
+a2.channels.c1.capacity = 1000
+a2.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a2.sources.r1.channels = c1
+a2.sinks.k1.channel = c1
+```
+
+#### 2.6.4 创建flume-flume-dir.conf
+
+```bash
+cd /opt/flume/job/group1
+vim flume-flume-dir.conf
+```
+
+```conf
+# Name the components on this agent
+a3.sources = r1
+a3.sinks = k1
+a3.channels = c2
+# Describe/configure the source
+a3.sources.r1.type = avro
+a3.sources.r1.bind = node01
+a3.sources.r1.port = 4142
+# Describe the sink
+a3.sinks.k1.type = file_roll
+a3.sinks.k1.sink.directory = /opt/flume/data/flume3
+# Describe the channel
+a3.channels.c2.type = memory
+a3.channels.c2.capacity = 1000
+a3.channels.c2.transactionCapacity = 100
+# Bind the source and sink to the channel
+a3.sources.r1.channels = c2
+a3.sinks.k1.channel = c2
+```
+
+!> 输出的本地目录必须是已经存在的目录，如果该目录不存在，并不会创建新的目录
+
+```bash
+mkdir -p /opt/flume/data/flume3
+```
+
+#### 2.6.5 开启Hadoop和Hive并操作Hive产生日志
+
+```bash
+start-all.sh                # 开启hadoop
+cd /opt/apache-hive-3.1.2   # 启动hive
+bin/hive
+```
+
+#### 2.6.6 启动flume
+
+avro通信框架需要先启动服务端，所以需要先启动source端
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a3 --conf-file job/group1/flume-flume-dir.conf
+bin/flume-ng agent --conf conf/ --name a2 --conf-file job/group1/flume-flume-hdfs.conf
+bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group1/flume-file-flume.conf
+```
+
+#### 2.6.7 查看HDFS上的数据
+
+访问地址：http://node01:9870/
+
+#### 2.6.8 查看本地数据
+
+```bash
+ll /opt/flume/data/flume3
+```
+
+### 2.7 负载均衡和故障转移
+
+#### 2.7.1 需求
+
+使用Flume1监控一个端口，其sink组中的sink分别对接Flume2和Flume3，采用FailoverSinkProcessor，实现故障转移的功能
+
+#### 2.7.2 创建flume-netcat-flume.conf
+
+```bash
+cd /opt/flume/job/group2
+vim flume-netcat-flume.conf
+```
+
+```conf
+# Name the components on this agent
+a1.sources = r1
+a1.channels = c1
+a1.sinkgroups = g1
+a1.sinks = k1 k2
+# Describe/configure the source
+a1.sources.r1.type = netcat
+a1.sources.r1.bind = localhost
+a1.sources.r1.port = 44444
+a1.sinkgroups.g1.processor.type = failover
+a1.sinkgroups.g1.processor.priority.k1 = 5
+a1.sinkgroups.g1.processor.priority.k2 = 10
+a1.sinkgroups.g1.processor.maxpenalty = 10000
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.hostname = node01
+a1.sinks.k1.port = 4141
+a1.sinks.k2.type = avro
+a1.sinks.k2.hostname = node01
+a1.sinks.k2.port = 4142
+# Describe the channel
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinkgroups.g1.sinks = k1 k2
+a1.sinks.k1.channel = c1
+a1.sinks.k2.channel = c1
+```
+
+#### 2.7.3 创建flume-flume-console1.conf
+
+```bash
+cd /opt/flume/job/group2
+vim flume-flume-console1.conf
+```
+
+```conf
+# Name the components on this agent
+a2.sources = r1
+a2.sinks = k1
+a2.channels = c1
+# Describe/configure the source
+a2.sources.r1.type = avro
+a2.sources.r1.bind = node01
+a2.sources.r1.port = 4141
+# Describe the sink
+a2.sinks.k1.type = logger
+# Describe the channel
+a2.channels.c1.type = memory
+a2.channels.c1.capacity = 1000
+a2.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a2.sources.r1.channels = c1
+a2.sinks.k1.channel = c1
+```
+
+#### 2.7.4 创建flume-flume-console2.conf
+
+```bash
+cd /opt/flume/job/group2
+vim flume-flume-console2.conf
+```
+
+```conf
+# Name the components on this agent
+a3.sources = r1
+a3.sinks = k1
+a3.channels = c2
+# Describe/configure the source
+a3.sources.r1.type = avro
+a3.sources.r1.bind = node01
+a3.sources.r1.port = 4142
+# Describe the sink
+a3.sinks.k1.type = logger
+# Describe the channel
+a3.channels.c2.type = memory
+a3.channels.c2.capacity = 1000
+a3.channels.c2.transactionCapacity = 100
+# Bind the source and sink to the channel
+a3.sources.r1.channels = c2
+a3.sinks.k1.channel = c2
+```
+
+#### 2.7.5 启动flume
+
+avro通信框架需要先启动服务端，所以需要先启动source端
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a3 --conf-file job/group2/flume-flume-console2.conf -Dflume.root.logger=INFO,console
+bin/flume-ng agent --conf conf/ --name a2 --conf-file job/group2/flume-flume-console1.conf -Dflume.root.logger=INFO,console
+bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group2/flume-netcat-flume.conf
+```
+
+#### 2.7.6 发送数据
+
+```bash
+nc localhost 44444
+```
+
+#### 2.7.7 查看Flume2和Flume3日志
+
+模拟异常kill掉Flume2进程，官场Flume3控制台日志
+
+#### 2.7.8 负载均衡
+
+修改flume-netcat-flume.conf
+
+```conf
+a1.sinkgroups.g1.processor.type = failover
+a1.sinkgroups.g1.processor.priority.k1 = 5
+a1.sinkgroups.g1.processor.priority.k2 = 10
+a1.sinkgroups.g1.processor.maxpenalty = 10000
+```
+
+替换为
+
+```conf
+a1.sinkgroups.g1.processor.type = load_balance
+a1.sinkgroups.g1.processor.backoff = true
+a1.sinkgroups.g1.processor.selector = random
+a1.sinkgroups.g1.processor.selector.maxTimeOut = 30000 # 退避算法最大值
+```
+
+### 2.8 聚合
+
+#### 2.8.1 需求
+
+- node01上的Flume-1监控文件/opt/apache-hive-3.1.2/logs/hive.log
+- node02上的Flume-2监控某一个端口的数据流
+- Flume-1与Flume-2将数据发送给node03上的Flume-3，Flume-3将最终数据打印到控制台
+
+#### 2.8.2 Flume分发
+
+```bash
+cd /opt/flume
+scp -r /opt/flume root@node02:$PWD
+scp -r /opt/flume root@node03:$PWD
+```
+
+#### 2.8.3 node01创建flume1-logger-flume.conf
+
+```bash
+cd /opt/flume/job/group3
+vim flume1-logger-flume.conf
+```
+
+```conf
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+# Describe/configure the source
+a1.sources.r1.type = exec
+a1.sources.r1.command = tail -F /opt/flume/data/group3.log
+a1.sources.r1.shell = /bin/bash -c
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.hostname = node03
+a1.sinks.k1.port = 4141
+# Describe the channel
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+#### 2.8.4 node02创建flume2-netcat-flume.conf
+
+```bash
+cd /opt/flume/job/group3
+vim flume2-netcat-flume.conf
+```
+
+```conf
+# Name the components on this agent
+a2.sources = r1
+a2.sinks = k1
+a2.channels = c1
+# Describe/configure the source
+a2.sources.r1.type = netcat
+a2.sources.r1.bind = node02
+a2.sources.r1.port = 44444
+# Describe the sink
+a2.sinks.k1.type = avro
+a2.sinks.k1.hostname = node03
+a2.sinks.k1.port = 4141
+# Use a channel which buffers events in memory
+a2.channels.c1.type = memory
+a2.channels.c1.capacity = 1000
+a2.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a2.sources.r1.channels = c1
+a2.sinks.k1.channel = c1
+```
+
+
+#### 2.8.5 node03创建flume3-flume-logger.conf
+
+```bash
+cd /opt/flume/job/group3
+vim flume3-flume-logger.conf
+```
+
+```conf
+# Name the components on this agent
+a3.sources = r1
+a3.sinks = k1
+a3.channels = c1
+# Describe/configure the source
+a3.sources.r1.type = avro
+a3.sources.r1.bind = node03
+a3.sources.r1.port = 4141
+# Describe the sink
+a3.sinks.k1.type = logger
+# Describe the channel
+a3.channels.c1.type = memory
+a3.channels.c1.capacity = 1000
+a3.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a3.sources.r1.channels = c1
+a3.sinks.k1.channel = c1
+```
+
+#### 2.8.6 启动flume
+
+avro通信框架需要先启动服务端，所以需要先启动source端
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a3 --conf-file job/group3/flume3-flume-logger.conf -Dflume.root.logger=INFO,console  # node03执行
+bin/flume-ng agent --conf conf/ --name a2 --conf-file job/group3/flume2-netcat-flume.conf                                   # node02执行
+bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group3/flume1-logger-flume.conf                                   # node01执行
+```
+
+#### 2.8.7 发送数据
+
+```bash
+echo 'hello' > /opt/flume/data/group3.log   # node01执行
+nc node02 44444                             # node02执行
+```
+
+#### 2.8.8 查看数据
+
+node03查看控制台数据
+
+
+## 3. 源码
+
+### 3.1 修改flume-taildir-source
 
 问题描述：在数仓项目中，使用Flume的TairDir Source监控日志文件，当文件更名之后会重新读取该文件造成重复
 
@@ -390,7 +814,7 @@ cd /opt/apache-pulsar-2.10.1/bin
   - 使用不更名打印日志框架（logback），每天会新生成一个日志文件，文件后面会加上当天的日期信息，所以不会重复
   - 修改源码，让TairDir Source判断文件时只看iNode的值
 
-#### 2.1.1 修改TailFile
+#### 3.1.1 修改TailFile
 
 org.apache.flume.source.taildir.TailFile
 
@@ -408,7 +832,7 @@ public boolean updatePos(String path, long inode, long pos) throws IOException {
   }
 ```
 
-#### 2.1.2 修改ReliableTaildirEventReader
+#### 3.1.2 修改ReliableTaildirEventReader
 
 org.apache.flume.source.taildir.ReliableTaildirEventReader
 
