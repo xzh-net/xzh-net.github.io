@@ -10,9 +10,8 @@ Flume 是 Cloudera 提供的一个高可用的，高可靠的，分布式的海�
 
 ## 1. 安装
 
-### 1.1 单机
 
-#### 1.1.1 上传解压
+### 1.1 上传解压
 
 ```bash
 mkdir -p /opt/software
@@ -21,7 +20,7 @@ tar -zxvf apache-flume-1.9.0-bin.tar.gz -C /opt
 mv /opt/apache-flume-1.9.0-bin/ /opt/flume
 ```
 
-#### 1.1.2 修改配置
+### 1.2 修改配置
 
 ```bash
 cd /opt/flume/conf
@@ -38,7 +37,7 @@ rm /opt/flume/lib/guava11.0.2.jar
 cp /opt/hadoop-3.1.4/share/hadoop/common/lib/guava-27.0-jre.jar /opt/flume/lib/
 ```
 
-#### 1.1.3 配置环境变量
+### 1.3 配置环境变量
 
 ```bash
 vim /etc/profile.d/my_env.sh
@@ -49,9 +48,9 @@ PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 export PATH JAVA_HOME HADOOP_HOME
 ```
 
-#### 1.1.4 监控端口数据测试
+### 1.4 监控端口数据测试
 
-1. 创建flume-netcat-logger.conf文件
+#### 1.4.1 创建flume-netcat-logger.conf文件
 
 ```bash
 cd /opt/flume/
@@ -80,7 +79,7 @@ a1.sources.r1.channels = c1
 a1.sinks.k1.channel = c1
 ```
 
-2. 启动flume
+#### 1.4.2 启动flume
 
 ```bash
 cd /opt/flume/
@@ -89,7 +88,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/flume-netcat-logger.co
 bin/flume-ng agent -c conf/ -n a1 -f job/flume-netcat-logger.conf -Dflume.root.logger=INFO,console
 ```
 
-3. 发送数据
+#### 1.4.3 发送数据
 
 ```bash
 sudo yum install -y nc  # 安装
@@ -97,9 +96,9 @@ sudo netstat -nlp | grep 44444  # 检测端口占用
 nc localhost 44444      # 发送数据
 ```
 
-#### 1.1.5 实时监控单个文件写入HDFS
+### 1.5 实时监控单个文件写入HDFS
 
-1. 创建flume-file-hdfs.conf文件
+#### 1.5.1 创建flume-file-hdfs.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -146,14 +145,14 @@ a2.sources.r2.channels = c2
 a2.sinks.k2.channel = c2
 ```
 
-2. 启动flume
+#### 1.5.2 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a2 --conf-file job/flume-file-hdfs.conf
 ```
 
-3. 开启Hadoop和Hive并操作Hive产生日志
+#### 1.5.3 开启Hadoop和Hive并操作Hive产生日志
 
 ```bash
 start-all.sh                # 开启hadoop
@@ -161,15 +160,15 @@ cd /opt/apache-hive-3.1.2   # 启动hive
 bin/hive
 ```
 
-4. 查看HDFS上的数据
+#### 1.5.4 查看HDFS上的数据
 
 访问地址：http://node01:9870/
 
 
-#### 1.1.6 实时监控目录下多个新文件
+### 1.6 实时监控目录下多个新文件
 
 
-1. 创建flume-dir-hdfs.conf文件
+#### 1.6.1 创建flume-dir-hdfs.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -219,14 +218,14 @@ a3.sources.r3.channels = c3
 a3.sinks.k3.channel = c3
 ```
 
-2. 启动flume
+#### 1.6.2 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-dir-hdfs.conf
 ```
 
-3. 向upload文件夹中添加文件
+#### 1.6.3 向upload文件夹中添加文件
 
 !> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
 
@@ -235,13 +234,13 @@ vi /opt/words.txt
 cp /opt/words.txt /opt/flume/upload/
 ```
 
-4. 查看HDFS上的数据
+#### 1.6.4 查看HDFS上的数据
 
 访问地址：http://node01:9870/
 
-#### 1.1.7 实时监控目录下的多个追加文件
+### 1.7 实时监控目录下的多个追加文件
 
-1. 创建flume-taildir-hdfs.conf文件
+#### 1.7.1 创建flume-taildir-hdfs.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -290,14 +289,14 @@ a3.sources.r3.channels = c3
 a3.sinks.k3.channel = c3
 ```
 
-2. 启动flume
+#### 1.7.2 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-taildir-hdfs.conf
 ```
 
-3. 写入文件
+#### 1.7.3 写入文件
 
 ```bash
 cd /opt/flume/
@@ -310,22 +309,22 @@ cd /opt/flume/files2
 echo log2 >> log2.txt
 ```
 
-4. 查看HDFS上的数据
+#### 1.7.4 查看HDFS上的数据
 
 访问地址：http://node01:9870/
  
 
-#### 1.1.8 采集数据到pulsar
+### 1.8 采集数据到pulsar
 
 代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/pulsar-flume-ng-sink
 
-1. 上传jar
+#### 1.8.1 上传jar
 
 ```bash
 cp /opt/software/flume-ng-pulsar-sink-1.9.0.jar /opt/flume/lib/
 ```
 
-2. 创建flume-netcat-pulsar.conf文件
+#### 1.8.2 创建flume-netcat-pulsar.conf文件
 
 ```bash
 cd /opt/flume/job
@@ -357,27 +356,29 @@ a1.sources.r1.channels = c1
 a1.sinks.k1.channel = c1
 ```
 
-3. 启动flume
+#### 1.8.3 启动flume
 
 ```bash
 cd /opt/flume/
 bin/flume-ng agent --conf conf/ --name a1 --conf-file job/flume-netcat-pulsar.conf
 ```
 
-4. 发送数据
+#### 1.8.4 发送数据
 
 ```bash
 nc localhost 44444
 ```
 
-5. 监听数据
+#### 1.8.5 监听数据
 
 ```bash
 cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-client consume persistent://public/default/test -s "consumer-test"  
 ```
 
-### 1.2 集群
+## 1.2 复制和多路复用
+## 1.3 负载均衡和故障转移
+## 1.4 聚合
 
 ## 2. 源码
 
