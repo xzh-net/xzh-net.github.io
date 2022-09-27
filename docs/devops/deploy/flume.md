@@ -324,7 +324,7 @@ echo log2 >> log2.txt
 
 代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/pulsar-flume-ng-sink
 
-#### 2.5.1 上传jar
+#### 2.5.1 编译上传
 
 ```bash
 cp /opt/software/flume-ng-pulsar-sink-1.9.0.jar /opt/flume/lib/
@@ -547,7 +547,7 @@ ll /opt/flume/data/flume3
 
 #### 2.7.2 自定义拦截器
 
-代码地址
+代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
 
 
 ### 2.8 负载均衡和故障转移
