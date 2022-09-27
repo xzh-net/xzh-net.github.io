@@ -61,6 +61,11 @@ rabbitmqctl set_user_tags root administrator      # 用户授权,administartor�
 cd /var/log/rabbitmq                              # 查看日志
 ```
 
+#### 1.1.5 访问控制台
+
+控制台地址：http://0.0.0.0:15672
+
+
 ### 1.2 编译安装
 
 ## 2. 命令
