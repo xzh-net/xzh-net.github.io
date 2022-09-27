@@ -549,6 +549,119 @@ ll /opt/flume/data/flume3
 
 代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
 
+#### 2.7.2 编译上传
+
+```bash
+cp /opt/software/flume-test-1.0-SNAPSHOT.jar /opt/flume/lib/
+```
+
+#### 2.7.3 node01创建flume1.conf
+
+```bash
+cd /opt/flume/job/group4
+vim flume1.conf
+```
+
+```conf
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+# Describe/configure the source
+a1.sources.r1.type = netcat
+a1.sources.r1.bind = localhost
+a1.sources.r1.port = 44444
+a1.sources.r1.interceptors = i1
+a1.sources.r1.interceptors.i1.type =net.xzh.flume.interceptor.MyInterceptor$Builder
+a1.sources.r1.selector.type = multiplexing
+a1.sources.r1.selector.header = from
+a1.sources.r1.selector.mapping.xzh = c1
+a1.sources.r1.selector.mapping.other = c2
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.hostname = node02
+a1.sinks.k1.port = 4141
+a1.sinks.k2.type=avro
+a1.sinks.k2.hostname = node03
+a1.sinks.k2.port = 4242
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+# Use a channel which buffers events in memory
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1 c2
+a1.sinks.k1.channel = c1
+a1.sinks.k2.channel = c2
+```
+
+#### 2.7.4 node02创建flume2.conf
+
+```bash
+cd /opt/flume/job/group4
+vim flume2.conf
+```
+
+```conf
+a2.sources = r1
+a2.sinks = k1
+a2.channels = c1
+a2.sources.r1.type = avro
+a2.sources.r1.bind = node02
+a2.sources.r1.port = 4141
+a2.sinks.k1.type = logger
+a2.channels.c1.type = memory
+a2.channels.c1.capacity = 1000
+a2.channels.c1.transactionCapacity = 100
+a2.sinks.k1.channel = c1
+a2.sources.r1.channels = c1
+```
+
+#### 2.7.5 node03创建flume3.conf
+
+```bash
+cd /opt/flume/job/group4
+vim flume3.conf
+```
+
+```conf
+a3.sources = r1
+a3.sinks = k1
+a3.channels = c1
+a3.sources.r1.type = avro
+a3.sources.r1.bind = node03
+a3.sources.r1.port = 4242
+a3.sinks.k1.type = logger
+a3.channels.c1.type = memory
+a3.channels.c1.capacity = 1000
+a3.channels.c1.transactionCapacity = 100
+a3.sinks.k1.channel = c1
+a3.sources.r1.channels = c1
+```
+
+#### 2.7.6 启动flume
+
+avro通信框架需要先启动服务端，所以需要先启动source端
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a3 --conf-file job/group4/flume3.conf -Dflume.root.logger=INFO,console  # node03执行
+bin/flume-ng agent --conf conf/ --name a2 --conf-file job/group4/flume2.conf -Dflume.root.logger=INFO,console  # node02执行
+bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group4/flume1.conf -Dflume.root.logger=INFO,console  # node01执行
+```
+
+#### 2.7.7 发送数据
+
+```bash
+nc localhost 44444   # node01执行，输入xzh
+```
+
+#### 2.7.8 查看数据
+
+node02，node03查看控制台数据
 
 ### 2.8 负载均衡和故障转移
 
