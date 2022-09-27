@@ -342,7 +342,7 @@ docker run -dit --name memcached -m 128m -c 16382 -p 11211:11211 -d memcached:1.
 
 可视化
 ```bash
-docker run -dit -p 8080:8080 -e MEMADMIN_USERNAME='admin' -e MEMADMIN_PASSWORD='admin' -e MEMCACHED_HOST='172.17.17.200' -e MEMCACHED_PORT='11211' vesica/memadmin:latest
+docker run -dit -p 8080:8080 -e MEMADMIN_USERNAME='admin' -e MEMADMIN_PASSWORD='admin' -e MEMCACHED_HOST='172.17.17.200' -e MEMCACHED_PORT='11211' kitsudo/memadmin:latest
 # 启动后报错进入容器，文件最后添加一行
 vim /etc/apache2/apache2.conf
 ServerName localhost:80
@@ -1010,7 +1010,7 @@ rabbitmq-plugins enable rabbitmq_mqtt
 rabbitmq-plugins enable rabbitmq_web_mqtt
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
 # 添加用户
-rabbitmqctl add_user admin 123456                   
+rabbitmqctl add_user admin 123456
 rabbitmqctl set_user_tags admin administrator
 ```
 
