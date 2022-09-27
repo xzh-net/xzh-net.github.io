@@ -54,11 +54,10 @@ CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 
 ```bash
 systemctl start rabbitmq-server
-rabbitmq-plugins enable rabbitmq_management       # 启用管理插件
-
-rabbitmqctl add_user root 123456                  # 添加用户
-rabbitmqctl set_user_tags root administrator      # 用户授权,administartor为管理员权限，四种权限【management、policymaker、monitoring、administrator】
-cd /var/log/rabbitmq                              # 查看日志
+rabbitmq-plugins enable rabbitmq_management        # 启用管理插件
+rabbitmqctl add_user admin 123456                  # 添加用户
+rabbitmqctl set_user_tags admin administrator      # 用户授权,administartor为管理员权限，四种权限【management、policymaker、monitoring、administrator】
+cd /var/log/rabbitmq                               # 查看日志
 ```
 
 #### 1.1.5 访问控制台
