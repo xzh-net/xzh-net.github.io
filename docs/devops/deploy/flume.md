@@ -382,7 +382,7 @@ cd /opt/apache-pulsar-2.10.1/bin
 ./pulsar-client consume persistent://public/default/test -s "consumer-test"  
 ```
 
-### 2.6 复制和多路复用
+### 2.6 复制
 
 #### 2.6.1 需求
 
@@ -539,13 +539,20 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group1/flume-file-flum
 ll /opt/flume/data/flume3
 ```
 
-### 2.7 负载均衡和故障转移
+### 2.7 多路复用
 
 #### 2.7.1 需求
 
+使用Flume采集服务器本地日志，需要按照日志类型的不同，将不同种类的日志发往不同的分析系统
+
+
+### 2.8 负载均衡和故障转移
+
+#### 2.8.1 需求
+
 使用Flume1监控一个端口，其sink组中的sink分别对接Flume2和Flume3，采用FailoverSinkProcessor，实现故障转移的功能
 
-#### 2.7.2 创建flume-netcat-flume.conf
+#### 2.8.2 创建flume-netcat-flume.conf
 
 ```bash
 cd /opt/flume/job/group2
@@ -584,7 +591,7 @@ a1.sinks.k1.channel = c1
 a1.sinks.k2.channel = c1
 ```
 
-#### 2.7.3 创建flume-flume-console1.conf
+#### 2.8.3 创建flume-flume-console1.conf
 
 ```bash
 cd /opt/flume/job/group2
@@ -611,7 +618,7 @@ a2.sources.r1.channels = c1
 a2.sinks.k1.channel = c1
 ```
 
-#### 2.7.4 创建flume-flume-console2.conf
+#### 2.8.4 创建flume-flume-console2.conf
 
 ```bash
 cd /opt/flume/job/group2
@@ -638,7 +645,7 @@ a3.sources.r1.channels = c2
 a3.sinks.k1.channel = c2
 ```
 
-#### 2.7.5 启动flume
+#### 2.8.5 启动flume
 
 avro通信框架需要先启动服务端，所以需要先启动source端
 
@@ -649,17 +656,17 @@ bin/flume-ng agent --conf conf/ --name a2 --conf-file job/group2/flume-flume-con
 bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group2/flume-netcat-flume.conf
 ```
 
-#### 2.7.6 发送数据
+#### 2.8.6 发送数据
 
 ```bash
 nc localhost 44444
 ```
 
-#### 2.7.7 查看Flume2和Flume3日志
+#### 2.8.7 查看Flume2和Flume3日志
 
 模拟异常kill掉Flume2进程，官场Flume3控制台日志
 
-#### 2.7.8 负载均衡
+#### 2.8.8 负载均衡
 
 修改flume-netcat-flume.conf
 
@@ -679,15 +686,15 @@ a1.sinkgroups.g1.processor.selector = random
 a1.sinkgroups.g1.processor.selector.maxTimeOut = 30000 # 退避算法最大值
 ```
 
-### 2.8 聚合
+### 2.9 聚合
 
-#### 2.8.1 需求
+#### 2.9.1 需求
 
 - node01上的Flume-1监控文件/opt/apache-hive-3.1.2/logs/hive.log
 - node02上的Flume-2监控某一个端口的数据流
 - Flume-1与Flume-2将数据发送给node03上的Flume-3，Flume-3将最终数据打印到控制台
 
-#### 2.8.2 Flume分发
+#### 2.9.2 Flume分发
 
 ```bash
 cd /opt/flume
@@ -695,7 +702,7 @@ scp -r /opt/flume root@node02:$PWD
 scp -r /opt/flume root@node03:$PWD
 ```
 
-#### 2.8.3 node01创建flume1-logger-flume.conf
+#### 2.9.3 node01创建flume1-logger-flume.conf
 
 ```bash
 cd /opt/flume/job/group3
@@ -724,7 +731,7 @@ a1.sources.r1.channels = c1
 a1.sinks.k1.channel = c1
 ```
 
-#### 2.8.4 node02创建flume2-netcat-flume.conf
+#### 2.9.4 node02创建flume2-netcat-flume.conf
 
 ```bash
 cd /opt/flume/job/group3
@@ -754,7 +761,7 @@ a2.sinks.k1.channel = c1
 ```
 
 
-#### 2.8.5 node03创建flume3-flume-logger.conf
+#### 2.9.5 node03创建flume3-flume-logger.conf
 
 ```bash
 cd /opt/flume/job/group3
@@ -781,7 +788,7 @@ a3.sources.r1.channels = c1
 a3.sinks.k1.channel = c1
 ```
 
-#### 2.8.6 启动flume
+#### 2.9.6 启动flume
 
 avro通信框架需要先启动服务端，所以需要先启动source端
 
@@ -792,14 +799,14 @@ bin/flume-ng agent --conf conf/ --name a2 --conf-file job/group3/flume2-netcat-f
 bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group3/flume1-logger-flume.conf                                   # node01执行
 ```
 
-#### 2.8.7 发送数据
+#### 2.9.7 发送数据
 
 ```bash
 echo 'hello' > /opt/flume/data/group3.log   # node01执行
 nc node02 44444                             # node02执行
 ```
 
-#### 2.8.8 查看数据
+#### 2.9.8 查看数据
 
 node03查看控制台数据
 
