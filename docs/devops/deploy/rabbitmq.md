@@ -6,26 +6,23 @@ RabbitMQ是一个开源的消息代理的队列服务器，用来通过普通协
 
 ## 1. 安装
 
-### 1.1 RPM安装
+### 1.1 下载上传
 
-#### 1.1.1 下载
+rabbitmq下载地址: https://github.com/rabbitmq/rabbitmq-server/releases/tag/v3.9.12
 
-- rabbitmq-server: https://github.com/rabbitmq/rabbitmq-server/releases/tag/v3.9.12
-- erlang-rpm: https://github.com/rabbitmq/erlang-rpm/releases/tag/v23.3.4.10
-
-#### 1.1.2 安装
+erlang下载地址: https://github.com/rabbitmq/erlang-rpm/releases/tag/v23.3.4.10
 
 ```bash
-yum install -y gcc socat  # 安装依赖
-cd /opt
-mkdir rabbitmq  # 上传文件
-cd rabbitmq
+yum install -y gcc socat    # 安装依赖
+mkdir -p /opt/rabbitmq
+cd /opt/rabbitmq            # 上传文件
 rpm -ivh erlang-23.3.4.10-1.el7.x86_64.rpm
 rpm -ivh rabbitmq-server-3.9.12-1.el7.noarch.rpm
 ```
 
-#### 1.1.3 修改配置
+### 1.2 修改配置
 
+配置参数
 - https://github.com/rabbitmq/rabbitmq-server/blob/master/deps/rabbit/docs/rabbitmq.conf.example
 - https://github.com/rabbitmq/rabbitmq-server/blob/master/deps/rabbit/docs/advanced.config.example
 - https://www.rabbitmq.com/configure.html#config-items
@@ -50,7 +47,7 @@ vi rabbitmq-defaults
 CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 ```
 
-#### 1.1.4 启动服务
+### 1.3 启动服务
 
 ```bash
 systemctl start rabbitmq-server
@@ -60,12 +57,9 @@ rabbitmqctl set_user_tags admin administrator      # 用户授权,administartor�
 cd /var/log/rabbitmq                               # 查看日志
 ```
 
-#### 1.1.5 访问控制台
+### 1.4 WebUI
 
-控制台地址：http://0.0.0.0:15672
-
-
-### 1.2 编译安装
+访问地址：http://0.0.0.0:15672
 
 ## 2. 命令
 
@@ -194,7 +188,7 @@ systemctl start rabbitmq-server
 
 #### 3.2.5 加入集群
 
-在node2和node3分别执行以下命令，使rabbit-node2加入node1, rabbit-node3加入node1 --ram标识内存节点，集群必须保证有一个磁盘节点
+在node2和node3分别执行以下命令，使rabbit-node2加入node1，rabbit-node3加入node1，--ram标识内存节点，集群必须保证有一个磁盘节点
 
 ```bash
 rabbitmqctl stop_app        
