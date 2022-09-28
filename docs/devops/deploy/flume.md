@@ -920,7 +920,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group3/flume1-logger-f
 
 ```bash
 echo 'hello' > /opt/flume/data/group3.log   # node01执行
-nc node02 44444                             # node02执行
+nc localhost 44444                          # node02执行
 ```
 
 #### 2.9.8 查看数据
