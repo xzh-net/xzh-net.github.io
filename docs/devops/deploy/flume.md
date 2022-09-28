@@ -54,7 +54,7 @@ source /etc/profile
 
 ## 2. 案例
 
-### 2.1 监控端口数据测试
+### 2.1 监控端口数据
 
 #### 2.1.1 创建flume-netcat-logger.conf文件
 
@@ -320,7 +320,7 @@ echo log2 >> log2.txt
 访问地址：http://node01:9870/
  
 
-### 2.5 采集数据到pulsar
+### 2.5 采集数据写入pulsar
 
 代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/pulsar-flume-ng-sink
 
@@ -928,6 +928,56 @@ nc node02 44444                             # node02执行
 node03查看控制台数据
 
 ### 2.10 自定义source
+
+#### 2.10.1 需求
+
+使用flume接收数据，并给每条数据添加前缀，输出到控制台。前缀可从flume配置文件中配置
+
+#### 2.10.2 代码编写
+
+代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
+
+#### 2.10.3 编译上传
+
+```bash
+cp /opt/software/flume-test-1.0-SNAPSHOT.jar /opt/flume/lib/
+```
+
+#### 2.10.4 创建flume1.conf
+
+```bash
+cd /opt/flume/job/group5
+vim flume1.conf
+```
+
+```conf
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+# Describe/configure the source
+a1.sources.r1.type = net.xzh.flume.source.MySource
+a1.sources.r1.delay = 2000
+a1.sources.r1.prefix = start-
+a1.sources.r1.subfix = -end
+#a1.sources.r1.field = atguigu
+# Describe the sink
+a1.sinks.k1.type = logger
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+#### 2.10.5 启动flume
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group5/flume1.conf -Dflume.root.logger=INFO,console
+```
 
 ### 2.11 自定义sink
 
