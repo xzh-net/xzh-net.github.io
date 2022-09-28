@@ -320,7 +320,7 @@ echo log2 >> log2.txt
 访问地址：http://node01:9870/
  
 
-### 2.5 采集数据写入pulsar
+### 2.5 采集数据写入Pulsar
 
 代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/pulsar-flume-ng-sink
 
