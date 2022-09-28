@@ -781,7 +781,7 @@ nc localhost 44444
 
 #### 2.8.7 查看Flume2和Flume3日志
 
-模拟异常kill掉Flume2进程，官场Flume3控制台日志
+模拟异常kill掉Flume2进程，观察Flume3控制台日志
 
 #### 2.8.8 负载均衡
 
