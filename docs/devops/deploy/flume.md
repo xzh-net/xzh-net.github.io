@@ -981,6 +981,60 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group5/flume1.conf -Df
 
 ### 2.11 自定义sink
 
+#### 2.11.1 需求
+
+使用flume接收数据，并在Sink端给每条数据添加前缀和后缀，输出到控制台。前后缀可在flume任务配置文件中配置
+
+#### 2.11.2 代码编写
+
+代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
+
+#### 2.11.3 编译上传
+
+```bash
+cp /opt/software/flume-test-1.0-SNAPSHOT.jar /opt/flume/lib/
+```
+
+#### 2.11.4 创建flume1.conf
+
+```bash
+cd /opt/flume/job/group6
+vim flume1.conf
+```
+
+```conf
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+# Describe/configure the source
+a1.sources.r1.type = netcat
+a1.sources.r1.bind = localhost
+a1.sources.r1.port = 44444
+# Describe the sink
+a1.sinks.k1.type = net.xzh.flume.sink.MySink
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+#### 2.11.5 启动flume
+
+```bash
+cd /opt/flume/
+bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group6/flume1.conf -Dflume.root.logger=INFO,console
+```
+
+#### 2.11.6 发送数据
+
+```bash
+nc localhost 44444
+```
+
 ## 3. 源码
 
 ### 3.1 修改flume-taildir-source
