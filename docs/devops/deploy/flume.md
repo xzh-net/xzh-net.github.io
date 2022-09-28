@@ -960,7 +960,6 @@ a1.sources.r1.type = net.xzh.flume.source.MySource
 a1.sources.r1.delay = 2000
 a1.sources.r1.prefix = start-
 a1.sources.r1.subfix = -end
-#a1.sources.r1.field = atguigu
 # Describe the sink
 a1.sinks.k1.type = logger
 # Use a channel which buffers events in memory
