@@ -390,6 +390,13 @@ drop database if exists sonardb;  # 删除库
 select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 库锁释放
 ```
 
+无法删除正在连接中的数据库
+
+```sql
+UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
+```
+
 ### 3.2 备份恢复
 
 #### 3.2.1 逻辑备份
