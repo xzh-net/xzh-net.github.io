@@ -20,9 +20,8 @@ chkconfig docker on # 开机启动
 ```bash
 curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
-
-#https://hub.docker.com/
 ```
 
 ### 1.3 修改设置
@@ -145,9 +144,9 @@ docker cp [local_path] rabbitmq:/[container_path]/  # 将主机文件copy至rabb
 docker cp [local_path] rabbitmq:/[container_path]   # 将主机文件copy至rabbitmq容器，目录重命名为[container_path]（注意与非重命名copy的区别）
 ```
 
-
-
 ## 3. 镜像仓库
+
+官网地址：https://hub.docker.com/
 
 ### 3.1 容器
 
@@ -164,10 +163,9 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 ```
 
 ```bash
-vim /usr/lib/systemd/system/docker.service #编辑文件
-# 添加配置文件内容
+vim /usr/lib/systemd/system/docker.service
+# 添加配置文件内容，xxx是代表原有的参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
 ExecStart= xxx -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
-xxx是代表原有的参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
 
 systemctl daemon-reload #加载docker守护线程
 systemctl restart docker #重启docker
