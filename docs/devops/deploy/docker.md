@@ -38,7 +38,7 @@ vi /etc/docker/daemon.json
 
 ```conf
 {
-    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
+    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn","https://registry.docker-cn.com"],
     "insecure-registries": ["192.168.3.200:5000"],
     "exec-opts":["native.cgroupdriver=systemd"],
     "data-root": "/data/docker"
@@ -2257,7 +2257,7 @@ services:
       - "8080:8080"
       - "7077:7077"
     volumes:
-      - ~/spark:/data
+      - /home/data/spark:/data
     environment:
       - INIT_DAEMON_STEP=setup_spark
   spark-worker-1:
@@ -2268,7 +2268,7 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ~/spark:/data
+      - /home/data/spark:/data
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
   spark-worker-2:
@@ -2279,7 +2279,7 @@ services:
     ports:
       - "8082:8081"
     volumes:
-      - ~spark:/data
+      - /home/data/spark:/data
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
 ```
@@ -2288,14 +2288,23 @@ services:
 
 ```bash
 sudo docker-compose -f spark.yml up -d
+sudo docker exec -it [容器的id] /bin/bash
+ls /spark/bin
+/spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
 ```
 
 访问地址：http://127.0.0.1:8080
 
-```bash
-sudo docker exec -it [器的id] /bin/bash
-ls /spark/bin
-/spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
 
+测试：创建RDD与filter处理
+
+```bash
+val rdd=sc.parallelize(Array(1,2,3,4,5,6,7,8))  # 创建一个RDD
+rdd.collect()                                   # 打印rdd内容
+rdd.partitions.size                             # 查询分区数
+val rddFilter=rdd.filter(_ > 5)                 # 选出大于5的数值
+rddFilter.collect()                             # 打印rddFilter内容
+:quit                                           # 退出spark-shell
+```
 
 
