@@ -2056,64 +2056,64 @@ pom.xml
   <java.version>1.8</java.version>
   <skipTests>true</skipTests>
   <docker.baseImage>openjdk:8-jre-alpine</docker.baseImage>
-      <docker.volumes>/tmp</docker.volumes>
-      <docker.host>http://172.17.17.148:2375</docker.host>
-      <docker.image.prefix>172.17.17.148:88/ec_platform</docker.image.prefix>
-      <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
-      <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
+  <docker.volumes>/tmp</docker.volumes>
+  <docker.host>http://172.17.17.148:2375</docker.host>
+  <docker.image.prefix>172.17.17.148:88/ec_platform</docker.image.prefix>
+  <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
+  <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
 </properties>
 
 <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <executions>
-					<execution>
-						<id>build-image</id>
-						<phase>package</phase>
-						<goals>
-							<goal>build</goal>
-						</goals>
-					</execution>
-				</executions>
-                <configuration>
-                	<serverId>docker148-harbor88</serverId>
-                	<dockerHost>${docker.host}</dockerHost>
-                    <imageName>${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
-                    <pushImage>true</pushImage>
-                    <baseImage>${docker.baseImage}</baseImage>
-                    <volumes>${docker.volumes}</volumes>
-                    <env>
-                        <JAVA_OPTS>${docker.java.opts}</JAVA_OPTS>
-                    </env>
-                    <runs>
-                    	<run>apk add --update ttf-dejavu fontconfig</run>
-                    </runs>
-                    <entryPoint>["sh","-c","java $JAVA_OPTS ${docker.java.security.egd} -jar /${project.build.finalName}.jar"]</entryPoint>
-                    <resources>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.jar</include>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
-        </plugins>
-        <finalName>${project.artifactId}</finalName>
-    </build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <serverId>docker148-harbor88</serverId>
+              <dockerHost>${docker.host}</dockerHost>
+                <imageName>${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
+                <pushImage>true</pushImage>
+                <baseImage>${docker.baseImage}</baseImage>
+                <volumes>${docker.volumes}</volumes>
+                <env>
+                    <JAVA_OPTS>${docker.java.opts}</JAVA_OPTS>
+                </env>
+                <runs>
+                  <run>apk add --update ttf-dejavu fontconfig</run>
+                </runs>
+                <entryPoint>["sh","-c","java $JAVA_OPTS ${docker.java.security.egd} -jar /${project.build.finalName}.jar"]</entryPoint>
+                <resources>
+                    <resource>
+                        <targetPath>/</targetPath>
+                        <directory>${project.build.directory}</directory>
+                        <include>${project.build.finalName}.jar</include>
+                    </resource>
+                </resources>
+            </configuration>
+        </plugin>
+    </plugins>
+    <finalName>${project.artifactId}</finalName>
+</build>
 ```
 
 ## 5. docker-compose
@@ -2188,7 +2188,7 @@ docker-compose -f docker-compose-env.yml down
 ```
 
 
-### 5.1 elk-762.yml
+### 5.2 elk-762.yml
 
 ```bash
 vi docker-compose-elk.yml
@@ -2239,3 +2239,63 @@ services:
       - 4562:4562
       - 4563:4563
 ```
+
+### 5.3 spark.yml
+
+```bash
+vi spark.yml
+```
+
+```yml
+version: '3.8'
+
+services:
+  spark-master:
+    image: bde2020/spark-master:3.2.0-hadoop3.2
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - ~/spark:/data
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+  spark-worker-1:
+    image: bde2020/spark-worker:3.2.0-hadoop3.2
+    container_name: spark-worker-1
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    volumes:
+      - ~/spark:/data
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+  spark-worker-2:
+    image: bde2020/spark-worker:3.2.0-hadoop3.2
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081"
+    volumes:
+      - ~spark:/data
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+```
+
+启动
+
+```bash
+sudo docker-compose -f spark.yml up -d
+```
+
+访问地址：http://127.0.0.1:8080
+
+```bash
+sudo docker exec -it [器的id] /bin/bash
+ls /spark/bin
+/spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
+
+
+
