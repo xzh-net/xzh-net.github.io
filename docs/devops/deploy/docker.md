@@ -24,13 +24,11 @@ cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
 ```
 
-### 1.3 修改设置
+### 1.3 修改镜像源
 
-- Docker官方中国区： https://registry.docker-cn.com
 - 网易：http://hub-mirror.c.163.com
+- Docker官方中国区：https://registry.docker-cn.com
 - 中国科学技术大学：https://docker.mirrors.ustc.edu.cn
-
-更换镜像源和修改镜像默认存储位置
 
 ```bash
 vi /etc/docker/daemon.json
@@ -38,17 +36,15 @@ vi /etc/docker/daemon.json
 
 ```conf
 {
-    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn","https://registry.docker-cn.com"],
+    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
     "insecure-registries": ["192.168.3.200:5000"],
     "exec-opts":["native.cgroupdriver=systemd"],
     "data-root": "/data/docker"
 }
 ```
 
-非初始化环境迁移镜像
-
 ```bash
-mv /var/lib/docker /data
+mv /var/lib/docker /data  # 非初始化环境迁移镜像
 ```
 
 重启服务
@@ -2287,16 +2283,13 @@ services:
 启动
 
 ```bash
-sudo docker-compose -f spark.yml up -d
-sudo docker exec -it [容器的id] /bin/bash
+docker-compose -f spark.yml up -d
+docker exec -it [容器的id] /bin/bash
 ls /spark/bin
 /spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
 ```
 
 访问地址：http://127.0.0.1:8080
-
-
-测试：创建RDD与filter处理
 
 ```bash
 val rdd=sc.parallelize(Array(1,2,3,4,5,6,7,8))  # 创建一个RDD
