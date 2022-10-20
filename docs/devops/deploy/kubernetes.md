@@ -188,7 +188,7 @@ KUBELET_CGROUP_ARGS="--cgroup-driver=systemd"
 KUBE_PROXY_MODE="ipvs"
 ```
 
-5. 设置kubelet开机自启
+4. 设置kubelet开机自启
 
 ```bash
 systemctl enable kubelet
