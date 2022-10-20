@@ -4,9 +4,9 @@
 
 ### 1.1 集群规划
 
-| 主机名称| IP地址 | 安装的软件 |
-| ----- | ----- | ----- |
-| k8s-master| 192.168.2.201 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3）、kube-apiserver:v1.17.4、kube-controller-manager:v1.17.4、kube-scheduler:v1.17.4 |
+| 主机名称 | IP地址 | 安装的软件 |
+| ------- | ------- | ------- |
+| k8s-master | 192.168.2.201 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3）、kube-apiserver（1.17.4）、kube-controller-manager（1.17.4）、kube-scheduler（1.17.4） |
 | k8s-node1 | 192.168.2.202 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3） |
 | k8s-node2 | 192.168.2.203 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3） |
 
@@ -234,7 +234,7 @@ kubeadm init --kubernetes-version=v1.17.4 --apiserver-advertise-address=192.168.
 kubeadm token create --print-join-command   # 查看集群加入命令
 ```
 
-2. 创建配置问渐渐
+2. 创建配置文件
 
 ```bash
 mkdir -p $HOME/.kube
