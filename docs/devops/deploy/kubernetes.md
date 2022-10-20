@@ -1,61 +1,99 @@
 # Kubernetes
 
-## 1. 集群
+## 1. 集群搭建
+
+### 1.1 集群规划
 
 | 主机名称| IP地址 | 安装的软件 |
 | ----- | ----- | ----- |
-| k8s-master| 192.168.3.200 | kube-apiserver、kube-controller-manager、kubescheduler、docker、etcd、calico，NFS |
-| k8s-node1 | 192.168.3.201 | kubelet、kubeproxy、Docker18.06.3-ce |
-| k8s-node2 | 192.168.3.202 | kubelet、kubeproxy、Docker18.06.3-ce |
+| k8s-master| 192.168.2.201 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3）、kube-apiserver:v1.17.4、kube-controller-manager:v1.17.4、kube-scheduler:v1.17.4 |
+| k8s-node1 | 192.168.2.202 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3） |
+| k8s-node2 | 192.168.2.203 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3） |
 
-### 1.1 三台机器完成
+### 1.2 基础环境准备(三台机器)
 
-```bash
-vi /etc/resolv.conf  nameserver 114.114.114.114 # 配置DNS
-vi /etc/sysconfig/network-scripts/ifcfg-enp0s3  # 修改ip
-service network restart
-```
-
-修改三台机器的hostname及hosts文件
+#### 1.2.1 修改主机名
 
 ```bash
 hostnamectl set-hostname k8s-master
-hostnamectl set-hostname k8s-node1 
-hostnamectl set-hostname k8s-node2
-
-cat >> /etc/hosts  <<EOF
-192.168.3.200 k8s-master 
-192.168.3.201 k8s-node1 
-192.168.3.202 k8s-node2
-EOF
+hostnamectl set-hostname k8s-node01 
+hostnamectl set-hostname k8s-node02
 ```
 
-关闭防火墙和关闭SELinux
+#### 1.2.2 主机名解析
+
+```bash
+vim /etc/hosts
+# 添加
+192.168.2.201 node01 node01.xuzhihao.net k8s-master
+192.168.2.202 node02 node02.xuzhihao.net k8s-node01 
+192.168.2.203 node03 node03.xuzhihao.net k8s-node02
+```
+
+#### 1.2.3 时间同步
+
+```bash
+systemctl start chronyd
+systemctl enable chronyd
+```
+
+#### 1.2.4 关闭防火墙
+
 ```bash
 systemctl stop firewalld
 systemctl disable firewalld
-setenforce 0
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config 
+systemctl stop iptables
+systemctl disable iptables
 ```
 
-网桥过滤配置文件
+#### 1.2.5 禁用selinux
+
 ```bash
-vi /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-ip6tables = 1 
-net.bridge.bridge-nf-call-iptables = 1
-net.ipv4.ip_forward = 1 
-vm.swappiness = 0
-
-modprobe br_netfilter     # 加载br_netfilter模块
-lsmod | grep br_netfilter # 查看是否加载
-
-sysctl -p /etc/sysctl.d/k8s.conf # 加载网桥
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-kube-proxy开启ipvs
+#### 1.2.6 禁用swap分区
+
+```bash
+vi /etc/fstab 
+# 注释掉以下字段
+/dev/mapper/cl-swap swap swap defaults 0 0
+```
+
+#### 1.2.7 修改linux内核参数
+
+1. 添加网桥过滤和地址转发
+
+```bash
+vi /etc/sysctl.d/kubernetes.conf
+# 添加内容
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+```
+
+```bash
+sysctl -p   # 重载配置
+```
+
+2. 加载网桥模块
+
+```bash
+modprobe br_netfilter       # 加载br_netfilter模块
+lsmod | grep br_netfilter   # 查看是否加载
+```
+
+#### 1.2.8 配置ipvs功能
+
+1. 安装ipset和ipvsadm
+
 ```bash
 yum -y install ipset ipvsadm
+```
 
+2. 添加需要加载的模块写入脚本文件 
+
+```bash
 cat > /etc/sysconfig/modules/ipvs.modules <<EOF
 #!/bin/bash
 modprobe -- ip_vs
@@ -64,27 +102,65 @@ modprobe -- ip_vs_wrr
 modprobe -- ip_vs_sh
 modprobe -- nf_conntrack_ipv4
 EOF
-# 授权、运行、检查是否加载
-chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
-
-vim /etc/sysconfig/kubelet
-KUBELET_EXTRA_ARGS="--cgroup-driver=systemd" # 为了实现docker使用的cgroupdriver与kubelet使用的cgroup的一致性
-KUBE_PROXY_MODE="ipvs"
 ```
 
-所有节点关闭swap
+3. 为脚本文件添加执行权限
 
 ```bash
-swapoff -a 临时关闭
-vi /etc/fstab 永久关闭
-#注释掉以下字段
-/dev/mapper/cl-swap swap swap defaults 0 0
+chmod +x /etc/sysconfig/modules/ipvs.modules
 ```
 
-安装kubelet、kubeadm、kubectl
-```bash
-yum clean all
+4. 执行脚本文件
 
+```bash
+/bin/bash /etc/sysconfig/modules/ipvs.modules
+```
+
+5. 查看对应的模块是否加载成功
+
+```bash
+lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+```
+
+### 1.3 安装docker(三台机器)
+
+1. 在线安装
+
+```bash
+yum install -y yum-utils device-mapper-persistent-data lvm2
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
+systemctl start docker  
+chkconfig docker on # 开机启动
+```
+
+2. 修改镜像源
+
+```bash
+vi /etc/docker/daemon.json
+```
+
+```conf
+{
+    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
+    "exec-opts":["native.cgroupdriver=systemd"],
+    "data-root": "/data/docker"
+}
+```
+
+3. 启动服务
+
+```bash
+sudo systemctl daemon-reload 
+sudo systemctl restart docker 
+```
+
+
+### 1.4 安装kubernetes组件(三台机器)
+
+1. 修改镜像源
+
+```bash
 cat > /etc/yum.repos.d/kubernetes.repo <<EOF
 [kubernetes]
 name=Kubernetes
@@ -95,77 +171,93 @@ repo_gpgcheck=0
 gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
 https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
 EOF
-
-yum install -y kubelet kubeadm kubectl
-yum remove -y kubelet kubeadm kubectl
-yum install -y kubelet-1.17.4 kubeadm-1.17.4 kubectl-1.17.4
-
-#kubelet设置开机启动（注意：先不启动，现在启动的话会报错）
-systemctl enable kubelet
-
-kubelet --version
-
 ```
 
-安装docker
+2. 安装kubeadm、kubelet和kubectl
 
 ```bash
-yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
-systemctl start docker
-chkconfig docker on
-
-vi /etc/docker/daemon.json
-
-{
-    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
-    "insecure-registries": ["192.168.3.200:5000"],
-    "exec-opts":["native.cgroupdriver=systemd"]
-}
-
-vi /usr/lib/systemd/system/docker.service
-ExecStart=/usr/bin/dockerd  # 如果原文件此行后面有-H选项，请删除-H(含)后面所有内容。
-
-sudo systemctl daemon-reload
-sudo systemctl restart docker
+yum install --setopt=obsoletes=0 kubeadm-1.17.4-0 kubelet-1.17.4-0 kubectl-1.17.4-0 -y
 ```
 
-镜像准备
+3.  配置kubelet的cgroup
+
+```bash
+vi /etc/sysconfig/kubelet
+# 添加配置，为了实现docker使用的cgroupdriver与kubelet使用的cgroup的一致性
+KUBELET_CGROUP_ARGS="--cgroup-driver=systemd"
+KUBE_PROXY_MODE="ipvs"
+```
+
+5. 设置kubelet开机自启
+
+```bash
+systemctl enable kubelet
+```
+
+### 1.5 准备集群镜像
+
+在安装kubernetes集群之前，必须要提前准备好集群需要的镜像，所需镜像可以通过下面命令查看
+
+```bash
+kubeadm config images list
+```
+
+此镜像在kubernetes的仓库中,由于网络原因,无法连接，下面提供了一种替代方案
 
 ```bash
 images=(
-	kube-apiserver:v1.17.4
-	kube-controller-manager:v1.17.4
-	kube-scheduler:v1.17.4
-	kube-proxy:v1.17.4
-	pause:3.1
-	etcd:3.4.3-0
-	coredns:1.6.5
+  kube-apiserver:v1.17.4
+  kube-controller-manager:v1.17.4
+  kube-scheduler:v1.17.4
+  kube-proxy:v1.17.4
+  pause:3.1
+  etcd:3.4.3-0
+  coredns:1.6.5
 )
 
 for imageName in ${images[@]} ; do
-	docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
-	docker tag  registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
-	docker rmi  registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+  docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+  docker tag  registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+  docker rmi  registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
 done
-
 ```
 
 
-### 1.2 Master节点集群初始化
+### 1.6 集群初始化
+
+#### 1.6.1 Master节点执行
+
+1. 创建集群
 
 ```bash
-kubeadm init --kubernetes-version=v1.17.4 --apiserver-advertise-address=192.168.3.200 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12 
+kubeadm init --kubernetes-version=v1.17.4 --apiserver-advertise-address=192.168.2.201 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12 
 kubeadm token create --print-join-command   # 查看集群加入命令
 ```
 
-配置kubectl工具
+2. 创建配置问渐渐
+
 ```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
+#### 1.6.2 Node节点执行
+
+1. 加入集群
+
+```bash
+kubeadm join 192.168.2.201:6443 \ 
+  --token 8507uc.o0knircuri8etnw2 \
+  --discovery-token-ca-cert-hash \
+  sha256:acc37967fb5b0acf39d7598f8a439cc7dc88f439a3f4d0c9cae88e7901b9d3f
+```
+
+2. 查看集群状态
+
+```bash
+kubectl get nodes
+```
 
 ### 1.3 插件安装
 
