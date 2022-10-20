@@ -16,7 +16,6 @@
 - 应用部署
   - [Docker](devops/deploy/docker)
   - [Kubernetes](devops/deploy/kubernetes)
-  - [Minikube](devops/deploy/minikube)
   - [Nginx](devops/deploy/nginx)
   - [Keepalived](devops/deploy/keepalived)
   - [HAProxy](devops/deploy/haproxy)
@@ -29,6 +28,7 @@
   - [Prometheus](devops/deploy/prometheus)
   - [Elastic Stack](devops/deploy/elk)
   - [Zookeeper](devops/deploy/zookeeper)
+  - [Etcd](devops/deploy/etcd)
   - [Kafka](devops/deploy/kafka)
   - [RabbitMQ](devops/deploy/rabbitmq)
   - [RocketMQ](devops/deploy/rocketmq)
