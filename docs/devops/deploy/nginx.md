@@ -1150,7 +1150,7 @@ source ~/.bashrc
 ```
 
 
-#### 4.2.4 分配证书
+#### 4.2.3 分配证书
 
 ```bash
 acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
