@@ -4,11 +4,11 @@
 
 ### 1.1 集群规划
 
-| 主机名称 | IP地址 | 安装的软件 |
+| 主机名称 | IP地址 | 配置 |
 | ------- | ------- | ------- |
-| k8s-master | 192.168.2.201 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3）、kube-apiserver（1.17.4）、kube-controller-manager（1.17.4）、kube-scheduler（1.17.4） |
-| k8s-node1 | 192.168.2.202 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3） |
-| k8s-node2 | 192.168.2.203 | kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）、docker（18.06.3） |
+| k8s-master | 192.168.2.201 | 2CPU，2G内存，20G硬盘 |
+| k8s-node1 | 192.168.2.202 | 2CPU，2G内存，20G硬盘 |
+| k8s-node2 | 192.168.2.203 | 2CPU，2G内存，20G硬盘 |
 
 ### 1.2 基础环境准备(三台机器)
 
@@ -25,9 +25,9 @@ hostnamectl set-hostname k8s-node02
 ```bash
 vim /etc/hosts
 # 添加
-192.168.2.201 node01 node01.xuzhihao.net k8s-master
-192.168.2.202 node02 node02.xuzhihao.net k8s-node01 
-192.168.2.203 node03 node03.xuzhihao.net k8s-node02
+192.168.2.201 k8s-master
+192.168.2.202 k8s-node01 
+192.168.2.203 k8s-node02
 ```
 
 #### 1.2.3 时间同步
@@ -225,16 +225,14 @@ done
 
 ### 1.6 集群初始化
 
-#### 1.6.1 Master节点执行
-
-1. 创建集群
+#### 1.6.1 Master节点创建集群
 
 ```bash
 kubeadm init --kubernetes-version=v1.17.4 --apiserver-advertise-address=192.168.2.201 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12 
 kubeadm token create --print-join-command   # 查看集群加入命令
 ```
 
-2. 创建配置文件
+创建配置文件
 
 ```bash
 mkdir -p $HOME/.kube
@@ -242,55 +240,59 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-#### 1.6.2 Node节点执行
-
-1. 加入集群
+#### 1.6.2 Node节点加入集群
 
 ```bash
-kubeadm join 192.168.2.201:6443 \ 
-  --token 8507uc.o0knircuri8etnw2 \
-  --discovery-token-ca-cert-hash \
-  sha256:acc37967fb5b0acf39d7598f8a439cc7dc88f439a3f4d0c9cae88e7901b9d3f
+kubeadm join 192.168.2.201:6443 --token jgqcwh.2rmnf494r16285og \
+    --discovery-token-ca-cert-hash sha256:8cf337eed08d91bcf574c0602abe1409e0dbec6717f7477ae42f3ab5a866efad
 ```
 
-2. 查看集群状态
+Master节点查看集群状态
 
 ```bash
 kubectl get nodes
 ```
 
-### 1.3 插件安装
+### 1.3 网络插件安装
 
-#### 1.3.1 flannel
+kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
-[flannel](/file/k8s/kube-flannel)
+下载地址：https://github.com/xzh-net/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
 
 ```bash
-docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-amd64
-docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-amd64 quay-mirror.qiniu.com/coreos/flannel:v0.12.0-amd64
-docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-amd64
+images=(
+  flannel:v0.12.0-amd64
+  flannel:v0.12.0-arm64
+  flannel:v0.12.0-arm
+  flannel:v0.12.0-ppc64le
+  flannel:v0.12.0-s390x
+)
 
-docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-arm64
-docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-arm64 quay-mirror.qiniu.com/coreos/flannel:v0.12.0-arm64
-docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-arm64
-
-docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-arm
-docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-arm quay-mirror.qiniu.com/coreos/flannel:v0.12.0-arm
-docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-arm
-
-docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-ppc64le
-docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-ppc64le quay-mirror.qiniu.com/coreos/flannel:v0.12.0-ppc64le
-docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-ppc64le
-
-docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-s390x
-docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-s390x quay-mirror.qiniu.com/coreos/flannel:v0.12.0-s390x
-docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/flannel:v0.12.0-s390x
+for imageName in ${images[@]} ; do
+  docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/$imageName
+  docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/$imageName quay-mirror.qiniu.com/coreos/$imageName
+  docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/$imageName
+done
 ```
 
 ```bash
-kubectl apply -f kube-flannel.yaml
-kubectl get pod --all-namespaces -o wide
+kubectl apply -f kube-flannel.yml   # 启动
+kubectl get pods -n kube-system -o wide
+kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报错，进行查看
+kubectl describe nodes k8s-node01
+kubectl get nodes   # 验证插件是否安装成功
 ```
+
+如果因为网络问题无法下载镜像可以去https://github.com/coreos/flannel/releases官方仓库下载镜像然后导入
+
+```bash
+https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-amd64.tar.gz
+https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-arm64.tar.gz
+https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-arm.tar.gz
+https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-ppc64le.tar.gz
+https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-s390x.tar.gz
+```
+
 
 #### 1.3.2 ingress-nginx
 
