@@ -199,7 +199,7 @@ systemctl enable kubelet
 在安装kubernetes集群之前，必须要提前准备好集群需要的镜像，所需镜像可以通过下面命令查看
 
 ```bash
-kubeadm config images list
+kubeadm config images list --kubernetes-version v1.17.4
 ```
 
 此镜像在kubernetes的仓库中,由于网络原因,无法连接，下面提供了一种替代方案
@@ -257,40 +257,14 @@ kubectl get nodes
 
 kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
-下载地址：https://github.com/xzh-net/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
-
-```bash
-images=(
-  flannel:v0.12.0-amd64
-  flannel:v0.12.0-arm64
-  flannel:v0.12.0-arm
-  flannel:v0.12.0-ppc64le
-  flannel:v0.12.0-s390x
-)
-
-for imageName in ${images[@]} ; do
-  docker pull registry.cn-shanghai.aliyuncs.com/leozhanggg/$imageName
-  docker tag  registry.cn-shanghai.aliyuncs.com/leozhanggg/$imageName quay-mirror.qiniu.com/coreos/$imageName
-  docker rmi  registry.cn-shanghai.aliyuncs.com/leozhanggg/$imageName
-done
-```
+下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
 ```bash
 kubectl apply -f kube-flannel.yml   # 启动
+kubectl get pods --all-namespaces -o wide
 kubectl get pods -n kube-system -o wide
-kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报错，进行查看
-kubectl describe nodes k8s-node01
 kubectl get nodes   # 验证插件是否安装成功
-```
-
-如果因为网络问题无法下载镜像可以去https://github.com/coreos/flannel/releases官方仓库下载镜像然后导入
-
-```bash
-https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-amd64.tar.gz
-https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-arm64.tar.gz
-https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-arm.tar.gz
-https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-ppc64le.tar.gz
-https://github.com/flannel-io/flannel/releases/download/v0.12.0/flannel-v0.12.0-linux-s390x.tar.gz
+kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报错，进行查看
 ```
 
 
