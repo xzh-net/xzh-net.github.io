@@ -194,7 +194,7 @@ KUBE_PROXY_MODE="ipvs"
 systemctl enable kubelet
 ```
 
-### 1.5 准备集群镜像
+### 1.5 准备集群镜像(三台机器)
 
 在安装kubernetes集群之前，必须要提前准备好集群需要的镜像，所需镜像可以通过下面命令查看
 
@@ -253,19 +253,34 @@ Master节点查看集群状态
 kubectl get nodes
 ```
 
-### 1.3 网络插件安装
+### 1.7 网络插件安装
 
 kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
+https://github.com/xzh-net/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
+
 ```bash
-kubectl apply -f kube-flannel.yml   # 启动
+kubectl apply -f kube-flannel.yml   # 安装插件
 kubectl get pods --all-namespaces -o wide
 kubectl get pods -n kube-system -o wide
-kubectl get nodes   # 验证插件是否安装成功
+kubectl get nodes                   # 验证插件是否安装成功
 kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报错，进行查看
 ```
+
+### 1.8 服务部署
+
+```bash
+# 部署nginx
+kubectl create deployment nginx --image=nginx:1.22.1
+# 端口暴漏 NodePort表示集群外浏览器访问
+kubectl expose deployment nginx --port=80 --type=NodePort
+# 查看服务状态
+kubectl get pods,service
+```
+
+访问地址：http://192.168.2.201:port/
 
 
 #### 1.3.2 ingress-nginx
@@ -384,16 +399,7 @@ systemctl start nfs
 showmount -e 192.168.3.200 # 查看NFS共享目录
 ```
 
-### 1.4 环境测试
 
-```bash
-kubectl delete ns test
-kubectl create ns test
-kubectl create deploy nginx --image=nginx:1.17.1 -n test
-kubectl get pods -n test -o wide
-kubectl expose deploy nginx --port=80 --type=NodePort -n test
-kubectl get svc -n test
-```
 
 
 ## 2. 组件命令
