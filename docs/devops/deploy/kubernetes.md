@@ -812,6 +812,14 @@ kubectl get svc -n dev -o wide
 kubectl delete svc svc-nginx2 -n dev  # 删除service
 ```
 
+!> 请求curl -L service很慢
+
+Checksum Offload 是网卡的一个功能选项。如果该选项开启，则网卡层面会计算需要发送或者接收到的消息的校验和，从而节省 CPU 的计算开销。此时，在需要发送的消息到达网卡前，系统会在报头的校验和字段填充一个随机值。但是，尽管校验和卸载能够降低 CPU 的计算开销，但受到计算能力的限制，某些环境下的一些网络卡计算速度不如主频超过 400MHz 的 CPU 快
+
+```bash
+ethtool -K flannel.1 tx-checksum-ip-generic off
+```
+
 #### 2.6.2 配置方式
 
 ```bash
