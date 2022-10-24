@@ -542,10 +542,6 @@ kubectl get cs                  # 集群状态
 kubectl taint nodes node1 key=value:effect # 设置污点
 kubectl taint nodes node1 key:effect-      # 去除污点
 kubectl taint nodes node1 key-             # 去除所有污点
-
-kubectl get pod   # 查看所有pod
-kubectl get pod pod_name  # 查看某个pod
-kubectl get pod pod_name -o yaml  # 查看某个pod,以yaml格式展示结果
 ```
 
 ### 2.2 Namespace
