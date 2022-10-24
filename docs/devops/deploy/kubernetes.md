@@ -538,6 +538,8 @@ kubeadm reset -f                # 重置kubeadm
 kubectl api-resources           # api资源
 kubectl api-versions            # api版本
 kubectl get cs                  # 集群状态
+kubectl explain pod             # yaml资源清单
+kubectl explain pod.metadata
 
 kubectl taint nodes node1 key=value:effect # 设置污点
 kubectl taint nodes node1 key:effect-      # 去除污点
