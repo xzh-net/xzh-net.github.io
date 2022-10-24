@@ -401,56 +401,188 @@ showmount -e 192.168.3.200 # 查看NFS共享目录
 
 ## 2. 命令
 
+资源管理方式
+   - 命令式对象管理：直接使用命令去操作kubernetes资源
+      - `kubectl run nginx-pod --image=nginx:1.22.1 --port=80`
+   - 命令式对象配置：通过命令配置和配置文件去操作kubernetes资源
+      - `kubectl create/patch -f nginx-pod.yaml`
+   - 声明式对象配置：通过apply命令和配置文件去操作kubernetes资源
+      - `kubectl apply -f nginx-pod.yaml`
+
+| 类型           | 操作对象 | 适用环境 | 优点           | 缺点                             |
+| -------------- | -------- | -------- | -------------- | -------------------------------- |
+| 命令式对象管理 | 对象     | 测试     | 简单           | 只能操作活动对象，无法审计、跟踪 |
+| 命令式对象配置 | 文件     | 开发     | 可以审计、跟踪 | 项目大时，配置文件多，操作麻烦   |
+| 声明式对象配置 | 目录     | 开发     | 支持目录操作   | 意外情况下难以调试               |
+
 ### 2.1 Kubectl
 
+<table>
+	<tr>
+	    <th>命令分类</th>
+	    <th>命令</th>
+		<th>翻译</th>
+		<th>命令作用</th>
+	</tr>
+	<tr>
+	    <td rowspan="6">基本命令</td>
+	    <td>create</td>
+	    <td>创建</td>
+		<td>创建一个资源</td>
+	</tr>
+	<tr>
+		<td>edit</td>
+	    <td>编辑</td>
+		<td>编辑一个资源</td>
+	</tr>
+	<tr>
+		<td>get</td>
+	    <td>获取</td>
+	    <td>获取一个资源</td>
+	</tr>
+   <tr>
+		<td>patch</td>
+	    <td>更新</td>
+	    <td>更新一个资源</td>
+	</tr>
+	<tr>
+	    <td>delete</td>
+	    <td>删除</td>
+		<td>删除一个资源</td>
+	</tr>
+	<tr>
+	    <td>explain</td>
+	    <td>解释</td>
+		<td>展示资源文档</td>
+	</tr>
+	<tr>
+	    <td rowspan="10">运行和调试</td>
+	    <td>run</td>
+	    <td>运行</td>
+		<td>在集群中运行一个指定的镜像</td>
+	</tr>
+	<tr>
+	    <td>expose</td>
+	    <td>暴露</td>
+		<td>暴露资源为Service</td>
+	</tr>
+	<tr>
+	    <td>describe</td>
+	    <td>描述</td>
+		<td>显示资源内部信息</td>
+	</tr>
+	<tr>
+	    <td>logs</td>
+	    <td>日志</td>
+		<td>输出容器在 pod 中的日志</td>
+	</tr>	
+	<tr>
+	    <td>attach</td>
+	    <td>缠绕</td>
+		<td>进入运行中的容器</td>
+	</tr>	
+	<tr>
+	    <td>exec</td>
+	    <td>执行</td>
+		<td>执行容器中的一个命令</td>
+	</tr>	
+	<tr>
+	    <td>cp</td>
+	    <td>复制</td>
+		<td>在Pod内外复制文件</td>
+	</tr>
+		<tr>
+		<td>rollout</td>
+	    <td>首次展示</td>
+		<td>管理资源的发布</td>
+	</tr>
+	<tr>
+		<td>scale</td>
+	    <td>规模</td>
+		<td>扩(缩)容Pod的数量</td>
+	</tr>
+	<tr>
+		<td>autoscale</td>
+	    <td>自动调整</td>
+		<td>自动调整Pod的数量</td>
+	</tr>
+	<tr>
+		<td rowspan="2">高级命令</td>
+	    <td>apply</td>
+	    <td>rc</td>
+		<td>通过文件对资源进行配置</td>
+	</tr>
+	<tr>
+	    <td>label</td>
+	    <td>标签</td>
+		<td>更新资源上的标签</td>
+	</tr>
+	<tr>
+		<td rowspan="2">其他命令</td>
+	    <td>cluster-info</td>
+	    <td>集群信息</td>
+		<td>显示集群信息</td>
+	</tr>
+	<tr>
+	    <td>version</td>
+	    <td>版本</td>
+		<td>显示当前Server和Client的版本</td>
+	</tr>
+</table>
+
 ```bash
-systemctl daemon-reload         # 重载kubelet守护
+systemctl daemon-reload         # 重载守护
 systemctl restart kubelet       # 重启kubelet服务    
-journalctl -u kubelet -f        # 查看日志:
+journalctl -u kubelet -f        # 查看日志
 kubeadm reset -f                # 重置kubeadm
 kubectl api-resources           # api资源
 kubectl api-versions            # api版本
 kubectl get cs                  # 集群状态
 
-kubectl explain deployment.spec # 查看标签用法
-
 kubectl taint nodes node1 key=value:effect # 设置污点
 kubectl taint nodes node1 key:effect-      # 去除污点
 kubectl taint nodes node1 key-             # 去除所有污点
+
+kubectl get pod   # 查看所有pod
+kubectl get pod pod_name  # 查看某个pod
+kubectl get pod pod_name -o yaml  # 查看某个pod,以yaml格式展示结果
 ```
 
 ### 2.2 Namespace
+
+#### 2.2.1 命令式
+
+```bash
+kubectl get namespace               # 查看所有命名空间
+kubectl get ns default              # 查看默认命名空间
+kubectl get ns default -o yaml      # 查看默认命名空间和yaml格式展示结果
+kubectl describe ns default         # 详情
+kubectl create ns dev               # 创建命名空间
+kubectl delete ns dev               # 删除命名
+```
+
+#### 2.2.2 配置方式
+
+```bash
+vi ns-dev.yaml
+```
 
 ```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: myns
+  name: dev
 ```
 
 ```bash
-kubectl create namespace my-istio-ns                          # 创建命名空间
-kubectl label namespace my-istio-ns istio-injection=enabled   # 给命名空间开启istio注入
-
-kubectl get namespace               # 查看命名空间
-kubectl apply -f my-namespace.yaml  # 创建命名空间
-kubectl delete -f my-namespace.yaml # 用资源文件删除命名空间
-kubectl delete namespace myns       # 按名字删除命名空间    
+kubectl create -f ns-dev.yaml     # 创建命名空间
+kubectl delete -f dev-dev.yaml    # 用资源文件删除命名空间
+kubectl delete namespace dev      # 按名字删除命名空间    
 ```
 
 ### 2.3 Pod
 
-- resources 资源配额
-- lifecycle 钩子函数
-- livenessProbe、readinessProbe 容器探测
-- restartPolicy 重启策略
-- nodeSelector 定向调度
-- Affinity 亲和性调度 nodeAffinity(node亲和性)、podAffinity(pod亲和性)、podAntiAffinity(pod反亲和性)
-- Taints 污点调度
-  - PreferNoSchedule：k8s将尽量避免把Pod调度到具有该污点的Node上，除非没有其他节点可调度
-  - NoSchedule：k8s将不会把Pod调度到具有该污点的Node上，但不会影响当前Node上已存在的Pod
-  - NoExecute：k8s将不会把Pod调度到具有该污点的Node上，同时也会将Node上已存在的Pod驱离
-- Toleration 容忍调度
+#### 2.3.1 参数解释
 
 ```yaml
 apiVersion: v1     #必选，版本号，例如v1
@@ -533,31 +665,183 @@ spec:  #必选，Pod中容器的详细定义
         path: string
 ```
 
-例子pod-base.yaml文件，内容如下：
+#### 2.3.2 命令式
+
+```bash
+kubectl get pods --all-namespaces -o wide                     # 查看所有pods
+kubectl run nginx-pod --image=nginx:1.22.1 --port=80 -n dev   # 指定命名空间创建pod
+kubectl get pod -n dev                                        # 按namespaces查看pods
+kubectl get pods nginx-pod-6fddd965c8-4srb4 -o wide -n dev    # 查看指定pod网络信息
+kubectl describe pod nginx-pod-6fddd965c8-4srb4 -n dev        # 查看指定pod具体信息
+kubectl get pod nginx-pod-6fddd965c8-4srb4 -n dev -o yaml     # 查看资源文件
+kubectl exec -it nginx-pod-6fddd965c8-4srb4 -n dev /bin/sh    # 进入容器
+kubectl delete deploy nginx-pod -n dev                        # 删除pod控制器
+```
+
+#### 2.3.3 配置方式
+
+```
+vi pod-nginx.yaml
+```
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-base
+  name: nginx
   namespace: dev
-  labels:
-    user: xuzhihao
 spec:
   containers:
-  - name: nginx
-    image: nginx:1.17.1
-  - name: busybox
-    image: busybox:1.30
+  - image: nginx:1.22.1
+    name: pod
+    ports:
+    - name: nginx-port
+      containerPort: 80
+      protocol: TCP
 ```
 
 ```bash
-kubectl get pods --all-namespaces -o wide   # 查看所有pods
-kubectl get pod -n ingress-nginx            # 按namespaces查看pods
-kubectl get pods -o wide nginx-ingress-controller-6594ddb5dc-d5zvh -n ingress-nginx # 查看指定pod具体信息
-kubectl get pod first-istio-65559bc449-c5pxd -o yaml # 查看资源文件
-kubectl get pods --show-labels              # 查看pod标签信息
-kubectl exec -it [podname] -n dev /bin/sh   # 进入容器
+kubectl create -f pod-nginx.yaml
+kubectl delete -f pod-nginx.yaml
+```
+
+### 2.4 Lable
+
+#### 2.4.1 命令方式
+
+```bash
+kubectl label pod nginx version=1.0 -n dev                # 打标签
+kubectl label pod nginx version=2.0 -n dev --overwrite    # 更新标签
+kubectl get pod nginx  -n dev --show-labels               # 查看标签
+kubectl get pod -n dev -l version=2.0  --show-labels      # 筛选标签
+kubectl label pod nginx-pod version- -n dev               # 删除标签
+```
+
+#### 2.4.2 配置方式
+
+```bash
+vi pod-nginx.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: dev
+  labels:
+    version: "3.0" 
+    env: "test"
+spec:
+  containers:
+  - image: nginx:1.17.1
+    name: pod
+    ports:
+    - name: nginx-port
+      containerPort: 80
+      protocol: TCP
+```
+
+```bash
+kubectl apply -f pod-nginx.yaml
+kubectl get pod nginx  -n dev --show-labels
+```
+
+
+### 2.5 Deployment
+
+#### 2.5.1 命令方式
+
+```bash
+kubectl run nginx --image=nginx:1.22.1 --port=80 --replicas=3 -n dev
+kubectl get pods -n dev                 # 查看创建的Pod
+kubectl get deploy -n dev               # 查看deployment的信息
+kubectl describe deploy nginx -n dev    # 查看deployment的详细信息
+kubectl delete deploy nginx -n dev      # 删除控制器
+```
+
+#### 2.5.2 配置方式
+
+```bash
+vi deploy-nginx.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: nginx
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx:1.22.1
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+```
+
+```bash
+kubectl create -f deploy-nginx.yaml
+kubectl delete -f deploy-nginx.yaml
+```
+
+### 2.6 Service
+
+Service可以看作是一组同类Pod`对外的访问接口`。借助Service，应用可以方便地实现服务发现和负载均衡。
+
+#### 2.6.1 命令方式
+
+1. 创建集群内部可访问的Service
+
+```bash
+kubectl expose deploy nginx --name=svc-nginx1 --type=ClusterIP --port=80 --target-port=80 -n dev  # 暴漏service
+kubectl get svc svc-nginx1 -n dev -o wide        # 查看service后通过curl访问service暴漏的地址，生命周期中这个地址是不会变
+```
+
+2. 创建集群外部也可访问的Service
+
+```bash
+kubectl expose deploy nginx --name=svc-nginx2 --type=NodePort --port=80 --target-port=80 -n dev
+kubectl get svc -n dev -o wide
+kubectl delete svc svc-nginx2 -n dev  # 删除service
+```
+
+#### 2.6.2 配置方式
+
+```bash
+vi svc-nginx.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-nginx
+  namespace: dev
+spec:
+  clusterIP: 10.109.179.231
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: nginx
+  type: ClusterIP
+```
+
+```bash
+kubectl create -f svc-nginx.yaml
+kubectl delete -f svc-nginx.yaml
 ```
 
 ### 2.4 Pod控制器
