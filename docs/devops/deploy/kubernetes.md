@@ -399,12 +399,10 @@ systemctl start nfs
 showmount -e 192.168.3.200 # 查看NFS共享目录
 ```
 
-
-
-
-## 2. 组件命令
+## 2. 命令
 
 ### 2.1 Kubectl
+
 ```bash
 systemctl daemon-reload         # 重载kubelet守护
 systemctl restart kubelet       # 重启kubelet服务    
@@ -422,6 +420,7 @@ kubectl taint nodes node1 key-             # 去除所有污点
 ```
 
 ### 2.2 Namespace
+
 ```yaml
 apiVersion: v1
 kind: Namespace
