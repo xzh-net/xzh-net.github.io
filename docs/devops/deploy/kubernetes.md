@@ -624,8 +624,8 @@ spec:  #必选，Pod中容器的详细定义
        initialDelaySeconds: 0       #容器启动完成后首次探测的时间，单位为秒
        timeoutSeconds: 0    　　    #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
        periodSeconds: 0     　　    #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
-       successThreshold: 0
-       failureThreshold: 0
+       successThreshold: 0          #连续探测成功多少次才被认定为成功。默认是1
+       failureThreshold: 0          #连续探测失败多少次才被认定为失败。默认是3。最小值是1
        securityContext:
          privileged: false
   restartPolicy: [Always | Never | OnFailure]  #Pod的重启策略
@@ -764,6 +764,10 @@ kubectl get pod pod-ports -n dev -o yaml
 
 #### 2.3.6 资源配额
 
+ 容器中的程序要运行，肯定是要占用一定资源的，比如cpu和内存等，如果不对某个容器的资源做限制，那么它就可能吃掉大量资源，导致其它容器无法运行。针对这种情况，kubernetes提供了对内存和cpu的资源进行配额的机制，这种机制主要通过resources选项实现，他有两个子选项：
+- limits：用于限制运行时容器的最大占用资源，当容器占用资源超过limits时会被终止，并进行重启
+- requests ：用于设置容器需要的最小资源，如果环境资源不够，容器将无法启动
+
 ```bash
 vi pod-resources.yaml
 ```
@@ -790,6 +794,269 @@ spec:
 ```bash
 kubectl create -f pod-resources.yaml
 kubectl get pod pod-resources -n dev
+```
+
+#### 2.3.7 钩子函数
+
+钩子函数能够感知自身生命周期中的事件，并在相应的时刻到来时运行用户指定的程序代码。
+
+kubernetes在主容器的启动之后和停止之前提供了两个钩子函数：
+- post start：容器创建之后执行，如果失败了会重启容器
+- pre stop  ：容器终止之前执行，执行完成之后容器将成功终止，在其完成之前会阻塞删除容器的操作
+
+钩子处理器支持使用下面三种方式定义动作：
+
+1. Exec命令
+
+在容器内执行一次命令
+
+```yaml
+lifecycle:
+  postStart: 
+    exec:
+      command:
+      - cat
+      - /tmp/healthy
+```
+
+案例
+
+```bash
+vi pod-hook-exec.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-hook-exec
+  namespace: dev
+spec:
+  containers:
+  - name: main-container
+    image: nginx:1.22.1
+    ports:
+    - name: nginx-port
+      containerPort: 80
+    lifecycle:
+      postStart: 
+        exec: # 在容器启动的时候执行一个命令，修改掉nginx的默认首页内容
+          command: ["/bin/sh", "-c", "echo postStart... > /usr/share/nginx/html/index.html"]
+      preStop:
+        exec: # 在容器停止之前停止nginx服务
+          command: ["/usr/sbin/nginx","-s","quit"]
+```
+
+```bash
+kubectl create -f pod-hook-exec.yaml            # 创建pod
+kubectl get pods  pod-hook-exec -n dev -o wide  # 查看pod
+curl 10.244.2.48                                # 访问
+```
+
+2. TCPSocket
+
+在当前容器尝试访问指定的socket
+
+```yaml
+lifecycle:
+    postStart:
+      tcpSocket:
+        port: 8080
+```
+
+3. HTTPGet
+
+在当前容器中向某url发起http请求
+
+```yaml
+lifecycle:
+    postStart:
+      httpGet:
+        path: / #URI地址
+        port: 80 #端口号
+        host: 127.0.0.1 #主机地址
+        scheme: HTTP #支持的协议，http或者https
+```
+
+#### 2.3.8 容器探测
+
+容器探测用于检测容器中的应用实例是否正常工作，是保障业务可用性的一种传统机制。如果经过探测，实例的状态不符合预期，那么kubernetes就会把该问题实例" 摘除 "，不承担业务流量。kubernetes提供了两种探针来实现容器探测，分别是：
+- liveness probes：存活性探针，用于检测应用实例当前是否处于正常运行状态，如果不是，k8s会重启容器
+- readiness probes：就绪性探针，用于检测应用实例当前是否可以接收请求，如果不能，k8s不会转发流量
+
+?> livenessProbe 决定是否重启容器，readinessProbe 决定是否将请求转发给容器。
+
+上面两种探针目前均支持三种探测方式：
+
+1. Exec命令
+
+在容器内执行一次命令，如果命令执行的退出码为0，则认为程序正常，否则不正常
+
+```yaml
+livenessProbe:
+    exec:
+      command:
+      - cat
+      - /tmp/healthy
+```
+
+案例
+
+```bash
+vi pod-liveness-exec.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-liveness-exec
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports: 
+    - name: nginx-port
+      containerPort: 80
+    livenessProbe:
+      exec:
+        command: ["/bin/cat","/tmp/hello.txt"] # 执行一个查看文件的命令
+```
+
+```bash
+kubectl create -f pod-liveness-exec.yaml    # 创建Pod
+kubectl get pods -n dev -o wide             # 查看Pod，RESTARTS一直增长说明钩子生效
+kubectl describe pods pod-liveness-exec -n dev    # 查看Pod详情，提示找不到/tmp/hello.txt
+```
+
+2. TCPSocket
+
+将会尝试访问一个用户容器的端口，如果能够建立这条连接，则认为程序正常，否则不正常
+
+```yaml
+livenessProbe:
+    tcpSocket:
+      port: 8080
+```
+
+案例
+
+```bash
+vi pod-liveness-tcpsocket.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-liveness-tcpsocket
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports: 
+    - name: nginx-port
+      containerPort: 80
+    livenessProbe:
+      tcpSocket:
+        port: 8080 # 尝试访问8080端口
+```
+
+```bash
+kubectl create -f pod-liveness-tcpsocket.yaml   # 创建Pod
+kubectl get pods -n dev -o wide                 # 查看Pod，RESTARTS一直增长说明钩子生效
+kubectl describe pods pod-liveness-tcpsocket -n dev    # 提示 8080: connect: connection refused
+```
+
+
+3. HTTPGet
+
+调用容器内Web应用的URL，如果返回的状态码在200和399之间，则认为程序正常，否则不正常
+
+```yaml
+livenessProbe:
+    httpGet:
+      path: / #URI地址
+      port: 80 #端口号
+      host: 127.0.0.1 #主机地址
+      scheme: HTTP #支持的协议，http或者https
+```
+
+案例
+
+```bash
+vi pod-liveness-httpget.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-liveness-httpget
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports:
+    - name: nginx-port
+      containerPort: 80
+    livenessProbe:
+      httpGet:  # 其实就是访问http://127.0.0.1:80/hello  
+        scheme: HTTP #支持的协议，http或者https
+        port: 80 #端口号
+        path: /hello #URI地址
+```
+
+```bash
+kubectl create -f pod-liveness-httpget.yaml
+kubectl get pods -n dev -o wide
+kubectl describe pod pod-liveness-httpget -n dev    # 提示连接失败：HTTP probe failed with statuscode: 404
+```
+
+#### 2.3.9 重启策略
+
+一旦容器探测出现了问题，kubernetes就会对容器所在的Pod进行重启，其实这是由pod的重启策略决定的，pod的重启策略有 3 种，分别如下：
+
+- Always ：容器失效时，自动重启该容器，这也是默认值。
+- OnFailure ： 容器终止运行且退出码不为0时重启
+- Never ： 不论状态为何，都不重启该容器
+
+重启策略适用于pod对象中的所有容器，首次需要重启的容器，将在其需要时立即进行重启，随后再次需要重启的操作将由kubelet延迟一段时间后进行，且反复的重启操作的延迟时长以此为10s、20s、40s、80s、160s和300s，300s是最大延迟时长。
+
+案例
+
+```bash
+vi pod-restartpolicy.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports:
+    - name: nginx-port
+      containerPort: 80
+    livenessProbe:
+      httpGet:
+        scheme: HTTP
+        port: 80
+        path: /hello
+  restartPolicy: Never # 设置重启策略为Never
+```
+
+```bash
+kubectl create -f pod-restartpolicy.yaml
+kubectl describe pods pod-restartpolicy  -n dev
+kubectl get pods pod-restartpolicy -n dev
 ```
 
 ### 2.4 Lable
@@ -903,7 +1170,7 @@ kubectl get svc -n dev -o wide
 kubectl delete svc svc-nginx2 -n dev  # 删除service
 ```
 
-!> k8s访问svc的clusterip异常的慢
+?> k8s访问svc的clusterip异常的慢
 
 Checksum Offload 是网卡的一个功能选项。如果该选项开启，则网卡层面会计算需要发送或者接收到的消息的校验和，从而节省 CPU 的计算开销。此时，在需要发送的消息到达网卡前，系统会在报头的校验和字段填充一个随机值。但是，尽管校验和卸载能够降低 CPU 的计算开销，但受到计算能力的限制，某些环境下的一些网络卡计算速度不如主频超过 400MHz 的 CPU 快
 
