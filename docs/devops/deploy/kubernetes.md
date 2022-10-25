@@ -385,19 +385,7 @@ kubectl -n kube-system logs metrics-server-758b8649fc-hb7qc  metrics-server --ta
 systemctl restart kubelet
 ```
 
-#### 1.3.4 安装NFS
 
-k8s-msater安装并设置，node节点仅安装
-```bash
-yum install -y nfs-utils   # 安装NFS服务
-mkdir -p /opt/nfs/jenkins  # 创建共享目录
-vi /etc/exports            # 编写NFS的共享配置，内容如下
-/opt/nfs/jenkins *(rw,no_root_squash) # *代表对所有IP都开放此目录，rw是读写
-
-systemctl enable nfs       # 启动服务
-systemctl start nfs
-showmount -e 192.168.3.200 # 查看NFS共享目录
-```
 
 ## 2. 命令
 
@@ -531,10 +519,10 @@ showmount -e 192.168.3.200 # 查看NFS共享目录
 </table>
 
 ```bash
-systemctl daemon-reload         # 重载守护
-systemctl restart kubelet       # 重启kubelet服务    
+kubectl version  
 journalctl -u kubelet -f        # 查看日志
 kubeadm reset -f                # 重置kubeadm
+kubectl delete node k8s-node01  # 删除节点
 kubectl api-resources           # api资源
 kubectl api-versions            # api版本
 kubectl get cs                  # 集群状态
@@ -676,31 +664,132 @@ kubectl exec -it nginx-pod-6fddd965c8-4srb4 -n dev /bin/sh    # 进入容器
 kubectl delete deploy nginx-pod -n dev                        # 删除pod控制器
 ```
 
-#### 2.3.3 配置方式
+#### 2.3.3 启动命令
 
-```
-vi pod-nginx.yaml
+```bash
+vi pod-command.yaml
 ```
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx
+  name: pod-command
   namespace: dev
 spec:
   containers:
-  - image: nginx:1.22.1
-    name: pod
-    ports:
+  - name: nginx
+    image: nginx:1.22.1
+    imagePullPolicy: IfNotPresent # 用于设置镜像拉取策略
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","touch /tmp/hello.txt;while true;do /bin/echo $(date +%T) >> /tmp/hello.txt; sleep 3; done;"]
+```
+
+```bash
+kubectl create -f pod-command.yaml    # 创建pod
+kubectl get pods pod-command -n dev   # 查看Pod详情
+kubectl exec pod-command -n dev -it -c busybox /bin/sh   # 进入容器
+tail -f /tmp/hello.txt
+```
+
+```lua
+特别说明：
+    通过上面发现command已经可以完成启动命令和传递参数的功能，为什么这里还要提供一个args选项，用于传递参数呢?这其实跟docker有点关系，kubernetes中的command、args两项其实是实现覆盖Dockerfile中ENTRYPOINT的功能。
+ 1 如果command和args均没有写，那么用Dockerfile的配置。
+ 2 如果command写了，但args没有写，那么Dockerfile默认的配置会被忽略，执行输入的command
+ 3 如果command没写，但args写了，那么Dockerfile中配置的ENTRYPOINT的命令会被执行，使用当前args的参数
+ 4 如果command和args都写了，那么Dockerfile的配置被忽略，执行command并追加上args参数
+```
+
+#### 2.3.4 环境变量
+
+```bash
+vi pod-env.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-env
+  namespace: dev
+spec:
+  containers:
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","while true;do /bin/echo $(date +%T);sleep 60; done;"]
+    env: # 设置环境变量列表
+    - name: "username"
+      value: "admin"
+    - name: "password"
+      value: "123456"
+```
+
+```bash
+kubectl create -f pod-env.yaml
+kubectl exec pod-env -n dev -c busybox -it /bin/sh
+echo $username
+echo $password
+```
+
+
+#### 2.3.5 端口设置
+
+```
+vi pod-ports.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-ports
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports: # 设置容器暴露的端口列表
     - name: nginx-port
       containerPort: 80
       protocol: TCP
 ```
 
 ```bash
-kubectl create -f pod-nginx.yaml
-kubectl delete -f pod-nginx.yaml
+kubectl create -f pod-ports.yaml
+kubectl get pod -n dev
+kubectl get pod pod-ports -n dev -o yaml
+```
+
+#### 2.3.6 资源配额
+
+```bash
+vi pod-resources.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-resources
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    resources: # 资源配额
+      limits:  # 限制资源（上限）
+        cpu: "2" # CPU限制，单位是core数
+        memory: "10Gi" # 内存限制
+      requests: # 请求资源（下限）
+        cpu: "1"  # CPU限制，单位是core数
+        memory: "10Mi"  # 内存限制
+```
+
+```bash
+kubectl create -f pod-resources.yaml
+kubectl get pod pod-resources -n dev
 ```
 
 ### 2.4 Lable
@@ -732,7 +821,7 @@ metadata:
     env: "test"
 spec:
   containers:
-  - image: nginx:1.17.1
+  - image: nginx:1.22.1
     name: pod
     ports:
     - name: nginx-port
@@ -848,562 +937,6 @@ spec:
 ```bash
 kubectl create -f svc-nginx.yaml
 kubectl delete -f svc-nginx.yaml
-```
-
-### 2.4 Pod控制器
-
-- ReplicationController：比较原始的pod控制器，已经被废弃，由ReplicaSet替代
-- (rs)ReplicaSet：保证副本数量一直维持在期望值，并支持pod数量扩缩容，镜像版本升级
-- (deploy)Deployment：通过控制ReplicaSet来控制Pod，并支持滚动升级、回退版本
-- (hpa)Horizontal Pod Autoscaler：可以根据集群负载自动水平调整Pod的数量，实现削峰填谷
-- (ds)DaemonSet：在集群中的指定Node上运行且仅运行一个副本，一般用于守护进程类的任务
-- Job：它创建出来的pod只要完成任务就立即退出，不需要重启或重建，用于执行一次性任务
-- (cj)Cronjob：它创建的Pod负责周期性任务控制，不需要持续后台运行
-- (sts)StatefulSet：管理有状态应用
-#### 2.4.1 ReplicaSet
-
-ReplicaSet的主要作用是保证一定数量的pod正常运行
-
-```yaml
-apiVersion: apps/v1 # 版本号
-kind: ReplicaSet # 类型       
-metadata: # 元数据
-  name: # rs名称 
-  namespace: # 所属命名空间 
-  labels: #标签
-    controller: rs
-spec: # 详情描述
-  replicas: 3 # 副本数量
-  selector: # 选择器，通过它指定该控制器管理哪些pod
-    matchLabels:      # Labels匹配规则
-      app: nginx-pod
-    matchExpressions: # Expressions匹配规则
-      - {key: app, operator: In, values: [nginx-pod]}
-  template: # 模板，当副本数量不足时，会根据下面的模板创建pod副本
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-        ports:
-        - containerPort: 80
-```
-
-例子pc-replicaset.yaml文件，内容如下：
-
-```yaml
-apiVersion: apps/v1
-kind: ReplicaSet   
-metadata:
-  name: pc-replicaset
-  namespace: dev
-spec:
-  replicas: 3
-  selector: 
-    matchLabels:
-      app: nginx-pod
-  template:
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-```
-
-#### 2.4.2 Deployment
-
-kubernetes在V1.2版本开始，引入了Deployment控制器。Deployment管理ReplicaSet，ReplicaSet管理Pod
-
-```yaml
-apiVersion: apps/v1 # 版本号
-kind: Deployment # 类型       
-metadata: # 元数据
-  name: # rs名称 
-  namespace: # 所属命名空间 
-  labels: #标签
-    controller: deploy
-spec: # 详情描述
-  replicas: 3 # 副本数量
-  revisionHistoryLimit: 3 # 保留历史版本
-  paused: false # 暂停部署，默认是false
-  progressDeadlineSeconds: 600 # 部署超时时间（s），默认是600
-  strategy: # 策略
-    type: RollingUpdate # 滚动更新策略
-    rollingUpdate: # 滚动更新
-      maxSurge: 30% # 最大额外可以存在的副本数，可以为百分比，也可以为整数
-      maxUnavailable: 30% # 最大不可用状态的 Pod 的最大值，可以为百分比，也可以为整数
-  selector: # 选择器，通过它指定该控制器管理哪些pod
-    matchLabels:      # Labels匹配规则
-      app: nginx-pod
-    matchExpressions: # Expressions匹配规则
-      - {key: app, operator: In, values: [nginx-pod]}
-  template: # 模板，当副本数量不足时，会根据下面的模板创建pod副本
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-        ports:
-        - containerPort: 80
-```
-
-例子pc-deployment.yaml，内容如下：
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment      
-metadata:
-  name: pc-deployment
-  namespace: dev
-spec: 
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx-pod
-  template:
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-```
-
-```bash
-kubectl apply -f mandatory-0.30.0.yaml     # 创建资源
-kubectl delete -f mandatory-0.30.0.yaml    # 删除资源
-kubectl get deployment --all-namespaces         # 获取所有deployment
-kubectl get deployment -o wide -n ingress-nginx # 按命名空间查询
-kubectl scale deploy pc-deployment --replicas=5 -n dev  # 扩缩容
-kubectl create deployment kubernetes-nginx --image=nginx:1.10  --replicas=5  # 创建5个Nginx应用
-kubectl expose deployment/kubernetes-nginx --type="NodePort" --port 80       # 进行暴露
-kubectl delete deployment kubernetes-nginx -n defaul                         # 删除deployments
-kubectl describe deployment nginx-ingress-controller -n ingress-nginx        # 查看详情
-
-kubectl rollout status deploy pc-deployment -n dev  # 查看当前升级版本的状态
-kubectl rollout history deploy pc-deployment -n dev # 查看升级历史记录
-kubectl rollout undo deployment pc-deployment --to-revision=1 -n dev # 使用--to-revision=1回滚到了1版本
-
-# 创建一个新的nginx:1.17.1镜像 创建完毕后就立即停止
-kubectl set image deploy pc-deployment nginx=nginx:1.17.1 -n dev && kubectl rollout pause deployment pc-deployment -n dev
-# 确保更新的pod没问题了，继续更新
-kubectl rollout resume deploy pc-deployment -n dev
-```
-
-#### 2.4.3 Horizontal Pod Autoscaler
-
-HPA可以获取每个Pod利用率，然后和HPA中定义的指标进行对比，同时计算出需要伸缩的具体值，最后实现Pod的数量的调整。它通过追踪分析RC控制的所有目标Pod的负载变化情况，来确定是否需要针对性地调整目标Pod的副本数
-
-```bash
-kubectl top node # 查看pod运行情况
-kubectl run nginx --image=nginx:latest --requests=cpu=100m -n dev # 创建deployment 
-kubectl expose deployment nginx --type=NodePort --port=80 -n dev  # 创建service
-```
-
-例子pc-hpa.yaml，内容如下：
-
-```yaml
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: pc-hpa
-  namespace: dev
-spec:
-  minReplicas: 1  #最小pod数量
-  maxReplicas: 10 #最大pod数量
-  targetCPUUtilizationPercentage: 3 # CPU使用率指标
-  scaleTargetRef:   # 指定要控制的nginx信息
-    apiVersion: apps/v1
-    kind: Deployment  
-    name: nginx  
-```
-
-使用压测工具对service地址进行压测，然后通过控制台查看hpa和pod的变化
-
-
-#### 2.4.4 DaemonSet
-
-DaemonSet类型的控制器可以保证在集群中的每一台（或指定）节点上都运行一个副本。一般适用于日志收集、节点监控等场景
-
-```yaml
-apiVersion: apps/v1 # 版本号
-kind: DaemonSet # 类型       
-metadata: # 元数据
-  name: # rs名称 
-  namespace: # 所属命名空间 
-  labels: #标签
-    controller: daemonset
-spec: # 详情描述
-  revisionHistoryLimit: 3 # 保留历史版本
-  updateStrategy: # 更新策略
-    type: RollingUpdate # 滚动更新策略
-    rollingUpdate: # 滚动更新
-      maxUnavailable: 1 # 最大不可用状态的 Pod 的最大值，可以为百分比，也可以为整数
-  selector: # 选择器，通过它指定该控制器管理哪些pod
-    matchLabels:      # Labels匹配规则
-      app: nginx-pod
-    matchExpressions: # Expressions匹配规则
-      - {key: app, operator: In, values: [nginx-pod]}
-  template: # 模板，当副本数量不足时，会根据下面的模板创建pod副本
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-        ports:
-        - containerPort: 80
-```
-
-例子pc-daemonset.yaml，内容如下：
-
-```yaml
-apiVersion: apps/v1
-kind: DaemonSet      
-metadata:
-  name: pc-daemonset
-  namespace: dev
-spec: 
-  selector:
-    matchLabels:
-      app: nginx-pod
-  template:
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-```
-
-#### 2.4.5 Job
-
-Job，主要用于负责批量处理(一次要处理指定数量任务)短暂的一次性(每个任务仅运行一次就结束)任务
-
-```yaml
-apiVersion: batch/v1 # 版本号
-kind: Job # 类型       
-metadata: # 元数据
-  name: # rs名称 
-  namespace: # 所属命名空间 
-  labels: #标签
-    controller: job
-spec: # 详情描述
-  completions: 1 # 指定job需要成功运行Pods的次数。默认值: 1
-  parallelism: 1 # 指定job在任一时刻应该并发运行Pods的数量。默认值: 1
-  activeDeadlineSeconds: 30 # 指定job可运行的时间期限，超过时间还未结束，系统将会尝试进行终止。
-  backoffLimit: 6 # 指定job失败后进行重试的次数。默认是6
-  manualSelector: true # 是否可以使用selector选择器选择pod，默认是false
-  selector: # 选择器，通过它指定该控制器管理哪些pod
-    matchLabels:      # Labels匹配规则
-      app: counter-pod
-    matchExpressions: # Expressions匹配规则
-      - {key: app, operator: In, values: [counter-pod]}
-  template: # 模板，当副本数量不足时，会根据下面的模板创建pod副本
-    metadata:
-      labels:
-        app: counter-pod
-    spec:
-      restartPolicy: Never # 重启策略只能设置为Never或者OnFailure
-      containers:
-      - name: counter
-        image: busybox:1.30
-        command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 2;done"]
-```
-
-```markdown
-关于重启策略设置的说明：
-    如果指定为OnFailure，则job会在pod出现故障时重启容器，而不是创建pod，failed次数不变
-    如果指定为Never，则job会在pod出现故障时创建新的pod，并且故障pod不会消失，也不会重启，failed次数加1
-    如果指定为Always的话，就意味着一直重启，意味着job任务会重复去执行了，当然不对，所以不能设置为Always
-```
-
-例子pc-job.yaml，内容如下：
-
-```yaml
-apiVersion: batch/v1
-kind: Job      
-metadata:
-  name: pc-job
-  namespace: dev
-spec:
-  manualSelector: true
-  selector:
-    matchLabels:
-      app: counter-pod
-  template:
-    metadata:
-      labels:
-        app: counter-pod
-    spec:
-      restartPolicy: Never
-      containers:
-      - name: counter
-        image: busybox:1.30
-        command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 3;done"]
-```
-
-#### 2.4.6 CronJob
-
-CronJob控制器以Job控制器资源为其管控对象，并借助它管理pod资源对象，CronJob可以在特定的时间点(反复的)去运行job任务
-
-```yaml
-apiVersion: batch/v1beta1 # 版本号
-kind: CronJob # 类型       
-metadata: # 元数据
-  name: # rs名称 
-  namespace: # 所属命名空间 
-  labels: #标签
-    controller: cronjob
-spec: # 详情描述
-  schedule: # cron格式的作业调度运行时间点,用于控制任务在什么时间执行
-  concurrencyPolicy: # 并发执行策略，用于定义前一次作业运行尚未完成时是否以及如何运行后一次的作业
-  failedJobHistoryLimit: # 为失败的任务执行保留的历史记录数，默认为1
-  successfulJobHistoryLimit: # 为成功的任务执行保留的历史记录数，默认为3
-  startingDeadlineSeconds: # 启动作业错误的超时时长
-  jobTemplate: # job控制器模板，用于为cronjob控制器生成job对象;下面其实就是job的定义
-    metadata:
-    spec:
-      completions: 1
-      parallelism: 1
-      activeDeadlineSeconds: 30
-      backoffLimit: 6
-      manualSelector: true
-      selector:
-        matchLabels:
-          app: counter-pod
-        matchExpressions: 规则
-          - {key: app, operator: In, values: [counter-pod]}
-      template:
-        metadata:
-          labels:
-            app: counter-pod
-        spec:
-          restartPolicy: Never 
-          containers:
-          - name: counter
-            image: busybox:1.30
-            command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 20;done"]
-```
-
-```markdown
-schedule: cron表达式，用于指定任务的执行时间
-*：代表所有可能的值
--：指定范围
-,：列出枚举  例如在分钟里，"5,15"表示5分钟和20分钟触发
-/：指定增量  例如在分钟里，"3/15"表示从3分钟开始，没隔15分钟执行一次
-?：表示没有具体的值，使用?要注意冲突
-L：表示last，例如星期中表示7或SAT，月份中表示最后一天31或30，6L表示这个月倒数第6天，FRIL表示这个月的最后一个星期五
-W：只能用在月份中，表示最接近指定天的工作日
-#：只能用在星期中，表示这个月的第几个周几，例如6#3表示这个月的第3个周五
-
-0 * * * * ? 每1分钟触发一次
-0 0 * * * ? 每天每1小时触发一次
-0 0 10 * * ? 每天10点触发一次
-0 * 14 * * ? 在每天下午2点到下午2:59期间的每1分钟触发
-0 30 9 1 * ? 每月1号上午9点半
-0 15 10 15 * ? 每月15日上午10:15触发
-*/5 * * * * ? 每隔5秒执行一次
-0 */1 * * * ? 每隔1分钟执行一次
-0 0 5-15 * * ? 每天5-15点整点触发
-0 0/3 * * * ? 每三分钟触发一次
-0 0 0 1 * ?  每月1号凌晨执行一次
-```
-
-例子pc-cronjob.yaml，内容如下：
-
-```yaml
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: pc-cronjob
-  namespace: dev
-  labels:
-    controller: cronjob
-spec:
-  schedule: "*/1 * * * *"
-  jobTemplate:
-    metadata:
-    spec:
-      template:
-        spec:
-          restartPolicy: Never
-          containers:
-          - name: counter
-            image: busybox:1.30
-            command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 3;done"]
-```
-
-### 2.5 Service
-
-- ClusterIP：默认值，它是Kubernetes系统自动分配的虚拟IP，只能在集群内部访问
-- NodePort：将Service通过指定的Node上的端口暴露给外部，通过此方法，就可以在集群外部访问服务
-- LoadBalancer：使用外接负载均衡器完成到服务的负载分发，注意此模式需要外部云环境支持
-- ExternalName： 把集群外部的服务引入集群内部，直接使用
-
-```yaml
-kind: Service  # 资源类型
-apiVersion: v1  # 资源版本
-metadata: # 元数据
-  name: service # 资源名称
-  namespace: dev # 命名空间
-spec: # 描述
-  selector: # 标签选择器，用于确定当前service代理哪些pod
-    app: nginx
-  type: # Service类型，指定service的访问方式
-  clusterIP:  # 虚拟服务的ip地址
-  sessionAffinity: # session亲和性，支持ClientIP、None两个选项
-  ports: # 端口信息
-    - protocol: TCP 
-      port: 3017  # service端口
-      targetPort: 5003 # pod端口
-      nodePort: 31122 # 主机端口
-```
-
-例子whoami-service.yaml，内容如下：
-
-```yaml
-apiVersion: apps/v1 ## 定义了一个版本
-kind: Deployment ##资源类型是Deployment
-metadata: ## metadata这个KEY对应的值为一个Maps
-  name: whoami-deployment ##资源名字
-  labels: ##将新建的Pod附加Label
-    app: whoami ##key=app:value=whoami
-spec: ##资源它描述了对象的
-  replicas: 3 ##副本数为1个，只会有一个pod
-  selector: ##匹配具有同一个label属性的pod标签
-    matchLabels: ##匹配合适的label
-      app: whoami
-  template: ##template其实就是对Pod对象的定义  (模板)
-    metadata:
-      labels:
-        app: whoami
-    spec:
-      containers:
-      - name: whoami ##容器名字  下面容器的镜像
-        image: jwilder/whoami
-        ports:
-        - containerPort: 8000 ##容器的端口
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: whoami-service
-spec:
-  ports:
-  - port: 80   
-    protocol: TCP
-    targetPort: 8000
-  selector:
-    app: whoami
-```
-
-```bash
-kubectl get svc
-kubectl expose deployment whoami-deployment             # deployment暴露集群内部访问
-kubectl describe svc whoami-deployment                  # service详细暴露规则
-kubectl delete svc whoami-deployment                    # 删除service
-kubectl expose deployment whoami-deployment  --type="NodePort" # 按外部访问方式暴露
-```
-
-#### 2.5.1 ClusterIP
-
-例子service-clusterip.yaml文件
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: service-clusterip
-  namespace: dev
-spec:
-  selector:
-    app: nginx-pod
-  clusterIP: 10.97.97.97 # service的ip地址，如果不写，默认会生成一个
-  type: ClusterIP
-  ports:
-  - port: 80  # Service端口       
-    targetPort: 80 # pod端口
-```
-
-**负载分发策略**
-
-对Service的访问被分发到了后端的Pod上去，目前kubernetes提供了两种负载分发策略：
-
-- 如果不定义，默认使用kube-proxy的策略，比如随机、轮询
-
-- 基于客户端地址的会话保持模式，即来自同一个客户端发起的所有请求都会转发到固定的一个Pod上
-
-  此模式可以使在spec中添加`sessionAffinity:ClientIP`选项
-
-#### 2.5.2 HeadLiness
-
-在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自己来控制负载均衡策略，针对这种情况，kubernetes提供了HeadLiness  Service，这类Service不会分配Cluster IP，如果想要访问service，只能通过service的域名进行查询
-
-例子service-headliness.yaml
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: service-headliness
-  namespace: dev
-spec:
-  selector:
-    app: nginx-pod
-  clusterIP: None # 将clusterIP设置为None，即可创建headliness Service
-  type: ClusterIP
-  ports:
-  - port: 80    
-    targetPort: 80
-```
-
-#### 2.5.3 NodePort
-
-集群外部使用例子service-nodeport.yaml
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: service-nodeport
-  namespace: dev
-spec:
-  selector:
-    app: nginx-pod
-  type: NodePort # service类型
-  ports:
-  - port: 80
-    nodePort: 30002 # 指定绑定的node的端口(默认的取值范围是：30000-32767), 如果不指定，会默认分配
-    targetPort: 80
-```
-
-#### 2.5.4 LoadBalancer
-
-LoadBalancer和NodePort很相似，目的都是向外部暴露一个端口，区别在于LoadBalancer会在集群的外部再来做一个负载均衡设备，而这个设备需要外部环境支持的，外部服务发送到这个设备上的请求，会被设备负载之后转发到集群中。
-
-#### 2.5.5 ExternalName
-
-ExternalName类型的Service用于引入集群外部的服务，它通过`externalName`属性指定外部一个服务的地址，然后在集群内部访问此service就可以访问到外部的服务了
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: service-externalname
-  namespace: dev
-spec:
-  type: ExternalName # service类型
-  externalName: www.baidu.com  #改成ip地址也可以
 ```
 
 ### 2.6 Ingress
@@ -2040,277 +1573,23 @@ ls /secret/config/
 more /secret/config/username
 ```
 
-
-## 4. 安全认证
-
-在Kubernetes集群中，客户端通常有两类：
-1. User Account：一般是独立于kubernetes之外的其他服务管理的用户账号。
-2. Service Account：kubernetes管理的账号，用于为Pod中的服务进程在访问Kubernetes时提供身份标识。
-  
-### 4.1 认证管理
-
-Kubernetes集群安全的最关键点在于如何识别并认证客户端身份，它提供了3种客户端身份认证方式：
-1. HTTP Base认证：通过用户名+密码的方式认证
-2. HTTP Token认证：通过一个Token来识别合法用户
-3. HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式
-  
-### 4.1 鉴权管理
-
-授权发生在认证成功之后，通过认证就可以知道请求用户是谁， 然后Kubernetes会根据事先定义的授权策略来决定用户是否有权限访问，这个过程就称为授权
-
-每个发送到ApiServer的请求都带上了用户和资源的信息：比如发送请求的用户、请求的路径、请求的动作等，授权就是根据这些信息和授权策略进行比较，如果符合策略，则认为授权通过，否则会返回错误
-
-API Server目前支持以下几种授权策略：
-- AlwaysDeny：表示拒绝所有请求，一般用于测试
-- AlwaysAllow：允许接收所有请求，相当于集群不需要授权流程（Kubernetes默认的策略）
-- ABAC：基于属性的访问控制，表示使用用户配置的授权规则对用户请求进行匹配和控制
-- Webhook：通过调用外部REST服务对用户进行授权
-- Node：是一种专用模式，用于对kubelet发出的请求进行访问控制
-- RBAC：基于角色的访问控制（kubeadm安装方式下的默认选项）
-
-RBAC(Role-Based Access Control) 基于角色的访问控制，主要是在描述一件事情：给哪些对象授予了哪些权限
-
-其中涉及到了下面几个概念：
-- 对象：User、Groups、ServiceAccount
-- 角色：代表着一组定义在资源上的可操作动作(权限)的集合
-- 绑定：将定义好的角色跟用户绑定在一起
-
-RBAC引入了4个顶级资源对象：
-- Role、ClusterRole：角色，用于指定一组权限
-- RoleBinding、ClusterRoleBinding：角色绑定，用于将角色（权限）赋予给对象
-
-Role、ClusterRole
-
-一个角色就是一组权限的集合，这里的权限都是许可形式的（白名单）。
-
-```yaml
-# Role只能对命名空间内的资源进行授权，需要指定nameapce
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  namespace: dev
-  name: authorization-role
-rules:
-- apiGroups: [""]  # 支持的API组列表,"" 空字符串，表示核心API群
-  resources: ["pods"] # 支持的资源对象列表
-  verbs: ["get", "watch", "list"] # 允许的对资源对象的操作方法列表
-```
-
-```yaml
-# ClusterRole可以对集群范围内资源、跨namespaces的范围资源、非资源类型进行授权
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
- name: authorization-clusterrole
-rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "watch", "list"]
-```
-
-需要详细说明的是，rules中的参数：
-- apiGroups: 支持的API组列表
-  ```bash
-  "","apps", "autoscaling", "batch"
-  ```
-- resources：支持的资源对象列表
-  ```bash
-  "services", "endpoints", "pods","secrets","configmaps","crontabs","deployments","jobs",
-  "nodes","rolebindings","clusterroles","daemonsets","replicasets","statefulsets",
-  "horizontalpodautoscalers","replicationcontrollers","cronjobs"
-  ```
-- verbs：对资源对象的操作方法列表
-  ```bash
-  "get", "list", "watch", "create", "update", "patch", "delete", "exec"
-  ```
-
-
-RoleBinding、ClusterRoleBinding
-
-角色绑定用来把一个角色绑定到一个目标对象上，绑定目标可以是User、Group或者ServiceAccount。
-
-```yaml
-# RoleBinding可以将同一namespace中的subject绑定到某个Role下，则此subject即具有该Role定义的权限
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: authorization-role-binding
-  namespace: dev
-subjects:
-- kind: User
-  name: xuzhihao
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: Role
-  name: authorization-role
-  apiGroup: rbac.authorization.k8s.io
-```
-
-```yaml
-# ClusterRoleBinding在整个集群级别和所有namespaces将特定的subject与ClusterRole绑定，授予权限
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
- name: authorization-clusterrole-binding
-subjects:
-- kind: User
-  name: xuzhihao
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: authorization-clusterrole
-  apiGroup: rbac.authorization.k8s.io
-```
-
-除此之外还可以RoleBinding引用ClusterRole进行授权
-
-RoleBinding可以引用ClusterRole，对属于同一命名空间内ClusterRole定义的资源主体进行授权
-
-```
-一种很常用的做法就是，集群管理员为集群范围预定义好一组角色（ClusterRole），然后在多个命名空间中重复使用这些ClusterRole。这样可以大幅提高授权管理工作效率，也使得各个命名空间下的基础性授权规则与使用体验保持一致。
-```
-
-```yaml
-# 虽然authorization-clusterrole是一个集群角色，但是因为使用了RoleBinding
-# 所以xuzhihao只能读取dev命名空间中的资源
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: authorization-role-binding-ns
-  namespace: dev
-subjects:
-- kind: User
-  name: xuzhihao
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: authorization-clusterrole
-  apiGroup: rbac.authorization.k8s.io
-```
-
-实战：创建一个只能管理dev空间下Pods资源的账号
-
-1) 创建账号
-```bash
-# 1) 创建证书
-[root@master pki]# cd /etc/kubernetes/pki/
-[root@master pki]# (umask 077;openssl genrsa -out devman.key 2048)
-
-# 2) 用apiserver的证书去签署
-# 2-1) 签名申请，申请的用户是devman,组是devgroup
-[root@master pki]# openssl req -new -key devman.key -out devman.csr -subj "/CN=devman/O=devgroup"     
-# 2-2) 签署证书
-[root@master pki]# openssl x509 -req -in devman.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out devman.crt -days 3650
-
-# 3) 设置集群、用户、上下文信息
-[root@master pki]# kubectl config set-cluster kubernetes --embed-certs=true --certificate-authority=/etc/kubernetes/pki/ca.crt --server=https://192.168.3.200:6443
-
-[root@master pki]# kubectl config set-credentials devman --embed-certs=true --client-certificate=/etc/kubernetes/pki/devman.crt --client-key=/etc/kubernetes/pki/devman.key
-
-[root@master pki]# kubectl config set-context devman@kubernetes --cluster=kubernetes --user=devman
-
-# 切换账户到devman
-[root@master pki]# kubectl config use-context devman@kubernetes
-Switched to context "devman@kubernetes".
-
-# 查看dev下pod，发现没有权限
-[root@master pki]# kubectl get pods -n dev
-Error from server (Forbidden): pods is forbidden: User "devman" cannot list resource "pods" in API group "" in the namespace "dev"
-
-# 切换到admin账户
-[root@master pki]# kubectl config use-context kubernetes-admin@kubernetes
-Switched to context "kubernetes-admin@kubernetes".
-```
-
-2) 创建Role和RoleBinding，为devman用户授权
-
-```yaml
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  namespace: dev
-  name: dev-role
-rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "watch", "list"]
-  
----
-
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: authorization-role-binding
-  namespace: dev
-subjects:
-- kind: User
-  name: devman
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: Role
-  name: dev-role
-  apiGroup: rbac.authorization.k8s.io
-```
-
-```bash
-kubectl create -f dev-role.yaml
-```
-
-3) 切换账户，再次验证
-
-```bash
-# 切换账户到devman
-[root@master pki]# kubectl config use-context devman@kubernetes
-Switched to context "devman@kubernetes".
-
-# 再次查看
-[root@master pki]# kubectl get pods -n dev
-NAME                                 READY   STATUS             RESTARTS   AGE
-nginx-deployment-66cb59b984-8wp2k    1/1     Running            0          4d1h
-nginx-deployment-66cb59b984-dc46j    1/1     Running            0          4d1h
-nginx-deployment-66cb59b984-thfck    1/1     Running            0          4d1h
-
-# 为了不影响后面的学习,切回admin账户
-[root@master pki]# kubectl config use-context kubernetes-admin@kubernetes
-Switched to context "kubernetes-admin@kubernetes".
-```
-
-### 4.1 准入控制
-
-通过了前面的认证和授权之后，还需要经过准入控制处理通过之后，apiserver才会处理这个请求。
-
-准入控制是一个可配置的控制器列表，可以通过在Api-Server上通过命令行设置选择执行哪些准入控制器：
-```bash
---admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,
-DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
-```
-
-只有当所有的准入控制器都检查通过之后，apiserver才执行该请求，否则返回拒绝。
-
-当前可配置的Admission Control准入控制如下：
-
-- AlwaysAdmit：允许所有请求
-- AlwaysDeny：禁止所有请求，一般用于测试
-- AlwaysPullImages：在启动容器之前总去下载镜像
-- DenyExecOnPrivileged：它会拦截所有想在Privileged Container上执行命令的请求
-- ImagePolicyWebhook：这个插件将允许后端的一个Webhook程序来完成admission controller的功能。
-- Service Account：实现ServiceAccount实现了自动化
-- SecurityContextDeny：这个插件将使用SecurityContext的Pod中的定义全部失效
-- ResourceQuota：用于资源配额管理目的，观察所有请求，确保在namespace上的配额不会超标
-- LimitRanger：用于资源限制管理，作用于namespace上，确保对Pod进行资源限制
-- InitialResources：为未设置资源请求与限制的Pod，根据其镜像的历史资源的使用情况进行设置
-- NamespaceLifecycle：如果尝试在一个不存在的namespace中创建资源对象，则该创建请求将被拒绝。当删除一个namespace时，系统将会删除该namespace中所有对象。
-- DefaultStorageClass：为了实现共享存储的动态供应，为未指定StorageClass或PV的PVC尝试匹配默认的StorageClass，尽可能减少用户在申请PVC时所需了解的后端存储细节
-- DefaultTolerationSeconds：这个插件为那些没有设置forgiveness tolerations并具有notready:NoExecute和unreachable:NoExecute两种taints的Pod设置默认的“容忍”时间，为5min
-- PodSecurityPolicy：这个插件用于在创建或修改Pod时决定是否根据Pod的security context和可用的PodSecurityPolicy对Pod的安全策略进行控制
-
 ## 5. DashBoard
 
-下载[recommended](/file/k8s/recommended)，并运行Dashboard
+### 5.1 部署
+
+下载文件
 
 ```bash
-wget  https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
-# 修改kubernetes-dashboard的Service类型
+wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+```
+
+修改kubernetes-dashboard的Service类型
+
+```bash
+vi recommended.yaml
+```
+
+```yaml
 kind: Service
 apiVersion: v1
 metadata:
@@ -2330,9 +1609,80 @@ spec:
 
 ```bash
 kubectl create -f recommended.yaml
-kubectl get pod,svc -n kubernetes-dashboard  # 查看namespace下的kubernetes-dashboard下的资源
+kubectl get pod,svc -n kubernetes-dashboard  # 查看资源
+```
+
+### 5.2 初始化账号
+
+```bash
 kubectl create serviceaccount dashboard-admin -n kubernetes-dashboard  # 创建账号
 kubectl create clusterrolebinding dashboard-admin-rb --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:dashboard-admin # 授权
-kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin # 获取账号token
-kubectl describe secrets [secretsname] -n kubernetes-dashboard # 查看token
+kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin  # 获取账号token
+kubectl describe secrets [secretsname] -n kubernetes-dashboard      # 查看token
 ```
+
+### 5.3 证书更换（可选）
+
+```bash
+cd /opt/k8s
+mkdir key && cd key
+#生成证书
+openssl genrsa -out dashboard.key 2048 
+openssl req -new -out dashboard.csr -key dashboard.key -subj '/CN=192.168.2.201'
+openssl x509 -req -in dashboard.csr -signkey dashboard.key -out dashboard.crt 
+# 删除原有的证书secret
+kubectl delete secret kubernetes-dashboard-certs -n kube-system
+# 创建新的证书secret
+kubectl create secret generic kubernetes-dashboard-certs --from-file=dashboard.key --from-file=dashboard.crt -n kube-system
+# 查看pod
+kubectl get pod -n kube-system
+# 重启pod
+kubectl delete pod <pod name> -n kube-system
+```
+
+### 5.3 Dashboard UI
+
+访问地址：https://192.168.2.201:30009
+`鼠标点击页面的任意地方，键盘输入： thisisunsafe`
+
+在登录页面上输入上面的token
+
+![](../../assets/_images/devops/deploy/k8s/image1.png)
+
+出现下面的页面代表成功
+
+![](../../assets/_images/devops/deploy/k8s/image2.png)
+
+使用DashBoard，以Deployment为例演示DashBoard的使用
+
+**查看**
+
+选择指定的命名空间`dev`，然后点击`Deployments`，查看dev空间下的所有deployment
+
+![](../../assets/_images/devops/deploy/k8s/image3.png)
+
+
+**扩缩容**
+
+在`Deployment`上点击`规模`，然后指定`目标副本数量`，点击确定
+
+![](../../assets/_images/devops/deploy/k8s/image4.png)
+
+**编辑**
+
+在`Deployment`上点击`编辑`，然后修改`yaml文件`，点击确定
+
+![](../../assets/_images/devops/deploy/k8s/image5.png)
+
+**查看Pod**
+
+点击`Pods`, 查看pods列表
+
+![](../../assets/_images/devops/deploy/k8s/image6.png)
+
+**操作Pod**
+
+选中某个Pod，可以对其执行日志（logs）、进入执行（exec）、编辑、删除操作
+
+![](../../assets/_images/devops/deploy/k8s/image7.png)
+
