@@ -528,10 +528,6 @@ kubectl api-versions            # api版本
 kubectl get cs                  # 集群状态
 kubectl explain pod             # yaml资源清单
 kubectl explain pod.metadata
-
-kubectl taint nodes node1 key=value:effect # 设置污点
-kubectl taint nodes node1 key:effect-      # 去除污点
-kubectl taint nodes node1 key-             # 去除所有污点
 ```
 
 ### 2.2 Namespace
@@ -1292,8 +1288,77 @@ spec:
         topologyKey: kubernetes.io/hostname
 ```
 
-##### 2.3.10.3 污染调度
+##### 2.3.10.3 污点和容忍
 
+1. 污点
+
+前面的调度方式都是站在Pod的角度上，通过在Pod上添加属性，来确定Pod是否要调度到指定的Node上，其实我们也可以站在Node的角度上，通过在Node上添加`污点`属性，来决定是否允许Pod调度过来
+
+Node被设置上污点之后就和Pod之间存在了一种相斥的关系，进而拒绝Pod调度进来，甚至可以将已经存在的Pod驱逐出去。
+
+污点的格式为：`key=value:effect`, key和value是污点的标签，effect描述污点的作用，支持如下三个选项：
+- PreferNoSchedule：kubernetes将尽量避免把Pod调度到具有该污点的Node上，除非没有其他节点可调度
+- NoSchedule：kubernetes将不会把Pod调度到具有该污点的Node上，但不会影响当前Node上已存在的Pod
+- NoExecute：kubernetes将不会把Pod调度到具有该污点的Node上，同时也会将Node上已存在的Pod驱离
+
+```bash
+kubectl taint nodes k8s-node01 key=value:effect  # 设置污点
+kubectl taint nodes k8s-node01 key:effect-       # 去除污点
+kubectl taint nodes k8s-node01 key-              # 去除所有污点
+```
+
+案例1验证PreferNoSchedule
+
+```bash
+# 停止node02节点模拟只有一个节点的情况
+kubectl taint nodes k8s-node01 tag=xzh:PreferNoSchedule   # 为node1设置污点(PreferNoSchedule)
+kubectl describe nodes k8s-node01                         # 查看节点污点
+kubectl run taint1 --image=nginx:1.22.1 -n dev            # 创建pod
+kubectl get pods -n dev -o wide
+```
+
+案例2验证NoSchedule
+
+```bash
+kubectl taint nodes k8s-node01 tag:PreferNoSchedule-      # 取消污点
+kubectl taint nodes k8s-node01 tag=xzh:NoSchedule         # 修改污点
+kubectl run taint2 --image=nginx:1.22.1 -n dev            # 创建pod
+kubectl get pods -n dev -o wide
+```
+
+案例3验证NoExecute
+
+```bash
+kubectl taint nodes k8s-node01 tag:NoSchedule-            # 取消污点
+kubectl taint nodes k8s-node01 tag=xzh:NoExecute          # 修改污点
+kubectl run taint3 --image=nginx:1.22.1 -n dev            # 创建pod
+kubectl get pods -n dev -o wide
+```
+
+2. 容忍
+
+上面介绍了污点的作用，我们可以在node上添加污点用于拒绝pod调度上来，但是如果就是想将一个pod调度到一个有污点的node上去，这时候应该怎么做呢？这就要使用到`容忍`。
+
+?> 污点就是拒绝，容忍就是忽略，Node通过污点拒绝pod调度上去，Pod通过容忍忽略拒绝
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-toleration
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  tolerations:      # 添加容忍
+  - key: "tag"        # 要容忍的污点的key
+    operator: "Equal" # 操作符
+    value: "xzh"    # 容忍的污点的value
+    effect: "NoExecute"   # 添加容忍的规则，这里必须和标记的污点规则相同
+```
+
+添加了容忍之后，该pod可以正常运行在有污点的节点上
 
 ### 2.4 Lable
 
