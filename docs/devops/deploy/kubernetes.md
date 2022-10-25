@@ -1059,6 +1059,242 @@ kubectl describe pods pod-restartpolicy  -n dev
 kubectl get pods pod-restartpolicy -n dev
 ```
 
+#### 2.3.10 调度规则
+
+在默认情况下，一个Pod在哪个Node节点上运行，是由Scheduler组件采用相应的算法计算出来的，这个过程是不受人工控制的。但是在实际使用中，这并不满足的需求，因为很多情况下，我们想控制某些Pod到达某些节点上，那么应该怎么做呢？这就要求了解kubernetes对Pod的调度规则，kubernetes提供了四大类调度方式：
+
+- 自动调度：运行在哪个节点上完全由Scheduler经过一系列的算法计算得出
+- 定向调度：NodeName、NodeSelector
+- 亲和性调度：NodeAffinity、PodAffinity、PodAntiAffinity
+- 污点（容忍）调度：Taints、Toleration
+
+##### 2.3.10.1 定向调度
+
+定向调度，指的是利用在pod上声明nodeName或者nodeSelector，以此将Pod调度到期望的node节点上。注意，这里的调度是强制的，这就意味着即使要调度的目标Node不存在，也会向上面进行调度，只不过pod运行失败而已
+
+1. NodeName
+
+用于强制约束将Pod调度到指定的Name的Node节点上。这种方式，其实是直接跳过Scheduler的调度逻辑，直接将Pod调度到指定名称的节点
+
+```bash
+vi pod-nodename.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-nodename
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  nodeName: k8s-node01 # 指定调度到k8s-node01节点上
+```
+
+```bash
+kubectl create -f pod-nodename.yaml
+kubectl get pods pod-nodename -n dev -o wide
+```
+
+2. NodeSelector
+
+NodeSelector用于将pod调度到添加了指定标签的node节点上。它是通过kubernetes的label-selector机制实现的，也就是说，在pod创建之前，会由scheduler使用MatchNodeSelector调度策略进行label匹配，找出目标node，然后将pod调度到目标节点，该匹配规则是强制约束
+
+首先分别为node节点添加标签
+
+```bash
+kubectl label nodes k8s-node01 nodeenv=pro
+kubectl label nodes k8s-node02 nodeenv=test
+```
+
+创建一个pod-nodeselector.yaml文件
+
+```bash
+vi pod-nodeselector.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-nodeselector
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  nodeSelector: 
+    nodeenv: test # 指定调度到具有nodeenv=test标签的节点上
+```
+
+```bash
+kubectl create -f pod-nodeselector.yaml
+kubectl get pods pod-nodeselector -n dev -o wide
+```
+
+##### 2.3.10.2 亲和性调度
+
+kubernetes还提供了一种亲和性调度（Affinity）。它在NodeSelector的基础之上的进行了扩展，可以通过配置的形式，实现优先选择满足条件的Node进行调度，如果没有，也可以调度到不满足条件的节点上，使调度更加灵活
+
+Affinity主要分为三类：
+- nodeAffinity(node亲和性）: 以node为目标，解决pod可以调度到哪些node的问题
+- podAffinity(pod亲和性) :  以pod为目标，解决pod可以和哪些已存在的pod部署在同一个拓扑域中的问题
+- podAntiAffinity(pod反亲和性) :  以pod为目标，解决pod不能和哪些已存在pod部署在同一个拓扑域中的问题
+
+1. NodeAffinity
+
+硬限制
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-nodeaffinity-required
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  affinity:  #亲和性设置
+    nodeAffinity: #设置node亲和性
+      requiredDuringSchedulingIgnoredDuringExecution: # 硬限制
+        nodeSelectorTerms:
+        - matchExpressions: # 匹配env的值在["xxx","yyy"]中的标签
+          - key: nodeenv
+            operator: In
+            values: ["pro","yyy"]
+```
+
+软限制
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-nodeaffinity-preferred
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  affinity:  #亲和性设置
+    nodeAffinity: #设置node亲和性
+      preferredDuringSchedulingIgnoredDuringExecution: # 软限制
+      - weight: 1
+        preference:
+          matchExpressions: # 匹配env的值在["xxx","yyy"]中的标签(当前环境没有)
+          - key: nodeenv
+            operator: In
+            values: ["xxx","yyy"]
+```
+
+```lua
+NodeAffinity规则设置的注意事项：
+    1 如果同时定义了nodeSelector和nodeAffinity，那么必须两个条件都得到满足，Pod才能运行在指定的Node上
+    2 如果nodeAffinity指定了多个nodeSelectorTerms，那么只需要其中一个能够匹配成功即可
+    3 如果一个nodeSelectorTerms中有多个matchExpressions ，则一个节点必须满足所有的才能匹配成功
+    4 如果一个pod所在的Node在Pod运行期间其标签发生了改变，不再符合该Pod的节点亲和性需求，则系统将忽略此变化
+```
+
+2. PodAffinity
+
+PodAffinity主要实现以运行的Pod为参照，实现让新创建的Pod跟参照pod在一个区域的功能
+
+硬限制，首先创建一个参照Pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-podaffinity-target
+  namespace: dev
+  labels:
+    podenv: pro #设置标签
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  nodeName: k8s-node01 # 将目标pod名确指定到k8s-node01上
+```
+
+创建目标pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-podaffinity-required
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  affinity:  #亲和性设置
+    podAffinity: #设置pod亲和性
+      requiredDuringSchedulingIgnoredDuringExecution: # 硬限制
+      - labelSelector:
+          matchExpressions: # 匹配env的值在["xxx","yyy"]中的标签
+          - key: podenv
+            operator: In
+            values: ["pro","yyy"]
+        topologyKey: kubernetes.io/hostname
+```
+
+```lua
+topologyKey用于指定调度时作用域,例如:
+    如果指定为kubernetes.io/hostname，那就是以Node节点为区分范围
+	如果指定为beta.kubernetes.io/os,则以Node节点的操作系统类型来区分
+```
+
+3. PodAntiAffinity
+
+PodAntiAffinity主要实现以运行的Pod为参照，让新创建的Pod跟参照pod不在一个区域中的功能
+
+硬限制，继续使用上一个参照Pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-podaffinity-target
+  namespace: dev
+  labels:
+    podenv: pro #设置标签
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  nodeName: k8s-node01 # 将目标pod名确指定到k8s-node01上
+```
+
+创建目标pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-podantiaffinity-required
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+  affinity:  #亲和性设置
+    podAntiAffinity: #设置pod亲和性
+      requiredDuringSchedulingIgnoredDuringExecution: # 硬限制
+      - labelSelector:
+          matchExpressions: # 匹配podenv的值在["pro"]中的标签
+          - key: podenv
+            operator: In
+            values: ["pro"]
+        topologyKey: kubernetes.io/hostname
+```
+
+##### 2.3.10.3 污染调度
+
+
 ### 2.4 Lable
 
 #### 2.4.1 命令方式
