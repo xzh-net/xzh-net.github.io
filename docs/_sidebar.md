@@ -16,6 +16,7 @@
 - 应用部署
   - [Docker](devops/deploy/docker)
   - [Kubernetes](devops/deploy/kubernetes)
+  - [Istio](devops/deploy/istio)
   - [Nginx](devops/deploy/nginx)
   - [Keepalived](devops/deploy/keepalived)
   - [HAProxy](devops/deploy/haproxy)
