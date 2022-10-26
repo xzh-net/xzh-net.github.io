@@ -1,4 +1,4 @@
-# Kubernetes
+# Kubernetes 1.17.4
 
 ## 1. 集群搭建
 
@@ -1238,11 +1238,10 @@ spec:
         topologyKey: kubernetes.io/hostname
 ```
 
-```lua
-topologyKey用于指定调度时作用域,例如:
-    如果指定为kubernetes.io/hostname，那就是以Node节点为区分范围
-	如果指定为beta.kubernetes.io/os,则以Node节点的操作系统类型来区分
-```
+topologyKey用于指定调度时作用域
+   - kubernetes.io/hostname，是以Node节点为区分范围
+   - beta.kubernetes.io/os，以Node节点的操作系统类型来区分
+
 
 3. PodAntiAffinity
 
