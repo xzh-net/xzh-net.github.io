@@ -1567,16 +1567,14 @@ kubectl get svc -n ingress-nginx # 查看端口
 192.168.2.201 tomcat.xzh.net
 ```
 
-#### 2.6.3 Https代理
+#### 2.8.4 Https代理
 
 ```bash
 # 生成证书
-openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=xuzhihao.net"
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=xzh.net"
 # 创建密钥
 kubectl create secret tls tls-secret --key tls.key --cert tls.crt
 ```
-
-创建ingress-https.yaml
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -1587,18 +1585,18 @@ metadata:
 spec:
   tls:
     - hosts:
-      - nginx.xuzhihao.net
-      - tomcat.xuzhihao.net
+      - nginx.xzh.net
+      - tomcat.xzh.net
       secretName: tls-secret # 指定秘钥
   rules:
-  - host: nginx.xuzhihao.net
+  - host: nginx.xzh.net
     http:
       paths:
       - path: /
         backend:
           serviceName: nginx-service
           servicePort: 80
-  - host: tomcat.xuzhihao.net
+  - host: tomcat.xzh.net
     http:
       paths:
       - path: /
