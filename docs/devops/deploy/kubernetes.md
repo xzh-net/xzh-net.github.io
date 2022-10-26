@@ -1359,9 +1359,23 @@ spec:
 
 添加了容忍之后，该pod可以正常运行在有污点的节点上
 
+#### 2.3.11 控制器
+
+Pod控制器是管理pod的中间层，使用Pod控制器之后，只需要告诉Pod控制器，想要多少个什么样的Pod就可以了，它会创建出满足条件的Pod并确保每一个Pod资源处于用户期望的目标状态。如果Pod资源在运行中出现故障，它会基于指定策略重新编排Pod
+
+##### 2.3.11.1 ReplicaSet
+
+##### 2.3.11.1 ReplicaSet
+
+##### 2.3.11.1 ReplicaSet
+
+##### 2.3.11.1 ReplicaSet
+
+##### 2.3.11.1 ReplicaSet
+
 ### 2.4 Lable
 
-#### 2.4.1 命令方式
+#### 2.4.1 命令式
 
 ```bash
 kubectl label pod nginx version=1.0 -n dev                # 打标签
@@ -1404,7 +1418,7 @@ kubectl get pod nginx  -n dev --show-labels
 
 ### 2.5 Deployment
 
-#### 2.5.1 命令方式
+#### 2.5.1 命令式
 
 ```bash
 kubectl run nginx --image=nginx:1.22.1 --port=80 --replicas=3 -n dev
@@ -1453,7 +1467,7 @@ kubectl delete -f deploy-nginx.yaml
 
 Service可以看作是一组同类Pod`对外的访问接口`。借助Service，应用可以方便地实现服务发现和负载均衡。
 
-#### 2.6.1 命令方式
+#### 2.6.1 命令式
 
 1. 创建集群内部可访问的Service
 
