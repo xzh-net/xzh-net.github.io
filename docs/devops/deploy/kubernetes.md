@@ -322,201 +322,9 @@ kubectl apply -f service-nodeport.yaml
 kubectl get svc -n ingress-nginx -o wide
 ```
 
-#### 1.3.3 metrics-server
-
-下载 https://github.com/kubernetes-sigs/metrics-server/releases/tag/v0.3.6
-
-修改metrics-server-deployment.yaml
-
-```yaml
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: metrics-server
-  namespace: kube-system
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: metrics-server
-  namespace: kube-system
-  labels:
-    k8s-app: metrics-server
-spec:
-  selector:
-    matchLabels:
-      k8s-app: metrics-server
-  template:
-    metadata:
-      name: metrics-server
-      labels:
-        k8s-app: metrics-server
-    spec:
-      hostNetwork: true
-      serviceAccountName: metrics-server
-      volumes:
-      # mount in tmp so we can safely use from-scratch images and/or read-only containers
-      - name: tmp-dir
-        emptyDir: {}
-      containers:
-      - name: metrics-server
-        image: registry.cn-hangzhou.aliyuncs.com/google_containers/metrics-server-amd64:v0.3.6
-        imagePullPolicy: Always
-        args:
-        - --kubelet-insecure-tls
-        - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
-        volumeMounts:
-        - name: tmp-dir
-          mountPath: /tmp
-```
-
-```bash
-mkdir /home/k8s/metrics-server-0.3.6
-kubectl apply -f ./             # 安装metrics-server
-kubectl api-versions
-kubectl describe svc metrics-server -n kube-system
-kubectl get pod -n kube-system  # 查看pod运行情况
-kubectl top pod -n kube-system  # 查看资源使用情况
-kubectl top nodes
-
-kubectl get pod -n kube-system | grep metrics-server
-kubectl -n kube-system logs metrics-server-758b8649fc-hb7qc  metrics-server --tail 100 -f
-systemctl restart kubelet
-```
-
-
-
-## 2. 命令
-
-资源管理方式
-   - 命令式对象管理：直接使用命令去操作kubernetes资源
-      - `kubectl run nginx-pod --image=nginx:1.22.1 --port=80`
-   - 命令式对象配置：通过命令配置和配置文件去操作kubernetes资源
-      - `kubectl create/patch -f nginx-pod.yaml`
-   - 声明式对象配置：通过apply命令和配置文件去操作kubernetes资源
-      - `kubectl apply -f nginx-pod.yaml`
-
-| 类型           | 操作对象 | 适用环境 | 优点           | 缺点                             |
-| -------------- | -------- | -------- | -------------- | -------------------------------- |
-| 命令式对象管理 | 对象     | 测试     | 简单           | 只能操作活动对象，无法审计、跟踪 |
-| 命令式对象配置 | 文件     | 开发     | 可以审计、跟踪 | 项目大时，配置文件多，操作麻烦   |
-| 声明式对象配置 | 目录     | 开发     | 支持目录操作   | 意外情况下难以调试               |
+## 2. 组件
 
 ### 2.1 Kubectl
-
-<table>
-	<tr>
-	    <th>命令分类</th>
-	    <th>命令</th>
-		<th>翻译</th>
-		<th>命令作用</th>
-	</tr>
-	<tr>
-	    <td rowspan="6">基本命令</td>
-	    <td>create</td>
-	    <td>创建</td>
-		<td>创建一个资源</td>
-	</tr>
-	<tr>
-		<td>edit</td>
-	    <td>编辑</td>
-		<td>编辑一个资源</td>
-	</tr>
-	<tr>
-		<td>get</td>
-	    <td>获取</td>
-	    <td>获取一个资源</td>
-	</tr>
-   <tr>
-		<td>patch</td>
-	    <td>更新</td>
-	    <td>更新一个资源</td>
-	</tr>
-	<tr>
-	    <td>delete</td>
-	    <td>删除</td>
-		<td>删除一个资源</td>
-	</tr>
-	<tr>
-	    <td>explain</td>
-	    <td>解释</td>
-		<td>展示资源文档</td>
-	</tr>
-	<tr>
-	    <td rowspan="10">运行和调试</td>
-	    <td>run</td>
-	    <td>运行</td>
-		<td>在集群中运行一个指定的镜像</td>
-	</tr>
-	<tr>
-	    <td>expose</td>
-	    <td>暴露</td>
-		<td>暴露资源为Service</td>
-	</tr>
-	<tr>
-	    <td>describe</td>
-	    <td>描述</td>
-		<td>显示资源内部信息</td>
-	</tr>
-	<tr>
-	    <td>logs</td>
-	    <td>日志</td>
-		<td>输出容器在 pod 中的日志</td>
-	</tr>	
-	<tr>
-	    <td>attach</td>
-	    <td>缠绕</td>
-		<td>进入运行中的容器</td>
-	</tr>	
-	<tr>
-	    <td>exec</td>
-	    <td>执行</td>
-		<td>执行容器中的一个命令</td>
-	</tr>	
-	<tr>
-	    <td>cp</td>
-	    <td>复制</td>
-		<td>在Pod内外复制文件</td>
-	</tr>
-		<tr>
-		<td>rollout</td>
-	    <td>首次展示</td>
-		<td>管理资源的发布</td>
-	</tr>
-	<tr>
-		<td>scale</td>
-	    <td>规模</td>
-		<td>扩(缩)容Pod的数量</td>
-	</tr>
-	<tr>
-		<td>autoscale</td>
-	    <td>自动调整</td>
-		<td>自动调整Pod的数量</td>
-	</tr>
-	<tr>
-		<td rowspan="2">高级命令</td>
-	    <td>apply</td>
-	    <td>rc</td>
-		<td>通过文件对资源进行配置</td>
-	</tr>
-	<tr>
-	    <td>label</td>
-	    <td>标签</td>
-		<td>更新资源上的标签</td>
-	</tr>
-	<tr>
-		<td rowspan="2">其他命令</td>
-	    <td>cluster-info</td>
-	    <td>集群信息</td>
-		<td>显示集群信息</td>
-	</tr>
-	<tr>
-	    <td>version</td>
-	    <td>版本</td>
-		<td>显示当前Server和Client的版本</td>
-	</tr>
-</table>
 
 ```bash
 kubectl version  
@@ -562,9 +370,52 @@ kubectl delete -f dev-dev.yaml    # 用资源文件删除命名空间
 kubectl delete namespace dev      # 按名字删除命名空间    
 ```
 
-### 2.3 Pod
+### 2.3 Lable
 
-#### 2.3.1 参数解释
+#### 2.3.1 命令式
+
+```bash
+kubectl label pod nginx version=1.0 -n dev                # 打标签
+kubectl label pod nginx version=2.0 -n dev --overwrite    # 更新标签
+kubectl get pod nginx  -n dev --show-labels               # 查看标签
+kubectl get pod -n dev -l version=2.0  --show-labels      # 筛选标签
+kubectl label pod nginx-pod version- -n dev               # 删除标签
+```
+
+#### 2.3.2 配置方式
+
+```bash
+vi pod-nginx.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: dev
+  labels:
+    version: "3.0" 
+    env: "test"
+spec:
+  containers:
+  - image: nginx:1.22.1
+    name: pod
+    ports:
+    - name: nginx-port
+      containerPort: 80
+      protocol: TCP
+```
+
+```bash
+kubectl apply -f pod-nginx.yaml
+kubectl get pod nginx  -n dev --show-labels
+```
+
+
+### 2.4 Pod
+
+#### 2.4.1 资源清单
 
 ```yaml
 apiVersion: v1     #必选，版本号，例如v1
@@ -647,7 +498,7 @@ spec:  #必选，Pod中容器的详细定义
         path: string
 ```
 
-#### 2.3.2 命令式
+#### 2.4.2 命令式
 
 ```bash
 kubectl get pods --all-namespaces -o wide                     # 查看所有pods
@@ -660,7 +511,7 @@ kubectl exec -it nginx-pod-6fddd965c8-4srb4 -n dev /bin/sh    # 进入容器
 kubectl delete deploy nginx-pod -n dev                        # 删除pod控制器
 ```
 
-#### 2.3.3 启动命令
+#### 2.4.3 启动命令
 
 ```bash
 vi pod-command.yaml
@@ -698,7 +549,7 @@ tail -f /tmp/hello.txt
  4 如果command和args都写了，那么Dockerfile的配置被忽略，执行command并追加上args参数
 ```
 
-#### 2.3.4 环境变量
+#### 2.4.4 环境变量
 
 ```bash
 vi pod-env.yaml
@@ -730,7 +581,7 @@ echo $password
 ```
 
 
-#### 2.3.5 端口设置
+#### 2.4.5 端口设置
 
 ```
 vi pod-ports.yaml
@@ -758,7 +609,7 @@ kubectl get pod -n dev
 kubectl get pod pod-ports -n dev -o yaml
 ```
 
-#### 2.3.6 资源配额
+#### 2.4.6 资源配额
 
  容器中的程序要运行，肯定是要占用一定资源的，比如cpu和内存等，如果不对某个容器的资源做限制，那么它就可能吃掉大量资源，导致其它容器无法运行。针对这种情况，kubernetes提供了对内存和cpu的资源进行配额的机制，这种机制主要通过resources选项实现，他有两个子选项：
 - limits：用于限制运行时容器的最大占用资源，当容器占用资源超过limits时会被终止，并进行重启
@@ -792,7 +643,7 @@ kubectl create -f pod-resources.yaml
 kubectl get pod pod-resources -n dev
 ```
 
-#### 2.3.7 钩子函数
+#### 2.4.7 钩子函数
 
 钩子函数能够感知自身生命周期中的事件，并在相应的时刻到来时运行用户指定的程序代码。
 
@@ -874,7 +725,7 @@ lifecycle:
         scheme: HTTP #支持的协议，http或者https
 ```
 
-#### 2.3.8 容器探测
+#### 2.4.8 容器探测
 
 容器探测用于检测容器中的应用实例是否正常工作，是保障业务可用性的一种传统机制。如果经过探测，实例的状态不符合预期，那么kubernetes就会把该问题实例" 摘除 "，不承担业务流量。kubernetes提供了两种探针来实现容器探测，分别是：
 - liveness probes：存活性探针，用于检测应用实例当前是否处于正常运行状态，如果不是，k8s会重启容器
@@ -1012,7 +863,7 @@ kubectl get pods -n dev -o wide
 kubectl describe pod pod-liveness-httpget -n dev    # 提示连接失败：HTTP probe failed with statuscode: 404
 ```
 
-#### 2.3.9 重启策略
+#### 2.4.9 重启策略
 
 一旦容器探测出现了问题，kubernetes就会对容器所在的Pod进行重启，其实这是由pod的重启策略决定的，pod的重启策略有 3 种，分别如下：
 
@@ -1055,7 +906,7 @@ kubectl describe pods pod-restartpolicy  -n dev
 kubectl get pods pod-restartpolicy -n dev
 ```
 
-#### 2.3.10 调度规则
+### 2.5 Pod调度
 
 在默认情况下，一个Pod在哪个Node节点上运行，是由Scheduler组件采用相应的算法计算出来的，这个过程是不受人工控制的。但是在实际使用中，这并不满足的需求，因为很多情况下，我们想控制某些Pod到达某些节点上，那么应该怎么做呢？这就要求了解kubernetes对Pod的调度规则，kubernetes提供了四大类调度方式：
 
@@ -1064,7 +915,7 @@ kubectl get pods pod-restartpolicy -n dev
 - 亲和性调度：NodeAffinity、PodAffinity、PodAntiAffinity
 - 污点（容忍）调度：Taints、Toleration
 
-##### 2.3.10.1 定向调度
+#### 2.5.1 定向调度
 
 定向调度，指的是利用在pod上声明nodeName或者nodeSelector，以此将Pod调度到期望的node节点上。注意，这里的调度是强制的，这就意味着即使要调度的目标Node不存在，也会向上面进行调度，只不过pod运行失败而已
 
@@ -1130,7 +981,7 @@ kubectl create -f pod-nodeselector.yaml
 kubectl get pods pod-nodeselector -n dev -o wide
 ```
 
-##### 2.3.10.2 亲和性调度
+#### 2.5.2 亲和性调度
 
 kubernetes还提供了一种亲和性调度（Affinity）。它在NodeSelector的基础之上的进行了扩展，可以通过配置的形式，实现优先选择满足条件的Node进行调度，如果没有，也可以调度到不满足条件的节点上，使调度更加灵活
 
@@ -1287,7 +1138,7 @@ spec:
         topologyKey: kubernetes.io/hostname
 ```
 
-##### 2.3.10.3 污点和容忍
+#### 2.5.3 污点和容忍
 
 1. 污点
 
@@ -1359,66 +1210,48 @@ spec:
 
 添加了容忍之后，该pod可以正常运行在有污点的节点上
 
-#### 2.3.11 控制器
+### 2.6 Pod控制器
 
 Pod控制器是管理pod的中间层，使用Pod控制器之后，只需要告诉Pod控制器，想要多少个什么样的Pod就可以了，它会创建出满足条件的Pod并确保每一个Pod资源处于用户期望的目标状态。如果Pod资源在运行中出现故障，它会基于指定策略重新编排Pod
 
-##### 2.3.11.1 ReplicaSet
-
-##### 2.3.11.1 ReplicaSet
-
-##### 2.3.11.1 ReplicaSet
-
-##### 2.3.11.1 ReplicaSet
-
-##### 2.3.11.1 ReplicaSet
-
-### 2.4 Lable
-
-#### 2.4.1 命令式
-
-```bash
-kubectl label pod nginx version=1.0 -n dev                # 打标签
-kubectl label pod nginx version=2.0 -n dev --overwrite    # 更新标签
-kubectl get pod nginx  -n dev --show-labels               # 查看标签
-kubectl get pod -n dev -l version=2.0  --show-labels      # 筛选标签
-kubectl label pod nginx-pod version- -n dev               # 删除标签
-```
-
-#### 2.4.2 配置方式
-
-```bash
-vi pod-nginx.yaml
-```
+#### 2.6.1 资源清单
 
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nginx
-  namespace: dev
-  labels:
-    version: "3.0" 
-    env: "test"
-spec:
-  containers:
-  - image: nginx:1.22.1
-    name: pod
-    ports:
-    - name: nginx-port
-      containerPort: 80
-      protocol: TCP
+apiVersion: apps/v1 # 版本号
+kind: Deployment # 类型       
+metadata: # 元数据
+  name: # rs名称 
+  namespace: # 所属命名空间 
+  labels: #标签
+    controller: deploy
+spec: # 详情描述
+  replicas: 3 # 副本数量
+  revisionHistoryLimit: 3 # 保留历史版本
+  paused: false # 暂停部署，默认是false
+  progressDeadlineSeconds: 600 # 部署超时时间（s），默认是600
+  strategy: # 策略
+    type: RollingUpdate # 滚动更新策略
+    rollingUpdate: # 滚动更新
+      maxSurge: 30% # 最大额外可以存在的副本数，可以为百分比，也可以为整数
+      maxUnavailable: 30% # 最大不可用状态的 Pod 的最大值，可以为百分比，也可以为整数
+  selector: # 选择器，通过它指定该控制器管理哪些pod
+    matchLabels:      # Labels匹配规则
+      app: nginx-pod
+    matchExpressions: # Expressions匹配规则
+      - {key: app, operator: In, values: [nginx-pod]}
+  template: # 模板，当副本数量不足时，会根据下面的模板创建pod副本
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.17.1
+        ports:
+        - containerPort: 80
 ```
 
-```bash
-kubectl apply -f pod-nginx.yaml
-kubectl get pod nginx  -n dev --show-labels
-```
-
-
-### 2.5 Deployment
-
-#### 2.5.1 命令式
+#### 2.6.2 命令式
 
 ```bash
 kubectl run nginx --image=nginx:1.22.1 --port=80 --replicas=3 -n dev
@@ -1428,7 +1261,7 @@ kubectl describe deploy nginx -n dev    # 查看deployment的详细信息
 kubectl delete deploy nginx -n dev      # 删除控制器
 ```
 
-#### 2.5.2 配置方式
+#### 2.6.3 Deployment
 
 ```bash
 vi deploy-nginx.yaml
@@ -1436,42 +1269,67 @@ vi deploy-nginx.yaml
 
 ```yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment      
 metadata:
-  name: nginx
+  name: pc-deployment
   namespace: dev
-spec:
+spec: 
   replicas: 3
   selector:
     matchLabels:
-      run: nginx
+      app: nginx-pod
   template:
     metadata:
       labels:
-        run: nginx
+        app: nginx-pod
     spec:
       containers:
-      - image: nginx:1.22.1
-        name: nginx
-        ports:
-        - containerPort: 80
-          protocol: TCP
+      - name: nginx
+        image: nginx:1.22.1
 ```
 
 ```bash
-kubectl create -f deploy-nginx.yaml
-kubectl delete -f deploy-nginx.yaml
+kubectl create -f pc-deployment.yaml
+kubectl get deploy pc-deployment -n dev
+kubectl get rs -n dev
+kubectl get pods -n dev
+kubectl scale deploy pc-deployment --replicas=5 -n dev    # 扩缩容
+kubectl edit deploy pc-deployment -n dev                  # 扩缩容
+kubectl set image deployment pc-deployment nginx=nginx:1.22.2 -n dev  # 镜像变更
+kubectl delete -f pc-deployment.yaml
 ```
 
-### 2.6 Service
+### 2.7 Service
 
 Service可以看作是一组同类Pod`对外的访问接口`。借助Service，应用可以方便地实现服务发现和负载均衡。
 
-#### 2.6.1 命令式
+#### 2.7.1 资源清单
+
+```yaml
+kind: Service  # 资源类型
+apiVersion: v1  # 资源版本
+metadata: # 元数据
+  name: service # 资源名称
+  namespace: dev # 命名空间
+spec: # 描述
+  selector: # 标签选择器，用于确定当前service代理哪些pod
+    app: nginx
+  type: # Service类型，指定service的访问方式
+  clusterIP:  # 虚拟服务的ip地址
+  sessionAffinity: # session亲和性，支持ClientIP、None两个选项
+  ports: # 端口信息
+    - protocol: TCP 
+      port: 3017  # service端口
+      targetPort: 5003 # pod端口
+      nodePort: 31122 # 主机端口
+```
+
+#### 2.7.2 命令式
 
 1. 创建集群内部可访问的Service
 
 ```bash
+kubectl run nginx --image=nginx:1.22.1 --port=80 --namespace dev 
 kubectl expose deploy nginx --name=svc-nginx1 --type=ClusterIP --port=80 --target-port=80 -n dev  # 暴漏service
 kubectl get svc svc-nginx1 -n dev -o wide        # 查看service后通过curl访问service暴漏的地址，生命周期中这个地址是不会变
 ```
@@ -1479,6 +1337,7 @@ kubectl get svc svc-nginx1 -n dev -o wide        # 查看service后通过curl访
 2. 创建集群外部也可访问的Service
 
 ```bash
+kubectl run nginx --image=nginx:1.22.1 --port=80 --namespace dev 
 kubectl expose deploy nginx --name=svc-nginx2 --type=NodePort --port=80 --target-port=80 -n dev
 kubectl get svc -n dev -o wide
 kubectl delete svc svc-nginx2 -n dev  # 删除service
@@ -1492,17 +1351,17 @@ Checksum Offload 是网卡的一个功能选项。如果该选项开启，则网
 ethtool -K flannel.1 tx-checksum-ip-generic off
 ```
 
-#### 2.6.2 配置方式
+#### 2.7.3 ClusterIP
 
 ```bash
-vi svc-nginx.yaml
+vi service-clusterip.yaml
 ```
 
 ```yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: svc-nginx
+  name: service-clusterip
   namespace: dev
 spec:
   clusterIP: 10.109.179.231
@@ -1511,16 +1370,93 @@ spec:
     protocol: TCP
     targetPort: 80
   selector:
-    run: nginx
+    app: nginx-pod
   type: ClusterIP
 ```
 
 ```bash
-kubectl create -f svc-nginx.yaml
-kubectl delete -f svc-nginx.yaml
+kubectl create -f service-clusterip.yaml  # 创建service
+kubectl get svc -n dev -o wide            # 查看service
+kubectl describe svc service-clusterip -n dev   # 查看service的详细信息
+ipvsadm -Ln   # 查看ipvs的映射规则
+kubectl delete -f service-clusterip.yaml
 ```
 
-### 2.6 Ingress
+#### 2.7.4 HeadLiness
+
+在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自己来控制负载均衡策略，针对这种情况，kubernetes提供了HeadLiness  Service，这类Service不会分配Cluster IP，如果想要访问service，只能通过service的域名进行查询
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-headliness
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: None # 将clusterIP设置为None，即可创建headliness Service
+  type: ClusterIP
+  ports:
+  - port: 80    
+    targetPort: 80
+```
+
+```bash
+kubectl create -f service-headliness.yaml   # 创建service
+kubectl get svc service-headliness -n dev -o wide
+kubectl describe svc service-headliness -n dev
+kubectl get pods -n dev
+kubectl exec -it pc-deployment-7bbc5875b7-4wrph -n dev /bin/sh
+cat /etc/resolv.conf
+dig @10.96.0.10 service-headliness.dev.svc.cluster.local  # 需要安装yum -y install bind-utils
+```
+
+#### 2.7.5 NodePort
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-nodeport
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  type: NodePort # service类型
+  ports:
+  - port: 80
+    nodePort: 30002 # 指定绑定的node的端口(默认的取值范围是：30000-32767), 如果不指定，会默认分配
+    targetPort: 80
+```
+
+```bash
+kubectl create -f service-nodeport.yaml
+kubectl get svc -n dev -o wide
+```
+
+#### 2.7.6 ExternalName
+
+ExternalName类型的Service用于引入集群外部的服务，它通过`externalName`属性指定外部一个服务的地址，然后在集群内部访问此service就可以访问到外部的服务了
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-externalname
+  namespace: dev
+spec:
+  type: ExternalName # service类型
+  externalName: www.baidu.com  #改成ip地址也可以
+```
+
+```bash
+kubectl create -f service-externalname.yaml
+kubectl get svc -n dev -o wide
+dig @10.96.0.10 service-externalname.dev.svc.cluster.local
+```
+
+### 2.8 Ingress
 
 #### 2.6.1 创建应用
 
@@ -1696,9 +1632,9 @@ kubectl get ing ingress-https -n dev
 kubectl describe ing ingress-https -n dev
 ```
 
-## 3. 数据存储
+### 3. 数据存储
 
-### 3.1 基本存储
+#### 3.1 基本存储
 
 #### 3.1.1 EmptyDir
 
@@ -1841,7 +1777,7 @@ kubectl get pods volume-nfs -n dev -o wide
 ls /root/data/nfs
 ```
 
-### 3.2 高级存储
+#### 3.2 高级存储
 
 - 存储：存储工程师维护
 - PV：  kubernetes管理员维护
@@ -2043,7 +1979,7 @@ kubectl get pv -n dev -o wide   # 查看pv
 more /root/data/pv1             # 查看nfs中的文件存储
 ```
 
-### 3.3 配置存储
+#### 3.3 配置存储
 
 #### 3.3.1 ConfigMap
 
@@ -2154,9 +2090,9 @@ ls /secret/config/
 more /secret/config/username
 ```
 
-## 5. DashBoard
+## 3. DashBoard
 
-### 5.1 部署
+### 3.1 部署
 
 下载文件
 
@@ -2193,7 +2129,7 @@ kubectl create -f recommended.yaml
 kubectl get pod,svc -n kubernetes-dashboard  # 查看资源
 ```
 
-### 5.2 初始化账号
+### 3.2 初始化账号
 
 ```bash
 kubectl create serviceaccount dashboard-admin -n kubernetes-dashboard  # 创建账号
@@ -2202,7 +2138,7 @@ kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin  # 获取账�
 kubectl describe secrets [secretsname] -n kubernetes-dashboard      # 查看token
 ```
 
-### 5.3 证书更换（可选）
+### 3.3 证书更换（可选）
 
 ```bash
 cd /opt/k8s
@@ -2221,7 +2157,7 @@ kubectl get pod -n kube-system
 kubectl delete pod <pod name> -n kube-system
 ```
 
-### 5.3 Dashboard UI
+### 3.4 Dashboard UI
 
 访问地址：https://192.168.2.201:30009
 `鼠标点击页面的任意地方，键盘输入： thisisunsafe`
