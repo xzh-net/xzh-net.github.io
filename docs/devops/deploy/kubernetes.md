@@ -282,46 +282,6 @@ kubectl get pods,service
 
 访问地址：http://192.168.2.201:port/
 
-
-#### 1.3.2 ingress-nginx
-
-[ingress-nginx](/file/k8s/mandatory)
-
-```bash
-kubectl apply -f mandatory.yaml
-kubectl get pods -n ingress-nginx -o wide
-```
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: ingress-nginx
-  namespace: ingress-nginx
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-spec:
-  type: NodePort
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-```
-
-```bash
-kubectl apply -f service-nodeport.yaml
-kubectl get svc -n ingress-nginx -o wide
-```
-
 ## 2. 组件
 
 ### 2.1 Kubectl
@@ -1458,9 +1418,34 @@ dig @10.96.0.10 service-externalname.dev.svc.cluster.local
 
 ### 2.8 Ingress
 
-#### 2.6.1 创建应用
+#### 2.8.1 安装
 
-例子tomcat-nginx.yaml
+下载地址：https://github.com/xzh-net/InstallHelper/tree/main/k8s/ingress
+
+1. 准备镜像
+
+```bash
+images=(
+  nginx-ingress-controller:0.30.0
+)
+
+for imageName in ${images[@]} ; do
+  docker pull quay.io/kubernetes-ingress-controller/$imageName
+  docker tag  quay.io/kubernetes-ingress-controller/$imageName quay-mirror.qiniu.com/kubernetes-ingress-controller/$imageName
+  docker rmi  quay.io/kubernetes-ingress-controller/$imageName
+done
+```
+
+2. 执行安装
+
+```bash
+mkdir /opt/k8s/ingress  # 上传文件
+kubectl apply -f ./
+kubectl get pod -n ingress-nginx
+kubectl get svc -n ingress-nginx
+```
+
+#### 2.8.2 创建tomcat-nginx
 
 ```yaml
 apiVersion: apps/v1
@@ -1480,7 +1465,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:1.17.1
+        image: nginx:1.22.1
         ports:
         - containerPort: 80
 
@@ -1541,15 +1526,11 @@ spec:
 ```
 
 ```bash
-kubectl delete ns dev
-kubectl create ns dev
 kubectl apply -f tomcat-nginx.yaml   # 创建
 kubectl get svc -n dev
 ```
 
-#### 2.6.2 Http代理
-
-创建ingress-http.yaml
+#### 2.8.3 Http代理
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -1559,14 +1540,14 @@ metadata:
   namespace: dev
 spec:
   rules:
-  - host: nginx.xuzhihao.net
+  - host: nginx.xzh.net
     http:
       paths:
       - path: /
         backend:
           serviceName: nginx-service
           servicePort: 80
-  - host: tomcat.xuzhihao.net
+  - host: tomcat.xzh.net
     http:
       paths:
       - path: /
@@ -1582,8 +1563,8 @@ kubectl describe ing ingress-http  -n dev
 kubectl get svc -n ingress-nginx # 查看端口
 
 #配置host
-192.168.3.200 nginx.xuzhihao.net
-192.168.3.200 tomcat.xuzhihao.net
+192.168.2.201 nginx.xzh.net
+192.168.2.201 tomcat.xzh.net
 ```
 
 #### 2.6.3 Https代理
