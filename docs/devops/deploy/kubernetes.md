@@ -1439,13 +1439,13 @@ done
 2. 执行安装
 
 ```bash
-mkdir /opt/k8s/ingress  # 上传文件
-kubectl apply -f ./
-kubectl get pod -n ingress-nginx
-kubectl get svc -n ingress-nginx
+mkdir /opt/k8s/ingress  
+kubectl apply -f ./     # 创建ingress-nginx
+kubectl get pod -n ingress-nginx -o wide  # 查看ingress-nginx
+kubectl get svc -n ingress-nginx -o wide  # 查看service
 ```
 
-#### 2.8.2 创建tomcat-nginx
+#### 2.8.2 创建应用服务
 
 ```yaml
 apiVersion: apps/v1
@@ -1526,8 +1526,8 @@ spec:
 ```
 
 ```bash
-kubectl apply -f tomcat-nginx.yaml   # 创建
-kubectl get svc -n dev
+kubectl apply -f tomcat-nginx.yaml   # 创建应用
+kubectl get svc -n dev               # 查看应用
 ```
 
 #### 2.8.3 Http代理
@@ -1559,9 +1559,10 @@ spec:
 ```bash
 kubectl apply -f ingress-http.yaml
 kubectl get ing ingress-http -n dev
-kubectl describe ing ingress-http  -n dev
-kubectl get svc -n ingress-nginx # 查看端口
+kubectl describe ing ingress-http -n dev  # 查详情
+```
 
+```bash
 #配置host
 192.168.2.201 nginx.xzh.net
 192.168.2.201 tomcat.xzh.net
