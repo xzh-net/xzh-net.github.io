@@ -1416,13 +1416,13 @@ kubectl get svc -n dev -o wide
 dig @10.96.0.10 service-externalname.dev.svc.cluster.local
 ```
 
-### 2.8 Ingress
+### 2.8 Ingress-nginx
 
-#### 2.8.1 安装
+#### 2.8.1 安装nginx-ingress-controller
 
 下载地址：https://github.com/xzh-net/InstallHelper/tree/main/k8s/ingress
 
-1. 准备镜像
+拉取镜像
 
 ```bash
 images=(
@@ -1436,16 +1436,52 @@ for imageName in ${images[@]} ; do
 done
 ```
 
-2. 执行安装
+创建资源
 
 ```bash
 mkdir /opt/k8s/ingress  
-kubectl apply -f ./     # 创建ingress-nginx
+kubectl apply -f mandatory.yaml    # 创建ingress-nginx
 kubectl get pod -n ingress-nginx -o wide  # 查看ingress-nginx
+```
+
+
+#### 2.8.2 创建service集群外访问
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+      nodePort: 30080
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+      nodePort: 30443
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+```
+
+创建资源
+
+```bash
+kubectl apply -f service-nodeport.yaml 
 kubectl get svc -n ingress-nginx -o wide  # 查看service
 ```
 
-#### 2.8.2 创建应用服务
+#### 2.8.3 创建测试应用
 
 ```yaml
 apiVersion: apps/v1
@@ -1527,10 +1563,10 @@ spec:
 
 ```bash
 kubectl apply -f tomcat-nginx.yaml   # 创建应用
-kubectl get svc -n dev               # 查看应用
+kubectl get pods,svc -n dev          # 查看
 ```
 
-#### 2.8.3 Http代理
+#### 2.8.4 配置http规则
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -1540,39 +1576,28 @@ metadata:
   namespace: dev
 spec:
   rules:
-  - host: nginx.xzh.net
+  - host: nginx.xuzhihao.net
     http:
       paths:
       - path: /
         backend:
           serviceName: nginx-service
           servicePort: 80
-  - host: tomcat.xzh.net
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: tomcat-service
-          servicePort: 8080
 ```
 
 ```bash
 kubectl apply -f ingress-http.yaml
 kubectl get ing ingress-http -n dev
 kubectl describe ing ingress-http -n dev  # 查详情
+curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080
 ```
 
-```bash
-#配置host
-192.168.2.201 nginx.xzh.net
-192.168.2.201 tomcat.xzh.net
-```
 
-#### 2.8.4 Https代理
+#### 2.8.5 配置https规则
 
 ```bash
 # 生成证书
-openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=xzh.net"
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=xuzhihao.net"
 # 创建密钥
 kubectl create secret tls tls-secret --key tls.key --cert tls.crt
 ```
@@ -1586,18 +1611,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - nginx.xzh.net
-      - tomcat.xzh.net
+      - tomcat.xuzhihao.net
       secretName: tls-secret # 指定秘钥
   rules:
-  - host: nginx.xzh.net
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: nginx-service
-          servicePort: 80
-  - host: tomcat.xzh.net
+  - host: tomcat.xuzhihao.net
     http:
       paths:
       - path: /
@@ -1610,6 +1627,7 @@ spec:
 kubectl apply -f ingress-https.yaml
 kubectl get ing ingress-https -n dev
 kubectl describe ing ingress-https -n dev
+curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
 
 ### 3. 数据存储
