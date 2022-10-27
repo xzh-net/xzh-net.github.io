@@ -1249,7 +1249,7 @@ find / -name 'meeting' -type d      # 查找meeting文件夹所在的位置
 find / -name 'server.xml' -print    # 查找server.xml文件的位置
 find . -iname 'Configure'           # 查找关键字忽略大小写
 
-find /home/eagleye -name '*.mysql' -print   # 在目录下找后缀是.mysql的文件
+find /opt/software -name '*.mysql' -print   # 在目录下找后缀是.mysql的文件
 find /usr -atime 3 –print                   # 会从/usr目录开始往下找，找最近3天之内存取过的文件。
 find /usr -ctime 5 –print                   # 会从/usr目录开始往下找，找最近5天之内修改过的文件。
 find /doc -user xzh -name 'j*' –print               # 会从/doc目录开始往下找，找用户xzh的、文件名开头是j的文件。  
