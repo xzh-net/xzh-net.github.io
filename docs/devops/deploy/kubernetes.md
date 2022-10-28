@@ -1416,72 +1416,29 @@ kubectl get svc -n dev -o wide
 dig @10.96.0.10 service-externalname.dev.svc.cluster.local
 ```
 
-### 2.8 Ingress-nginx
+### 2.8 Ingress
+
+Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量路由由Ingress资源上定义的规则控制。
 
 #### 2.8.1 安装nginx-ingress-controller
 
 下载地址：https://github.com/xzh-net/InstallHelper/tree/main/k8s/ingress
 
-拉取镜像
-
 ```bash
-images=(
-  nginx-ingress-controller:0.30.0
-)
-
-for imageName in ${images[@]} ; do
-  docker pull quay.io/kubernetes-ingress-controller/$imageName
-  docker tag  quay.io/kubernetes-ingress-controller/$imageName quay-mirror.qiniu.com/kubernetes-ingress-controller/$imageName
-  docker rmi  quay.io/kubernetes-ingress-controller/$imageName
-done
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
 ```
 
-创建资源
+修改镜像地址将`k8s.gcr.io/ingress-nginx/controller:v0.35.0@sha256:fc4979d8b8443a831c9789b5155cded454cb7de737a8b727bc2ba0106d2eae8b`替换成`scofield/ingress-nginx-controller:v0.35.0`
+
+执行部署
 
 ```bash
 mkdir /opt/k8s/ingress  
-kubectl apply -f mandatory.yaml    # 创建ingress-nginx
-kubectl get pod -n ingress-nginx -o wide  # 查看ingress-nginx
+kubectl apply -f deploy.yaml                  # 创建ingress-nginx
+kubectl get pod,svc -n ingress-nginx -o wide  # 查看ingress-nginx
 ```
 
-
-#### 2.8.2 创建service集群外访问
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: ingress-nginx
-  namespace: ingress-nginx
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-spec:
-  type: NodePort
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      protocol: TCP
-      nodePort: 30080
-    - name: https
-      port: 443
-      targetPort: 443
-      protocol: TCP
-      nodePort: 30443
-  selector:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: ingress-nginx
-```
-
-创建资源
-
-```bash
-kubectl apply -f service-nodeport.yaml 
-kubectl get svc -n ingress-nginx -o wide  # 查看service
-```
-
-#### 2.8.3 创建测试应用
+#### 2.8.2 创建测试应用
 
 ```yaml
 apiVersion: apps/v1
@@ -1566,7 +1523,7 @@ kubectl apply -f tomcat-nginx.yaml   # 创建应用
 kubectl get pods,svc -n dev          # 查看
 ```
 
-#### 2.8.4 配置http规则
+#### 2.8.3 配置http规则
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -1589,11 +1546,12 @@ spec:
 kubectl apply -f ingress-http.yaml
 kubectl get ing ingress-http -n dev
 kubectl describe ing ingress-http -n dev  # 查详情
-curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080
+
+curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
 ```
 
 
-#### 2.8.5 配置https规则
+#### 2.8.4 配置https规则
 
 ```bash
 # 生成证书
@@ -1627,7 +1585,9 @@ spec:
 kubectl apply -f ingress-https.yaml
 kubectl get ing ingress-https -n dev
 kubectl describe ing ingress-https -n dev
+
 curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
+curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
 
 ## 3. DashBoard
