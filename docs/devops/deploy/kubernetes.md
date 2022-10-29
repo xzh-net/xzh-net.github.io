@@ -1420,6 +1420,8 @@ dig @10.96.0.10 service-externalname.dev.svc.cluster.local
 
 Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量路由由Ingress资源上定义的规则控制。
 
+数据流向：Ingress-Service端口(30080) -> ingress-Pod端口(80) -> 通过绑定规则(域名+80)，应用service端口 -> 应用Pod端口
+
 #### 2.8.1 安装nginx-ingress-controller
 
 下载地址：https://github.com/xzh-net/InstallHelper/tree/main/k8s/ingress
@@ -1589,11 +1591,6 @@ kubectl describe ing ingress-https -n dev
 curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
-
-总结：
-1. ingress-Service暴漏访问端口(30080)对应Pod端口80
-2. Ingress通过规则绑定域名和Pod端口80，找到应用的service
-3. 应用service找到应用Pod
 
 ## 3. DashBoard
 
