@@ -1425,17 +1425,17 @@ Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量�
 下载地址：https://github.com/xzh-net/InstallHelper/tree/main/k8s/ingress
 
 ```bash
-wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
 ```
-
-修改镜像地址将`k8s.gcr.io/ingress-nginx/controller:v0.35.0@sha256:fc4979d8b8443a831c9789b5155cded454cb7de737a8b727bc2ba0106d2eae8b`替换成`scofield/ingress-nginx-controller:v0.35.0`
 
 执行部署
 
 ```bash
 mkdir /opt/k8s/ingress  
-kubectl apply -f deploy.yaml                  # 创建ingress-nginx
-kubectl get pod,svc -n ingress-nginx -o wide  # 查看ingress-nginx
+kubectl apply -f mandatory.yaml                 # 创建ingress-nginx
+kubectl apply -f service-nodeport.yaml          # 创建service
+kubectl get pod,svc -n ingress-nginx -o wide    # 查看ingress-nginx
 ```
 
 #### 2.8.2 创建测试应用
@@ -1589,6 +1589,11 @@ kubectl describe ing ingress-https -n dev
 curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
+
+总结：
+1. ingress-Service暴漏访问端口(30080)对应Pod端口80
+2. Ingress通过规则绑定域名和Pod端口80，找到应用的service
+3. 应用service找到应用Pod
 
 ## 3. DashBoard
 
