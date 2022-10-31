@@ -8,9 +8,7 @@ Etcd是CoreOS基于Raft协议开发的分布式key-value存储，可用于服务
 
 ## 1. 安装
 
-### 1.1 集群
-
-#### 1.1.1 上传解压
+### 1.1 上传解压
 
 ```bash
 cd /opt/software
@@ -21,7 +19,7 @@ mv /opt/etcd/{etcd,etcdctl} /opt/etcd/bin/
 ```
 
 
-#### 1.1.2 下载证书工具
+### 1.2 下载证书工具
 
 ```bash
 cd /opt/etcd/tls
@@ -34,7 +32,7 @@ cp cfssljson_linux-amd64 /usr/local/bin/cfssljson
 cp cfssl-certinfo_linux-amd64 /usr/local/bin/cfssl-certinfo
 ```
 
-#### 1.1.3 生成自签CA
+### 1.3 生成自签CA
 
 ```bash
 mkdir -p /opt/etcd/tls/{etcd,k8s}
@@ -95,7 +93,7 @@ cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
 ls ca*pem
 ```
 
-#### 1.1.4 使用自签CA签发Etcd HTTPS证书
+### 1.4 使用自签CA签发HTTPS证书
 
 ```bash
 vi server-csr.json
@@ -132,7 +130,7 @@ ls server*pem
 ```
 
 
-#### 1.1.5 创建etcd配置文件
+### 1.5 创建etcd配置文件
 
 ```bash
 vi /opt/etcd/cfg/etcd.conf
@@ -153,7 +151,7 @@ ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
 ETCD_INITIAL_CLUSTER_STATE="new"
 ```
 
-#### 1.1.6 system管理etcd
+### 1.6 设置开启启动
 
 ```bash
 vi /usr/lib/systemd/system/etcd.service
@@ -205,7 +203,7 @@ systemctl daemon-reload
 systemctl enable etcd
 ```
 
-#### 1.1.7 应用分发
+### 1.7 应用分发
 
 ```bash
 scp -r /opt/etcd/ node02:/opt/
@@ -263,14 +261,14 @@ systemctl daemon-reload
 systemctl enable etcd
 ```
 
-#### 1.1.8 启动集群
+### 1.8 启动集群
 
 ```bash
 systemctl start etcd    # 三台机器
 netstat -lntup |grep etcd
 ```
 
-#### 1.1.9 客户端测试
+### 1.9 客户端测试
 
 ```bash
 export ETCDCTL_API=3
