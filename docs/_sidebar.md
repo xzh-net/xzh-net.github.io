@@ -81,7 +81,6 @@
   - [分布式文件系统](java/distributed/dfs)
   - [Spring Cloud Netflix](java/microservice/springcloud)
   - [Spring Cloud Alibaba](java/microservice/springclouda)
-  - [服务网格Service Mesh](java/microservice/servicemesh)
   - [Mysql](java/database/mysql)
   - [Oracle](java/database/oracle)
   - [Mycat](java/database/mycat)
