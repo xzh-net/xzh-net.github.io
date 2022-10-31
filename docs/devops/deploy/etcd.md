@@ -130,7 +130,7 @@ ls server*pem
 ```
 
 
-### 1.5 创建etcd配置文件
+### 1.5 修改配置文件
 
 ```bash
 vi /opt/etcd/cfg/etcd.conf
