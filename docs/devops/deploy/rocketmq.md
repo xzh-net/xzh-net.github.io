@@ -512,17 +512,9 @@ nohup sh mqbroker -c /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-a
 https://github.com/xzh-net/rocketmq-dashboard
 
 
-### 2.2 编译
-
-#### 2.2.1 源码安装 
+### 2.2 编译运行
 
 ```bash
 mvn clean package -Dmaven.test.skip=true
 java -jar target/rocketmq-dashboard-1.0.1-SNAPSHOT.jar
-```
-
-#### 2.2.2 docker运行
-
-```bash
-docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=127.0.0.1:9876" -p 8080:8080 -t apacherocketmq/rocketmq-dashboard:latest
 ```
