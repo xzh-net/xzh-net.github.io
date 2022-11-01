@@ -1698,7 +1698,7 @@ access.log  error.log
 
 ​NFS是一个网络文件存储系统，可以搭建一台NFS服务器，然后将Pod中的存储直接连接到NFS系统上，这样的话，无论Pod在节点上怎么转移，只要Node跟NFS的对接没问题，数据就可以成功访问
 
-准备单独的nfs服务器
+1. 准备单独的nfs服务器
 
 ```bash
 yum install nfs-utils -y
@@ -1713,13 +1713,13 @@ vim /etc/exports
 systemctl start nfs
 ```
 
-在k8s-node01节点安装客户端
+2. 在k8s-node01节点安装客户端
 
 ```bash
 yum install -y nfs-utils.x86_64
 ```
 
-创建volume-nfs.yaml
+3. 创建volume-nfs.yaml
 
 ```yaml
 apiVersion: v1
@@ -1761,11 +1761,345 @@ access.log  error.log
 
 #### 2.9.4 PV
 
+PV（Persistent Volume）是持久化卷的意思，是对底层的共享存储的一种抽象。一般情况下PV由kubernetes管理员进行创建和配置，它与底层具体的共享存储技术有关，并通过插件完成与共享存储的对接
+
+1. 资源清单
+
+```yaml
+apiVersion: v1  
+kind: PersistentVolume
+metadata:
+  name: pv2
+spec:
+  nfs: # 存储类型，与底层真正存储对应
+  capacity:  # 存储能力，目前只支持存储空间的设置
+    storage: 2Gi
+  accessModes:  # 访问模式
+  storageClassName: # 存储类别
+  persistentVolumeReclaimPolicy: # 回收策略
+```
+
+2. 准备NFS环境
+
+在nfs服务器进行设置
+
+```bash
+mkdir /root/data/{pv1,pv2,pv3} -pv
+vi /etc/exports
+# 编辑内容
+/root/data/pv1  192.168.2.0/24(rw,no_root_squash)
+/root/data/pv2  192.168.2.0/24(rw,no_root_squash)
+/root/data/pv3  192.168.2.0/24(rw,no_root_squash)
+
+# 重启服务
+systemctl restart nfs
+```
+
+3. 创建pv.yaml
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name:  pv1
+spec:
+  capacity: 
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv1
+    server: 192.168.2.200
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name:  pv2
+spec:
+  capacity: 
+    storage: 2Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv2
+    server: 192.168.2.200
+    
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name:  pv3
+spec:
+  capacity: 
+    storage: 3Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv3
+    server: 192.168.2.200
+```
+
+```bash
+# 创建 pv
+kubectl create -f pv.yaml
+# 查看 pv
+kubectl get pv -o wide
+```
+
 #### 2.9.5 PVC
+
+PVC（Persistent Volume Claim）是持久卷声明的意思，是用户对于存储需求的一种声明。换句话说，PVC其实就是用户向kubernetes系统发出的一种资源需求申请
+
+1. 资源清单
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc
+  namespace: dev
+spec:
+  accessModes: # 访问模式
+  selector: # 采用标签对PV选择
+  storageClassName: # 存储类别
+  resources: # 请求空间
+    requests:
+      storage: 5Gi
+```
+
+2. 创建pvc.yaml，申请pv
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+  namespace: dev
+spec:
+  accessModes: 
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+      
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc2
+  namespace: dev
+spec:
+  accessModes: 
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+     
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc3
+  namespace: dev
+spec:
+  accessModes: 
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+```bash
+# 创建pvc
+kubectl create -f pvc.yaml
+# 查看pvc
+kubectl get pvc  -n dev -o wide
+```
+
+3. 创建pods.yaml, 使用pv
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+  namespace: dev
+spec:
+  containers:
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","while true;do echo pod1 >> /root/out.txt; sleep 10; done;"]
+    volumeMounts:
+    - name: volume
+      mountPath: /root/
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: pvc1
+        readOnly: false
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod2
+  namespace: dev
+spec:
+  containers:
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","while true;do echo pod2 >> /root/out.txt; sleep 10; done;"]
+    volumeMounts:
+    - name: volume
+      mountPath: /root/
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: pvc2
+        readOnly: false 
+```
+
+```bash
+# 创建pod
+kubectl create -f pods.yaml
+# 查看pod
+kubectl get pods -n dev -o wide
+# 查看pvc
+kubectl get pvc -n dev -o wide
+# 查看pv
+kubectl get pv -n dev -o wide
+# 查看nfs中的文件存储
+more /root/data/pv1/out.txt
+more /root/data/pv2/out.txt
+```
 
 #### 2.9.6 ConfigMap
 
+ConfigMap是一种比较特殊的存储卷，它的主要作用是用来存储配置信息的。
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap
+  namespace: dev
+data:
+  info: |
+    username:admin
+    password:123456
+```
+
+```bash
+# 创建configmap
+kubectl create -f configmap.yaml
+# 查看configmap详情
+kubectl describe cm configmap -n dev
+```
+
+接下来创建一个pod-configmap.yaml，将上面创建的configmap挂载进去
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-configmap
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    volumeMounts: # 将configmap挂载到目录
+    - name: config
+      mountPath: /configmap/config
+  volumes: # 引用configmap
+  - name: config
+    configMap:
+      name: configmap
+```
+
+```bash
+# 创建pod
+kubectl create -f pod-configmap.yaml
+# 查看pod
+kubectl get pod pod-configmap -n dev
+#进入容器
+kubectl exec -it pod-configmap -n dev /bin/sh
+cd /configmap/config/
+ls
+more info
+```
+
 #### 2.9.7 Secret
+
+在kubernetes中，还存在一种和ConfigMap非常类似的对象，称为Secret对象。它主要用于存储敏感信息，例如密码、秘钥、证书等等。
+
+1. 首先使用base64对数据进行编码
+
+```bash
+echo -n 'admin' | base64 # 准备username
+echo -n '123456' | base64 #准备password
+```
+
+2. 接下来编写secret.yaml，并创建Secret
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret
+  namespace: dev
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: MTIzNDU2
+```
+
+```bash
+# 创建secret
+kubectl create -f secret.yaml
+# 查看secret详情
+kubectl describe secret secret -n dev
+```
+
+3. 创建pod-secret.yaml，将上面创建的secret挂载进去
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-secret
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    volumeMounts: # 将secret挂载到目录
+    - name: config
+      mountPath: /secret/config
+  volumes:
+  - name: config
+    secret:
+      secretName: secret
+```
+
+```bash
+# 创建pod
+kubectl create -f pod-secret.yaml
+# 查看pod
+kubectl get pod pod-secret -n dev
+# 进入容器，查看secret信息，发现已经自动解码了
+kubectl exec -it pod-secret /bin/sh -n dev
+ls /secret/config/
+more /secret/config/username
+more /secret/config/password
+```
 
 ## 3. DashBoard
 
