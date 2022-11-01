@@ -268,7 +268,7 @@ kubectl get ingress -n istio-system
 
 访问地址：grafana.istio.qy.com:30080（k8s中将ingress的80映射为30080）
 
-### 1.5 完全卸载
+### 1.5 卸载
 
 ```bash
 /opt/istio/samples/bookinfo/platform/kube/cleanup.sh    # 清空应用，输入命名空间 bookinfo
