@@ -583,6 +583,9 @@ server {
     location /emoji/ {                  # alias表示虚拟的路径，任意更改
         alias /home/project/emoji/;     # 必须以斜线结尾，实际路径http://127.0.0.1/emoji/index.json
     }
+    location /MP_verify_AHlGORozI4xN5yov.txt {      # wx授权域名绑定
+        alias /home/MP_verify_AHlGORozI4xN5yov.txt;
+    }
     location /blob/ {
         proxy_redirect off;
         proxy_set_header Host $host;
