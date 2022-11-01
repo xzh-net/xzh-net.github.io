@@ -1,7 +1,7 @@
 
 # 基于Nexus3快速搭建Maven私有仓库
 
-!> 为什么要搭建私有仓库
+?> 为什么要搭建私有仓库
 
 ![](../../assets/_images/devops/deploy/nexus3/maven.png)
 

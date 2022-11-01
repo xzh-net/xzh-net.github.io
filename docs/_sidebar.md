@@ -20,7 +20,7 @@
   - [Nginx](devops/deploy/nginx)
   - [Keepalived](devops/deploy/keepalived)
   - [HAProxy](devops/deploy/haproxy)
-  - [Nexus3](devops/deploy/nexus3)
+  - [Nexus](devops/deploy/nexus)
   - [Gitlab](devops/deploy/gitlab)
   - [Jenkins](devops/deploy/jenkins)
   - [Zabbix](devops/deploy/zabbix)

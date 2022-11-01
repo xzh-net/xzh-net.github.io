@@ -1592,6 +1592,181 @@ curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
 
+### 2.9 数据存储
+
+#### 2.9.1 EmptyDir
+
+EmptyDir是最基础的Volume类型，一个EmptyDir就是Host上的一个空目录。
+
+​EmptyDir是在Pod被分配到Node时创建的，它的初始内容为空，并且无须指定宿主机上对应的目录文件，因为kubernetes会自动分配一个目录，当Pod销毁时， EmptyDir中的数据也会被永久删除
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-emptydir
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports:
+    - containerPort: 80
+    volumeMounts:  # 将logs-volume挂在到nginx容器中，对应的目录为 /var/log/nginx
+    - name: logs-volume
+      mountPath: /var/log/nginx
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","tail -f /logs/access.log"] # 初始命令，动态读取指定文件中内容
+    volumeMounts:  # 将logs-volume 挂在到busybox容器中，对应的目录为 /logs
+    - name: logs-volume
+      mountPath: /logs
+  volumes: # 声明volume， name为logs-volume，类型为emptyDir
+  - name: logs-volume
+    emptyDir: {}
+```
+
+```bash
+# 创建Pod
+kubectl create -f volume-emptydir.yaml
+# 查看pod
+kubectl get pods volume-emptydir -n dev -o wide
+# 通过podIp访问nginx
+curl 10.244.1.27
+# 通过kubectl logs命令查看指定容器的标准输出
+kubectl logs -f volume-emptydir -n dev -c busybox
+```
+
+#### 2.9.2 HostPath
+
+HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就可以保证Pod销毁了，但是数据依据可以存在于Node主机上。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-hostpath
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: logs-volume
+      mountPath: /var/log/nginx
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","tail -f /logs/access.log"]
+    volumeMounts:
+    - name: logs-volume
+      mountPath: /logs
+  volumes:
+  - name: logs-volume
+    hostPath: 
+      path: /root/logs
+      type: DirectoryOrCreate  # 目录存在就使用，不存在就先创建后使用
+```
+
+```lua
+关于type的值的一点说明：
+  DirectoryOrCreate 目录存在就使用，不存在就先创建后使用
+  Directory	目录必须存在
+  FileOrCreate  文件存在就使用，不存在就先创建后使用
+  File 文件必须存在	
+  Socket	unix套接字必须存在
+  CharDevice	字符设备必须存在
+  BlockDevice 块设备必须存在
+```
+
+```bash
+# 创建Pod
+kubectl create -f volume-hostpath.yaml
+# 查看Pod
+kubectl get pods volume-hostpath -n dev -o wide
+# 访问nginx
+curl 10.244.1.28
+# 查看文件，去目标pod所在的节点
+ls /root/logs/
+access.log  error.log
+```
+
+#### 2.9.3 NFS
+
+​HostPath可以解决数据持久化的问题，但是一旦Node节点故障了，Pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的用NFS、CIFS。
+
+​NFS是一个网络文件存储系统，可以搭建一台NFS服务器，然后将Pod中的存储直接连接到NFS系统上，这样的话，无论Pod在节点上怎么转移，只要Node跟NFS的对接没问题，数据就可以成功访问
+
+准备单独的nfs服务器
+
+```bash
+yum install nfs-utils -y
+# 准备一个共享目录
+mkdir /root/data/nfs -pv
+# 将共享目录以读写权限暴露给192.168.2.0/24网段中的所有主机
+vim /etc/exports
+# 添加内容
+/root/data/nfs  192.168.2.0/24(rw,no_root_squash)
+
+# 启动nfs服务
+systemctl start nfs
+```
+
+在k8s-node01节点安装客户端
+
+```bash
+yum install -y nfs-utils.x86_64
+```
+
+创建volume-nfs.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-nfs
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.22.1
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: logs-volume
+      mountPath: /var/log/nginx
+  - name: busybox
+    image: busybox:1.30
+    command: ["/bin/sh","-c","tail -f /logs/access.log"] 
+    volumeMounts:
+    - name: logs-volume
+      mountPath: /logs
+  volumes:
+  - name: logs-volume
+    nfs:
+      server: 192.168.2.200   #nfs服务器地址
+      path: /root/data/nfs    #共享文件路径
+```
+
+```bash
+# 创建pod
+kubectl create -f volume-nfs.yaml
+# 查看pod
+kubectl get pods volume-nfs -n dev -o wide
+# 查看nfs服务器上的共享目录，发现已经有文件了
+ls /root/data/
+access.log  error.log
+```
+
+#### 2.9.4 PV
+
+#### 2.9.5 PVC
+
+#### 2.9.6 ConfigMap
+
+#### 2.9.7 Secret
+
 ## 3. DashBoard
 
 ### 3.1 部署
