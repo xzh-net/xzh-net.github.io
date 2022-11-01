@@ -2043,8 +2043,8 @@ more info
 1. 首先使用base64对数据进行编码
 
 ```bash
-echo -n 'admin' | base64 # 准备username
-echo -n '123456' | base64 #准备password
+echo -n 'admin' | base64    # 准备username
+echo -n '123456' | base64   # 准备password
 ```
 
 2. 接下来编写secret.yaml，并创建Secret
