@@ -1,2 +1,6 @@
-* 关于我们
-  * [虎威传奇](http://www.hwcq.online/)
+- Translations
+  - [:uk: English](/)
+  - [:cn: 中文](/zh-cn/)
+  - [:de: Deutsch](/de-de/)
+  - [:es: Spanish](/es/)
+  - [:ru: Russian](/ru-ru/)

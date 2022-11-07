@@ -1,8 +1,11 @@
 ![logo](icon.svg)
 
-# xzh
+# xzh <small>.net</small>
 
 > 请忠于你内心深处的选择与坚守
+
+- 虎威传奇
+- 天罡虎威
 
 [GitHub](https://github.com/xzh-net/xzh-net.github.io)
 [Get Started](README.md)
