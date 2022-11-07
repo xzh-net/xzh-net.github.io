@@ -230,13 +230,15 @@ docker exec -it rancher reset-password
 
 
 ```bash
-docker pull mysql:5.7
+mkdir -p /mydata/mysql/data /mydata/mysql/logs /mydata/mysql/conf
+cd /mydata/mysql/conf
+touch my.cnf
 
 docker run -p 3306:3306 --name mysql \
--v /mydata/mysql/log:/var/log/mysql \
+-v /mydata/mysql/conf:/etc/mysql/conf.d \
 -v /mydata/mysql/data:/var/lib/mysql \
--v /mydata/mysql/conf:/etc/mysql \
--e MYSQL_ROOT_PASSWORD=root  \
+-v /mydata/mysql/logs:/logs \
+-e MYSQL_ROOT_PASSWORD=root \
 -d mysql:5.7
 
 docker cp /mydata/mall.sql mysql:/  # sql拷贝到容器中
@@ -2133,9 +2135,9 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /mydata/mysql/data/db:/var/lib/mysql #数据文件挂载
-      - /mydata/mysql/data/conf:/etc/mysql/conf.d #配置文件挂载
-      - /mydata/mysql/log:/var/log/mysql #日志文件挂载
+      - /mydata/mysql/conf:/etc/mysql/conf.d #配置文件挂载
+      - /mydata/mysql/data:/var/lib/mysql  #数据文件挂载
+      - /mydata/mysql/logs:/logs  #日志文件挂载
   redis:
     image: redis:5
     container_name: redis
