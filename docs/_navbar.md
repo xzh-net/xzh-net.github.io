@@ -4,3 +4,5 @@
   - [:de: Deutsch](/de-de/)
   - [:es: Spanish](/es/)
   - [:ru: Russian](/ru-ru/)
+  - [:cn: 天罡虎威](/ru-ru/)  
+  - 虎威传奇 www.hwcq.online
