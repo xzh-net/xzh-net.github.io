@@ -1,8 +1,7 @@
 - Translations
-  - [:uk: English](/)
-  - [:cn: 中文](/zh-cn/)
-  - [:de: Deutsch](/de-de/)
-  - [:es: Spanish](/es/)
-  - [:ru: Russian](/ru-ru/)
-  - [:cn: 天罡虎威](/ru-ru/)  
-  - 虎威传奇 www.hwcq.online
+  - [:cn: 天罡虎威](/zh-cn/)
+  - [:it: 圣龙虎威](/)
+  - [:es: 追忆虎威](/)
+  - [:fr: 梦幻虎威](/)
+  - [:de: 经典虎威](/)
+  - 虎威再现 www.hwcq.online
