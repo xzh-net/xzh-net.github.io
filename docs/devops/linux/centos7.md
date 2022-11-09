@@ -311,6 +311,7 @@ systemctl status named
 ```bash
 echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
 
+yum install bind-utils
 nslookup 172.17.17.165
 dig @172.17.17.201 -x 172.17.17.165
 host 172.17.17.165
