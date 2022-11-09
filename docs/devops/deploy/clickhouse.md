@@ -79,9 +79,33 @@ clickhouse start
 #### 1.1.6 客户端测试
 
 ```bash
+clickhouse-client -m  # 支持多行语句
 clickhouse-client --password 123456
 show databases;
 create table t_tinylog ( id String, name String) engine=TinyLog;
 ```
+
+#### 1.1.7 配置目录
+
+```bash
+# 命令目录
+cd /usr/bin
+ll | grep clickhouse
+# 配置文件目录
+cd /etc/clickhouse-server/
+# 日志目录
+cd /var/log/clickhouse-server/
+# 数据文件目录
+cd /var/lib/clickhouse/
+# 允许远程访问
+cd /etc/clickhouse-server/
+vim config.xml   # 找到<listen_host>::</listen_host> 打开注释
+# 重启服务
+clickhouse restart
+```
+
+验证地址：http://192.168.2.201:8123
+
+
 
 ### 1.2 集群
