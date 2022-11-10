@@ -4,11 +4,11 @@
 
 下载地址: https://github.com/MyCATApache/Mycat-download
 
-![](../../assets/_images/java/database/mycat/1573485852837.png)
+![](../../assets/_images/devops/database/mycat/1573485852837.png)
 
 最新下载地址: http://dl.mycat.io/
 
-![](../../assets/_images/java/database/mycat/1573485998327.png)
+![](../../assets/_images/devops/database/mycat/1573485998327.png)
 
 ## 2. 环境搭建
 
@@ -76,7 +76,7 @@ flush privileges;
 
 授权远程访问之后 , 就可以通过sqlYog来连接Linux上的MySQL , 但是记得关闭Linux上的防火墙(或者配置防火墙): 
 
-![](../../assets/_images/java/database/mycat/1573536143760.png)
+![](../../assets/_images/devops/database/mycat/1573536143760.png)
 
 ### 2.3 安装JDK1.8
 
@@ -102,7 +102,7 @@ C. 配置PATH环境变量 , 在该配置文件(/etc/profile)的最后加入如�
 
 3). MyCat的目录结构介绍
 
-![](../../assets/_images/java/database/mycat/1573556739880.png)
+![](../../assets/_images/devops/database/mycat/1573556739880.png)
 
 
 ### 2.5 分片配置测试
@@ -111,7 +111,7 @@ C. 配置PATH环境变量 , 在该配置文件(/etc/profile)的最后加入如�
 
 由于 TB_TEST 表中数据量很大, 现在需要对 TB_TEST 表进行数据分片, 分为三个数据节点 , 每一个节点主机位于不同的服务器上, 具体的结构 ,参考下图 : 
 
-![](../../assets/_images/java/database/mycat/1575724614686.png)
+![](../../assets/_images/devops/database/mycat/1575724614686.png)
 
 #### 2.5.2 环境准备
 
@@ -209,12 +209,12 @@ bin/mycat status
 mysql -h 127.0.0.1 -P 8066 -u root -p 
 ```
 
-![](../../assets/_images/java/database/mycat/1573916419746.png)
+![](../../assets/_images/devops/database/mycat/1573916419746.png)
 
 
 2). 通过sqlyog连接
 
-![](../../assets/_images/java/database/mycat/1573832298131.png)
+![](../../assets/_images/devops/database/mycat/1573832298131.png)
 
 #### 2.5.6 分片测试
 
@@ -480,7 +480,7 @@ table 标签定义了MyCat中逻辑库schema下的逻辑表 , 所有需要拆分
 
 属性如下 ： 
 
-![](../../assets/_images/java/database/mycat/1574954845578.png)
+![](../../assets/_images/devops/database/mycat/1574954845578.png)
 
 
 1). name 
@@ -493,13 +493,13 @@ table 标签定义了MyCat中逻辑库schema下的逻辑表 , 所有需要拆分
 
 定义的逻辑表所属的dataNode , 该属性需要与dataNode标签中的name属性的值对应。 如果一张表拆分的数据，存储在多个数据节点上，多个节点的名称使用","分隔 。
 
-![](../../assets/_images/java/database/mycat/1574955059453.png)
+![](../../assets/_images/devops/database/mycat/1574955059453.png)
 
 3). rule
 
 该属性用于指定逻辑表的分片规则的名字, 规则的名字是在rule.xml文件中定义的, 必须与tableRule标签中name属性对应。
 
-![](../../assets/_images/java/database/mycat/1574955534319.png)
+![](../../assets/_images/devops/database/mycat/1574955534319.png)
 
 4). ruleRequired
 
@@ -1081,7 +1081,7 @@ insert into tb_user (id,username ,status) values(5,'Lily',1);
 
 **缺点**： 在数据范围时固定值（非递增值）时，存在不方便扩展的情况，例如将 dataNode Group size 从 2 扩展为 4 时，需要进行数据迁移才能完成 ； 如图所示： 
 
-![](../../assets/_images/java/database/mycat/image-20200110193319982.png)
+![](../../assets/_images/devops/database/mycat/image-20200110193319982.png)
 
 配置如下： 
 
@@ -1165,11 +1165,11 @@ autopartition-range-mod.txt 配置格式 :
 
 最小值：
 
-![](../../assets/_images/java/database/mycat/image-20200112180630348.png)
+![](../../assets/_images/devops/database/mycat/image-20200112180630348.png)
 
 最大值：
 
-![](../../assets/_images/java/database/mycat/image-20200112180643493.png)
+![](../../assets/_images/devops/database/mycat/image-20200112180643493.png)
 
 
 
@@ -1410,7 +1410,7 @@ partition-prefixpattern.txt 配置如下:
 
 附录 ASCII码表 : 
 
-![](../../assets/_images/java/database/mycat/1577267028771.png)
+![](../../assets/_images/devops/database/mycat/1577267028771.png)
 
 **测试:**
 
@@ -1578,7 +1578,7 @@ INSERT INTO tb_strhash (name,content) VALUES('TOMCAT', UUID());
 
 原理: 
 
-![](../../assets/_images/java/database/mycat/image-20200112234530612.png)
+![](../../assets/_images/devops/database/mycat/image-20200112234530612.png)
 
 #### 4.3.10 一致性hash算法
 
@@ -1806,7 +1806,7 @@ INSERT INTO tb_order (id,money,content) VALUES(212132, 100 , UUID());
 Mycat-web 是 Mycat 可视化运维的管理和监控平台，弥补了 Mycat 在监控上的空白。帮 Mycat 分担统计任务和配置管理任务。Mycat-web 引入了 ZooKeeper 作为配置中心，可以管理多个节点。Mycat-web 主要管理和监控 Mycat 的流量、连接、活动线程和内存等，具备 IP 白名单、邮件告警等模块，还可以统计 SQL 并分析慢 SQL 和高频 SQL 等。为优化 SQL 提供依据。
 
 
-![](../../assets/_images/java/database/mycat/1577358192118.png)
+![](../../assets/_images/devops/database/mycat/1577358192118.png)
 
 
 
@@ -1814,7 +1814,7 @@ Mycat-web 是 Mycat 可视化运维的管理和监控平台，弥补了 Mycat �
 
 下载地址 : http://dl.mycat.io/
 
-![](../../assets/_images/java/database/mycat/1577358192118.png)
+![](../../assets/_images/devops/database/mycat/1577358192118.png)
 
 
 
@@ -1873,13 +1873,13 @@ E. 访问
 如果Zookeeper与Mycat-web不在同一台服务器上 , 需要设置Zookeeper的地址 ; 在/usr/local/mycat-web/mycat-web/WEB-INF/classes/mycat.properties文件中配置 : 
 
 
-![](../../assets/_images/java/database/mycat/1577370960657.png)
+![](../../assets/_images/devops/database/mycat/1577370960657.png)
 
 ##### 5.1.3.2 配置
 
-![](../../assets/_images/java/database/mycat/1577372353498.png)
+![](../../assets/_images/devops/database/mycat/1577372353498.png)
 
-![](../../assets/_images/java/database/mycat/1577372371549.png)
+![](../../assets/_images/devops/database/mycat/1577372371549.png)
 
 
 
@@ -1889,7 +1889,7 @@ E. 访问
 
 A. MyCat内存分析: 
 
-![](../../assets/_images/java/database/mycat/1577373437531.png)
+![](../../assets/_images/devops/database/mycat/1577373437531.png)
 
 MyCat的内存分析 , 反映了当前的内存使用情况与历史时间段的峰值、平均值。
 
@@ -1897,7 +1897,7 @@ MyCat的内存分析 , 反映了当前的内存使用情况与历史时间段的
 
 B. MyCat流量分析: 
 
-![](../../assets/_images/java/database/mycat/1577373861622.png)
+![](../../assets/_images/devops/database/mycat/1577373861622.png)
 
 MyCat流量分析统计了历史时间段的流量峰值、当前值、平均值，是MyCat数据传输的重要指标， In代表输入， Out代表输出。
 
@@ -1905,7 +1905,7 @@ MyCat流量分析统计了历史时间段的流量峰值、当前值、平均值
 
 C. MyCat连接分析
 
-![](../../assets/_images/java/database/mycat/1577374030291.png)
+![](../../assets/_images/devops/database/mycat/1577374030291.png)
 
 MyCat连接分析, 反映了MyCat的连接数 
 
@@ -1913,7 +1913,7 @@ MyCat连接分析, 反映了MyCat的连接数
 
 D. MyCat TPS分析
 
-![](../../assets/_images/java/database/mycat/1577374126073.png)
+![](../../assets/_images/devops/database/mycat/1577374126073.png)
 
 MyCat TPS 是并发性能的重要参数指标, 指系统在每秒内能够处理的请求数量。 MyCat TPS的值越高 , 代表MyCat单位时间内能够处理的请求就越多, 并发能力也就越高。
 
@@ -1929,12 +1929,12 @@ F. MyCat缓存队列分析, 反映了当前在缓存队列中的任务数量。
 
 1). MySQL配置
 
-![](../../assets/_images/java/database/mycat/1577374634946.png)
+![](../../assets/_images/devops/database/mycat/1577374634946.png)
 
 
 2). MySQL监控指标
 
-![](../../assets/_images/java/database/mycat/1577374588708.png)
+![](../../assets/_images/devops/database/mycat/1577374588708.png)
 
 可以通过MySQL服务监控, 检测每一个MySQL节点的运行状态, 包含缓存命中率 、增删改查比例、流量统计、慢查询比例、线程、临时表等相关性能数据。
 
@@ -1944,29 +1944,29 @@ F. MyCat缓存队列分析, 反映了当前在缓存队列中的任务数量。
 
 1). SQL 统计
 
-![](../../assets/_images/java/database/mycat/1577374982024.png)
+![](../../assets/_images/devops/database/mycat/1577374982024.png)
 
 2). SQL表分析
 
-![](../../assets/_images/java/database/mycat/1577375016852.png)
+![](../../assets/_images/devops/database/mycat/1577375016852.png)
 
 3). SQL监控
 
-![](../../assets/_images/java/database/mycat/1577375043787.png)
+![](../../assets/_images/devops/database/mycat/1577375043787.png)
 
 
 
 4). 高频SQL
 
-![](../../assets/_images/java/database/mycat/1577375072881.png)
+![](../../assets/_images/devops/database/mycat/1577375072881.png)
 
 5). 慢SQL统计
 
-![](../../assets/_images/java/database/mycat/1577375100383.png)
+![](../../assets/_images/devops/database/mycat/1577375100383.png)
 
 6). SQL解析
 
-![](../../assets/_images/java/database/mycat/1577375162928.png)
+![](../../assets/_images/devops/database/mycat/1577375162928.png)
 
 ### 5.2 MyCat 读写分离
 
@@ -2037,7 +2037,7 @@ flush privileges;
 show master status;
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200103102209631.png)
+![](../../assets/_images/devops/database/mycat/image-20200103102209631.png)
 
 字段含义:
 
@@ -2086,7 +2086,7 @@ start slave;
 show slave status;
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200103144903105.png)
+![](../../assets/_images/devops/database/mycat/image-20200103144903105.png)
 
 5） 停止同步操作
 
@@ -2120,18 +2120,18 @@ insert into user(id,name,sex) values(null,'Dawn','1');
 
 在从库中，可以查看到刚才创建的数据库：
  
-![](../../assets/_images/java/database/mycat/image-20200103103029311.png)
+![](../../assets/_images/devops/database/mycat/image-20200103103029311.png)
 
 在该数据库中，查询user表中的数据：
 
-![](../../assets/_images/java/database/mycat/image-20200103103049675.png)
+![](../../assets/_images/devops/database/mycat/image-20200103103049675.png)
 
 
 #### 5.2.3 MyCat一主一从读写分离
 
 ##### 5.2.3.1 读写分离配置
 
-![](../../assets/_images/java/database/mycat/image-20200103140249789.png)
+![](../../assets/_images/devops/database/mycat/image-20200103140249789.png)
 
 配置如下： 
 
@@ -2206,7 +2206,7 @@ balance
 
 ##### 5.2.4.1 双主双从配置
 
-![](../../assets/_images/java/database/mycat/image-20200103170452653.png)
+![](../../assets/_images/devops/database/mycat/image-20200103170452653.png)
 
 准备的机器如下: 
 
@@ -2316,12 +2316,12 @@ flush privileges;
 
 查询Master1的状态 : 
 
-![](../../assets/_images/java/database/mycat/image-20200104090901765.png)
+![](../../assets/_images/devops/database/mycat/image-20200104090901765.png)
 
 
 查询Master2的状态 :
 
-![](../../assets/_images/java/database/mycat/image-20200104090922386.png)
+![](../../assets/_images/devops/database/mycat/image-20200104090922386.png)
 
 
 
@@ -2355,10 +2355,10 @@ start slave;
 show slave status\G;
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200104091917814.png)
+![](../../assets/_images/devops/database/mycat/image-20200104091917814.png)
 
 
-![](../../assets/_images/java/database/mycat/image-20200104091948213.png)
+![](../../assets/_images/devops/database/mycat/image-20200104091948213.png)
 
 
 
@@ -2394,9 +2394,9 @@ start slave;
 show slave status\G;
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200104092654432.png)
+![](../../assets/_images/devops/database/mycat/image-20200104092654432.png)
 
-![](../../assets/_images/java/database/mycat/image-20200104092741892.png)
+![](../../assets/_images/devops/database/mycat/image-20200104092741892.png)
 
 **10). 验证**
 
@@ -2426,13 +2426,13 @@ insert into user(id,name,sex) values(null,'Jerry','1');
 
 在Master1上创建数据库: 
 
-![](../../assets/_images/java/database/mycat/image-20200104095232047.png)
+![](../../assets/_images/devops/database/mycat/image-20200104095232047.png)
 
 
 
 在Master1上创建表 :
 
-![](../../assets/_images/java/database/mycat/image-20200104095521070.png)
+![](../../assets/_images/devops/database/mycat/image-20200104095521070.png)
 
 **11). 停止从服务复制功能**
 
@@ -2503,11 +2503,11 @@ reset master;
 
 查询数据 : select * from user;
 
-![](../../assets/_images/java/database/mycat/image-20200104101106144.png)
+![](../../assets/_images/devops/database/mycat/image-20200104101106144.png)
 
 插入数据 : insert into user(id,name,sex) values(null,'Dawn','1');
 
-![](../../assets/_images/java/database/mycat/image-20200104100956216.png)
+![](../../assets/_images/devops/database/mycat/image-20200104100956216.png)
 
 
 
@@ -2524,7 +2524,7 @@ reset master;
 
 在上面的章节, 我们已经讲解过了通过MyCat来实现MySQL的读写分离, 从而完成MySQL集群的负载均衡 , 如下面的结构图: 
 
-![](../../assets/_images/java/database/mycat/image-20200104144550132.png)
+![](../../assets/_images/devops/database/mycat/image-20200104144550132.png)
 
 但是以上架构存在问题 , 由于MyCat中间件是单节点的服务, 前端客户端所有的压力过来都直接请求这一台MyCat , 存在单点故障。所以这个时候， 我们就需要考虑MyCat的集群 ；
 
@@ -2558,7 +2558,7 @@ HAProxy 是一个开源的、高性能的基于TCP(第四层)和HTTP(第七层)�
 
 #### 6.1.3 MyCat的高可用集群
 
-![](../../assets/_images/java/database/mycat/image-20200104153537319.png)
+![](../../assets/_images/devops/database/mycat/image-20200104153537319.png)
 
 
 **图解说明：**
@@ -2596,7 +2596,7 @@ VRRP(虚拟路由冗余协议-Virtual Router Redundancy Protocol)协议是用于
 | HAProxy节点1/keepalived主 | 192.168.192.159 |      |             |
 | HAProxy节点2/keepalived备 | 192.168.192.160 |      |             |
 
-![](../../assets/_images/java/database/mycat/image-20200104153537320.png)
+![](../../assets/_images/devops/database/mycat/image-20200104153537320.png)
 
 #### 6.2.2 MySQL主从复制搭建
 
@@ -2639,7 +2639,7 @@ flush privileges;
 show master status;
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200104171647471.png)
+![](../../assets/_images/devops/database/mycat/image-20200104171647471.png)
 
 字段含义:
 
@@ -2685,7 +2685,7 @@ start slave;
 show slave status;
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200103144903105.png)
+![](../../assets/_images/devops/database/mycat/image-20200103144903105.png)
 
 5） 停止同步操作
 
@@ -2771,12 +2771,12 @@ insert into user(id,name,sex) values(null,'Dawn','1');
 
 界面: 
 
-![](../../assets/_images/java/database/mycat/image-20200202214408231.png)
+![](../../assets/_images/devops/database/mycat/image-20200202214408231.png)
 
 
 #### 6.2.5 Keepalived安装配置
 
-![](../../assets/_images/java/database/mycat/image-20200203010953404.png)
+![](../../assets/_images/devops/database/mycat/image-20200203010953404.png)
 
 - [Keepalived安装](linux/deploy/keepalived)
 - [Keepalived配置HAProxy文件](linux/deploy/keepalived?id=_22-haproxy)
@@ -2791,7 +2791,7 @@ service keepalived start	# 启动
 mysql -uroot -p123456 -h 192.168.192.200 -P 48066
 ```
 
-![](../../assets/_images/java/database/mycat/image-20200202193227448.png)
+![](../../assets/_images/devops/database/mycat/image-20200202193227448.png)
 
 ## 7. MyCat架构剖析
 
@@ -2799,17 +2799,17 @@ mysql -uroot -p123456 -h 192.168.192.200 -P 48066
 
 #### 7.1.1 源码下载及导入
 
-![](../../assets/_images/java/database/mycat/image-20200202220149279.png)
+![](../../assets/_images/devops/database/mycat/image-20200202220149279.png)
 
 导入Idea
 
-![](../../assets/_images/java/database/mycat/image-20200202220220682.png)
+![](../../assets/_images/devops/database/mycat/image-20200202220220682.png)
 
 #### 7.1.2 总体架构
 
 MyCat在逻辑上由几个模块组成: 通信协议、路由解析、结果集处理、数据库连接、监控等模块。如图所示： 
 
-![](../../assets/_images/java/database/mycat/image-20200107230122662.png)
+![](../../assets/_images/devops/database/mycat/image-20200107230122662.png)
 
 
 1). 通信协议模块： 通信协议模块承担底层的收发数据、线程回调处理工作， MyCat通信协议默认采用Reactor模式，在协议层采用MySQL协议；
@@ -2828,7 +2828,7 @@ MyCat在逻辑上由几个模块组成: 通信协议、路由解析、结果集�
 
 #### 7.1.3 总体执行流程
 
-![](../../assets/_images/java/database/mycat/image-20200107233001248.png)
+![](../../assets/_images/devops/database/mycat/image-20200107233001248.png)
 
 ### 7.2 MyCat网络I/O架构及实现
 
@@ -2872,7 +2872,7 @@ usingAIO为1代表使用AIO模型 , 为0表示使用NIO模型;
 
 **MyCat的AIO架构**
 
-![](../../assets/_images/java/database/mycat/image-20200108103954458.png)
+![](../../assets/_images/devops/database/mycat/image-20200108103954458.png)
 
 
 1). MyCatStartUp是整个MyCat服务启动的入口;
@@ -2883,13 +2883,13 @@ usingAIO为1代表使用AIO模型 , 为0表示使用NIO模型;
 
 4). 进入AIO分支 , 主要有AIOAcceptor接收客户端请求, 绑定端口, 创建服务端的异步Socket ;在accept方法中完成两件事: ①. FrontedConnection的创建, 这是前段连接的关键; ②. register注册事件, MySQL协议握手包就在此时发送;
 
-![](../../assets/_images/java/database/mycat/image-20200108111012502.png)
+![](../../assets/_images/devops/database/mycat/image-20200108111012502.png)
 
 **MyCat的NIO架构**
 
 如果设置的usingAIO为0 ,那么将走NIOAcceptor通道 , 流程如下: 
 
-![](../../assets/_images/java/database/mycat/image-20200108111153230.png)
+![](../../assets/_images/devops/database/mycat/image-20200108111153230.png)
 
 
 1). 如果走NIO分支 , 将首先创建NIOAcceptor对象, 并调用其start方法;
@@ -2898,12 +2898,12 @@ usingAIO为1代表使用AIO模型 , 为0表示使用NIO模型;
 
 NIOAcceptor的accept方法 ： 
 
-![](../../assets/_images/java/database/mycat/image-20200108112521438.png)
+![](../../assets/_images/devops/database/mycat/image-20200108112521438.png)
 
 
 NIOReactor的postRegister方法： 
 
-![](../../assets/_images/java/database/mycat/image-20200108112959564.png)
+![](../../assets/_images/devops/database/mycat/image-20200108112959564.png)
 
 ### 7.3 Mycat实现MySQL协议
 
@@ -2917,7 +2917,7 @@ MySQL协议处于应用层之下、TCP/IP之上, 在MySQL客户端和服务端�
 
 ##### 7.3.1.2 握手认证阶段
 
-![](../../assets/_images/java/database/mycat/image-20200109113445831.png)
+![](../../assets/_images/devops/database/mycat/image-20200109113445831.png)
 
 A. 握手认证阶段是客户端连接服务器的必经之路, 客户端与服务端完成TCP的三次握手以后, 服务端会向客户端发送一个初始化握手包, 握手包中包含了协议版本、MySQLServer版本、线程ID、服务器的权能标识和字符集等信息。
 
@@ -2927,19 +2927,19 @@ C. 服务端接收到客户端的登录验证包之后，需要进行逻辑校�
 
 Wireshark抓包如下:
 
-![](../../assets/_images/java/database/mycat/image-20200127165109223.png)
+![](../../assets/_images/devops/database/mycat/image-20200127165109223.png)
 
 
 报文分析如下： 
 
 1). 初始化握手包
 
-![](../../assets/_images/java/database/mycat/image-20200109133647751.png)
+![](../../assets/_images/devops/database/mycat/image-20200109133647751.png)
 
 
 通过抓包工具Wireshark抓取到的握手包信息如下, 握手包格式:
 
-![](../../assets/_images/java/database/mycat/image-20200127162616334.png)
+![](../../assets/_images/devops/database/mycat/image-20200127162616334.png)
 
 
 说明: 
@@ -2956,7 +2956,7 @@ Server Greeting : 消息体, 包含了协议版本、MySQLServer版本、线程I
 
 客户端在接收到服务端发来的初始握手包之后， 向服务端发出认证请求， 该请求包含以下信息（由Wireshark抓获） ： 
 
-![](../../assets/_images/java/database/mycat/image-20200127163702804.png)
+![](../../assets/_images/devops/database/mycat/image-20200127163702804.png)
 
 
 3). OK包或ERROR包
@@ -2965,12 +2965,12 @@ Server Greeting : 消息体, 包含了协议版本、MySQLServer版本、线程I
 
 OK报文如下： 
 
-![](../../assets/_images/java/database/mycat/image-20200127163957990.png)
+![](../../assets/_images/devops/database/mycat/image-20200127163957990.png)
 
 
 ERROR报文如下 :
 
-![](../../assets/_images/java/database/mycat/image-20200127165156952.png)
+![](../../assets/_images/devops/database/mycat/image-20200127165156952.png)
 
 ##### 7.3.1.3 命令执行阶段
 
@@ -2978,16 +2978,16 @@ ERROR报文如下 :
 
 Wireshark 捕获的数据包如下： 
 
-![](../../assets/_images/java/database/mycat/image-20200127170112968.png)
+![](../../assets/_images/devops/database/mycat/image-20200127170112968.png)
 
 1). 命令包
 
-![](../../assets/_images/java/database/mycat/image-20200127170235143.png)
+![](../../assets/_images/devops/database/mycat/image-20200127170235143.png)
 
 
 2). 结果集包
 
-![](../../assets/_images/java/database/mycat/image-20200127170823882.png)
+![](../../assets/_images/devops/database/mycat/image-20200127170823882.png)
 
 
 #### 7.3.2 MySQL协议在MyCat中实现
@@ -3002,7 +3002,7 @@ Wireshark 捕获的数据包如下：
 
 MyCat中的源码中io.mycat.net.FrontendConnection类的实现如下:
 
-![](../../assets/_images/java/database/mycat/image-20200127183259378.png)
+![](../../assets/_images/devops/database/mycat/image-20200127183259378.png)
 
 
 握手包信息组装完毕后, 通过FrontedConnection写回客户端。
@@ -3011,22 +3011,22 @@ MyCat中的源码中io.mycat.net.FrontendConnection类的实现如下:
 
 客户端接收到握手包后, 紧接着向服务端发起一个认证包, MyCat封装为类 AuthPacket:
 
-![](../../assets/_images/java/database/mycat/image-20200127231628215.png)
+![](../../assets/_images/devops/database/mycat/image-20200127231628215.png)
 
 客户端发送的认证包转由 FrontendAuthenticator 的Handler来处理, 主要操作就是 拆包, 检查用户名、密码合法性， 检查连接数是够超出限制。源码实现如下： 
 
-![](../../assets/_images/java/database/mycat/image-20200127232022594.png)
+![](../../assets/_images/devops/database/mycat/image-20200127232022594.png)
 
 认证失败， 调用failure方法， 认证成功调用success方法。
 
 failure方法源码： 
 
-![](../../assets/_images/java/database/mycat/image-20200127232344040.png)
+![](../../assets/_images/devops/database/mycat/image-20200127232344040.png)
 
 
 success方法源码： 
 
-![](../../assets/_images/java/database/mycat/image-20200127232422887.png)
+![](../../assets/_images/devops/database/mycat/image-20200127232422887.png)
 
 ##### 7.3.2.2 命令执行实现
 
@@ -3034,12 +3034,12 @@ success方法源码：
 
 从客户端发来的命令交给 FrontendCommandHandler 中的handle方法处理:
 
-![](../../assets/_images/java/database/mycat/image-20200127235140959.png)
+![](../../assets/_images/devops/database/mycat/image-20200127235140959.png)
 
 
 处理具体的请求, 返回客户端结果集数据包: 
 
-![](../../assets/_images/java/database/mycat/image-20200128000050787.png)
+![](../../assets/_images/devops/database/mycat/image-20200128000050787.png)
 
 
 ### 7.4 MyCat线程架构与实现
@@ -3048,11 +3048,11 @@ success方法源码：
 
 在MyCat中大量用到了线程池， 通过线程池来避免频繁的创建和销毁线程而造成的系统性能的浪费。在MyCat中使用的线程池是JDK中提供的线程池 ThreadPoolExecutor 的子类 NameableExecutor ， 构造方法如下： 
 
-![](../../assets/_images/java/database/mycat/image-20200108114506434.png)
+![](../../assets/_images/devops/database/mycat/image-20200108114506434.png)
 
 父类构造为： 
 
-![](../../assets/_images/java/database/mycat/image-20200108114611505.png)
+![](../../assets/_images/devops/database/mycat/image-20200108114611505.png)
 
 构造参数含义: 
 
@@ -3072,7 +3072,7 @@ threadFactory: 线程工厂, 用来创建线程
 
 #### 7.4.2 MyCat线程架构
 
-![](../../assets/_images/java/database/mycat/image-20200108114952672.png)
+![](../../assets/_images/devops/database/mycat/image-20200108114952672.png)
 
 在MyCat中主要有两大线程池: timerExecutor 和 businessExecutor。
 
@@ -3094,7 +3094,7 @@ F. 查询结果的异步分发
 
 G. 基于guava实现异步回调
 
-![](../../assets/_images/java/database/mycat/image-20200108141645417.png)
+![](../../assets/_images/devops/database/mycat/image-20200108141645417.png)
 
 ### 7.5 MyCat内存管理及缓存框架与实现
 
@@ -3136,7 +3136,7 @@ C. buffer的容量大于chunkSize
 
 MyCat支持ehcache、mapdb、leveldb缓存, 可通过配置文件cacheserver.properties来进行配置;
 
-![](../../assets/_images/java/database/mycat/image-20200108154627518.png)
+![](../../assets/_images/devops/database/mycat/image-20200108154627518.png)
 
 2). 缓存内容
 
@@ -3150,7 +3150,7 @@ C. ER关系缓存: 在ER分片时使用, 而且在insert查询中才会使用缓
 
 查看缓存指令： show @@cache；
 
-![](../../assets/_images/java/database/mycat/image-20200108155642414.png)
+![](../../assets/_images/devops/database/mycat/image-20200108155642414.png)
 
 ### 7.6 MyCat连接池架构与实现
 
@@ -3166,7 +3166,7 @@ MyCat按照每个dataHost创建一个连接池, 根据schema.xml文件的配置�
 
 3). 架构
 
-![](../../assets/_images/java/database/mycat/image-20200108155642414.png)
+![](../../assets/_images/devops/database/mycat/image-20200108155642414.png)
 
 ### 7.7 MyCat主从切换架构与实现
 
@@ -3204,7 +3204,7 @@ MyCat的读写分离依赖于MySQL的主从同步, 也就是说MyCat没有实现
 
 主要流程如下:
 
-![](../../assets/_images/java/database/mycat/image-20200128005840029.png)
+![](../../assets/_images/devops/database/mycat/image-20200128005840029.png)
 
 
 ### 7.8 MyCat核心技术
@@ -3241,7 +3241,7 @@ commit/rollback
 
 完整流程如下: 
 
-![](../../assets/_images/java/database/mycat/image-20200129223657058.png)
+![](../../assets/_images/devops/database/mycat/image-20200129223657058.png)
 
 
 #### 7.8.2 MyCat SQL路由实现
@@ -3250,7 +3250,7 @@ MyCat的路由是和SQL解析组件息息相关的, SQL路由模块是MyCat数�
 
 ##### 7.8.2.1 路由的作用
 
-![](../../assets/_images/java/database/mycat/image-20200113225535847.png)
+![](../../assets/_images/devops/database/mycat/image-20200113225535847.png)
 
 
 如图所示， MyCat接收到应用系统发来的查询语句， 要将其发送到后端连接的MySQL数据库去执行， 但是后端有三个数据库服务器，具体要查询那一台数据库服务器呢， 这就是路由需要实现的功能。
@@ -3285,14 +3285,14 @@ B. 全局表的查询操作会从任意节点执行,因为所有节点的数据�
 
 C. 全局表可以和任意表进行join操作
 
-![](../../assets/_images/java/database/mycat/image-20200128013501684.png)
+![](../../assets/_images/devops/database/mycat/image-20200128013501684.png)
 
 
 ##### 7.8.3.2 ER表
 
 关系型数据库是基于实体关系模型(Entity Relationship Model)的, MyCat中的ER表便来源于此。 MyCat提出了基于ER关系的数据分片策略 , 子表的记录与其所关联的父表的记录存放在同一个数据分片中, 通过表分组(Table Group)保证数据关联查询不会跨库操作。
 
-![](../../assets/_images/java/database/mycat/image-20200129101108379.png)
+![](../../assets/_images/devops/database/mycat/image-20200129101108379.png)
 
 
 ##### 7.8.3.3 catlet
@@ -3301,7 +3301,7 @@ catlet是MyCat为了解决跨分片Join提出的一种创新思路, 也叫做人
 
 采用这种方案开发时,必须要实现Catlet接口的两个方法 :
 
-![](../../assets/_images/java/database/mycat/image-20200129101108379.png)
+![](../../assets/_images/devops/database/mycat/image-20200129101108379.png)
 
 route 方法: 路由的方法, 传递系统配置和schema配置等 ;
 
@@ -3333,7 +3333,7 @@ ShareJoin 是Catlet的实现， 是一个简单的跨分片Join， 目前支持�
 
 在MySQL中存在两种排序方式： 一种利用有序索引获取有序数据， 另一种通过相应的排序算法将获取到的数据在内存中进行排序。 而MyCat中数据排序采用堆排序法对多个分片返回有序数据，并在合并、排序后再返回给客户端。
 
-![](../../assets/_images/java/database/mycat/image-20200129113055429.png)
+![](../../assets/_images/devops/database/mycat/image-20200129113055429.png)
 
 
 
