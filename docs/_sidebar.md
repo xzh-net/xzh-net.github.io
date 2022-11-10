@@ -1,9 +1,9 @@
 - 操作系统
-  - [CentOS 7](devops/linux/centos7)
-  - [Redhat 7](devops/linux/rhel7)
-  - [Rocky 8.5](devops/linux/rocky85)
-  - [Debian 11](devops/linux/debian11)
-  - [Windows 10](devops/windows/windows10)
+  - [CentOS 7](devops/os/centos7)
+  - [Redhat 7](devops/os/rhel7)
+  - [Rocky 8.5](devops/os/rocky85)
+  - [Debian 11](devops/os/debian11)
+  - [Windows 10](devops/os/windows10)
 
 - 数据库
   - [Oracle](devops/database/oracle)
@@ -50,13 +50,13 @@
   - [Hive](devops/deploy/hive)
   - [ClickHouse](devops/deploy/clickhouse)
   - [Kettle](devops/deploy/kettle) 
+  - [DataX](devops/deploy/datax)
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
   - [使用ZeroBrane Studio调试lua脚本](java/tools/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
   - [Sacla IDEA 开发配置教程](java/tools/scala)
-  - [离线数据同步工具DataX](java/tools/datax)
 
 - 学习笔记
   - [解决方案](java/project/scheme)
