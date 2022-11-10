@@ -253,52 +253,52 @@ zabbix_get -s '192.168.3.201' -p 10050 -k 'login.user'
 
 ?> 配置-模板-创建模板
 
-![](../../assets/_images/devops/deploy/zabbix/create_template.png)
+![](../../assets/_images/deploy/zabbix/create_template.png)
 
 #### 6.2.2 创建应用集
 
 ?> 配置-模板-Template login user-应用集-创建应用集
 
-![](../../assets/_images/devops/deploy/zabbix/modify_template.png)
+![](../../assets/_images/deploy/zabbix/modify_template.png)
 
-![](../../assets/_images/devops/deploy/zabbix/create_app.png)
+![](../../assets/_images/deploy/zabbix/create_app.png)
 
 #### 6.2.3 创建监控项
 
 ?> 配置-模板-Template login user-监控项-创建监控项
 
-![](../../assets/_images/devops/deploy/zabbix/create_monitor.png)
+![](../../assets/_images/deploy/zabbix/create_monitor.png)
 
 #### 6.2.4 创建触发器
 
 ?> 配置-模板-Template login user-触发器-创建触发器
 
-![](../../assets/_images/devops/deploy/zabbix/create_trigger.png)
+![](../../assets/_images/deploy/zabbix/create_trigger.png)
 
 #### 6.2.5 创建图形
 
 ?> 配置-模板-Template login user-图形-创建图形
 
-![](../../assets/_images/devops/deploy/zabbix/create_graph.png)
+![](../../assets/_images/deploy/zabbix/create_graph.png)
 
 #### 6.2.6 主机关联模板
 
-![](../../assets/_images/devops/deploy/zabbix/template_rel.png)
+![](../../assets/_images/deploy/zabbix/template_rel.png)
 
 #### 6.2.7 邮件报警
 
 ?> 管理-报警媒介类型-创建媒介类型(密码为邮箱授权码)
 
-![](../../assets/_images/devops/deploy/zabbix/create_email.png)
+![](../../assets/_images/deploy/zabbix/create_email.png)
 
-![](../../assets/_images/devops/deploy/zabbix/create_email_template.png)
+![](../../assets/_images/deploy/zabbix/create_email_template.png)
 
 #### 6.2.8 用户设置
 
 ?> User settings-报警媒介
 
-![](../../assets/_images/devops/deploy/zabbix/user_settings_email.png)
+![](../../assets/_images/deploy/zabbix/user_settings_email.png)
 
 #### 6.2.9 激活报警
 
-![](../../assets/_images/devops/deploy/zabbix/enable_email.png)
+![](../../assets/_images/deploy/zabbix/enable_email.png)

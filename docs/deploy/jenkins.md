@@ -12,7 +12,7 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 
 ### 1.1 Gitlab安装
 
-[Gitlab](devops/deploy/gitlab)
+[Gitlab](deploy/gitlab)
 
 ### 1.2 Jenkins安装
 
@@ -45,9 +45,9 @@ systemctl start jenkins
 
 访问地址：http://172.17.17.200:8888/
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_skip.png)
+![](../../assets/_images/deploy/jenkins/jenkins_skip.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_admin.png)
+![](../../assets/_images/deploy/jenkins/jenkins_admin.png)
 
 
 ### 1.3 Jenkins插件管理
@@ -56,11 +56,11 @@ systemctl start jenkins
 
 1. Manage Plugins点击Advanced，首先把Update Site改为`http://updates.jenkins-zh.cn/update-center.json`来解除https校验
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_https.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_https.png)
 
 2. 然后点击`available`待全部载入完毕
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_load.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_load.png)
 
 3. 更换清华大学源
 
@@ -68,7 +68,7 @@ systemctl start jenkins
 https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
 ```
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_tuna.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_tuna.png)
 
 
 4. 修改插件下载地址
@@ -84,7 +84,7 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 
 #### 1.3.2 汉化插件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_chinese.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
 插件下载错误，需要下载skip-certificate-check，用于ssl无法识别问题以及插件安装超时问题，可以到国内清华大学开源软件镜像站的插件中心https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/skip-certificate-check 下载后直接放在你的Jenkins的plugins目录下即可，需要重启两次完成加载
 
@@ -115,25 +115,25 @@ systemctl restart jenkins
 
 1. 安装Role-based Authorization Strategy插件来管理Jenkins用户权限
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_role.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_role.png)
 
 2. 开启权限全局安全配置
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_set.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_set.png)
 
 3. 授权策略切换为"Role-Based Strategy"
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_set2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_set2.png)
 
 4. 创建角色
 
 在系统管理页面进入 Manage and Assign Roles
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_role.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_role.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_role2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_role2.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_role1.png)
+![](../../assets/_images/deploy/jenkins/jenkins_role1.png)
 
 添加以下三个角色：
 - baseRole：该角色为全局角色。这个角色需要绑定Overall下面的Read权限，是为了给所有用户绑定最基本的Jenkins访问权限。注意：如果不给后续用户绑定这个角色，会报错误：用户名 is
@@ -141,23 +141,23 @@ missing the Overall/Read permission
 - role1：该角色为项目角色。使用正则表达式绑定"xuzhihao.*"，意思是只能操作xuzhihao开头的项目。
 - role2：该角色也为项目角色。绑定"xzh.*"，意思是只能操作xzh开头的项目。
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_role2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_role2.png)
 
 5. 创建用户
 
 在系统管理页面进入 Manage Users
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_user.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_user2.png)
 
 系统管理页面进入Manage and Assign Roles，点击Assign Roles，绑定规则如下：
 - zhangsan用户分别绑定baseRole和role1角色(xuzhihao)
 - lisi用户分别绑定baseRole和role2角色(xzh)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user3.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_user3.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_user_role.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_user_role.png)
 
 6. 创建项目测试权限
 
@@ -170,15 +170,15 @@ missing the Overall/Read permission
 
 #### 1.5.1 安装Credentials Binding插件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials2.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials3.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials3.png)
 
 安装插件后，左边多了"凭证"菜单，在这里管理所有凭证
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_credentials4.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials4.png)
 
 可以添加的凭证有5种：
 - Username with password：用户名和密码
@@ -194,7 +194,7 @@ missing the Overall/Read permission
 
 为了让Jenkins支持从Gitlab拉取源码，需要安装Git插件以及在CentOS7上安装Git工具。
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_git.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_git.png)
 
 ```bash
 yum install git -y #安装
@@ -205,7 +205,7 @@ git --version #安装后查看版本
 
 1. 创建凭证
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_git2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_git2.png)
 
 选择"Username with password"，输入Gitlab的用户名和密码，点击"确定"
 
@@ -213,23 +213,23 @@ git --version #安装后查看版本
 
 创建一个FreeStyle项目：新建Item->FreeStyle Project->确定
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_project.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_project.png)
 
 找到"源码管理"->"Git"，在Repository URL复制Gitlab中的项目URL，选择刚才创建的凭证就不会报错
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_clone_project.png)
+![](../../assets/_images/deploy/jenkins/jenkins_clone_project.png)
 
 保存配置后，点击构建”Build Now“ 开始构建项目
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_project_bulid.png)
+![](../../assets/_images/deploy/jenkins/jenkins_project_bulid.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_project_bulid_console.png)
+![](../../assets/_images/deploy/jenkins/jenkins_project_bulid_console.png)
 
 ?> 代码的构建目录:/var/lib/jenkins/workspace
 
 #### 1.5.4 SSH密钥类型凭证
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_ssh_rsa.png)
+![](../../assets/_images/deploy/jenkins/jenkins_ssh_rsa.png)
 
 1. gitlab服务器使用root用户生成公钥和私钥在/root/.ssh/目录
 
@@ -241,15 +241,15 @@ ssh-keygen -t rsa
 
 以root账户登录->点击头像->Settings->SSH Public Keys->复制刚才id_rsa.pub文件的内容到这里，点击"Add Key"
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_git_secret.png)
+![](../../assets/_images/deploy/jenkins/jenkins_git_secret.png)
 
 3. 在Jenkins中添加凭证，配置私钥
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh.png)
+![](../../assets/_images/deploy/jenkins/jenkins_git_ssh.png)
 
 4. 测试凭证是否可用
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_git_ssh_test.png)
+![](../../assets/_images/deploy/jenkins/jenkins_git_ssh_test.png)
 
 ### 1.6 Maven安装和配置
 
@@ -274,17 +274,17 @@ mvn -v                                # 查找Maven版本
 
 Jenkins->Global Tool Configuration->JDK->新增JDK，配置如下：
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_jdk.png)
+![](../../assets/_images/deploy/jenkins/jenkins_jdk.png)
 
 Jenkins->Global Tool Configuration->Maven->新增Maven，配置如下：
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_maven.png)
+![](../../assets/_images/deploy/jenkins/jenkins_maven.png)
 
 #### 1.6.3 添加Jenkins全局变量
 
 Manage Jenkins->Configure System->Global Properties ，添加三个全局变量JAVA_HOME、M2_HOME、PATH+EXTRA
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_env.png)
+![](../../assets/_images/deploy/jenkins/jenkins_env.png)
 
 1. 修改Maven的settings.xml
 
@@ -313,9 +313,9 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 
 使用之前的gitlab密码测试项目，修改配置，构建->增加构建步骤->Execute Shell
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mvn_build.png)
+![](../../assets/_images/deploy/jenkins/jenkins_mvn_build.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mvn_build2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_mvn_build2.png)
 
 ?> 输入命令：mvn clean package
 
@@ -335,7 +335,7 @@ tar -xzf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
 
 ?> 地址为：http://172.17.17.196/8080
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat.png)
 
 默认情况下Tomcat是没有配置用户角色权限的，后续Jenkins部署项目到Tomcat服务器，需要用到Tomcat的用户，所以修改tomcat以下配置，添加用户及权限
 
@@ -368,7 +368,7 @@ allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 
 ?> 访问： http://192.168.66.102:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat2.png)
 
 
 ## 2. 构建项目
@@ -384,9 +384,9 @@ Jenkins中自动构建项目的类型有很多，常用的有以下三种：
 
 #### 2.1.1 拉取代码
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_create_project.png)
+![](../../assets/_images/deploy/jenkins/jenkins_create_project.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_free_build.png)
+![](../../assets/_images/deploy/jenkins/jenkins_free_build.png)
 
 ```bash
 echo "开始编译和打包"
@@ -400,42 +400,42 @@ echo "编译和打包结束"
 
 Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to container插件实现
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_deploy.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_deploy.png)
 
 2. 添加Tomcat用户凭证
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_auth.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat_auth.png)
 
 #### 2.1.3 添加构建后操作
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy2.png)
 
 点击"Build Now"，开始构建过程
 
 #### 2.1.4 部署成功后，访问项目
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy3.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy3.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_tomcat_deploy4.png)
+![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy4.png)
 
 
 ### 2.2 Maven项目
 
 #### 2.2.1 安装Maven Integration插件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_maven.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_maven.png)
 
 #### 2.2.2 创建Maven项目
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_project_maven.png)
+![](../../assets/_images/deploy/jenkins/jenkins_project_maven.png)
 
 #### 2.2.3 配置项目
 
 拉取代码和远程部署的过程和自由风格项目一样，只是"构建"部分不同
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_maven_build.png)
+![](../../assets/_images/deploy/jenkins/jenkins_maven_build.png)
 
 
 ### 2.3 流水线项目
@@ -447,9 +447,9 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to 
 
 #### 2.3.1 安装 Pipeline 插件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_pipeline.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_pipeline.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_project_pipeline.png)
+![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline.png)
 
 
 #### 2.3.2 Pipeline语法快速入门
@@ -485,7 +485,7 @@ pipeline {
 }
 ```
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_pipeline_declarative.png)
+![](../../assets/_images/deploy/jenkins/jenkins_pipeline_declarative.png)
 
 点击构建，可以看到整个构建过程
 
@@ -510,7 +510,7 @@ node {
 }
 ```
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_pipeline_script.png)
+![](../../assets/_images/deploy/jenkins/jenkins_pipeline_script.png)
 
 构建结果和声明式一样！
 
@@ -612,9 +612,9 @@ pipeline {
 
 在项目中引用该文件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_scm1.png)
+![](../../assets/_images/deploy/jenkins/jenkins_scm1.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_scm2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_scm2.png)
 
 
 ### 2.4 Jenkins项目构建参数
@@ -630,17 +630,17 @@ Jenkins内置4种构建触发器：
 
 1.  触发远程构建
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_triger1.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_triger1.png)
 
 触发构建url：http://172.17.17.200:8888/job/test_pipeline01/build?token=123456
 
 2. 其他工程构建后触发
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_after.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_after.png)
 
 3. 定时构建
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_task.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_task.png)
 ```bash
 # 每十五分钟（可能在 :07, :22, :37, :52）：
 H/15 * * * *
@@ -657,7 +657,7 @@ HH 1,15 1-11 *
 4. 轮询SCM
 
 轮询SCM，是指定时扫描本地代码仓库的代码是否有变更，如果代码有变更就触发项目构建。但是定时扫描本地整个项目的代码，增大系统的开销，不建议使用
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_scm.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_scm.png)
 
 #### 2.4.2 Git hook自动触发构建
 
@@ -665,11 +665,11 @@ HH 1,15 1-11 *
 
 安装插件：`Generic Webhook Trigger`和`GitLab`
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_gitwebhook.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook.png)
 
 1. Jenkins设置自动构建
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_project_webhook.png)
+![](../../assets/_images/deploy/jenkins/jenkins_project_webhook.png)
 
 2. Gitlab配置webhook
 
@@ -677,16 +677,16 @@ HH 1,15 1-11 *
 使用root账户登录到后台，点击Admin Area -> Settings -> Network
 勾选`Allow requests to the local network from web hooks and services`
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_gitlab_webhook.png)
+![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook.png)
 
 2）在项目添加webhook
 点击项目->Settings->Integrations
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_gitlab_webhook2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook2.png)
 
 !> 注意：以下设置必须完成，否则会报错！Manage Jenkins->Configure System
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
 
 
 
@@ -696,9 +696,9 @@ HH 1,15 1-11 *
 
 Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_param0.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_param0.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_param1.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_param1.png)
 
 创建分支：test，代码稍微改动下，然后提交到gitlab上。
 ```bash
@@ -707,30 +707,30 @@ git push -u origin master:test
 
 改动pipeline流水线代码
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_param2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_param2.png)
 
 点击Build with Parameters
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_build_param3.png)
+![](../../assets/_images/deploy/jenkins/jenkins_build_param3.png)
 
 
 #### 2.4.4 配置邮箱服务器发送构建结果
 
 安装Email Extension Template插件
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_plugin_email.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_email.png)
 
 Jenkins设置邮箱相关参数， Manage Jenkins->Configure System
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mail_admin.png)
+![](../../assets/_images/deploy/jenkins/jenkins_mail_admin.png)
 
 设置邮件参数，Extended E-mail Notification
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mail_admin2.png)
+![](../../assets/_images/deploy/jenkins/jenkins_mail_admin2.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mail_admin3.png)
+![](../../assets/_images/deploy/jenkins/jenkins_mail_admin3.png)
 
-![](../../assets/_images/devops/deploy/jenkins/jenkins_mail_admin4.png)
+![](../../assets/_images/deploy/jenkins/jenkins_mail_admin4.png)
 
 准备邮件内容,在项目根目录编写email.html，并把文件推送到Gitlab，内容如下
 

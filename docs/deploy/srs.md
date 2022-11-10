@@ -126,35 +126,35 @@ ffplay rtmp://39.105.58.136/live/time
 
 1. 设置捕获源
 
-![](../../assets/_images/devops/deploy/srs/1.png)
-![](../../assets/_images/devops/deploy/srs/2.png)
-![](../../assets/_images/devops/deploy/srs/3.png)
-![](../../assets/_images/devops/deploy/srs/4.png)
+![](../../assets/_images/deploy/srs/1.png)
+![](../../assets/_images/deploy/srs/2.png)
+![](../../assets/_images/deploy/srs/3.png)
+![](../../assets/_images/deploy/srs/4.png)
 
 2. 设置视频
 
-![](../../assets/_images/devops/deploy/srs/5.png)
-![](../../assets/_images/devops/deploy/srs/6.png)
+![](../../assets/_images/deploy/srs/5.png)
+![](../../assets/_images/deploy/srs/6.png)
 
 
 3. 设置音频
 
 【注意】如果只想进行桌面共享，不想传输声音，则将方框中选项全部选择已禁用。如果想进行桌面共享及传输声音，则按照图示设置
 
-![](../../assets/_images/devops/deploy/srs/7.png)
+![](../../assets/_images/deploy/srs/7.png)
 
 4. 设置输出
 
-![](../../assets/_images/devops/deploy/srs/8.png)
+![](../../assets/_images/deploy/srs/8.png)
 
 5. 设置推流
 
-![](../../assets/_images/devops/deploy/srs/9.png)
+![](../../assets/_images/deploy/srs/9.png)
 
 6. 开始推流
 
-![](../../assets/_images/devops/deploy/srs/10.png)
-![](../../assets/_images/devops/deploy/srs/11.png)
+![](../../assets/_images/deploy/srs/10.png)
+![](../../assets/_images/deploy/srs/11.png)
 
 
 ### 2.4 在线播放器

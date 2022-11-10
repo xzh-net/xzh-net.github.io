@@ -3,7 +3,7 @@
 
 ?> 为什么要搭建私有仓库
 
-![](../../assets/_images/devops/deploy/nexus3/maven.png)
+![](../../assets/_images/deploy/nexus3/maven.png)
 
 通常都是通过本机的Maven直接访问到中央仓库，并没有使用到虚线标识的区域，直接使用中央仓库可能会给我们带来的问题
 
@@ -24,7 +24,7 @@
 - `proxy`：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
 - `group`：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
 
-![](../../assets/_images/devops/deploy/nexus3/repository_types.png)
+![](../../assets/_images/deploy/nexus3/repository_types.png)
 
 
 ## 1. 安装
@@ -46,25 +46,25 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 
 ### 2.1 创建存储
 
-![](../../assets/_images/devops/deploy/nexus3/create_blob.png)
+![](../../assets/_images/deploy/nexus3/create_blob.png)
 
-![](../../assets/_images/devops/deploy/nexus3/blob_list.png)
+![](../../assets/_images/deploy/nexus3/blob_list.png)
 
 ### 2.2 三方混合托管库
 
-![](../../assets/_images/devops/deploy/nexus3/repository_list.png)
+![](../../assets/_images/deploy/nexus3/repository_list.png)
 
-![](../../assets/_images/devops/deploy/nexus3/hosted_repository.png)
+![](../../assets/_images/deploy/nexus3/hosted_repository.png)
 
-![](../../assets/_images/devops/deploy/nexus3/hosted_mixed.png)
+![](../../assets/_images/deploy/nexus3/hosted_mixed.png)
 
 ### 2.3 二方发布托管库
 
-![](../../assets/_images/devops/deploy/nexus3/hosted_releases.png)
+![](../../assets/_images/deploy/nexus3/hosted_releases.png)
 
 ### 2.4 二方快照托管库
 
-![](../../assets/_images/devops/deploy/nexus3/hosted_snapshots.png)
+![](../../assets/_images/deploy/nexus3/hosted_snapshots.png)
 
 Hosted选项
 - Allow redeploy：允许同一个版本号下重复提交代码, nexus以时间区分
@@ -74,15 +74,15 @@ Hosted选项
 
 ### 2.5 代理仓库
 
-![](../../assets/_images/devops/deploy/nexus3/proxy_repository.png)
+![](../../assets/_images/deploy/nexus3/proxy_repository.png)
 
-![](../../assets/_images/devops/deploy/nexus3/proxy_public.png)
+![](../../assets/_images/deploy/nexus3/proxy_public.png)
 
 ?> 阿里云的maven中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
 
 ### 2.6 创建仓库组
 
-![](../../assets/_images/devops/deploy/nexus3/group_repository.png)
+![](../../assets/_images/deploy/nexus3/group_repository.png)
 
 ### 2.7 客户端Maven配置
 

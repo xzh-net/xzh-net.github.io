@@ -503,7 +503,7 @@ hdfs balancer -threshold 5      # 重新执行负载均衡
 
 ## 3. HDFS HA
 
-![](../../assets/_images/devops/deploy/hadoop/1.png)
+![](../../assets/_images/deploy/hadoop/1.png)
 
 ### 3.1 集群规划
 

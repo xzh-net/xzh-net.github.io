@@ -404,19 +404,19 @@ MR验证：http://192.168.2.201:8088/cluster
 
 添加插件
 
-![](../../assets/_images/devops/deploy/hive/idea1.png)
+![](../../assets/_images/deploy/hive/idea1.png)
 
 设置连接
 
-![](../../assets/_images/devops/deploy/hive/idea2.png)
+![](../../assets/_images/deploy/hive/idea2.png)
 
 设置驱动
 
-![](../../assets/_images/devops/deploy/hive/idea3.png)
+![](../../assets/_images/deploy/hive/idea3.png)
 
 验证数据
 
-![](../../assets/_images/devops/deploy/hive/idea4.png)
+![](../../assets/_images/deploy/hive/idea4.png)
 
 ## 3. DDL
 

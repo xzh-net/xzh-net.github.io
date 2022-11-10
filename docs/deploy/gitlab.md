@@ -52,28 +52,28 @@ gitlab-ctl restart
 
 ### 2.2 添加组
 
-![](../../assets/_images/devops/deploy/gitlab/create_group.png)
+![](../../assets/_images/deploy/gitlab/create_group.png)
 
 ### 2.3 创建用户
 
-![](../../assets/_images/devops/deploy/gitlab/create_user.png)
+![](../../assets/_images/deploy/gitlab/create_user.png)
 
 
-![](../../assets/_images/devops/deploy/gitlab/create_user2.png)
+![](../../assets/_images/deploy/gitlab/create_user2.png)
 
 ### 2.4 修改密码
 
-![](../../assets/_images/devops/deploy/gitlab/update_user.png)
+![](../../assets/_images/deploy/gitlab/update_user.png)
 
 
 ### 2.5 用户添加到组中
 
-![](../../assets/_images/devops/deploy/gitlab/group_add_user.png)
+![](../../assets/_images/deploy/gitlab/group_add_user.png)
 
 
 ### 2.6 新用户身份登录创建项目
 
-![](../../assets/_images/devops/deploy/gitlab/create_project.png)
+![](../../assets/_images/deploy/gitlab/create_project.png)
 
 
 ## 3. 客户端
@@ -86,11 +86,11 @@ https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2
 
 1. 复制项目连接
 
-![](../../assets/_images/devops/deploy/gitlab/project_clone.png)
+![](../../assets/_images/deploy/gitlab/project_clone.png)
 
 2. 打开命令行
 
-![](../../assets/_images/devops/deploy/gitlab/gitlab_base_cmd.png)
+![](../../assets/_images/deploy/gitlab/gitlab_base_cmd.png)
 
 3. 设置用户名密码
 

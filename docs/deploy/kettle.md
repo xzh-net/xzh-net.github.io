@@ -29,26 +29,26 @@ https://dev.mysql.com/downloads/connector/j/
 
 下载完成解压到任意路径，打开文件夹，找到Spoon.bat，创建桌面快捷方式，打开
 
-![](../../assets/_images/devops/deploy/kattle/1.png)
+![](../../assets/_images/deploy/kattle/1.png)
 
 在文件->新建装换，新建转换后在左边的主对象树中建立DB连接用以连接数据库
 
-![](../../assets/_images/devops/deploy/kattle/2.png)
+![](../../assets/_images/deploy/kattle/2.png)
 
 连接oralce 
 
-![](../../assets/_images/devops/deploy/kattle/3.png)
+![](../../assets/_images/deploy/kattle/3.png)
 
 
 ### 2.2 导出Excel
 
 #### 2.2.1 表输入
    
-![](../../assets/_images/devops/deploy/kattle/5.png)
+![](../../assets/_images/deploy/kattle/5.png)
 
 #### 2.2.2 Excel输出
 
-![](../../assets/_images/devops/deploy/kattle/6.png)
+![](../../assets/_images/deploy/kattle/6.png)
 
 设置保存位置和导出字段
 
@@ -79,32 +79,32 @@ END;
 
 在右侧【核心对象】中搜索【表输入】，【调用DB存储过程】将其拖到新创建的转换中
 
-![](../../assets/_images/devops/deploy/kattle/8.png)
+![](../../assets/_images/deploy/kattle/8.png)
 
 ```sql
 SELECT '${P_NAME}' as I_NAME,'${P_YEAR}' as I_YEAR FROM DUAL
 ```
 
-![](../../assets/_images/devops/deploy/kattle/7.png)
+![](../../assets/_images/deploy/kattle/7.png)
 
 
 #### 2.3.3 设置转换
 
 右键点击转换空白处，打开【转换设置】->【命名参数】， 配置调用存储过程要使用的输入参数（与【表输入】的SQL语句中的变量参数一致）
 
-![](../../assets/_images/devops/deploy/kattle/9.png)
+![](../../assets/_images/deploy/kattle/9.png)
 
-![](../../assets/_images/devops/deploy/kattle/10.png)
+![](../../assets/_images/deploy/kattle/10.png)
 
 
 ### 2.4 定时调度
 
 #### 2.4.1 转换
 
-![](../../assets/_images/devops/deploy/kattle/11.png)
+![](../../assets/_images/deploy/kattle/11.png)
 
-![](../../assets/_images/devops/deploy/kattle/12.png)
+![](../../assets/_images/deploy/kattle/12.png)
 
 #### 2.4.2 运行
 
-![](../../assets/_images/devops/deploy/kattle/13.png)
+![](../../assets/_images/deploy/kattle/13.png)

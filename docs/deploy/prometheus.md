@@ -321,17 +321,17 @@ systemctl enable grafana-server
 
 Configuration -> Data Sources ->add data source -> Prometheus
 
-![](../../assets/_images/devops/deploy/prometheus/grafana1.png)
-![](../../assets/_images/devops/deploy/prometheus/grafana2.png)
-![](../../assets/_images/devops/deploy/prometheus/grafana3.png)
+![](../../assets/_images/deploy/prometheus/grafana1.png)
+![](../../assets/_images/deploy/prometheus/grafana2.png)
+![](../../assets/_images/deploy/prometheus/grafana3.png)
 
 2. 导入模板
 
-![](../../assets/_images/devops/deploy/prometheus/grafana4.png)
+![](../../assets/_images/deploy/prometheus/grafana4.png)
 
 选择数据源
 
-![](../../assets/_images/devops/deploy/prometheus/grafana5.png)
+![](../../assets/_images/deploy/prometheus/grafana5.png)
 
 
 #### 2.4.2 mysql监控

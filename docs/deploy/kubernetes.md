@@ -2175,11 +2175,11 @@ kubectl delete pod <pod name> -n kube-system
 
 在登录页面上输入上面的token
 
-![](../../assets/_images/devops/deploy/k8s/image1.png)
+![](../../assets/_images/deploy/k8s/image1.png)
 
 出现下面的页面代表成功
 
-![](../../assets/_images/devops/deploy/k8s/image2.png)
+![](../../assets/_images/deploy/k8s/image2.png)
 
 使用DashBoard，以Deployment为例演示DashBoard的使用
 
@@ -2187,30 +2187,30 @@ kubectl delete pod <pod name> -n kube-system
 
 选择指定的命名空间`dev`，然后点击`Deployments`，查看dev空间下的所有deployment
 
-![](../../assets/_images/devops/deploy/k8s/image3.png)
+![](../../assets/_images/deploy/k8s/image3.png)
 
 
 **扩缩容**
 
 在`Deployment`上点击`规模`，然后指定`目标副本数量`，点击确定
 
-![](../../assets/_images/devops/deploy/k8s/image4.png)
+![](../../assets/_images/deploy/k8s/image4.png)
 
 **编辑**
 
 在`Deployment`上点击`编辑`，然后修改`yaml文件`，点击确定
 
-![](../../assets/_images/devops/deploy/k8s/image5.png)
+![](../../assets/_images/deploy/k8s/image5.png)
 
 **查看Pod**
 
 点击`Pods`, 查看pods列表
 
-![](../../assets/_images/devops/deploy/k8s/image6.png)
+![](../../assets/_images/deploy/k8s/image6.png)
 
 **操作Pod**
 
 选中某个Pod，可以对其执行日志（logs）、进入执行（exec）、编辑、删除操作
 
-![](../../assets/_images/devops/deploy/k8s/image7.png)
+![](../../assets/_images/deploy/k8s/image7.png)
 
