@@ -5,7 +5,18 @@
   - [Debian 11](devops/linux/debian11)
   - [Windows 10](devops/windows/windows10)
 
-- 应用部署
+- 数据库
+  - [Oracle](devops/database/oracle)
+  - [PostgreSQL](devops/database/postgre)
+  - [MySQL](devops/database/mysql)
+  - [SQL Server](devops/database/mssql)
+  - [MongoDB](devops/database/mongodb)
+  - [Redis](devops/database/redis)
+  - [HBase](devops/database/hbase)
+  - [Mycat](devops/database/mycat)
+  - [Debezium](devops/database/debezium)
+
+- 应用
   - [Docker](devops/deploy/docker)
   - [Kubernetes](devops/deploy/kubernetes)
   - [Istio](devops/deploy/istio)
@@ -18,17 +29,6 @@
   - [Zabbix](devops/deploy/zabbix)
   - [Simple RTMP Server](devops/deploy/srs)
   - [TURN Server](devops/deploy/turnserver)
-
-- 数据库
-  - [Oracle](devops/database/oracle)
-  - [PostgreSQL](devops/database/postgre)
-  - [MySQL](devops/database/mysql)
-  - [SQL Server](devops/database/mssql)
-  - [MongoDB](devops/database/mongodb)
-  - [Redis](devops/database/redis)
-  - [Debezium](devops/deploy/debezium)
-  - [HBase](devops/deploy/hbase)
-  - [Mycat](java/database/mycat)
 
 - 微服务
   - [Prometheus](devops/deploy/prometheus)
