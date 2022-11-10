@@ -365,35 +365,35 @@ cd ~/database/
 
 不接收邮件通知更新
 
-![](../../assets/_images/devops/database/oracle/step1.png)
+![](../../assets/_images/deploy/oracle/step1.png)
 
 跳过软件更新
 
-![](../../assets/_images/devops/database/oracle/step2.png)
+![](../../assets/_images/deploy/oracle/step2.png)
 
 创建和配置数据库
 
-![](../../assets/_images/devops/database/oracle/step3.png)
+![](../../assets/_images/deploy/oracle/step3.png)
 
 选择服务器类
 
-![](../../assets/_images/devops/database/oracle/step4.png)
+![](../../assets/_images/deploy/oracle/step4.png)
 
 默认选择单实例数据库
 
-![](../../assets/_images/devops/database/oracle/step5.png)
+![](../../assets/_images/deploy/oracle/step5.png)
 
 默认典型安装
 
-![](../../assets/_images/devops/database/oracle/step6.png)
+![](../../assets/_images/deploy/oracle/step6.png)
 
 设置实例和密码，其他默认即可。这里密码要在大写字母+小写字母+数字组合。比如：1234Qwer
 
-![](../../assets/_images/devops/database/oracle/step7.png)
+![](../../assets/_images/deploy/oracle/step7.png)
 
 创建产品清单，默认
 
-![](../../assets/_images/devops/database/oracle/step8.png)
+![](../../assets/_images/deploy/oracle/step8.png)
 
 执行先决条件检查，按照静默方式的内核参数和限制设定
 
@@ -406,25 +406,25 @@ swapon swapfree # 开启交换分区
 echo "swapfree   swap    swap    sw  0   0" >> /etc/fstab
 ```
 
-![](../../assets/_images/devops/database/oracle/step9.png)
+![](../../assets/_images/deploy/oracle/step9.png)
 
 准备安装
 
-![](../../assets/_images/devops/database/oracle/step10.png)
+![](../../assets/_images/deploy/oracle/step10.png)
 
 进行安装
 
-![](../../assets/_images/devops/database/oracle/step11.png)
+![](../../assets/_images/deploy/oracle/step11.png)
 
 
 进度70% `ins_emagent.mk错误弹框`
 
-![](../../assets/_images/devops/database/oracle/step11_error.png)
+![](../../assets/_images/deploy/oracle/step11_error.png)
 
 
 ?> 编辑 /home/oracle/app/oracle/product/11.2.0/dbhome_1/sysman/lib/ins_emagent.mk 约176行，可以搜索$(MK_EMAGENT_NMECTL) 关键字快速找到。
 
-![](../../assets/_images/devops/database/oracle/step11_update.png)
+![](../../assets/_images/deploy/oracle/step11_update.png)
 
 ```bash
 #===========================
@@ -441,15 +441,15 @@ $(SYSMANBIN)emdctl:
 
 修改完成后，点击重试（R）
 
-![](../../assets/_images/devops/database/oracle/step11_goon.png)
+![](../../assets/_images/deploy/oracle/step11_goon.png)
 
 数据库创建完成
 
-![](../../assets/_images/devops/database/oracle/step11_done.png)
+![](../../assets/_images/deploy/oracle/step11_done.png)
 
 执行配置脚本
 
-![](../../assets/_images/devops/database/oracle/step11_shell.png)
+![](../../assets/_images/deploy/oracle/step11_shell.png)
 
 使用root身份执行
 
@@ -460,11 +460,11 @@ $(SYSMANBIN)emdctl:
 
 执行完成这两个脚本，点击确定
 
-![](../../assets/_images/devops/database/oracle/step11_shell_ok.png)
+![](../../assets/_images/deploy/oracle/step11_shell_ok.png)
 
 Oracle Database 安装成功
 
-![](../../assets/_images/devops/database/oracle/step12.png)
+![](../../assets/_images/deploy/oracle/step12.png)
 
 #### 1.2.6 设置oracle用户环境变量
 

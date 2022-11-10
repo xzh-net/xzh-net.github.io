@@ -1211,7 +1211,7 @@ shutdown -h now # 关机
 shutdown -r now # 重启
 ```
 
-![](../../assets/_images/devops/linux/centos7/resetpwd.png)
+![](../../assets/_images/deploy/centos7/resetpwd.png)
 
 ```bash
 # 忘记root密码，开机狂按E，按图修改后按Ctrl+x重启输入
