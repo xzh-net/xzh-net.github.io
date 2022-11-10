@@ -5,14 +5,6 @@
   - [Debian 11](devops/linux/debian11)
   - [Windows 10](devops/windows/windows10)
 
-- 数据库
-  - [Oracle](devops/database/oracle)
-  - [PostgreSQL](devops/database/postgre)
-  - [MySQL](devops/database/mysql)
-  - [SQL Server](devops/database/mssql)
-  - [MongoDB](devops/database/mongodb)
-  - [Redis](devops/database/redis)
-
 - 应用部署
   - [Docker](devops/deploy/docker)
   - [Kubernetes](devops/deploy/kubernetes)
@@ -30,25 +22,38 @@
   - [Elastic Stack](devops/deploy/elk)
   - [Zookeeper](devops/deploy/zookeeper)
   - [Etcd](devops/deploy/etcd)
-  - [Kafka](devops/deploy/kafka)
   - [RabbitMQ](devops/deploy/rabbitmq)
   - [RocketMQ](devops/deploy/rocketmq)
   - [Pulsar](devops/deploy/pulsar)
+
+- 数据库
+  - [Oracle](devops/database/oracle)
+  - [PostgreSQL](devops/database/postgre)
+  - [MySQL](devops/database/mysql)
+  - [SQL Server](devops/database/mssql)
+  - [MongoDB](devops/database/mongodb)
+  - [Redis](devops/database/redis)
   - [Debezium](devops/deploy/debezium)
-  - [Hadoop](devops/deploy/hadoop)
-  - [Hive](devops/deploy/hive)
   - [HBase](devops/deploy/hbase)
+  - [Mycat](java/database/mycat)
+
+- 数仓
+  - [Hive](devops/deploy/hive)
+  - [ClickHouse](devops/deploy/clickhouse)
+  - [Kettle](devops/deploy/kettle) 
+
+- 大数据
+  - [Hadoop](devops/deploy/hadoop)
   - [Spark](devops/deploy/spark)
   - [Flink](devops/deploy/flink)
   - [Flume](devops/deploy/flume) 
-  - [ClickHouse](devops/deploy/clickhouse)
+  - [Kafka](devops/deploy/kafka)
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
   - [使用ZeroBrane Studio调试lua脚本](java/tools/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
   - [Sacla IDEA 开发配置教程](java/tools/scala)
-  - [ETL工具kettle部署及应用](java/tools/etl)
   - [离线数据同步工具DataX](java/tools/datax)
 
 - 学习笔记
@@ -83,6 +88,5 @@
   - [Spring Cloud Alibaba](java/microservice/springclouda)
   - [Mysql](java/database/mysql)
   - [Oracle](java/database/oracle)
-  - [Mycat](java/database/mycat)
   - [ShardingSphere](java/database/shardingsphere)
 
