@@ -18,13 +18,6 @@
   - [Zabbix](devops/deploy/zabbix)
   - [Simple RTMP Server](devops/deploy/srs)
   - [TURN Server](devops/deploy/turnserver)
-  - [Prometheus](devops/deploy/prometheus)
-  - [Elastic Stack](devops/deploy/elk)
-  - [Zookeeper](devops/deploy/zookeeper)
-  - [Etcd](devops/deploy/etcd)
-  - [RabbitMQ](devops/deploy/rabbitmq)
-  - [RocketMQ](devops/deploy/rocketmq)
-  - [Pulsar](devops/deploy/pulsar)
 
 - 数据库
   - [Oracle](devops/database/oracle)
@@ -37,10 +30,14 @@
   - [HBase](devops/deploy/hbase)
   - [Mycat](java/database/mycat)
 
-- 数仓
-  - [Hive](devops/deploy/hive)
-  - [ClickHouse](devops/deploy/clickhouse)
-  - [Kettle](devops/deploy/kettle) 
+- 微服务
+  - [Prometheus](devops/deploy/prometheus)
+  - [Elastic Stack](devops/deploy/elk)
+  - [Zookeeper](devops/deploy/zookeeper)
+  - [Etcd](devops/deploy/etcd)
+  - [RabbitMQ](devops/deploy/rabbitmq)
+  - [RocketMQ](devops/deploy/rocketmq)
+  - [Pulsar](devops/deploy/pulsar)
 
 - 大数据
   - [Hadoop](devops/deploy/hadoop)
@@ -48,6 +45,11 @@
   - [Flink](devops/deploy/flink)
   - [Flume](devops/deploy/flume) 
   - [Kafka](devops/deploy/kafka)
+
+- 数仓
+  - [Hive](devops/deploy/hive)
+  - [ClickHouse](devops/deploy/clickhouse)
+  - [Kettle](devops/deploy/kettle) 
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
@@ -82,8 +84,6 @@
   - [IO模型](java/network/io)
   - [分布式理论与算法](java/distributed/cap)
   - [分布式事务Seata](java/distributed/seata)
-  - [分布式全局ID](java/distributed/snowflake)
-  - [分布式文件系统](java/distributed/dfs)
   - [Spring Cloud Netflix](java/microservice/springcloud)
   - [Spring Cloud Alibaba](java/microservice/springclouda)
   - [Mysql](java/database/mysql)
