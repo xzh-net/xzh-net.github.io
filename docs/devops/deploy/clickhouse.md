@@ -24,8 +24,7 @@ tar -zxvf clickhouse-client-21.9.4.35.tgz -C /opt/clickhouse
 #### 1.1.2 安装依赖
 
 ```bash
-yum install -y libtool
-yum install -y *unixODBC*
+yum install -y libtool *unixODBC*
 ```
 
 #### 1.1.3 参数设置
@@ -85,6 +84,14 @@ show databases;
 create table t_tinylog ( id String, name String) engine=TinyLog;
 ```
 
+如果忘记默认密码
+
+```bash
+cd /etc/clickhouse-server/users.d/
+# 将默认用户配置文件重命名，不需重启
+mv default-password.xml default-pwd.xml
+```
+
 #### 1.1.7 配置目录
 
 ```bash
@@ -105,7 +112,6 @@ clickhouse restart
 ```
 
 验证地址：http://192.168.2.201:8123
-
 
 
 ### 1.2 集群
