@@ -1,0 +1,30 @@
+td {
+	font-size: 12px;
+	color: #FF9900;
+	text-decoration: none;
+	line-height: 160%;
+
+}
+a:link {
+	font-size: 12px;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+a:visited {
+	font-size: 12px;
+	color: #FF9900;
+	text-decoration: none;
+}
+a:hover {
+	color: #FFCC00;
+}
+.gg {
+	font-size: 12px;
+	line-height: 230%;
+	text-decoration: none;
+}
+.lb {
+	font-size: 12px;
+	text-decoration: none;
+	line-height: 10px;
+}
