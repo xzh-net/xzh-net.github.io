@@ -355,24 +355,29 @@ set timezone = 'Etc/UTC';
 set timezone = 'Asia/Shanghai';
 show timezone;
 
-CREATE TABLE product(
-    id INT8 NOT NULL,
-    create_user_id INT8 NOT NULL,
-    create_time timestamptz NOT NULL,
-    update_user_id INT8 NOT NULL,
-    update_time timestamptz NOT NULL,
-    revision INT4 DEFAULT 1 NOT NULL,
-    deleted INT4 DEFAULT 0 NOT NULL,
-    PRIMARY KEY (id)
+CREATE TABLE "public"."car" (
+  "id" int8 NOT NULL,
+  "car_no" varchar(15),
+  "start_price" numeric(11,2),
+  "view_num" int4,
+  "on_status" int2,
+  "on_time" timestamp(6),
+  "register_date" date,
+  "create_user_id" int8,
+  "create_time" timestamptz(6),
+  "is_deleted" int2 DEFAULT 0,
+  PRIMARY KEY ("id")
 );
 
-COMMENT ON COLUMN product.id IS '主键';
-COMMENT ON COLUMN product.create_user_id IS '创建人';
-COMMENT ON COLUMN product.create_time IS '创建时间';
-COMMENT ON COLUMN product.update_user_id IS '更新人';
-COMMENT ON COLUMN product.update_time IS '更新时间';
-COMMENT ON COLUMN product.revision IS '乐观锁';
-COMMENT ON COLUMN product.deleted IS '删除标志';
+COMMENT ON COLUMN "public"."car"."car_no" IS '车辆编号';
+COMMENT ON COLUMN "public"."car"."start_price" IS '起拍价格';
+COMMENT ON COLUMN "public"."car"."view_num" IS '查看数量';
+COMMENT ON COLUMN "public"."car"."on_status" IS '上架状态（0：下架；1：上架）';
+COMMENT ON COLUMN "public"."car"."on_time" IS '上架时间';
+COMMENT ON COLUMN "public"."car"."register_date" IS '注册日期';
+COMMENT ON COLUMN "public"."car"."create_user_id" IS '创建用户id';
+COMMENT ON COLUMN "public"."car"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：是）';
 ```
 
 ## 3. 库操作
