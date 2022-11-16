@@ -163,8 +163,8 @@ vim /usr/lib/systemd/system/docker.service
 # 添加配置文件内容，xxx是代表原有的参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
 ExecStart= xxx -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
 
-systemctl daemon-reload #加载docker守护线程
-systemctl restart docker #重启docker
+systemctl daemon-reload   # 加载docker守护线程
+systemctl restart docker  # 重启docker
 ```
 
 #### 3.1.2 Nginx
@@ -231,8 +231,6 @@ docker exec -it rancher reset-password
 
 ```bash
 mkdir -p /mydata/mysql/data /mydata/mysql/logs /mydata/mysql/conf
-cd /mydata/mysql/conf
-touch my.cnf
 
 docker run -p 3306:3306 --name mysql \
 -v /mydata/mysql/conf:/etc/mysql/conf.d \
