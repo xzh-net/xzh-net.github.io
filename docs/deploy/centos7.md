@@ -1375,7 +1375,7 @@ which gcc
 gcc --version
 ```
 
-### 2.6 shell
+### 2.6 脚本
 
 #### 2.6.1 常用命令
 
@@ -1562,7 +1562,7 @@ systemctl disable firewalld.service # 关闭
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-### 3.2 ssh
+### 3.2 SSH安装
 
 ```bash
 vi /etc/ssh/sshd_config
