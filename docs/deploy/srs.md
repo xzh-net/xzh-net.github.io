@@ -2,13 +2,12 @@
 
 SRS是一个采用MIT协议授权的国产简单RTMP/HLS直播服务器。最新版还支持FLV模式，同时具备了RTMP的实时性，以及HLS中属于HTTP协议对各种网络环境高度适应性，并且支持更多播放器。它的功能与nginx-rtmp-module类似, 可以实现RTMP/HLS的分发,可用于直播/录播/视频客服等多种场景，其定位是运营级的互联网直播服务器集群
 
+下载地址：https://github.com/ossrs/srs/releases/download/v4.0-r1/srs-server-4.0-r1.tar.gz
+
+
 ## 1. 安装
 
-### 1.1 下载
-
-https://github.com/ossrs/srs/releases/download/v4.0-r1/srs-server-4.0-r1.tar.gz
-
-### 1.2 解压编译
+### 1.1 解压编译
 
 ```bash
 cd /opt/software
@@ -18,7 +17,7 @@ cd /opt/srs-server-4.0-b10/trunk
 make
 ```
 
-### 1.3 修改配置
+### 1.2 修改配置
 
 ```bash
 cd conf
@@ -63,7 +62,7 @@ vhost __defaultVhost__ {
 }
 ```
 
-### 1.4 启动服务
+### 1.3 启动服务
 
 ```bash
 cd /opt/srs-server-4.0-b10/trunk
