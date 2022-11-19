@@ -1243,7 +1243,7 @@ mkdir -p /home/docker/data  # 级联创建目录
 mkdir -p src/{test,main}/{java,resources}   # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
 
 # Find查找
-grep "www.xuzhihao.net" *               # 当前路径下按关键字过滤
+grep "www.xuzhihao.net" *           # 当前路径下按关键字过滤
 find / -type f -size +100M          # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
 find / -name memcached              # 查找应用
 find / -name 'meeting' -type d      # 查找meeting文件夹所在的位置
@@ -1646,11 +1646,11 @@ vim +3 /etc/passwd      # 定位到第三行
 vim +/sssd /etc/passwd  # 定位到sssd所在的行
 ```
 
-## 4. 开发环境
+## 4. 环境搭建
 
 ### 4.1 Java
 
-#### 4.1.1 JDK
+#### 4.1.1 JDK8
 
 1. 在线安装
 
@@ -1816,4 +1816,11 @@ source /etc/profile
 
 go version
 go env
+```
+
+### 4.5 Python
+
+```bash
+#!/bin/bash
+nohup python -m SimpleHTTPServer 8887 &
 ```
