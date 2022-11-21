@@ -398,28 +398,6 @@ POST /_analyze
 }
 ```
 
-#### 2.5.8 按条件删除
-
-```bash
-POST flow_data/_search
-{
-    "query": {
-      "match": {
-        "username": "xzh"
-      }
-    }
-}
-
-POST flow_data/_delete_by_query?conflicts=proceed&wait_for_completion=false
-{
-  "query": {
-      "match": {
-        "username": "xzh"
-      }
-  }
-}
-```
-
 ## 3. Logstash
 
 ### 3.1 下载解压
