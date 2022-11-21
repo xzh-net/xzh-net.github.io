@@ -1082,6 +1082,7 @@ openssl req -new -key server.key -out server.csr    # 创建SSL证书签名请�
 cp server.key server.key.org        
 openssl rsa -in server.key.org -out server.key      # 利用私钥生成一个不需要输入密码的密钥文件
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt  # 生成SSL证书，有效期为365天
+openssl x509 -in www.hwcq.online.crt -noout -dates  # 验证到期时间
 ```
 
 ```conf
