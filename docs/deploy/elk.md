@@ -388,13 +388,35 @@ get mytest/_search
 }
 ```
 
-#### 2.5.7 测试分词器
+#### 2.5.7 IK分词器
 
 ```bash
 POST /_analyze
 {
   "text": "我的苹果手机和你的安卓手机，我们都有身份证",
   "analyzer": "ik_smart"
+}
+```
+
+#### 2.5.8 按条件删除
+
+```bash
+POST flow_data/_search
+{
+    "query": {
+      "match": {
+        "username": "xzh"
+      }
+    }
+}
+
+POST flow_data/_delete_by_query?conflicts=proceed&wait_for_completion=false
+{
+  "query": {
+      "match": {
+        "username": "xzh"
+      }
+  }
 }
 ```
 
