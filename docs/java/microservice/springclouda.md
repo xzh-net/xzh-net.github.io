@@ -1,6 +1,6 @@
 # Spring Cloud Alibaba
 
-!> 版本说明：https://github.com/alibaba/spring-cloud-alibaba/wiki/版本说明
+?> 版本说明：https://github.com/alibaba/spring-cloud-alibaba/wiki/版本说明
 
 ## 1. Sentinel分布式系统流量防卫兵
 

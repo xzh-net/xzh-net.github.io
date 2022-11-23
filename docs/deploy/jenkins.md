@@ -684,7 +684,7 @@ HH 1,15 1-11 *
 
 ![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook2.png)
 
-!> 注意：以下设置必须完成，否则会报错！Manage Jenkins->Configure System
+?> 注意：以下设置必须完成，否则会报错！Manage Jenkins->Configure System
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
 

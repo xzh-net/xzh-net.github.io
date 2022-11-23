@@ -233,7 +233,7 @@ bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-dir-hdfs.conf
 
 #### 2.3.3 向upload文件夹中添加文件
 
-!> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
+?> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
 
 ```bash
 vi /opt/words.txt
@@ -504,7 +504,7 @@ a3.sources.r1.channels = c2
 a3.sinks.k1.channel = c2
 ```
 
-!> 输出的本地目录必须是已经存在的目录，如果该目录不存在，并不会创建新的目录
+?> 输出的本地目录必须是已经存在的目录，如果该目录不存在，并不会创建新的目录
 
 ```bash
 mkdir -p /opt/flume/data/flume3

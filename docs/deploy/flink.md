@@ -60,7 +60,7 @@ hello
 benv.readTextFile("/opt/words.txt").flatMap(_.split(" ")).map((_,1)).groupBy(0).sum(1).print()
 ```
 
-!> 目前所有Scala2.12版本的安装包暂时都不支持 Scala Shell
+?> 目前所有Scala2.12版本的安装包暂时都不支持 Scala Shell
 
 5. Web UI
 
@@ -148,7 +148,7 @@ scp  /etc/profile node03:/etc/profile
 /opt/flink-1.12.0/bin/taskmanager.sh stop       # 在从节点停止taskmanager
 ```
 
-!> 整合hadoop3.1.4过程中会出现historyserver启动失败，下载jar放置到flink中lib文件夹下
+?> 整合hadoop3.1.4过程中会出现historyserver启动失败，下载jar放置到flink中lib文件夹下
 
 下载地址：https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.7.5-10.0/flink-shaded-hadoop-2-uber-2.7.5-10.0.jar
 
@@ -289,7 +289,7 @@ jobmanager.rpc.address: node02
 /opt/flink-1.12.0/bin/taskmanager.sh stop       # 在从节点停止taskmanager
 ```
 
-!> 整合hadoop3.1.4过程中会出现historyserver启动失败，下载jar放置到flink中lib文件夹下
+?> 整合hadoop3.1.4过程中会出现historyserver启动失败，下载jar放置到flink中lib文件夹下
 
 下载地址：https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.7.5-10.0/flink-shaded-hadoop-2-uber-2.7.5-10.0.jar
 

@@ -158,7 +158,7 @@ DECLINE_SECURITY_UPDATES=true
 cd /u01/software/database/
 ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 ```
-!> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
+?> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
 ```lua
 正在启动 Oracle Universal Installer...
 
