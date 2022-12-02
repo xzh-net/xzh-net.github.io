@@ -1236,11 +1236,11 @@ tar –xvf file.tar                   # 解压
 tar zxvf file.tar -C /home/data/    # 解压到指定路径
 
 # 拷贝复制
-ln -s /usr/local/jdk1.8/ jdk                        # 软连接
-cp -f xxx.log   # 复制并强制覆盖同名文件
-scp -r vjsp.workflow -P {port} root@20.255.122.15:/opt/code # 远程复制
+cp -f xxx.log               # 复制并强制覆盖同名文件
 mkdir -p /home/docker/data  # 级联创建目录
-mkdir -p src/{test,main}/{java,resources}   # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
+mkdir -p src/{test,main}/{java,resources}       # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
+ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java            # 创建软连接
+scp -r vjsp.workflow -P {port} root@20.255.122.15:/opt/code     # 远程复制
 
 # Find查找
 grep "www.xuzhihao.net" *           # 当前路径下按关键字过滤
