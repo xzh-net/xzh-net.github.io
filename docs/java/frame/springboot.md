@@ -34,7 +34,7 @@
 java -jar xxxx.jar --spring.config.location=D:/kawa/application.yml
 
 
-!> 从springboot 2.4以后，就默认不加载bootstrap配置文件了，解决办法：添加依赖
+?> 从springboot 2.4以后，就默认不加载bootstrap配置文件了，解决办法：添加依赖
 
 ```xml
 <dependency>

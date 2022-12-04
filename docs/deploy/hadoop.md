@@ -672,7 +672,7 @@ vim hdfs-site.xml
 </property>
 ```
 
-!> 远程补刀需要namenode互相免密登录，同时安装psmisc
+?> 远程补刀需要namenode互相免密登录，同时安装psmisc
 
 ```bash
 ssh-copy-id node01  # 在node02节点执行

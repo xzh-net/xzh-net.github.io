@@ -45,7 +45,7 @@ chmod -R 775 /u01/app/oracle
     - 32位linux系统：可取最大值为 4GB （ 4294967296bytes ） -1byte ，即 4294967295 。建议值为多于内存的一半，所以如果是 32 为系统，一般可取值为 4294967295 。 32 位系统对 SGA 大小有限制，所以 SGA 肯定可以包含在单个共享内存段中。
     - 64位linux系统：可取的最大值为物理内存值 -1byte ，建议值为多于物理内存的一半，一般取值大于 SGA_MAX_SIZE 即可，可以取物理内存 -1byte 。  
 
-  ?> 内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
+?> 内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
 
 vim /etc/sysctl.conf
 ```bash
@@ -158,7 +158,7 @@ DECLINE_SECURITY_UPDATES=true
 cd /u01/software/database/
 ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 ```
-!> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
+?> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
 ```lua
 正在启动 Oracle Universal Installer...
 
@@ -646,8 +646,11 @@ crontab -e
 30 3 * * * sh /data/shell/ei.sh  # 每天凌晨3点半执行
 ```
 
+```bash
 vi /data/shell/ei.sh
-```sh
+```
+
+```bash
 #!/bin/bash
 starttime=`date +'%Y-%m-%d %H:%M:%S'`
 stime=`date +'%Y-%m-%d %H:%M:%S'`
@@ -688,24 +691,10 @@ echo '还原数据库1结束时间：'$etime >> /data/kh_shell/kh_log.log
 
 sleep 5s;
 stime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '还原数据库5开始时间：'$stime >> /data/kh_shell/kh_log.log
+echo '还原数据库2开始时间：'$stime >> /data/kh_shell/kh_log.log
 su - oracle -c "impdp VJSP_JSWZ_190601/wzld9999 directory=KH_DIR dumpfile=VJSP_JSWZ_${BAKDATE}_%U.dmp parallel=4 logfile=5_${BAKDATE}.log remap_schema=VJSP_JSWZ_190601:VJSP_JSWZ_190601 TABLE_EXISTS_ACTION=TRUNCATE tables=TS_SYSTEM_DYWJ"
 etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '还原数据库5结束时间：'$etime >> /data/kh_shell/kh_log.log
-
-sleep 5s;
-stime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '还原数据库6开始时间：'$stime >> /data/kh_shell/kh_log.log
-su - oracle -c "impdp VJSP_JSWZ_190601/wzld9999 directory=KH_DIR dumpfile=VJSP_JSWZ_${BAKDATE}_%U.dmp parallel=4 logfile=6_${BAKDATE}.log remap_schema=VJSP_JSWZ_190601:VJSP_JSWZ_190601 TABLE_EXISTS_ACTION=TRUNCATE tables=TS_FLOW_MAIN_MX"
-etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '还原数据库6结束时间：'$etime >> /data/kh_shell/kh_log.log
-
-sleep 5s;
-stime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '还原数据库7开始时间：'$stime >> /data/kh_shell/kh_log.log
-su - oracle -c "impdp VJSP_JSWZ_190601/wzld9999 directory=KH_DIR dumpfile=VJSP_JSWZ_${BAKDATE}_%U.dmp parallel=4 logfile=7_${BAKDATE}.log remap_schema=VJSP_JSWZ_190601:VJSP_JSWZ_190601 TABLE_EXISTS_ACTION=TRUNCATE tables=TS_FLOW_PATH_COM"
-etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '还原数据库7结束时间：'$etime >> /data/kh_shell/kh_log.log
+echo '还原数据库2结束时间：'$etime >> /data/kh_shell/kh_log.log
 
 sleep 5s;
 stime=`date +'%Y-%m-%d %H:%M:%S'`
@@ -733,47 +722,6 @@ echo '脚本2结束时间：'$etime >> /data/kh_shell/kh_log.log
 
 sleep 5s;
 stime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '脚本3开始时间：'$stime >> /data/kh_shell/kh_log.log
-su - oracle -c "sqlplus VJSP_JSWZ_190601/wzld9999<< EOF
-call PROC_DEL_ONEYEAR();
-commit;
-call PROC_UPDATECFID0();
-commit;
-call proc_up_path2('');
-commit;
-call PROC_GET_DEALTIME('',to_char(TRUNC(SYSDATE - 1, 'MM'),'YYYY/MM/DD HH24:MI:SS'),to_char(TRUNC(LAST_DAY(sysdate-1) + 1, 'MM'),'YYYY/MM/DD HH24:MI:SS'));
-commit;
-disconnect
-quit
-EOF"
-etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '脚本3结束时间：'$etime >> /data/kh_shell/kh_log.log
-
-sleep 5s;
-stime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '脚本4开始时间：'$stime >> /data/kh_shell/kh_log.log
-su - oracle -c "sqlplus VJSP_JSWZ_190601/wzld9999<< EOF
-call PROC_GET_NOTME('','');
-commit;
-disconnect
-quit
-EOF"
-etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '脚本4结束时间：'$etime >> /data/kh_shell/kh_log.log
-
-sleep 5s;
-stime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '提交事务开始时间：'$stime >> /data/kh_shell/kh_log.log
-su - oracle -c "sqlplus VJSP_JSWZ_190601/wzld9999<< EOF
-commit;
-disconnect
-quit
-EOF"
-etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '提交事务结束时间：'$etime >> /data/kh_shell/kh_log.log
-
-sleep 5s;
-stime=`date +'%Y-%m-%d %H:%M:%S'`
 echo '重启数据库开始时间：'$stime >> /data/kh_shell/kh_log.log
 sleep 5s
 su - oracle -c "sqlplus /nolog<< EOF
@@ -781,6 +729,7 @@ conn /as sysdba
 shutdown immediate
 quit
 EOF"
+
 sleep 5s
 su - oracle -c "sqlplus /nolog<< EOF
 conn /as sysdba
@@ -801,6 +750,19 @@ echo '删除文件结束时间：'$etime >> /data/kh_shell/kh_log.log
 endtime=`date +'%Y-%m-%d %H:%M:%S'`
 echo '总计结束时间：'$endtime >> /data/kh_shell/kh_log.log
 echo "本次总计运行时间： "$(($(date --date="$endtime" +%s)-$(date --date="$starttime" +%s)))"s" >> /data/kh_shell/kh_log.log
+```
+
+```bash
+0 1 * * *  sh /opt/DB/oracle_bak.sh
+```
+
+```bash
+#!/bin/bash
+BAKDATE=`date +%Y%m%d%H%M`
+/u01/app/oracle/product/11.2.0/dbhome_1/bin/expdp SGDB/123456 SCHEMAS=SGDB DIRECTORY=DP_DEMO dumpfile=SGDB$BAKDATE.dmp logfile=SGDB$BAKDATE.log
+/usr/bin/gzip /opt/DB/SGDB$BAKDATE.dmp
+find /opt/DB/ -mtime +5 -type f -name '*.dmp.gz' -exec rm {} \;
+find /opt/DB/ -mtime +5 -type f -name '*.log' -exec rm {} \;
 ```
 
 ### 2.6 生成AWR报告

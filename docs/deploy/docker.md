@@ -163,8 +163,8 @@ vim /usr/lib/systemd/system/docker.service
 # 添加配置文件内容，xxx是代表原有的参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
 ExecStart= xxx -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
 
-systemctl daemon-reload #加载docker守护线程
-systemctl restart docker #重启docker
+systemctl daemon-reload   # 加载docker守护线程
+systemctl restart docker  # 重启docker
 ```
 
 #### 3.1.2 Nginx
@@ -231,8 +231,6 @@ docker exec -it rancher reset-password
 
 ```bash
 mkdir -p /mydata/mysql/data /mydata/mysql/logs /mydata/mysql/conf
-cd /mydata/mysql/conf
-touch my.cnf
 
 docker run -p 3306:3306 --name mysql \
 -v /mydata/mysql/conf:/etc/mysql/conf.d \
@@ -1505,7 +1503,7 @@ VOLUME      # 设置可被挂载的数据卷（目录映射）
 ONBUILD     # 设置在构建时需要自动执行的命令
 ```
 
-!> Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
+?> Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
 
 #### 4.1.1 jar
 

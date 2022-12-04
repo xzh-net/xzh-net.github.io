@@ -123,7 +123,7 @@ scp -r /opt/spark root@node03:$PWD
 /opt/spark/sbin/stop-slaves.sh  # 在从节点停止slaves
 ```
 
-!> 因为hadoop配置了全局变量，`start-all.sh`变成hadoop的启停命令，因此spark命令需要使用`./`或者绝对路径来执行
+?> 因为hadoop配置了全局变量，`start-all.sh`变成hadoop的启停命令，因此spark命令需要使用`./`或者绝对路径来执行
 
 2. 验证集群
 

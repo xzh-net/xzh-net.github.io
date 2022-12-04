@@ -388,7 +388,7 @@ get mytest/_search
 }
 ```
 
-#### 2.5.7 测试分词器
+#### 2.5.7 IK分词器
 
 ```bash
 POST /_analyze

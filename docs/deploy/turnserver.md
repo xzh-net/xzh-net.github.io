@@ -8,7 +8,7 @@ libevent是一个事件通知库，适用于windows、linux、bsd等多种平台
 
 ### 1.1 安装libevent
 
-#### 1.1.1 编译libevent
+#### 1.1.1 编译
 
 ```bash
 cd /opt/software
@@ -26,7 +26,7 @@ sudo make install
 whereis libevent
 ```
 
-#### 1.1.3 运行demo
+运行demo
 
 ```bash
 # 服务器端
@@ -44,7 +44,7 @@ nc 127.0.0.1 9995
 yum install -y make gcc cc gcc-c++ wget openssl-devel libevent libevent-devel mysql-devel
 ```
 
-### 1.3 下载解压
+### 1.3 下载
 
 最新版本的coturn，可以查看https://github.com/coturn/coturn/wiki/Downloads
 

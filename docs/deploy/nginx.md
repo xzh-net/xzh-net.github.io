@@ -591,10 +591,12 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_pass http://192.168.3.200:8000/blob/;
+        proxy_pass http://127.0.0.1:8000/blob/;
     }
 }
 ```
+
+?> `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
 
 ### 3.6 错误页
 
@@ -1082,13 +1084,14 @@ openssl req -new -key server.key -out server.csr    # 创建SSL证书签名请�
 cp server.key server.key.org        
 openssl rsa -in server.key.org -out server.key      # 利用私钥生成一个不需要输入密码的密钥文件
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt  # 生成SSL证书，有效期为365天
+openssl x509 -in www.hwcq.online.crt -noout -dates  # 验证到期时间
 ```
 
 ```conf
 server {
     listen       80; # 同时支持HTTP
     listen       443 ssl; # 添加HTTPS支持
-    server_name  api.xuzhihao.net; #修改域名
+    server_name  www.xuzhihao.net; #修改域名
 
     #ssl配置
     ssl_certificate      /usr/share/nginx/html/ssl/api/api.crt; # 配置证书
@@ -1104,7 +1107,7 @@ server {
         proxy_set_header  Host $http_host;              # 设置客户端真实的域名（包括端口号）
         proxy_set_header  X-Real-IP  $remote_addr;      # 设置客户端真实IP
         proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for; # 设置在多层代理时会包含真实客户端及中间每个代理服务器的IP
-        proxy_set_header X-Forwarded-Proto $scheme;     # 设置客户端真实的协议（http还是https）
+        proxy_set_header  X-Forwarded-Proto $scheme;    # 设置客户端真实的协议（http还是https）
         index  index.html index.htm;
     }
 
