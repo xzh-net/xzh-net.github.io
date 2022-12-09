@@ -614,10 +614,10 @@ drop user xzh0610 cascade;
 ### 2.4 目录管理
 
 ```sql
-SELECT * FROM DBA_DIRECTORIES;                          --查看目录
+SELECT * FROM DBA_DIRECTORIES;                          -- 查看目录
 CREATE DIRECTORY oradmp AS '/u01/app/oracle/oradmp';    -- 创建目录
 DROP DIRECTORY oradmp;                                  -- 删除目录
-GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        --将oradmp目录的赋给用户
+GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        -- 将oradmp目录的赋给用户
 ```
 
 ### 2.5 备份恢复
