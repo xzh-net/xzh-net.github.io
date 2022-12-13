@@ -452,24 +452,22 @@ server {
 }
 ```
 
-### 3.2 负载均衡upstream
+### 3.2 负载均衡
 
-#### 3.2.1 负载均衡状态
+#### 3.2.1 upstream策略
 
 ```conf
-upstream backend{
+upstream backend {
 	server 192.168.3.200:9001 down;
 	server 192.168.3.201:9002 backup;
-	server 192.168.3.202:9003 max_fails=3 fail_timeout=15;
+	server 192.168.3.202:9003 max_fails=3 fail_timeout=30s;
 }
 ```
-
-#### 3.2.2 负载均衡策略
 
 1. weight
 
 ```conf
-upstream backend{
+upstream backend {
 	server 192.168.200.146:9001 weight=10;
 	server 192.168.200.146:9002 weight=5;
 	server 192.168.200.146:9003 weight=3;
@@ -489,7 +487,7 @@ upstream blob.xuzhihao.net {
 3. least_conn
 
 ```
-upstream backend{
+upstream backend {
 	least_conn;
 	server 192.168.200.146:9001;
 	server 192.168.200.146:9002;
@@ -500,7 +498,7 @@ upstream backend{
 4. url_hash
 
 ```conf
-upstream backend{
+upstream backend {
 	hash &request_uri;
 	server 192.168.200.146:9001;
 	server 192.168.200.146:9002;
@@ -511,7 +509,7 @@ upstream backend{
 5. fair
 
 ```conf
-upstream backend{
+upstream backend {
 	fair;
 	server 192.168.200.146:9001;
 	server 192.168.200.146:9002;
@@ -520,7 +518,7 @@ upstream backend{
 ```
 
 
-### 3.3 四层负载stream
+#### 3.2.3 stream四层负载
 
 ```bash
 ./configure --prefix=/usr/local/nginx --with-stream
@@ -540,6 +538,62 @@ stream {
     }
 }
 ```
+
+### 3.3 正向代理
+
+下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
+
+https://github.com/xzh-net/InstallHelper/ngx_http_proxy_connect_module
+
+```bash
+cd /opt/nginx-1.20.2
+patch -p1 < /opt/nginx-1.20.2/modules/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_1018.patch
+./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=./modules/ngx_http_proxy_connect_module
+make && make install
+```
+
+配置代理
+```conf
+server {
+	listen 3182;
+	resolver  114.114.114.114;
+
+	proxy_connect;
+	proxy_connect_allow            443 563;
+	proxy_connect_connect_timeout  10s;
+	proxy_connect_read_timeout     10s;
+	proxy_connect_send_timeout     10s;
+
+	location / {
+	  proxy_pass $scheme://$http_host$request_uri;
+	  proxy_set_header Host $host;
+	}
+}
+```
+
+配置代理服务器地址
+```bash
+vi /etc/profile
+export http_proxy=192.168.3.114:3182    # 正向代理
+export https_proxy=192.168.3.114:3182   # 代理服务
+source /etc/profile
+```
+
+win客户端验证
+
+![](../../assets/_images/deploy/nginx/image1.png)
+
+![](../../assets/_images/deploy/nginx/image2.png)
+
+![](../../assets/_images/deploy/nginx/image3.png)
+
+linux客户端验证
+```bash
+curl -i www.baidu.com
+#如果未加环境变量代理设置，则可以通过临时代理访问
+curl -i --proxy 192.168.3.114:3182  www.baidu.com
+```
+
 
 ### 3.4 泛域名
 
@@ -728,7 +782,7 @@ location /images {
 server {
 	listen 80;
 	server_name www.web.name;
-	location /server{
+	location /server {
 		rewrite ^/server-([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)\.html$ /server/$1/$2/$3/$4/$5.html last;
 	}
 }
