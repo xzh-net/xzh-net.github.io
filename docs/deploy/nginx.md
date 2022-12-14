@@ -232,8 +232,8 @@ sed -i 's/\r$//' run.sh
 ### 1.4 卸载
 
 ```bash
-yum remove -y nginx					# yum卸载
-find / -name nginx | xargs rm -rf	# 编译删除
+yum remove -y nginx                 # yum卸载
+find / -name nginx | xargs rm -rf   # 编译删除
 ```
 
 
