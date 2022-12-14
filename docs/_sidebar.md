@@ -17,12 +17,12 @@
   - [Debezium](deploy/debezium)
 
 - 应用
-  - [Docker](deploy/docker)
-  - [Kubernetes](deploy/kubernetes)
-  - [Istio](deploy/istio)
   - [Nginx](deploy/nginx)
   - [Keepalived](deploy/keepalived)
   - [HAProxy](deploy/haproxy)
+  - [Docker](deploy/docker)
+  - [Kubernetes](deploy/kubernetes)
+  - [Istio](deploy/istio)
   - [Nexus](deploy/nexus)
   - [Gitlab](deploy/gitlab)
   - [Jenkins](deploy/jenkins)
