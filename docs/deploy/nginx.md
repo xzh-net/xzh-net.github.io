@@ -327,11 +327,11 @@ make upgrade
 
 ### 3.1 配置文件
 
+#### 3.1.1 nginx.conf
+
 ```bash
 ./configure --prefix=/usr/local/nginx --with-stream --with-http_stub_status_module --with-http_ssl_module
 ```
-
-#### 3.1.1 nginx.conf
 
 ```conf
 user nginx;
@@ -454,7 +454,22 @@ server {
 
 ### 3.2 负载均衡
 
-#### 3.2.1 upstream策略
+#### 3.2.1 upstream七层负载
+
+
+下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
+
+https://github.com/xzh-net/InstallHelper/tree/main/nginx/nginx_upstream_check_module
+
+```bash
+cd /opt/nginx-1.20.2
+patch -p1 < /opt/nginx-1.20.2/modules/nginx_upstream_check_module/check_1.20.1+.patch
+
+./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=./modules/ngx_http_proxy_connect_module --add-module=./modules/nginx_upstream_check_module
+
+make && make install
+```
+
 
 ```conf
 upstream backend {
@@ -543,7 +558,7 @@ stream {
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
-https://github.com/xzh-net/InstallHelper/ngx_http_proxy_connect_module
+https://github.com/xzh-net/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
 
 ```bash
 cd /opt/nginx-1.20.2
