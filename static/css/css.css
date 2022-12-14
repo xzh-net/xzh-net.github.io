@@ -213,3 +213,11 @@ body{
        top: 100px;
        left: 1645px;
 }
+.article {
+    margin: 20px 30px;
+    width: 700px;
+    font-size: 12px;
+    padding: 5px 10px;
+    color: #FF9900;
+    background-color: #000000;
+}
