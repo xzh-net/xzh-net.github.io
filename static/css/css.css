@@ -213,8 +213,9 @@ body{
        top: 100px;
        left: 1645px;
 }
+
 .article {
-    margin: 20px 30px;
+    margin: 20px 20px;
     width: 700px;
     font-size: 12px;
     padding: 5px 10px;
