@@ -2,7 +2,7 @@
   - [CentOS 7](deploy/centos7)
   - [Redhat 7](deploy/rhel7)
   - [Rocky 8.5](deploy/rocky85)
-  - [Debian 11](deploy/debian11)
+  - [Kali 2021](deploy/kali)
   - [Windows 10](deploy/windows10)
 
 - 数据库
