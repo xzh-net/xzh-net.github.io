@@ -146,9 +146,11 @@ dhclient eth0       # 分配IP
 vim /etc/apt/sources.list
 ```
 
-```
+```bash
 deb http://mirrors.aliyun.com/kali kali-rolling main non-free contrib
 deb-src http://mirrors.aliyun.com/kali kali-rolling main non-free contrib
 ```
 
+```bash
 apt update
+```
