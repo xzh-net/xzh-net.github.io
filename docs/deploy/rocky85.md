@@ -23,7 +23,7 @@ systemctl enable --now cockpit.socket   # 开启web管理程序
 systemctl disable cockpit.socket
 ```
 
-### 1.3 配置IP
+### 1.3 网络配置
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3

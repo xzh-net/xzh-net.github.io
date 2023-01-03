@@ -1,6 +1,6 @@
 # Red Hat Enterprise Linux Server release 7.9
 
-## 1. 安装虚拟机
+## 1. 安装VMware
 
 ![](../../assets/_images/deploy/rhel7/Vm1.png)
 ![](../../assets/_images/deploy/rhel7/Vm2.png)
@@ -10,12 +10,12 @@
 ![](../../assets/_images/deploy/rhel7/Vm6.png)
 ![](../../assets/_images/deploy/rhel7/Vm7.png)
 
-### 1.1 配置首选项
+1. 配置首选项
 
 ![](../../assets/_images/deploy/rhel7/Vm8.png)
 
 
-### 1.2 桥接模式
+2. 桥接模式
 
 必须手动选择宿主机对应的网卡
 
@@ -25,13 +25,13 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/Vm10.png)
 
-### 1.3 NET模式
+3. NET模式
 
 将默认的VMnet8 网卡设置为 192.168.109.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.109.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为VMnet8 ，可以实现虚拟机linux与外网通讯，手动设置虚拟机IP地址需要注意将dns设置为网关地址，总结：虚拟机可以连接宿主机所在局域网的其他机器，但是局域网机器不能连接虚拟机，因为虚拟dhcp服务器在宿主机上，宿主机是虚拟机的上级
 
 ![](../../assets/_images/deploy/rhel7/Vm11.png)
 
-### 1.4 仅主机模式
+4. 仅主机模式
 
 将默认的VMnet1 网卡设置为 192.168.154.0/255.255.255.0，这样宿主机 windows 系统会默认获得192.168.154.1的IP，导入虚拟机镜像后可以将虚拟机网卡选择为 VMnet1 ，可以实现windows与虚拟机linux网络通信
 
@@ -39,7 +39,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ## 2. 安装系统
 
-### 2.1 新建虚拟机
+1. 新建虚拟机
 
 ![](../../assets/_images/deploy/rhel7/1.png)
 ![](../../assets/_images/deploy/rhel7/2.png)
@@ -51,7 +51,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 ![](../../assets/_images/deploy/rhel7/8.png)
 ![](../../assets/_images/deploy/rhel7/9.png)
 
-### 2.2 系统安装
+2. 安装
 
 > 选择 `Install Red Hat Enterprise Linux 7.9`
 
@@ -61,7 +61,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/11.png)
 
-### 2.3 设置时区
+3. 设置时区
 
 ![](../../assets/_images/deploy/rhel7/12.png)
 
@@ -69,7 +69,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/13.png)
 
-### 2.4 设置安装源
+4. 设置安装源
 
 ![](../../assets/_images/deploy/rhel7/14.png)
 
@@ -82,7 +82,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/17.png)
 
-### 2.5 安装软件
+5. 安装软件
 
 ![](../../assets/_images/deploy/rhel7/18.png)
 
@@ -90,7 +90,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/19.png)
 
-### 2.6 磁盘分区
+6. 磁盘分区
 
 ![](../../assets/_images/deploy/rhel7/20.png)
 
@@ -109,12 +109,12 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 ![](../../assets/_images/deploy/rhel7/24.png)
 ![](../../assets/_images/deploy/rhel7/25.png)
 
-### 2.7 KDUMP设置
+7. KDUMP设置
 
 ![](../../assets/_images/deploy/rhel7/26.png)
 ![](../../assets/_images/deploy/rhel7/27.png)
 
-### 2.8 网络主机设置
+8. 网络主机设置
 
 ![](../../assets/_images/deploy/rhel7/28.png)
 
@@ -123,7 +123,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 ![](../../assets/_images/deploy/rhel7/29.png)
 ![](../../assets/_images/deploy/rhel7/30.png)
 
-### 2.9 安全策略
+9. 安全策略
 
 ![](../../assets/_images/deploy/rhel7/31.png)
 
@@ -131,11 +131,11 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/32.png)
 
-### 2.10 设置管理员密码
+10. 设置管理员密码
 
 ![](../../assets/_images/deploy/rhel7/33.png)
 
-### 2.11 系统重启
+11. 系统重启
 
 ![](../../assets/_images/deploy/rhel7/34.png)
 
