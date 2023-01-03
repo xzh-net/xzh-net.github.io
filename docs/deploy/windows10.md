@@ -1,6 +1,76 @@
 # Windows 10
 
+Windows 10 22H2 精简版基于微软官方原版安装包简化而成，为了使用户获得最佳的性能和舒适体验，本安装包删除、禁用、阻止了所有不需要的软件、后台服务以及对性能等产生影响的因素。因此精简系统可以提高电脑的性能、增强系统的稳定性，减少硬件资源的浪费，并且可以使配置低或老旧的电脑变的流畅。本系统的安装包仅内置了英文及俄文，但系统安装完成后，可通过安装简体中文语言包，将它切换成简体中文
+
 ## 1. 安装系统
+
+1. 选择语言
+
+![](../../assets/_images/deploy/win10/1.png)
+
+![](../../assets/_images/deploy/win10/2.png)
+
+2. 完全安装
+
+![](../../assets/_images/deploy/win10/3.png)
+
+3. 磁盘格式化
+
+![](../../assets/_images/deploy/win10/4.png)
+
+4. 等待安装
+
+![](../../assets/_images/deploy/win10/5.png)
+
+5. 选择地区
+
+![](../../assets/_images/deploy/win10/6.png)
+
+6. 选择键盘布局，然后单击跳过
+
+![](../../assets/_images/deploy/win10/7.png)
+
+![](../../assets/_images/deploy/win10/8.png)
+
+7. 创建用户和输入密码
+
+![](../../assets/_images/deploy/win10/9.png)
+
+![](../../assets/_images/deploy/win10/10.png)
+
+![](../../assets/_images/deploy/win10/11.png)
+
+![](../../assets/_images/deploy/win10/12.png)
+
+8. 进入桌面
+
+![](../../assets/_images/deploy/win10/13.png)
+
+9. 网络设置
+
+![](../../assets/_images/deploy/win10/14.png)
+
+10. 安装中文包
+
+![](../../assets/_images/deploy/win10/15.png)
+![](../../assets/_images/deploy/win10/16.png)
+![](../../assets/_images/deploy/win10/17.png)
+![](../../assets/_images/deploy/win10/18.png)
+![](../../assets/_images/deploy/win10/19.png)
+
+11. 时区设置
+
+![](../../assets/_images/deploy/win10/20.png)
+![](../../assets/_images/deploy/win10/21.png)
+![](../../assets/_images/deploy/win10/22.png)
+![](../../assets/_images/deploy/win10/23.png)
+![](../../assets/_images/deploy/win10/24.png)
+![](../../assets/_images/deploy/win10/25.png)
+![](../../assets/_images/deploy/win10/26.png)
+
+12. 激活
+
+下载地址：https://github.com/massgravel/Microsoft-Activation-Scripts
 
 ## 2. 开发环境
 
