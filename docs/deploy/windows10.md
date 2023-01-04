@@ -32,15 +32,9 @@ Windows 10 22H2 精简版基于微软官方原版安装包简化而成，为了�
 
 ![](../../assets/_images/deploy/win10/8.png)
 
-7. 创建用户和输入密码
+7. 创建用户
 
 ![](../../assets/_images/deploy/win10/9.png)
-
-![](../../assets/_images/deploy/win10/10.png)
-
-![](../../assets/_images/deploy/win10/11.png)
-
-![](../../assets/_images/deploy/win10/12.png)
 
 8. 进入桌面
 
