@@ -580,6 +580,9 @@ select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
 select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
 -- 或
 select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
+
+-- 查询所有表的行数
+SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
 ```
 
 ### 4.3 表注释
