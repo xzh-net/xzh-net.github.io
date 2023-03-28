@@ -815,8 +815,8 @@ SELECT 'ALTER SYSTEM KILL SESSION ''' || SID || ',' || SERIAL# || '''' || ';'
   FROM V$SESSION
  WHERE USERNAME = 'XW0125'
 
--- alter失败执行ps -ef|grep spid
-select pro.spid from v$session ses,v$process pro where ses.sid={sid} and ses.paddr=pro.addr;
+-- ora-00031错误执行：ps -ef|grep spid，kill -9 spid
+select spid, osuser, s.program from v$session s, v$process p where s.paddr = p.addr and s.sid = {sid};
 ```
 
 ### 3.3 等待事件
