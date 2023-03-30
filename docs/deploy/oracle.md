@@ -595,6 +595,23 @@ alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' resize 50m;     
 alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' autoextend on next 50m maxsize 500m;  # 表空间自动增长
 ```
 
+```sql
+-- 查询表空间利用率
+select b.file_name 物理文件名,
+       b.tablespace_name 表空间,
+       b.bytes / 1024 / 1024 大小M,
+       (b.bytes - sum(nvl(a.bytes, 0))) / 1024 / 1024 已使用M,
+       substr((b.bytes - sum(nvl(a.bytes, 0))) / (b.bytes) * 100, 1, 5) 利用率
+  from dba_free_space a, dba_data_files b
+ where a.file_id = b.file_id
+ group by b.tablespace_name, b.file_name, b.bytes
+ order by b.tablespace_name;
+-- 查询用户隶属表空间
+select username,default_tablespace from dba_users where username='xuzhihao';
+-- 增加表空间文件
+alter tablespace xuzhihao_data ADD datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 1024M autoextend on next 1024M maxsize 16384M; 
+```
+
 ### 2.3 创建用户授权
 
 ```sql
@@ -888,11 +905,10 @@ SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
 
 ### 3.4 统计
 
-#### 3.4.1 内存查询
-
-1. SGA/PGA使用率
+#### 3.4.1 内存
 
 ```sql
+-- 查询SGA/PGA使用率
 SELECT
 	name,
 	total,
@@ -923,24 +939,18 @@ FROM
 	FROM
 	dual 
 	);
-```
+  
+-- 查询占用share pool内存大于10M的sql
+SELECT substr(sql_text, 1, 100) "Stmt",
+       count(*),
+       sum(sharable_mem) "Mem",
+       sum(users_opening) "Open",
+       sum(executions) "Exec"
+  FROM v$sql
+ GROUP BY substr(sql_text, 1, 100)
+HAVING sum(sharable_mem) > 10000000;
 
-2. 查询占用share pool内存大于10M的sql
-
-```sql
-  SELECT substr(sql_text, 1, 100) "Stmt",
-         count(*),
-         sum(sharable_mem) "Mem",
-         sum(users_opening) "Open",
-         sum(executions) "Exec"
-    FROM v$sql
-   GROUP BY substr(sql_text, 1, 100)
-  HAVING sum(sharable_mem) > 10000000;
-```
-
-3. 查询version count过高SQL
-
-```sql
+-- 查询version count过高SQL
 SELECT address,
        sql_id,
        hash_value,
@@ -952,11 +962,10 @@ SELECT address,
  WHERE version_count > 10;
 ```
 
-#### 3.4.2 表空间查询
-
-1. 查看当前用户下所有表空间的使用情况
+#### 3.4.2 空间
 
 ```sql
+-- 查看当前用户下所有表空间的使用情况
 SELECT A.TABLESPACE_NAME "表空间名",
        TOTAL / (1024 * 1024) "表空间大小(M)",
        FREE / (1024 * 1024) "表空间剩余大小(M)",
@@ -969,14 +978,9 @@ SELECT A.TABLESPACE_NAME "表空间名",
           FROM DBA_DATA_FILES
          GROUP BY TABLESPACE_NAME) B
  WHERE A.TABLESPACE_NAME = B.TABLESPACE_NAME;
-```
 
 
-#### 3.4.3 数据查询
-
-1. 单表占用物理空间
-
- ```sql
+-- 单表占用物理空间
 SELECT SEGMENT_NAME              TABLE_NAME
       ,SUM(BLOCKS)               BLOCKS
       ,SUM(BYTES)/(1024*1024)    "TABLE_SIZE[MB]"
@@ -984,11 +988,9 @@ FROM USER_SEGMENTS
 WHERE  SEGMENT_TYPE='TABLE'
    AND SEGMENT_NAME='JG_GY_XP'
 GROUP BY SEGMENT_NAME;
-```
 
-2. 所有表占用物理空间
 
-```sql
+-- 所有表占用物理空间
 SELECT OWNER AS "用户名", SUM(BYTES) / 1024 / 1024 AS "所有表的大小(MB)"
 FROM DBA_SEGMENTS
 WHERE SEGMENT_NAME IN (SELECT T2.OBJECT_NAME
@@ -997,17 +999,13 @@ WHERE SEGMENT_NAME IN (SELECT T2.OBJECT_NAME
 GROUP BY OWNER ORDER BY 2 DESC;
 ```
 
-#### 3.4.4 记录查询
-
-1. 查询某用户下所有表的记录总数
-
-```
-SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'SHJG0814';
-```
-
-2. 查看户下所有表的各自的记录条数
+#### 3.4.3 数据
 
 ```sql
+-- 查询某用户下所有表的记录总数
+SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'SHJG0814';
+
+--查看户下所有表的各自的记录条数
 SELECT T.TABLE_NAME "表名",T.NUM_ROWS "记录条数" FROM USER_TABLES T;
 ```
 
