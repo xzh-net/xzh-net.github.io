@@ -461,16 +461,18 @@ select pg_wal_replay_resume();  # 停止恢复
 #### 3.2.4 定时备份
 
 ```bash
+crontab -e
+30 1 * * * sh /data/shell/bakup.sh  # 每天凌晨1点半执行
+```
+
+```bash
 #!/bin/bash
 cur_time=$(date '+%Y-%m-%d')
 sevendays_time=$(date -d -10days '+%Y-%m-%d')
 
-/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /opt/DB/vjsp10010260_$cur_time.dump VJSP10010260
-
-scp /opt/DB/vjsp10010260_$cur_time.dump root@192.168.42.39:/opt/DB
-scp /opt/DB/vjsp10010260_$cur_time.dump root@192.168.42.38:/opt/DB
-
-rm -rf /opt/DB/vjsp10010260_$cur_time.dump
+/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /opt/db/vjsp10010260_$cur_time.dump VJSP10010260
+scp /opt/db/vjsp10010260_$cur_time.dump root@192.168.42.38:/mydata/db
+rm -rf /opt/db/vjsp10010260_$sevendays_time.dump
 echo "backup finished" his
 ```
 
