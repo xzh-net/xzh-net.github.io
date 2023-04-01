@@ -656,15 +656,11 @@ impdp xzh0611/123456 directory=oradmp dumpfile=xzh0610.dmp  schemas=xzh0610 REMA
 execute dbms_stats.delete_schema_stats('xzh0610');
 ```
 
-#### 2.5.3 定时数据还原
+#### 2.5.3 定时备份
 
 ```bash
 crontab -e
-30 3 * * * sh /data/shell/ei.sh  # 每天凌晨3点半执行
-```
-
-```bash
-vi /data/shell/ei.sh
+30 3 * * * sh /data/shell/bakup.sh  # 每天凌晨3点半执行
 ```
 
 ```bash
@@ -769,9 +765,6 @@ echo '总计结束时间：'$endtime >> /data/kh_shell/kh_log.log
 echo "本次总计运行时间： "$(($(date --date="$endtime" +%s)-$(date --date="$starttime" +%s)))"s" >> /data/kh_shell/kh_log.log
 ```
 
-```bash
-0 1 * * *  sh /opt/DB/oracle_bak.sh
-```
 
 ```bash
 #!/bin/bash
