@@ -609,7 +609,7 @@ select b.file_name 物理文件名,
 -- 查询用户隶属表空间
 select username,default_tablespace from dba_users where username='xuzhihao';
 -- 增加表空间文件
-alter tablespace xuzhihao_data ADD datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 1024M autoextend on next 1024M maxsize 16384M; 
+alter tablespace xuzhihao_data ADD datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
 ```
 
 ### 2.3 创建用户授权
