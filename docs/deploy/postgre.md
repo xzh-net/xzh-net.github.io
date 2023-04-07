@@ -120,7 +120,7 @@ listen_addresses = '*'
 ```
 
 ```conf
-vi pg_hba.conf       # 配置对数据库的访问权限
+vi pg_hba.conf       # 配置对数据库的访问权限，末尾添加
 host    all             all             0.0.0.0/0        md5  # 所有地址访问
 host    replication     all             0.0.0.0/0        md5  # 物理备份 -R
 
