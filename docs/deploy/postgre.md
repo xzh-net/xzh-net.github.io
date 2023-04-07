@@ -121,9 +121,9 @@ listen_addresses = '*'
 
 ```conf
 vi pg_hba.conf       # 配置对数据库的访问权限
-local all all trust
-host all all 0.0.0.0/0 md5          # 所有地址访问
-host replication all 0.0.0.0/0 md5  # 物理备份 -R
+host    all             all             0.0.0.0/0        md5  # 所有地址访问
+host    replication     all             0.0.0.0/0        md5  # 物理备份 -R
+
 ```
 
 #### 1.2.9 设置开机自启动
