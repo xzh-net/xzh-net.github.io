@@ -1286,7 +1286,7 @@ fdisk /dev/sdb
 
 ```bash
 mkfs -t ext4 /dev/sdb1  # 格式化
-mkdir /mydata
+mkdir /data
 mount /dev/sdb1 /data   # 单独挂载到某个目录
 df -lh                  # 查看磁盘使用情况和挂载情况
 umount /dev/sdb1        # 卸载分区
