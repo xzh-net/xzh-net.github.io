@@ -29,6 +29,7 @@
   - [Zabbix](deploy/zabbix)
   - [Simple RTMP Server](deploy/srs)
   - [TURN Server](deploy/turnserver)
+  - [NPS](deploy/nps)
 
 - 微服务
   - [Prometheus](deploy/prometheus)
