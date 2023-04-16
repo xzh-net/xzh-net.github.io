@@ -189,6 +189,17 @@ server_port=9002
 
 ### 2.3 http代理模式
 
+客户端配配置
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[http]
+mode=httpProxy
+server_port=9003
+```
+
 ### 2.4 socks5代理模式
 
 ### 2.5 私密代理模式
