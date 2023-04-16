@@ -58,6 +58,11 @@ nps start               # 启动nps服务
 
 ## 2. 客户端
 
+```bash
+# 无配置文件模式启动
+npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
+```
+
 ### 2.1 域名代理
 
 适用范围： 小程序开发、微信公众号开发、产品演示
@@ -92,8 +97,8 @@ header_set_proxy=nps
 ```conf
 #HTTP(S) proxy port, no startup if empty
 http_proxy_ip=0.0.0.0
-http_proxy_port=80      # 修改
-https_proxy_port=443    # 修改
+http_proxy_port=80      # 20080
+https_proxy_port=443    # 20443
 https_just_proxy=true
 #default https certificate setting
 https_default_cert_file=conf/server.pem
@@ -103,16 +108,42 @@ https_default_key_file=conf/server.key
 
 ### 2.1 tcp隧道模式
 
-#### 2.1.1 通过ssh、mstsc访问内网设备
+#### 2.1.1 ssh访问内网
 
-简介：内网设备有暴露可连接的端口，比如22、3389等端口，外网无法访问。NPS安装在有公网IP的环境
+使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的22端口，实现SSH连接。
 
-```bash
-# 被控端启动NPC
-npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
+客户端配置
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[tcp]
+mode=tcp
+target_addr=127.0.0.1:22
+server_port=8090
 ```
 
-`远程桌面配置`
+![](../../assets/_images/deploy/nps/nps11.png)
+
+![](../../assets/_images/deploy/nps/nps10.png)
+
+
+#### 2.1.2 mstsc访问内网
+
+使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的3389端口
+
+客户端配置
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[tcp]
+mode=tcp
+target_addr=127.0.0.1:3389
+server_port=8090
+```
 
 ![](../../assets/_images/deploy/nps/nps4.png)
 
@@ -122,26 +153,39 @@ npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
 
 ![](../../assets/_images/deploy/nps/nps7.png)
 
-`SSH配置`
 
-![](../../assets/_images/deploy/nps/nps11.png)
+#### 2.1.3 http正向代理
 
-![](../../assets/_images/deploy/nps/nps10.png)
+客户端配置
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[tcp]
+mode=tcp
+target_addr=127.0.0.1:8088
+server_port=9090
 
-#### 2.1.2 http正向代理
-
-```bash
-# 被控端启动NPC
-npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
 ```
-
-
 ![](../../assets/_images/deploy/nps/nps8.png)
 
 ![](../../assets/_images/deploy/nps/nps9.png)
 
 
 ### 2.2 udp隧道模式
+
+客户端配配置
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[udp]
+mode=udp
+target_addr=127.0.0.1:8080
+server_port=9002
+```
 
 ### 2.3 http代理模式
 
