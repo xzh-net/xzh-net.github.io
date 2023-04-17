@@ -226,7 +226,6 @@ npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
 
 使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的22端口，实现SSH连接。
 
-客户端配置
 ```conf
 [common]
 server_addr=39.105.58.136:8024
@@ -248,7 +247,6 @@ server_port=8090
 
 使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的3389端口
 
-客户端配置
 ```conf
 [common]
 server_addr=39.105.58.136:8024
@@ -272,7 +270,6 @@ server_port=8090
 
 #### 2.1.3 http反向代理
 
-客户端配置
 ```conf
 [common]
 server_addr=39.105.58.136:8024
@@ -291,7 +288,6 @@ server_port=9090
 
 ### 2.2 udp隧道模式
 
-客户端配配置
 ```conf
 [common]
 server_addr=39.105.58.136:8024
@@ -306,7 +302,6 @@ server_port=9002
 
 ### 2.3 http代理模式
 
-客户端配配置
 ```conf
 [common]
 server_addr=39.105.58.136:8024
@@ -320,7 +315,62 @@ server_port=9003
 
 ### 2.4 socks5代理模式
 
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[socks5]
+mode=socks5
+server_port=9004
+multi_account=multi_account.conf
+```
+
+?> 注：windows系统可以配合proxifier进行全局代理。Linux还可以使用proxychains进行socks5配置，推荐linux使用proxychains进行配置，可以更好的联合其他工具进行嗅探收集内网信息和横向移动。
+
+Proxifier是一款功能非常强大的socks5客户端，可以让不支持通过代理服务器工作的网络程序能通过HTTPS或SOCKS代理或代理链。
+
+1. 添加代理服务器
+
+菜单栏点击Proxy Servers图标—add，这里添加socks代理，填写socks服务端的ip和端口
+
+![](../../assets/_images/deploy/nps/nps13.png)
+
+2. 设置代理规则
+
+单击Proxification Rules图标—add，这里设置如果访问172.20.92.*这个ip段则走socks5代理
+
+勾选我们添加的代理规则，默认的代理规勾选为Direct！！！
+
+![](../../assets/_images/deploy/nps/nps14.png)
+   
+3. 直接访问目标内网的机器
+
+![](../../assets/_images/deploy/nps/nps15.png)
+
+
 ### 2.5 私密代理模式
+
+tcp隧道暴露了公网vps的监听端口。如果其他人得到了vps的ip，通过端口扫描得到了开放的端口，将会很容易连接上部署的tcp隧道，这是一个很不安全的行为。为了更加安全管理内网设备，nps支持建立私密代理，通过给隧道设置连接密码，增加了隧道的安全性和私密性。攻击机也需要配置nps客户端
+
+客户端配置：
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[secret_ssh]
+mode=secret
+password=ssh2
+target_addr=127.0.0.1:22
+```
+
+攻击机配置：
+```bash
+./npc -server=39.105.58.136:8024 -vkey=888888 -type=tcp -password=ssh2 -local_type=secret
+
+ssh -p 2000 root@127.0.0.1
+```
 
 ### 2.6 p2p代理模式
 
@@ -328,7 +378,6 @@ server_port=9003
 
 利用nps提供一个公网可访问的本地文件服务，此模式仅客户端使用配置文件模式方可启动
 
-客户端配配置
 ```conf
 [common]
 server_addr=39.105.58.136:8024
@@ -337,7 +386,9 @@ vkey=123456
 auto_reconnection=true
 [file]
 mode=file
-server_port=9100
+server_port=9006
 local_path=/tmp/
 strip_pre=/web/
 ```
+
+对于`strip_pre`，访问公网`ip:9006/web/`相当于访问`/tmp/`目录
