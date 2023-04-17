@@ -8,9 +8,10 @@ NPS是一款轻量级、高性能、功能强大的内网穿透代理服务器�
 
 ### 1.1 二进制安装
 
+下载地址：https://github.com/ehang-io/nps/releases
+
 ![](../../assets/_images/deploy/nps/nps1.png)
 
-下载地址：https://github.com/ehang-io/nps/releases
 
 ```bash
 mkdir /opt/nps/
@@ -72,10 +73,103 @@ disconnect_timeout|客户端连接超时，单位 5s，默认值 60，即 300s =
 
 ## 2. 客户端
 
-```bash
-# 无配置文件模式启动
-npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
+### 2.1 配置文件
+
+```conf
+[common]
+server_addr=127.0.0.1:8024
+conn_type=tcp
+vkey=123
+auto_reconnection=true
+max_conn=1000
+flow_limit=1000
+rate_limit=1000
+basic_username=11
+basic_password=3
+web_username=user
+web_password=1234
+crypt=true
+compress=true
+#pprof_addr=0.0.0.0:9999
+disconnect_timeout=60
+
+[health_check_test1]
+health_check_timeout=1
+health_check_max_failed=3
+health_check_interval=1
+health_http_url=/
+health_check_type=http
+health_check_target=127.0.0.1:8083,127.0.0.1:8082
+
+[health_check_test2]
+health_check_timeout=1
+health_check_max_failed=3
+health_check_interval=1
+health_check_type=tcp
+health_check_target=127.0.0.1:8083,127.0.0.1:8082
+
+[web]
+host=c.o.com
+target_addr=127.0.0.1:8083,127.0.0.1:8082
+
+[tcp]
+mode=tcp
+target_addr=127.0.0.1:8080
+server_port=10000
+
+[socks5]
+mode=socks5
+server_port=19009
+multi_account=multi_account.conf
+
+[file]
+mode=file
+server_port=19008
+local_path=/Users/liuhe/Downloads
+strip_pre=/web/
+
+[http]
+mode=httpProxy
+server_port=19004
+
+[udp]
+mode=udp
+server_port=12253
+target_addr=114.114.114.114:53
+
+[ssh_secret]
+mode=secret
+password=ssh2
+target_addr=123.206.77.88:22
+
+[ssh_p2p]
+mode=p2p
+password=ssh3
+
+[secret_ssh]
+local_port=2001
+password=ssh2
+
+[p2p_ssh]
+local_port=2002
+password=ssh3
+target_addr=123.206.77.88:22
 ```
+
+项 | 含义
+---|---
+server_addr | 服务端ip/域名:port
+conn_type | 与服务端通信模式(tcp或kcp)
+vkey|服务端配置文件中的密钥(非web)
+username|socks5或http(s)密码保护用户名(可忽略)
+password|socks5或http(s)密码保护密码(可忽略)
+compress|是否压缩传输(true或false或忽略)
+crypt|是否加密传输(true或false或忽略)
+rate_limit|速度限制，可忽略
+flow_limit|流量限制，可忽略
+remark|客户端备注，可忽略
+max_conn|最大连接数，可忽略
+pprof_addr|debug pprof ip:port
 
 ### 2.1 域名代理
 
@@ -98,6 +192,7 @@ npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
 server_addr=vpsip:8024
 conn_type=tcp
 vkey=123456
+auto_reconnection=true
 [web1]
 host=www.hwcq.online
 target_addr=127.0.0.1:8088
@@ -119,6 +214,11 @@ https_default_cert_file=conf/server.pem
 https_default_key_file=conf/server.key
 ```
 
+无配置文件模式(可选)
+```bash
+npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
+```
+
 
 ### 2.1 tcp隧道模式
 
@@ -132,6 +232,7 @@ https_default_key_file=conf/server.key
 server_addr=39.105.58.136:8024
 conn_type=tcp
 vkey=123456
+auto_reconnection=true
 [tcp]
 mode=tcp
 target_addr=127.0.0.1:22
@@ -153,6 +254,7 @@ server_port=8090
 server_addr=39.105.58.136:8024
 conn_type=tcp
 vkey=123456
+auto_reconnection=true
 [tcp]
 mode=tcp
 target_addr=127.0.0.1:3389
@@ -195,6 +297,7 @@ server_port=9090
 server_addr=39.105.58.136:8024
 conn_type=tcp
 vkey=123456
+auto_reconnection=true
 [udp]
 mode=udp
 target_addr=127.0.0.1:8080
@@ -209,6 +312,7 @@ server_port=9002
 server_addr=39.105.58.136:8024
 conn_type=tcp
 vkey=123456
+auto_reconnection=true
 [http]
 mode=httpProxy
 server_port=9003
@@ -222,3 +326,18 @@ server_port=9003
 
 ### 2.7 文件访问模式
 
+利用nps提供一个公网可访问的本地文件服务，此模式仅客户端使用配置文件模式方可启动
+
+客户端配配置
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+auto_reconnection=true
+[file]
+mode=file
+server_port=9100
+local_path=/tmp/
+strip_pre=/web/
+```
