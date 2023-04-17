@@ -117,25 +117,19 @@ mode=tcp
 target_addr=127.0.0.1:8080
 server_port=10000
 
-[socks5]
-mode=socks5
-server_port=19009
-multi_account=multi_account.conf
-
-[file]
-mode=file
-server_port=19008
-local_path=/Users/liuhe/Downloads
-strip_pre=/web/
+[udp]
+mode=udp
+server_port=12253
+target_addr=114.114.114.114:53
 
 [http]
 mode=httpProxy
 server_port=19004
 
-[udp]
-mode=udp
-server_port=12253
-target_addr=114.114.114.114:53
+[socks5]
+mode=socks5
+server_port=19009
+multi_account=multi_account.conf
 
 [ssh_secret]
 mode=secret
@@ -154,6 +148,12 @@ password=ssh2
 local_port=2002
 password=ssh3
 target_addr=123.206.77.88:22
+
+[file]
+mode=file
+server_port=19008
+local_path=/Users/liuhe/Downloads
+strip_pre=/web/
 ```
 
 项 | 含义
@@ -193,7 +193,7 @@ server_addr=vpsip:8024
 conn_type=tcp
 vkey=123456
 auto_reconnection=true
-[web1]
+[web]
 host=www.hwcq.online
 target_addr=127.0.0.1:8088
 host_change=www.hwcq.online
