@@ -329,7 +329,7 @@ vi /etc/nps/conf/nps.conf
 ```conf
 #p2p
 p2p_ip=39.105.58.136    # 公网ip
-p2p_port=6000           # 防火墙开启6000-6002，7000端口一次类推
+p2p_port=6000           # 请在防火墙开放6000~6002(额外添加2个端口)udp端口
 ```
 
 客户端配置：
@@ -340,8 +340,14 @@ conn_type=tcp
 vkey=123456
 [p2p_ssh]
 mode=p2p
-password=ssh2
-target_addr=127.0.0.1:3389
+password=123
+target_addr=127.0.0.1:22
+```
+
+攻击机配置：
+```bash
+./npc -server=39.105.58.136:8024 -vkey=999999 -type=tcp -password=123 -target=127.0.0.1:22
+ssh -p 2000 root@127.0.0.1
 ```
 
 ### 2.7 文件访问模式
