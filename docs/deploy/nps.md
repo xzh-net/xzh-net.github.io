@@ -78,7 +78,7 @@ disconnect_timeout|客户端连接超时，单位 5s，默认值 60，即 300s =
 ```conf
 [common]
 server_addr=127.0.0.1:8024
-conn_type=tcp
+conn_type=tcpf
 vkey=123
 auto_reconnection=true
 max_conn=1000
@@ -107,53 +107,6 @@ health_check_max_failed=3
 health_check_interval=1
 health_check_type=tcp
 health_check_target=127.0.0.1:8083,127.0.0.1:8082
-
-[web]
-host=c.o.com
-target_addr=127.0.0.1:8083,127.0.0.1:8082
-
-[tcp]
-mode=tcp
-target_addr=127.0.0.1:8080
-server_port=10000
-
-[udp]
-mode=udp
-server_port=12253
-target_addr=114.114.114.114:53
-
-[http]
-mode=httpProxy
-server_port=19004
-
-[socks5]
-mode=socks5
-server_port=19009
-multi_account=multi_account.conf
-
-[ssh_secret]
-mode=secret
-password=ssh2
-target_addr=123.206.77.88:22
-
-[ssh_p2p]
-mode=p2p
-password=ssh3
-
-[secret_ssh]
-local_port=2001
-password=ssh2
-
-[p2p_ssh]
-local_port=2002
-password=ssh3
-target_addr=123.206.77.88:22
-
-[file]
-mode=file
-server_port=19008
-local_path=/Users/liuhe/Downloads
-strip_pre=/web/
 ```
 
 项 | 含义
@@ -212,11 +165,6 @@ https_just_proxy=true
 #default https certificate setting
 https_default_cert_file=conf/server.pem
 https_default_key_file=conf/server.key
-```
-
-无配置文件模式(可选)
-```bash
-npc.exe -server=vpsip:8024 -vkey=123456 -type=tcp
 ```
 
 
@@ -368,7 +316,6 @@ target_addr=127.0.0.1:22
 攻击机配置：
 ```bash
 ./npc -server=39.105.58.136:8024 -vkey=888888 -type=tcp -password=ssh2 -local_type=secret
-
 ssh -p 2000 root@127.0.0.1
 ```
 
