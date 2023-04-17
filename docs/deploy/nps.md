@@ -321,6 +321,29 @@ ssh -p 2000 root@127.0.0.1
 
 ### 2.6 p2p代理模式
 
+```bash
+vi /etc/nps/conf/nps.conf
+```
+
+服务器开启p2p
+```conf
+#p2p
+p2p_ip=39.105.58.136    # 公网ip
+p2p_port=6000           # 防火墙开启6000-6002，7000端口一次类推
+```
+
+客户端配置：
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+[p2p_ssh]
+mode=p2p
+password=ssh2
+target_addr=127.0.0.1:3389
+```
+
 ### 2.7 文件访问模式
 
 利用nps提供一个公网可访问的本地文件服务，此模式仅客户端使用配置文件模式方可启动
