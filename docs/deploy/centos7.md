@@ -1828,7 +1828,7 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-### 4.4 Golang
+### 4.4 Go
 
 ```bash
 wget  https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
