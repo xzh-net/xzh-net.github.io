@@ -19,7 +19,7 @@ setenforce 0
 
 ```bash
 vim /etc/hosts
-192.168.3.200 zabbix.xuzhihao.net zabbix01
+192.168.3.200 zabbix.51xssh.com zabbix01
 ```
 
 ### 1.3 配置yum源
@@ -88,7 +88,7 @@ mysql -uroot -p1234Qwer
 create database zabbix character set utf8 collate utf8_bin;
 grant all privileges on zabbix.* to zabbix@localhost identified by '123456';
 grant all privileges on zabbix.* to zabbix@'192.168.3.%' identified by '123456';
-grant all privileges on zabbix.* to zabbix@'zabbix.xuzhihao.net' identified by '123456';
+grant all privileges on zabbix.* to zabbix@'zabbix.51xssh.com' identified by '123456';
 flush privileges;
 ```
 
@@ -183,8 +183,8 @@ yum install -y zabbix-agent2
 vi /etc/zabbix/zabbix_agent2.conf
 
 # 修改以下配置
-Server=zabbix.xuzhihao.net
-ServerActive=zabbix.xuzhihao.net
+Server=zabbix.51xssh.com
+ServerActive=zabbix.51xssh.com
 Hostname=Zabbix02
 ```
 
