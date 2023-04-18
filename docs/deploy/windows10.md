@@ -118,7 +118,7 @@ https://goproxy.cn
 #### 2.3.2 模块初始化
 
 ```bash
-go mod init xzh-net/markdown-renderer
+go mod init xzh/markdown-renderer
 ```
 
 ### 2.4 Python Anaconda
