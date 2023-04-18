@@ -322,7 +322,7 @@ echo log2 >> log2.txt
 
 ### 2.5 采集数据写入Pulsar
 
-代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/pulsar-flume-ng-sink
+代码地址：https://github.com/51xssh/java/tree/main/pulsar-flume-ng-sink
 
 #### 2.5.1 编译上传
 
@@ -349,7 +349,7 @@ a1.sources.r1.port = 44444
 
 # Describe the sink
 a1.sinks.k1.type = org.apache.flume.sink.pulsar.PulsarSink
-a1.sinks.k1.serviceUrl = node01.xuzhihao.net:6650,node02.xuzhihao.net:6650,node03.xuzhihao.net:6650
+a1.sinks.k1.serviceUrl = node01.51xssh.com:6650,node02.51xssh.com:6650,node03.51xssh.com:6650
 a1.sinks.k1.topicName = test
 a1.sinks.k1.producerName = testProducer
 # Use a channel which buffers events in memory
@@ -547,7 +547,7 @@ ll /opt/flume/data/flume3
 
 #### 2.7.2 自定义拦截器
 
-代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
+代码地址：https://github.com/51xssh/java/tree/main/flume
 
 #### 2.7.2 编译上传
 
@@ -935,7 +935,7 @@ node03查看控制台数据
 
 #### 2.10.2 代码编写
 
-代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
+代码地址：https://github.com/51xssh/java/tree/main/flume
 
 #### 2.10.3 编译上传
 
@@ -986,7 +986,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group5/flume1.conf -Df
 
 #### 2.11.2 代码编写
 
-代码地址：https://github.com/xzh-net/jakarta-learn/tree/main/flume
+代码地址：https://github.com/51xssh/java/tree/main/flume
 
 #### 2.11.3 编译上传
 
