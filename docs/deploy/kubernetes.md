@@ -259,7 +259,7 @@ kubernetes支持多种网络插件，比如flannel、calico、canal等等，任�
 
 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
-https://github.com/xzh-net/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
+https://github.com/51xssh/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
 
 ```bash
 kubectl apply -f kube-flannel.yml   # 安装插件
@@ -1424,7 +1424,7 @@ Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量�
 
 #### 2.8.1 安装nginx-ingress-controller
 
-下载地址：https://github.com/xzh-net/InstallHelper/tree/main/k8s/ingress
+下载地址：https://github.com/51xssh/InstallHelper/tree/main/k8s/ingress
 
 ```bash
 wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
@@ -1535,7 +1535,7 @@ metadata:
   namespace: dev
 spec:
   rules:
-  - host: nginx.xuzhihao.net
+  - host: nginx.51xssh.com
     http:
       paths:
       - path: /
@@ -1549,7 +1549,7 @@ kubectl apply -f ingress-http.yaml
 kubectl get ing ingress-http -n dev
 kubectl describe ing ingress-http -n dev  # 查详情
 
-curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
+curl -H 'Host:nginx.51xssh.com' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
 ```
 
 
@@ -1557,7 +1557,7 @@ curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查�
 
 ```bash
 # 生成证书
-openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=xuzhihao.net"
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=51xssh.com"
 # 创建密钥
 kubectl create secret tls tls-secret --key tls.key --cert tls.crt
 ```
@@ -1571,10 +1571,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - tomcat.xuzhihao.net
+      - tomcat.51xssh.com
       secretName: tls-secret # 指定秘钥
   rules:
-  - host: tomcat.xuzhihao.net
+  - host: tomcat.51xssh.com
     http:
       paths:
       - path: /
@@ -1588,8 +1588,8 @@ kubectl apply -f ingress-https.yaml
 kubectl get ing ingress-https -n dev
 kubectl describe ing ingress-https -n dev
 
-curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
-curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
+curl -H 'Host:tomcat.51xssh.com' https://192.168.2.201:30443
+curl -k -H 'Host:tomcat.51xssh.com' https://192.168.2.201:30443
 ```
 
 ### 2.9 数据存储
