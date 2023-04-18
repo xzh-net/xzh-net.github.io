@@ -200,9 +200,9 @@ cp -p /etc/named.rfc1912.zones /etc/named.rfc1912.zones.bak
 vim /etc/named.rfc1912.zones
 
 # 在该文件最后面增加以下内容：
-zone "hwcq.online" IN {
+zone "51xssh.com" IN {
         type master;
-        file "hwcq.online.zone";
+        file "51xssh.com.zone";
         allow-update { none; };
 };
 ```
@@ -210,17 +210,17 @@ zone "hwcq.online" IN {
 5. 配置zone文件
 
 ```bash
-cp -p /var/named/named.localhost /var/named/hwcq.online.zone    # 一定要使用-p复制用户组和权限
-vi /var/named/hwcq.online.zone
+cp -p /var/named/named.localhost /var/named/51xssh.com.zone    # 一定要使用-p复制用户组和权限
+vi /var/named/51xssh.com.zone
 
 $TTL 1D
-@       IN SOA  hwcq.online.  rname.invalid. (
+@       IN SOA  51xssh.com.  rname.invalid. (
                                         0       ; serial
                                         1D      ; refresh
                                         1H      ; retry
                                         1W      ; expire
                                         3H )    ; minimum
-@       NS      dns1.hwcq.online.   # dns1表示命名空间，可以有多个，但是后面的Ａ记录保持一致就行
+@       NS      dns1.51xssh.com.   # dns1表示命名空间，可以有多个，但是后面的Ａ记录保持一致就行
 dns1    A       127.0.0.1           # 一定是当前DNS服务器的IP
 www     A    192.168.3.200          # 根据实际填写
 ```
@@ -232,7 +232,7 @@ named-checkconf /etc/named.conf
 named-checkconf /etc/named.rfc1912.zones
 
 cd /var/named/
-named-checkzone hwcq.online.zone hwcq.online.zone # 区域文件写2遍
+named-checkzone 51xssh.com.zone 51xssh.com.zone # 区域文件写2遍
 ```
 
 7. 启动服务
@@ -249,10 +249,10 @@ systemctl enable named
 ```bash
 echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
 
-nslookup www.hwcq.online
-nslookup -type=txt www.hwcq.online  # 验证txt值
-dig @172.17.17.201 www.hwcq.online
-host www.hwcq.online
+nslookup www.51xssh.com
+nslookup -type=txt www.51xssh.com  # 验证txt值
+dig @172.17.17.201 www.51xssh.com
+host www.51xssh.com
 ```
 
 
@@ -278,13 +278,13 @@ cp -p /var/named/named.loopback /var/named/172.17.17.zone    # 一定要使用-p
 vi /var/named/172.17.17.zone
 
 $TTL 1D
-@	IN SOA	hwcq.online. rname.invalid. (
+@	IN SOA	51xssh.com. rname.invalid. (
 					0	; serial
 					1D	; refresh
 					1H	; retry
 					1W	; expire
 					3H )	; minimum
-@	NS	dns2.hwcq.online.   # 如果dns2.hwcq.online在正向域文件中存在，可以不用写A记录
+@	NS	dns2.51xssh.com.   # 如果dns2.51xssh.com在正向域文件中存在，可以不用写A记录
 dns2	A	127.0.0.1
 165	PTR	www.hwqc.online.
 ```
@@ -355,10 +355,10 @@ options {
 ```bash
 vi /etc/named.rfc1912.zones
 # 最后添加
-zone "hwcq.online" IN {
+zone "51xssh.com" IN {
         type slave;
         masters {172.17.17.201;};       # 指定master dns的ip地址
-        file "slaves/hwcq.online.zone"; # 同步过来的文件的保存路径及名字
+        file "slaves/51xssh.com.zone"; # 同步过来的文件的保存路径及名字
 };
 ```
 
@@ -368,9 +368,9 @@ zone "hwcq.online" IN {
 vi /etc/named.rfc1912.zones
 
 # 修改以下内容：
-zone "hwcq.online" IN {
+zone "51xssh.com" IN {
         type master;
-        file "hwcq.online.zone";
+        file "51xssh.com.zone";
         //allow-update { none; }; # 删除
 };
 ```
@@ -386,7 +386,7 @@ systemctl status named
 
 ```bash
 cd /var/named/slaves
-ll  # 可见同步过来的hwcq.online.zone文件
+ll  # 可见同步过来的51xssh.com.zone文件
 ```
 
 6. 客户端测试
@@ -395,9 +395,9 @@ ll  # 可见同步过来的hwcq.online.zone文件
 echo nameserver 172.17.17.201 > /etc/resolv.conf  # 客户端机器添加dns服务器
 echo nameserver 172.17.17.200 >> /etc/resolv.conf 
 
-nslookup www.hwcq.online
-dig @172.17.17.201 www.hwcq.online
-host www.hwcq.online
+nslookup www.51xssh.com
+dig @172.17.17.201 www.51xssh.com
+host www.51xssh.com
 ```
 
 ### 1.4 SSH
@@ -1501,7 +1501,7 @@ Nginx修改对应配置
 ```conf
 server {
 	listen 80;
-	server_name www.hwcq.online;
+	server_name www.51xssh.com;
 	location / {
 		proxy_pass http://192.168.2.200:8080;
 	}
@@ -1509,7 +1509,7 @@ server {
 
 server {
 	listen 80;
-	server_name node.hwcq.online;
+	server_name node.51xssh.com;
 	location / {
 		proxy_pass http://www.xzh.com:8080;
 	}

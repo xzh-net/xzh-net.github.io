@@ -745,7 +745,7 @@ location /postUser {
 
 ```conf
 location ~*\.(png|jpg|gif){
-    valid_referers none blocked www.hwcq.online 192.168.3.200 *.xuzhihao.net xuzhihao.*  ~\.hwcq\.;
+    valid_referers none blocked www.51xssh.com 192.168.3.200 *.xuzhihao.net xuzhihao.*  ~\.hwcq\.;
     if ($invalid_referer){
         return 403;
     }
@@ -755,7 +755,7 @@ location ~*\.(png|jpg|gif){
 
 ```conf
 location /images {
-    valid_referers none blocked www.hwcq.online 192.168.3.200 *.xuzhihao.net xuzhihao.*  ~\.hwcq\.;
+    valid_referers none blocked www.51xssh.com 192.168.3.200 *.xuzhihao.net xuzhihao.*  ~\.hwcq\.;
     if ($invalid_referer){
         rewrite ^/ http://www.web.com/images/forbidden.png;
     }
@@ -810,7 +810,7 @@ server {
     listen       80;
     server_name  www.xuzhihao.net;
     location /console/ {
-        rewrite ^/(.*)$ http://www.hwcq.online/$1 permanent;
+        rewrite ^/(.*)$ http://www.51xssh.com/$1 permanent;
     }
 }
 ```
@@ -923,7 +923,7 @@ vi /usr/local/nginx/conf/nginx.conf
 server 
 {
   listen 80;
-  server_name www.hwcq.online;
+  server_name www.51xssh.com;
   charset utf-8; 
   location /	{
       root /home/www/; 
@@ -1153,7 +1153,7 @@ openssl req -new -key server.key -out server.csr    # 创建SSL证书签名请�
 cp server.key server.key.org        
 openssl rsa -in server.key.org -out server.key      # 利用私钥生成一个不需要输入密码的密钥文件
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt  # 生成SSL证书，有效期为365天
-openssl x509 -in www.hwcq.online.crt -noout -dates  # 验证到期时间
+openssl x509 -in www.51xssh.com.crt -noout -dates  # 验证到期时间
 ```
 
 ```conf
@@ -1214,22 +1214,22 @@ curl https://get.acme.sh | sh -s email=xcg992224@163.com
 export Ali_Key="Ali_Key"
 export Ali_Secret="Ali_Secret"
 source ~/.bashrc
-~/.acme.sh/acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --debug  # 单证书
-~/.acme.sh/acme.sh --issue --dns dns_ali -d *.hwcq.online                            # 泛域证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d 51xssh.com -d test.51xssh.com --debug  # 单证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d *.51xssh.com                            # 泛域证书
 ```
 
 2. http模式
 
 ```bash
-~/.acme.sh/acme.sh --issue -d zk.hwcq.online --webroot /var/www
+~/.acme.sh/acme.sh --issue -d zk.51xssh.com --webroot /var/www
 ```
 
 
 #### 4.2.3 分配证书
 
 ```bash
-acme.sh --issue --dns dns_ali -d hwcq.online -d test.hwcq.online --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
-acme.sh --issue --dns dns_ali -d *.hwcq.online --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
+acme.sh --issue --dns dns_ali -d 51xssh.com -d test.51xssh.com --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
+acme.sh --issue --dns dns_ali -d *.51xssh.com --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
 ```
 
 修改nginx配置配置文件
