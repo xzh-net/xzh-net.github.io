@@ -396,33 +396,33 @@ http {
   proxy_temp_file_write_size 1024k;
   
   # 加载其他配置
-  include /usr/local/openresty/nginx/conf/blob.xuzhihao.net.conf;
+  include /usr/local/openresty/nginx/conf/blob.51xssh.com.conf;
   # 负载均衡
-  include /usr/local/openresty/nginx/conf/blob.xuzhihao.net_upstream.conf;
+  include /usr/local/openresty/nginx/conf/blob.51xssh.com_upstream.conf;
 }
 ```
 
-#### 3.1.2 blob.xuzhihao.net_upstream.conf
+#### 3.1.2 blob.51xssh.com_upstream.conf
 
 ```conf
-upstream blob.xuzhihao.net {
+upstream blob.51xssh.com {
   ip_hash;
   server 192.168.3.200:7535;
   server 192.168.3.201:7535;
 }
 ```
 
-#### 3.1.3 blob.xuzhihao.net.conf
+#### 3.1.3 blob.51xssh.com.conf
 
 ```conf
 server {
 		listen 80;
-		server_name blob.xuzhihao.net;
+		server_name blob.51xssh.com;
 		rewrite ^(.*)$ https://$host$1 permanent;
 }
 server {
 		listen 443 ssl;
-		server_name blob.xuzhihao.net;
+		server_name blob.51xssh.com;
 		charset utf-8;
 		ssl_certificate /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_chain.crt;
 		ssl_certificate_key /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_key.key;
@@ -447,7 +447,7 @@ server {
 				add_header Access-Control-Allow-Origin *;
 				add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
 				add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
-				proxy_pass http://blob.xuzhihao.net;
+				proxy_pass http://blob.51xssh.com;
 		}
 }
 ```
@@ -459,7 +459,7 @@ server {
 
 下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
 
-https://github.com/xzh-net/InstallHelper/tree/main/nginx/nginx_upstream_check_module
+https://github.com/51xssh/InstallHelper/tree/main/nginx/nginx_upstream_check_module
 
 ```bash
 cd /opt/nginx-1.20.2
@@ -492,7 +492,7 @@ upstream backend {
 2. ip_hash
 
 ```conf
-upstream blob.xuzhihao.net {
+upstream blob.51xssh.com {
   ip_hash;
   server 192.168.3.200:7535;
   server 192.168.3.201:7535;
@@ -558,7 +558,7 @@ stream {
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
-https://github.com/xzh-net/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
+https://github.com/51xssh/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
 
 ```bash
 cd /opt/nginx-1.20.2
@@ -620,7 +620,7 @@ curl -i --proxy 192.168.3.114:3182  www.baidu.com
 server
 { 
     listen 80;
-	server_name  ~^(?<serno>.+).xuzhihao.net$;
+	server_name  ~^(?<serno>.+).51xssh.com$;
 	server_name_in_redirect off; 
 	location / {
 		rewrite ^(.*)$ /$serno$1 break;
@@ -640,7 +640,7 @@ server
 ```conf
 server {
     listen 80;
-    server_name  www.xuzhihao.net;
+    server_name  www.51xssh.com;
     charset utf-8; 
     index index.html;
     location / {
@@ -673,7 +673,7 @@ server {
 
 ```bash
 server {
-	error_page 404 http://www.xuzhihao.net;
+	error_page 404 http://www.51xssh.com;
 }
 ```
 
@@ -745,7 +745,7 @@ location /postUser {
 
 ```conf
 location ~*\.(png|jpg|gif){
-    valid_referers none blocked www.51xssh.com 192.168.3.200 *.xuzhihao.net xuzhihao.*  ~\.hwcq\.;
+    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com xuzhihao.*  ~\.hwcq\.;
     if ($invalid_referer){
         return 403;
     }
@@ -755,7 +755,7 @@ location ~*\.(png|jpg|gif){
 
 ```conf
 location /images {
-    valid_referers none blocked www.51xssh.com 192.168.3.200 *.xuzhihao.net xuzhihao.*  ~\.hwcq\.;
+    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com xuzhihao.*  ~\.hwcq\.;
     if ($invalid_referer){
         rewrite ^/ http://www.web.com/images/forbidden.png;
     }
@@ -808,7 +808,7 @@ server {
 ```conf
 server {
     listen       80;
-    server_name  www.xuzhihao.net;
+    server_name  www.51xssh.com;
     location /console/ {
         rewrite ^/(.*)$ http://www.51xssh.com/$1 permanent;
     }
@@ -1160,7 +1160,7 @@ openssl x509 -in www.51xssh.com.crt -noout -dates  # 验证到期时间
 server {
     listen       80; # 同时支持HTTP
     listen       443 ssl; # 添加HTTPS支持
-    server_name  www.xuzhihao.net; #修改域名
+    server_name  www.51xssh.com; #修改域名
 
     #ssl配置
     ssl_certificate      /usr/share/nginx/html/ssl/api/api.crt; # 配置证书
