@@ -293,7 +293,7 @@ vi /opt/hadoop-3.1.4/etc/hadoop/yarn-site.xml
     <!-- 配置yarn主节点的位置 -->
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>node01.xuzhihao.net</value>
+        <value>node01.51xssh.com</value>
     </property>
     <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
     <property>
@@ -497,7 +497,7 @@ ${SPARK_HOME}/examples/jars/spark-examples_2.12-3.1.3.jar \
 
 参考代码：https://github.com/apache/spark/tree/master/examples/src/main/scala/org/apache/spark/examples
 
-代码地址：https://github.com/xzh-net/spark-learn/tree/main/spark3-test
+代码地址：https://github.com/51xssh/scala/tree/main/spark3-test
 
 ```bash
 mvn clean package   # 编译后上传
