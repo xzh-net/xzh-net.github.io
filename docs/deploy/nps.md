@@ -23,6 +23,15 @@ nps start               # 启动nps服务
 
 ### 1.2 编译安装
 
+```bash
+wget https://codeload.github.com/ehang-io/nps/zip/refs/heads/master -O nps-master.zip -P /home/xzh/go
+cd /home/xzh/go
+unzip nps-master.zip
+cd nps-master
+go build cmd/nps/nps.go    # 服务端
+go build cmd/npc/npc.go    # 客户端
+```
+
 ### 1.3 配置文件
 
 - /etc/nps/conf/nps.conf
