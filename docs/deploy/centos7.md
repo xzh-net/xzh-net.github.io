@@ -90,7 +90,7 @@ vim /etc/dhcp/dhcpd.conf
 
 default-lease-time 259200;    # 预设租期3天
 max-lease-time 518400;        # 最大租期6天
-option domain-name "xuzhihao.com";         # 指定默认域名
+option domain-name "51xssh.com";         # 指定默认域名
 option domain-name-servers 192.168.100.1;  # DNS(可以写多个)
 ddns-update-style none;       # 禁用 DNS 动态更新 
 log-facility local7;          # 定义日志设备载体 （/var/log/boot.log输出）
@@ -1243,7 +1243,7 @@ ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java            # 创建软连�
 scp -r vjsp.workflow -P {port} root@20.255.122.15:/opt/code     # 远程复制
 
 # Find查找
-grep "www.xuzhihao.net" *           # 当前路径下按关键字过滤
+grep "www.51xssh.com" *           # 当前路径下按关键字过滤
 find / -type f -size +100M          # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
 find / -name memcached              # 查找应用
 find / -name 'meeting' -type d      # 查找meeting文件夹所在的位置
