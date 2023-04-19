@@ -133,7 +133,7 @@ remark|客户端备注，可忽略
 max_conn|最大连接数，可忽略
 pprof_addr|debug pprof ip:port
 
-### 2.1 域名代理
+### 2.2 域名代理
 
 适用范围： 小程序开发、微信公众号开发、产品演示
 
@@ -177,9 +177,9 @@ https_default_key_file=conf/server.key
 ```
 
 
-### 2.1 tcp隧道模式
+### 2.3 tcp隧道模式
 
-#### 2.1.1 ssh访问内网
+#### 2.3.1 ssh访问内网
 
 使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的22端口，实现SSH连接。
 
@@ -200,7 +200,7 @@ server_port=8090
 ![](../../assets/_images/deploy/nps/nps10.png)
 
 
-#### 2.1.2 mstsc访问内网
+#### 2.3.2 mstsc访问内网
 
 使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的3389端口
 
@@ -225,7 +225,7 @@ server_port=8090
 ![](../../assets/_images/deploy/nps/nps7.png)
 
 
-#### 2.1.3 http反向代理
+#### 2.3.3 http反向代理
 
 ```conf
 [common]
@@ -243,7 +243,7 @@ server_port=9090
 ![](../../assets/_images/deploy/nps/nps9.png)
 
 
-### 2.2 udp隧道模式
+### 2.4 udp隧道模式
 
 ```conf
 [common]
@@ -257,7 +257,7 @@ target_addr=127.0.0.1:8080
 server_port=9002
 ```
 
-### 2.3 http代理模式
+### 2.5 http代理模式
 
 ```conf
 [common]
@@ -270,7 +270,7 @@ mode=httpProxy
 server_port=9003
 ```
 
-### 2.4 socks5代理模式
+### 2.6 socks5代理模式
 
 ```conf
 [common]
@@ -306,7 +306,7 @@ Proxifier是一款功能非常强大的socks5客户端，可以让不支持通�
 ![](../../assets/_images/deploy/nps/nps15.png)
 
 
-### 2.5 私密代理模式
+### 2.7 私密代理模式
 
 tcp隧道暴露了公网vps的监听端口。如果其他人得到了vps的ip，通过端口扫描得到了开放的端口，将会很容易连接上部署的tcp隧道，这是一个很不安全的行为。为了更加安全管理内网设备，nps支持建立私密代理，通过给隧道设置连接密码，增加了隧道的安全性和私密性。攻击机也需要配置nps客户端
 
@@ -328,7 +328,7 @@ target_addr=127.0.0.1:22
 ssh -p 2000 root@127.0.0.1
 ```
 
-### 2.6 p2p代理模式
+### 2.8 p2p代理模式
 
 ```bash
 vi /etc/nps/conf/nps.conf
@@ -359,7 +359,7 @@ target_addr=127.0.0.1:22
 ssh -p 2000 root@127.0.0.1
 ```
 
-### 2.7 文件访问模式
+### 2.9 文件访问模式
 
 利用nps提供一个公网可访问的本地文件服务，此模式仅客户端使用配置文件模式方可启动
 
