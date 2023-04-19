@@ -2,6 +2,7 @@
 
 ## 1. 安装
 
+
 ### 1.1 docker
 
 ```bash
@@ -24,7 +25,7 @@ cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
 ```
 
-### 1.3 修改镜像源
+### 1.3 修改镜像仓库
 
 - 网易：http://hub-mirror.c.163.com
 - Docker官方中国区：https://registry.docker-cn.com
@@ -52,6 +53,22 @@ mv /var/lib/docker /data  # 非初始化环境迁移镜像
 ```bash
 sudo systemctl daemon-reload 
 sudo systemctl restart docker 
+```
+
+### 1.4 卸载
+
+```bash
+sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine
+rm -rf /var/lib/docker
 ```
 
 
