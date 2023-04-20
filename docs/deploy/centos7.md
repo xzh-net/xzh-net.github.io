@@ -1419,7 +1419,7 @@ for i in {2..3}; do scp -r flink node$i:$PWD; done
 ```
 
 
-#### 2.6.2 Tomcat 8
+#### 2.6.2 Tomcat
 
 1. 启动
 
@@ -1521,37 +1521,106 @@ vi /etc/hosts
 192.168.2.200 www.xzh.com
 ```
 
-#### 2.6.3 Spring Boot
+#### 2.6.3 RocketMQ
 
 ```bash
-#!/bin/bash
+# MQ默认以类路径文件启动，其他环境下也可以打开注释使用jar文件启动
+nohup sh bin/runserver.sh org.apache.rocketmq.namesrv.NamesrvStartup &
+```
 
-JAVA_OPTS="-server -Xms1024m -Xmx1024m -Xmn1024m -XX:MetaspaceSize=1024m -XX:MaxMetaspaceSize=1024m -Xverify:none -XX:+DisableExplicitGC -Djava.awt.headless=true"
-
-jar_name="eureka-server.jar"
-this_dir="$( cd "$( dirname "$0"  )" && pwd )"
-log_dir="${this_dir}/logs"
-jar_file="${this_dir}/${jar_name}"
-echo "${jar_file}"
-
-#日志文件夹不存在，则创建
-if [ ! -d "${log_dir}" ]; then
-    mkdir "${log_dir}"
-fi
-
-#父目录下jar文件存在
-if [ -f "${jar_file}" ]; then
-   	nohup java $JAVA_OPTS -jar ${jar_file} 1> ${log_dir}/catalina.log 2>&1 &
-    exit 0
-else
-    echo -e "\033[31m${jar_file}文件不存在！\033[0m"
+```bash
+#!/bin/sh
+#===========================================================================================
+# Java Environment Setting
+#===========================================================================================
+error_exit ()
+{
+    echo "ERROR: $1 !!"
     exit 1
-fi
+}
+
+find_java_home()
+{
+    case "`uname`" in
+        Darwin)
+            JAVA_HOME=$(/usr/libexec/java_home)
+        ;;
+        *)
+            JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+        ;;
+    esac
+}
+
+find_java_home
+
+[ ! -e "$JAVA_HOME/bin/java" ] && JAVA_HOME=$HOME/jdk/java
+[ ! -e "$JAVA_HOME/bin/java" ] && JAVA_HOME=/usr/java
+[ ! -e "$JAVA_HOME/bin/java" ] && error_exit "Please set the JAVA_HOME variable in your environment, We need java(x64)!"
+
+export JAVA_HOME
+export JAVA="$JAVA_HOME/bin/java"
+export BASE_DIR=$(dirname $0)/..
+#export SERVER="mq-server"
+export CLASSPATH=.:${BASE_DIR}/conf:${BASE_DIR}/lib/*:${CLASSPATH}
+
+#===========================================================================================
+# JVM Configuration
+#===========================================================================================
+# The RAMDisk initializing size in MB on Darwin OS for gc-log
+DIR_SIZE_IN_MB=600
+
+choose_gc_log_directory()
+{
+    case "`uname`" in
+        Darwin)
+            if [ ! -d "/Volumes/RAMDisk" ]; then
+                # create ram disk on Darwin systems as gc-log directory
+                DEV=`hdiutil attach -nomount ram://$((2 * 1024 * DIR_SIZE_IN_MB))` > /dev/null
+                diskutil eraseVolume HFS+ RAMDisk ${DEV} > /dev/null
+                echo "Create RAMDisk /Volumes/RAMDisk for gc logging on Darwin OS."
+            fi
+            GC_LOG_DIR="/Volumes/RAMDisk"
+        ;;
+        *)
+            # check if /dev/shm exists on other systems
+            if [ -d "/dev/shm" ]; then
+                GC_LOG_DIR="/dev/shm"
+            else
+                GC_LOG_DIR=${BASE_DIR}
+            fi
+        ;;
+    esac
+}
+
+choose_gc_options()
+{
+    # Example of JAVA_MAJOR_VERSION value : '1', '9', '10', '11', ...
+    # '1' means releases befor Java 9
+    JAVA_MAJOR_VERSION=$("$JAVA" -version 2>&1 | sed -r -n 's/.* version "([0-9]*).*$/\1/p')
+    if [ -z "$JAVA_MAJOR_VERSION" ] || [ "$JAVA_MAJOR_VERSION" -lt "9" ] ; then
+      JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -Xmn2g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
+      JAVA_OPT="${JAVA_OPT} -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+CMSClassUnloadingEnabled -XX:SurvivorRatio=8 -XX:-UseParNewGC"
+      JAVA_OPT="${JAVA_OPT} -verbose:gc -Xloggc:${GC_LOG_DIR}/rmq_srv_gc_%p_%t.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+      JAVA_OPT="${JAVA_OPT} -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=30m"
+    else
+      JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
+      JAVA_OPT="${JAVA_OPT} -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:G1ReservePercent=25 -XX:InitiatingHeapOccupancyPercent=30 -XX:SoftRefLRUPolicyMSPerMB=0"
+      JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${GC_LOG_DIR}/rmq_srv_gc_%p_%t.log:time,tags:filecount=5,filesize=30M"
+    fi
+}
+
+choose_gc_log_directory
+choose_gc_options
+JAVA_OPT="${JAVA_OPT} -XX:-OmitStackTraceInFastThrow"
+JAVA_OPT="${JAVA_OPT} -XX:-UseLargePages"
+#JAVA_OPT="${JAVA_OPT} -jar ${BASE_DIR}/target/${SERVER}.jar"
+#JAVA_OPT="${JAVA_OPT} -Xdebug -Xrunjdwp:transport=dt_socket,address=9555,server=y,suspend=n"
+JAVA_OPT="${JAVA_OPT} ${JAVA_OPT_EXT}"
+JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
+
+$JAVA ${JAVA_OPT} $@
 ```
 
-```bash
-sed -i 's/\r$//' run.sh  
-```
 
 #### 2.6.4 xsync
 
@@ -1679,20 +1748,7 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 
 ### 4.1 Java
 
-#### 4.1.1 JDK8
-
-1. 在线安装
-
-```bash
-yum install java-1.8.0-openjdk
-vim /etc/profile
-
-export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
-export PATH=$PATH:$JAVA_HOME/bin
-source /etc/profile   # 配置生效
-```
-
-2. 解压安装
+#### 4.1.1 JDK
 
 ```bash
 # Oracle最后一个商用免费版本
