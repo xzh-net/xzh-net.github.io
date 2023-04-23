@@ -85,7 +85,7 @@ docker system df            # 查看占用的磁盘空间
 docker info | grep "Docker Root Dir"  # 查看镜像位置
 ```
 
-### 2.2 网络、挂载
+### 2.2 网络存储
 
 ```bash
 docker network ls                                     # 查看网络
@@ -1670,7 +1670,7 @@ exec /usr/bin/turnserver "$@"
 
 
 3. 构建镜像
- 
+
 ```bash
 chmod -R 777 /home/coturn
 sudo docker build --tag coturn .
