@@ -761,8 +761,7 @@ docker run -d --name skywalking-ui \
 apache/skywalking-ui:6.6.0
 ```
 
-下载源码包，下面会用到agent 
-> https://archive.apache.org/dist/skywalking/6.6.0/apache-skywalking-apm-6.6.0.tar.gz
+Agent下载地址：https://archive.apache.org/dist/skywalking/6.6.0/apache-skywalking-apm-6.6.0.tar.gz
 
 ```bash
 java -jar skywalking_springboot.jar # 原启动方式
