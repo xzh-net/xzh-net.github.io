@@ -465,6 +465,102 @@ vim /etc/shells
 /sbin/nologin
 ```
 
+```conf
+#设定不允许匿名访问
+anonymous_enable=NO
+#设定本地用户可以访问注意：主要是为虚拟宿主用户，如果该项目设定为NO那么所有虚拟用户将无法访问
+local_enable=YES
+#设定可以进行写操作
+write_enable=YES
+#设定上传后文件的权限掩码
+local_umask=022
+#禁止匿名用户上传
+#anon_upload_enable=NO
+#禁止匿名用户建立目录
+#anon_mkdir_write_enable=NO
+#设定开启目录标语功能
+dirmessage_enable=YES
+#设定端口20进行数据连接
+connect_from_port_20=YES
+#设定禁止上传文件更改宿主
+#chown_uploads=NO
+#设定开启日志记录功能
+xferlog_enable=YES
+#设定日志使用标准的记录格式
+xferlog_std_format=YES
+#设定Vsftpd的服务日志保存路径
+#	注意，该文件默认不存在必须要手动touch出来，并且由于这里更改了Vsftpd的服务宿主用户为手动建立的Vsftpd
+#	必须注意给与该用户对日志的写入权限，否则服务将启动失败
+#	仅在(xferlog_enable=YES并且xferlog_std_format=YES)或者(dual_log_enable=YES)时有意义。
+xferlog_file=/var/log/vsftpd.log
+#设定支撑Vsftpd服务的宿主用户为手动建立的Vsftpd用户
+#	注意，一旦做出更改宿主用户后，必须注意一起与该服务相关的读写文件的读写赋权问题
+#	比如日志文件就必须给与该用户写入权限等
+#nopriv_user=vsftpd
+#设定支持异步传输功能
+#async_abor_enable=YES
+#设定支持ASCII模式的上传功能
+#ascii_upload_enable=YES
+#设定支持ASCII模式的下载功能
+#ascii_download_enable=YES
+#设定Vsftpd的登陆标语
+#ftpd_banner=WelcometoAweiFTPservers
+#禁止本地用户登出自己的FTP主目录
+chroot_local_user=YES
+#设定启用虚拟用户功能
+#guest_enable=YES
+#设定PAM服务下Vsftpd的认证文件名(默认目录:/etc/pam.d/)
+#	以下这些是关于Vsftpd虚拟用户支持的重要配置项目
+#	默认Vsftpd.conf中不包含这些设定项目，需要自己手动添加配置
+pam_service_name=vsftpd
+#指定虚拟用户的宿主用户
+#guest_username=vftp
+#设定虚拟用户的权限符合他们的宿主用户
+#virtual_use_local_privs=YES
+#设定虚拟用户个人Vsftp的配置文件存放路径
+#	也就是说，这个被指定的目录里，将存放每个Vsftp虚拟用户个性的配置文件，
+#	一个需要注意的地方就是这些配置文件名必须和虚拟用户名相同
+#user_config_dir=/etc/vsftpd/vconf
+#是否以standalone模式运行。standalone模式是指vsftpd不由inetd启动，而是独自监听和处理连接
+listen=YES
+#standalone模式下,指定在哪个端口上监听(默认21)
+listen_port=21
+#standalone模式下,允许连接的最大客户端数量,默认"0"表示不限
+max_clients=20000
+#standalone模式下,同一个IP地址允许发起的最大并发连接数,默认"0"表示不限。
+max_per_ip=20000
+#客户端在两个FTP命令之间允许的最大间隔秒数。超时的客户端将被踢出。
+idle_session_timeout=600
+#含义与listen指令相同，只是在IPv6套接字上进行监听,该指令与listen是互斥的，不能同时使用
+listen_ipv6=NO
+#是否禁止userlist_file文件中的用户登陆。设为NO则根本无视该文件。
+userlist_enable=YES
+#是否通过tcp_wrappers对进入连接进行访问控制。仅在编译了tcp_wrappers支持的时候有效
+#	tcp_wrappers可以针对每个单独的IP进行设置。
+#	如果tcp_wrappers设置了VSFTPD_LOAD_CONF环境变量，那么vsftpd会话将会尝试加载其指定的配置文件
+tcp_wrappers=YES
+#是否允许使用PASV命令获得数据连接的地址端口对。
+pasv_enable=yes
+#PASV风格公网IP
+pasv_address=39.105.58.136
+#允许为PASV风格的数据连接使用的最小端口号,默认"0"表示不限
+#vsftpd默认没有开启PASV模式，现在FTP只能通过PORT模式连接，要开启PASV默认需要通过下面的配置
+pasv_min_port=50000
+#允许为PASV风格的数据连接使用的最大端口号,默认"0"表示不限
+pasv_max_port=50010
+#解决无法登陆的问题
+allow_writeable_chroot=YES
+#使用户不能离开主目录
+#chroot_list_enable=YES
+#是否同时记录xferlog_file和vsftpd_log_file两份日志
+dual_log_enable=YES
+#指定vsftpd风格的日志文件的路径。
+#	仅在(xferlog_enable=YES并且xferlog_std_format=NO)或者(dual_log_enable=YES)时有意义。
+#	注意：如果syslog_enable=YES，那么日志将被发送到系统日志记录器，而不会记录到这里指定的文件中。
+vsftpd_log_file=/var/log/vsftpd.log
+
+```
+
 #### 1.5.3 添加用户
 
 ```bash
