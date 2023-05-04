@@ -41,7 +41,7 @@ vi stream2stream.json
                         "column": [
                             {
                                 "type":"string",
-                                "value":"xuzhihao"
+                                "value":"xzh"
                             },
                             {
                                 "type": "long",

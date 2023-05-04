@@ -1780,7 +1780,7 @@ vi /etc/hosts
 vi /etc/resolv.conf  nameserver 192.168.0.1    # 修改DNS
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # 修改IP
 vi /etc/sysconfig/network                      # 修改网关 GATEWAY=192.168.3.1
-hostnamectl set-hostname xuzhihao              # 修改主机名
+hostnamectl set-hostname xzh                   # 修改主机名
 ```
 
 ```conf

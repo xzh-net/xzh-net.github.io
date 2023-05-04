@@ -121,8 +121,8 @@ git push origin dev           # 将新创建的dev分支推送到远程仓库
 ### 4.1 Git全局设置
 
 ```bash
-git config --global user.name "xuzhihao"
-git config --global user.email "xuzhihao@163.com"
+git config --global user.name "xzh"
+git config --global user.email "xzh@163.com"
 ```
 
 ### 4.2 创建仓库

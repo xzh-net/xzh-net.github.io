@@ -587,12 +587,12 @@ extent management local;
 
 ```bash
 select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;            # 查询表空间
-create tablespace xuzhihao datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 100M;                # 创建表空间
-alter tablespace xuzhihao add datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 5m;               # 增加表空间数据文件
-drop tablespace xuzhihao including contents;                                                          # 删除表空间
-drop tablespace xuzhihao including contents and datafiles;                                            # 删除表空间和数据文件
-alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' resize 50m;                           # 扩展表空间
-alter database datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' autoextend on next 50m maxsize 500m;  # 表空间自动增长
+create tablespace xzh datafile '/u01/app/oracle/xzh/xzh.dbf' size 100M;                               # 创建表空间
+alter tablespace xzh add datafile '/u01/app/oracle/xzh/xzh.dbf' size 5m;                              # 增加表空间数据文件
+drop tablespace xzh including contents;                                                           # 删除表空间
+drop tablespace xzh including contents and datafiles;                                             # 删除表空间和数据文件
+alter database datafile '/u01/app/oracle/xzh/xzh.dbf' resize 50m;                                 # 扩展表空间
+alter database datafile '/u01/app/oracle/xzh/xzh.dbf' autoextend on next 50m maxsize 500m;        # 表空间自动增长
 ```
 
 ```sql
@@ -607,9 +607,9 @@ select b.file_name 物理文件名,
  group by b.tablespace_name, b.file_name, b.bytes
  order by b.tablespace_name;
 -- 查询用户隶属表空间
-select username,default_tablespace from dba_users where username='xuzhihao';
+select username,default_tablespace from dba_users where username='xzh';
 -- 增加表空间文件
-alter tablespace xuzhihao_data ADD datafile '/u01/app/oracle/xuzhihao/xuzhihao.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
+alter tablespace xzh_data ADD datafile '/u01/app/oracle/xzh/xzh.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
 ```
 
 ### 2.3 创建用户授权

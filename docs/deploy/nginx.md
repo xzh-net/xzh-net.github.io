@@ -745,7 +745,7 @@ location /postUser {
 
 ```conf
 location ~*\.(png|jpg|gif){
-    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com xuzhihao.*  ~\.hwcq\.;
+    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com hwcq.*  ~\.hwcq\.;
     if ($invalid_referer){
         return 403;
     }
@@ -755,7 +755,7 @@ location ~*\.(png|jpg|gif){
 
 ```conf
 location /images {
-    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com xuzhihao.*  ~\.hwcq\.;
+    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com hwcq.*  ~\.hwcq\.;
     if ($invalid_referer){
         rewrite ^/ http://www.web.com/images/forbidden.png;
     }

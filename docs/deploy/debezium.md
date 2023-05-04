@@ -25,12 +25,12 @@ cat connect-distributed.properties.bak | grep -v "#" | grep -v "^$" > connect-di
 vi connect-distributed.properties
 # 修改配置
 bootstrap.servers=192.168.3.200:9092
-group.id=connect-xuzhihao
+group.id=connect-xzh
 key.converter=org.apache.kafka.connect.json.JsonConverter
 value.converter=org.apache.kafka.connect.json.JsonConverter
 key.converter.schemas.enable=false
 value.converter.schemas.enable=false
-offset.storage.topic=connect-xuzhihao-status
+offset.storage.topic=connect-xzh-status
 offset.storage.replication.factor=2
 config.storage.topic=connect-configs
 config.storage.replication.factor=1
@@ -43,7 +43,7 @@ plugin.path=/opt/debezium/connector
 2. 创建topic
 
 ```bash
-bin/kafka-topics.sh --create --topic connect-xuzhihao-status --bootstrap-server 192.168.3.200:9092
+bin/kafka-topics.sh --create --topic connect-xzh-status --bootstrap-server 192.168.3.200:9092
 bin/kafka-topics.sh --create --topic connect-configs --bootstrap-server 192.168.3.200:9092
 bin/kafka-topics.sh --create --topic connect-status --bootstrap-server 192.168.3.200:9092
 ```
