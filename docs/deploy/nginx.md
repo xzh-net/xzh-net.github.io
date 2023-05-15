@@ -906,7 +906,7 @@ cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到ngin
 1. 下载模板
 
 ```bash
-wget https://codeload.github.com/51xssh/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
+wget https://codeload.github.com/xuzhihao-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
 cd /home/www
 unzip nginx-fancyindex.zip	
 mv nginx-fancyindex fancyindex
