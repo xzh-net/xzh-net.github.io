@@ -259,7 +259,7 @@ kubernetes支持多种网络插件，比如flannel、calico、canal等等，任�
 
 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
-https://github.com/51xssh/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
+https://github.com/xuzhihao-net/InstallHelper/blob/main/k8s/flannel/kube-flannel.yml
 
 ```bash
 kubectl apply -f kube-flannel.yml   # 安装插件
@@ -1424,7 +1424,7 @@ Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量�
 
 #### 2.8.1 安装nginx-ingress-controller
 
-下载地址：https://github.com/51xssh/InstallHelper/tree/main/k8s/ingress
+下载地址：https://github.com/xuzhihao-net/InstallHelper/tree/main/k8s/ingress
 
 ```bash
 wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml

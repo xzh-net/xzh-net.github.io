@@ -459,7 +459,7 @@ server {
 
 下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
 
-https://github.com/51xssh/InstallHelper/tree/main/nginx/nginx_upstream_check_module
+https://github.com/xuzhihao-net/InstallHelper/tree/main/nginx/nginx_upstream_check_module
 
 ```bash
 cd /opt/nginx-1.20.2
@@ -558,7 +558,7 @@ stream {
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
-https://github.com/51xssh/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
+https://github.com/xuzhihao-net/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
 
 ```bash
 cd /opt/nginx-1.20.2

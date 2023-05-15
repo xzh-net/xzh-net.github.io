@@ -322,7 +322,7 @@ echo log2 >> log2.txt
 
 ### 2.5 采集数据写入Pulsar
 
-代码地址：https://github.com/51xssh/java/tree/main/pulsar-flume-ng-sink
+代码地址：https://github.com/xuzhihao-net/java/tree/main/flume/pulsar-flume-ng-sink
 
 #### 2.5.1 编译上传
 
@@ -547,7 +547,7 @@ ll /opt/flume/data/flume3
 
 #### 2.7.2 自定义拦截器
 
-代码地址：https://github.com/51xssh/java/tree/main/flume
+代码地址：https://github.com/xuzhihao-net/java/tree/main/flume
 
 #### 2.7.2 编译上传
 
@@ -935,7 +935,7 @@ node03查看控制台数据
 
 #### 2.10.2 代码编写
 
-代码地址：https://github.com/51xssh/java/tree/main/flume
+代码地址：https://github.com/xuzhihao-net/java/tree/main/flume
 
 #### 2.10.3 编译上传
 
@@ -986,7 +986,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group5/flume1.conf -Df
 
 #### 2.11.2 代码编写
 
-代码地址：https://github.com/51xssh/java/tree/main/flume
+代码地址：https://github.com/xuzhihao-net/java/tree/main/flume
 
 #### 2.11.3 编译上传
 
