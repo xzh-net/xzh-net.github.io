@@ -90,7 +90,7 @@ vim /etc/dhcp/dhcpd.conf
 
 default-lease-time 259200;    # 预设租期3天
 max-lease-time 518400;        # 最大租期6天
-option domain-name "51xssh.com";         # 指定默认域名
+option domain-name "xuzhihao.net";         # 指定默认域名
 option domain-name-servers 192.168.100.1;  # DNS(可以写多个)
 ddns-update-style none;       # 禁用 DNS 动态更新 
 log-facility local7;          # 定义日志设备载体 （/var/log/boot.log输出）
@@ -200,9 +200,9 @@ cp -p /etc/named.rfc1912.zones /etc/named.rfc1912.zones.bak
 vim /etc/named.rfc1912.zones
 
 # 在该文件最后面增加以下内容：
-zone "51xssh.com" IN {
+zone "xuzhihao.net" IN {
         type master;
-        file "51xssh.com.zone";
+        file "xuzhihao.net.zone";
         allow-update { none; };
 };
 ```
@@ -210,17 +210,17 @@ zone "51xssh.com" IN {
 5. 配置zone文件
 
 ```bash
-cp -p /var/named/named.localhost /var/named/51xssh.com.zone    # 一定要使用-p复制用户组和权限
-vi /var/named/51xssh.com.zone
+cp -p /var/named/named.localhost /var/named/xuzhihao.net.zone    # 一定要使用-p复制用户组和权限
+vi /var/named/xuzhihao.net.zone
 
 $TTL 1D
-@       IN SOA  51xssh.com.  rname.invalid. (
+@       IN SOA  xuzhihao.net.  rname.invalid. (
                                         0       ; serial
                                         1D      ; refresh
                                         1H      ; retry
                                         1W      ; expire
                                         3H )    ; minimum
-@       NS      dns1.51xssh.com.   # dns1表示命名空间，可以有多个，但是后面的Ａ记录保持一致就行
+@       NS      dns1.xuzhihao.net.   # dns1表示命名空间，可以有多个，但是后面的Ａ记录保持一致就行
 dns1    A       127.0.0.1           # 一定是当前DNS服务器的IP
 www     A    192.168.3.200          # 根据实际填写
 ```
@@ -232,7 +232,7 @@ named-checkconf /etc/named.conf
 named-checkconf /etc/named.rfc1912.zones
 
 cd /var/named/
-named-checkzone 51xssh.com.zone 51xssh.com.zone # 区域文件写2遍
+named-checkzone xuzhihao.net.zone xuzhihao.net.zone # 区域文件写2遍
 ```
 
 7. 启动服务
@@ -249,10 +249,10 @@ systemctl enable named
 ```bash
 echo nameserver 172.17.17.201 > /etc/resolv.conf # 客户端机器添加dns服务器
 
-nslookup www.51xssh.com
-nslookup -type=txt www.51xssh.com  # 验证txt值
-dig @172.17.17.201 www.51xssh.com
-host www.51xssh.com
+nslookup www.xuzhihao.net
+nslookup -type=txt www.xuzhihao.net  # 验证txt值
+dig @172.17.17.201 www.xuzhihao.net
+host www.xuzhihao.net
 ```
 
 
@@ -278,13 +278,13 @@ cp -p /var/named/named.loopback /var/named/172.17.17.zone    # 一定要使用-p
 vi /var/named/172.17.17.zone
 
 $TTL 1D
-@	IN SOA	51xssh.com. rname.invalid. (
+@	IN SOA	xuzhihao.net. rname.invalid. (
 					0	; serial
 					1D	; refresh
 					1H	; retry
 					1W	; expire
 					3H )	; minimum
-@	NS	dns2.51xssh.com.   # 如果dns2.51xssh.com在正向域文件中存在，可以不用写A记录
+@	NS	dns2.xuzhihao.net.   # 如果dns2.xuzhihao.net在正向域文件中存在，可以不用写A记录
 dns2	A	127.0.0.1
 165	PTR	www.hwqc.online.
 ```
@@ -355,10 +355,10 @@ options {
 ```bash
 vi /etc/named.rfc1912.zones
 # 最后添加
-zone "51xssh.com" IN {
+zone "xuzhihao.net" IN {
         type slave;
         masters {172.17.17.201;};       # 指定master dns的ip地址
-        file "slaves/51xssh.com.zone"; # 同步过来的文件的保存路径及名字
+        file "slaves/xuzhihao.net.zone"; # 同步过来的文件的保存路径及名字
 };
 ```
 
@@ -368,9 +368,9 @@ zone "51xssh.com" IN {
 vi /etc/named.rfc1912.zones
 
 # 修改以下内容：
-zone "51xssh.com" IN {
+zone "xuzhihao.net" IN {
         type master;
-        file "51xssh.com.zone";
+        file "xuzhihao.net.zone";
         //allow-update { none; }; # 删除
 };
 ```
@@ -386,7 +386,7 @@ systemctl status named
 
 ```bash
 cd /var/named/slaves
-ll  # 可见同步过来的51xssh.com.zone文件
+ll  # 可见同步过来的xuzhihao.net.zone文件
 ```
 
 6. 客户端测试
@@ -395,9 +395,9 @@ ll  # 可见同步过来的51xssh.com.zone文件
 echo nameserver 172.17.17.201 > /etc/resolv.conf  # 客户端机器添加dns服务器
 echo nameserver 172.17.17.200 >> /etc/resolv.conf 
 
-nslookup www.51xssh.com
-dig @172.17.17.201 www.51xssh.com
-host www.51xssh.com
+nslookup www.xuzhihao.net
+dig @172.17.17.201 www.xuzhihao.net
+host www.xuzhihao.net
 ```
 
 ### 1.4 SSH
@@ -1339,7 +1339,7 @@ ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java            # 创建软连�
 scp -r vjsp.workflow -P {port} root@20.255.122.15:/opt/code     # 远程复制
 
 # Find查找
-grep "www.51xssh.com" *           # 当前路径下按关键字过滤
+grep "www.xuzhihao.net" *           # 当前路径下按关键字过滤
 find / -type f -size +100M          # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
 find / -name memcached              # 查找应用
 find / -name 'meeting' -type d      # 查找meeting文件夹所在的位置
@@ -1597,7 +1597,7 @@ Nginx修改对应配置
 ```conf
 server {
 	listen 80;
-	server_name www.51xssh.com;
+	server_name www.xuzhihao.net;
 	location / {
 		proxy_pass http://192.168.2.200:8080;
 	}
@@ -1605,7 +1605,7 @@ server {
 
 server {
 	listen 80;
-	server_name node.51xssh.com;
+	server_name node.xuzhihao.net;
 	location / {
 		proxy_pass http://www.xzh.com:8080;
 	}
