@@ -116,9 +116,9 @@ Dsnappy.lib=/usr/local/lib  # 指snappy在编译机器上安装后的库路径
 #### 2.2.1 修改主机名
 
 ```bash
-hostnamectl set-hostname node01.51xssh.com
-hostnamectl set-hostname node02.51xssh.com
-hostnamectl set-hostname node03.51xssh.com
+hostnamectl set-hostname node01.xuzhihao.net
+hostnamectl set-hostname node02.xuzhihao.net
+hostnamectl set-hostname node03.xuzhihao.net
 ```
 
 #### 2.2.2 hosts映射
@@ -126,9 +126,9 @@ hostnamectl set-hostname node03.51xssh.com
 ```bash
 vim /etc/hosts
 # 添加
-192.168.2.201 node01 node01.51xssh.com
-192.168.2.202 node02 node02.51xssh.com
-192.168.2.203 node03 node03.51xssh.com
+192.168.2.201 node01 node01.xuzhihao.net
+192.168.2.202 node02 node02.xuzhihao.net
+192.168.2.203 node03 node03.xuzhihao.net
 ```
 
 #### 2.2.3 关闭防火墙
@@ -208,7 +208,7 @@ vim core-site.xml
 <!-- hdfs文件系统访问地址：http://nn_host:8020。-->
 <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://node01.51xssh.com:8020</value>
+    <value>hdfs://node01.xuzhihao.net:8020</value>
 </property>
 <!-- hadoop本地数据存储目录 format时自动生成 -->
 <property>
@@ -234,7 +234,7 @@ vim hdfs-site.xml
 <!-- 设定SNN运行主机和端口。-->
 <property>
     <name>dfs.namenode.secondary.http-address</name>
-    <value>node02.51xssh.com:9868</value>
+    <value>node02.xuzhihao.net:9868</value>
 </property>
 # 此处为节点下线做准备
 <property>
@@ -286,7 +286,7 @@ vim yarn-site.xml
 <!-- yarn集群主角色RM运行机器。-->
 <property>
     <name>yarn.resourcemanager.hostname</name>
-    <value>node01.51xssh.com</value>
+    <value>node01.xuzhihao.net</value>
 </property>
 <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
 <property>
@@ -317,9 +317,9 @@ cd /opt/hadoop-3.1.4/etc/hadoop/
 vim workers
 
 # 删除第一行localhost，然后添加以下三行
-node01.51xssh.com
-node02.51xssh.com
-node03.51xssh.com
+node01.xuzhihao.net
+node02.xuzhihao.net
+node03.xuzhihao.net
 ```
 
 ### 2.5 分发安装包
@@ -452,7 +452,7 @@ scp /etc/profile root@node04:/etc/
 ```bash
 # 192.168.2.201执行
 cd /opt/hadoop-3.1.4
-scp -r /opt/hadoop-3.1.4 root@node04.51xssh.com:$PWD
+scp -r /opt/hadoop-3.1.4 root@node04.xuzhihao.net:$PWD
 ```
 
 #### 2.9.3 启动节点
@@ -480,7 +480,7 @@ cd /opt/hadoop-3.1.4/etc/hadoop/
 vim exclude
 
 # 添加下线节点
-node04.51xssh.com
+node04.xuzhihao.net
 ```
 
 ?>注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役
@@ -575,7 +575,7 @@ vim core-site.xml
 <!-- ZooKeeper集群的地址和端口-->
 <property>
     <name>ha.zookeeper.quorum</name>
-    <value>node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181</value>
+    <value>node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181</value>
 </property>
 
 <!-- 在Web UI访问HDFS使用的用户名。-->
@@ -608,31 +608,31 @@ vim hdfs-site.xml
 <!-- nn1的RPC通信地址 -->
 <property>
     <name>dfs.namenode.rpc-address.mycluster.nn1</name>
-    <value>node01.51xssh.com:8020</value>
+    <value>node01.xuzhihao.net:8020</value>
 </property>
 
 <!-- nn1的http通信地址 -->
 <property>
     <name>dfs.namenode.http-address.mycluster.nn1</name>
-    <value>node01.51xssh.com:9870</value>
+    <value>node01.xuzhihao.net:9870</value>
 </property>
 
 <!-- nn2的RPC通信地址 -->
 <property>
     <name>dfs.namenode.rpc-address.mycluster.nn2</name>
-    <value>node02.51xssh.com:8020</value>
+    <value>node02.xuzhihao.net:8020</value>
 </property>
 
 <!-- nn2的http通信地址 -->
 <property>
     <name>dfs.namenode.http-address.mycluster.nn2</name>
-    <value>node02.51xssh.com:9870</value>
+    <value>node02.xuzhihao.net:9870</value>
 </property>
 
 <!-- 指定NameNode的edits元数据在JournalNode上的存放位置 -->
 <property>
     <name>dfs.namenode.shared.edits.dir</name>
-    <value>qjournal://node01.51xssh.com:8485;node02.51xssh.com:8485;node03.51xssh.com:8485/mycluster</value>
+    <value>qjournal://node01.xuzhihao.net:8485;node02.xuzhihao.net:8485;node03.xuzhihao.net:8485/mycluster</value>
 </property>
 
 <!-- 指定JournalNode在本地磁盘存放数据的位置 -->
@@ -686,9 +686,9 @@ cd /opt/hadoop-3.1.4/etc/hadoop/
 vim workers
 
 # 删除第一行localhost，然后添加以下三行
-node01.51xssh.com
-node02.51xssh.com
-node03.51xssh.com
+node01.xuzhihao.net
+node02.xuzhihao.net
+node03.xuzhihao.net
 ```
 
 ### 3.5 分发安装包

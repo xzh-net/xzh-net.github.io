@@ -40,12 +40,12 @@ vim hbase-site.xml
     <!-- HBase数据在HDFS中的存放的路径 -->
     <property>
         <name>hbase.rootdir</name>
-        <value>hdfs://node01.51xssh.com:8020/hbase</value>
+        <value>hdfs://node01.xuzhihao.net:8020/hbase</value>
     </property>
     <!-- ZooKeeper的地址 -->
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>node01.51xssh.com,node02.51xssh.com,node03.51xssh.com</value>
+        <value>node01.xuzhihao.net,node02.xuzhihao.net,node03.xuzhihao.net</value>
     </property>
     <!--Hbase临时数据存储的地方 默认是 ./tmp -->
     <property>
@@ -68,9 +68,9 @@ vim regionservers
 ```
 
 ```bash
-node01.51xssh.com
-node02.51xssh.com
-node03.51xssh.com
+node01.xuzhihao.net
+node02.xuzhihao.net
+node03.xuzhihao.net
 ```
 
 ### 1.3 设置Hbase环境变量
@@ -102,8 +102,8 @@ mv /opt/hbase-2.4.11/lib/client-facing-thirdparty/slf4j-reload4j-1.7.33.jar /opt
 
 ```bash
 cd /opt/hbase-2.4.11
-scp -r /opt/hbase-2.4.11 node02.51xssh.com:$PWD
-scp -r /opt/hbase-2.4.11 node03.51xssh.com:$PWD
+scp -r /opt/hbase-2.4.11 node02.xuzhihao.net:$PWD
+scp -r /opt/hbase-2.4.11 node03.xuzhihao.net:$PWD
 ```
 
 ### 1.6 启动服务
@@ -131,7 +131,7 @@ hbase shell
 # 输入status
 ```
 
-WebUI：http://node01.51xssh.com:16010/master-status
+WebUI：http://node01.xuzhihao.net:16010/master-status
 
 
 ### 1.8 Master高可用
@@ -148,8 +148,8 @@ stop-hbase.sh
 cd /opt/hbase-2.4.11/conf
 vi backup-masters
 # 添加
-node02.51xssh.com
-node03.51xssh.com
+node02.xuzhihao.net
+node03.xuzhihao.net
 ```
 
 #### 1.8.3 配置分发
@@ -165,7 +165,7 @@ scp backup-masters node03:/opt/hbase-2.4.11/conf/
 start-hbase.sh
 ```
 
-启动集群后，在node02出现HMaster节点，访问地址：http://node02.51xssh.com:16010/master-status， 不过此时处于备用状态，当手动kill掉node01机器的HMaster节点，node02的HMaster节点变成可用状态
+启动集群后，在node02出现HMaster节点，访问地址：http://node02.xuzhihao.net:16010/master-status， 不过此时处于备用状态，当手动kill掉node01机器的HMaster节点，node02的HMaster节点变成可用状态
 
 ```bash
 hbase-daemon.sh start master    # 重启node01上的HMaster
@@ -263,8 +263,8 @@ cp /opt/phoenix-hbase-2.4-5.1.2/phoenix-*.jar /opt/hbase-2.4.11/lib/
 
 # 分发lib
 cd /opt/hbase-2.4.11/lib/
-scp phoenix-*.jar node02.51xssh.com:$PWD
-scp phoenix-*.jar node03.51xssh.com:$PWD
+scp phoenix-*.jar node02.xuzhihao.net:$PWD
+scp phoenix-*.jar node03.xuzhihao.net:$PWD
 ```
 
 #### 3.1.3 设置环境变量
@@ -307,16 +307,16 @@ cp /opt/hbase-2.4.11/conf/hbase-site.xml /opt/phoenix-hbase-2.4-5.1.2/bin/
 
 ```bash
 cd /opt/hbase-2.4.11/conf
-scp -r hbase-site.xml node02.51xssh.com:$PWD
-scp -r hbase-site.xml node03.51xssh.com:$PWD
+scp -r hbase-site.xml node02.xuzhihao.net:$PWD
+scp -r hbase-site.xml node03.xuzhihao.net:$PWD
 ```
 
 2. 分发phoenix
 
 ```bash
 cd /opt/phoenix-hbase-2.4-5.1.2
-scp -r /opt/phoenix-hbase-2.4-5.1.2 node02.51xssh.com:$PWD
-scp -r /opt/phoenix-hbase-2.4-5.1.2 node03.51xssh.com:$PWD
+scp -r /opt/phoenix-hbase-2.4-5.1.2 node02.xuzhihao.net:$PWD
+scp -r /opt/phoenix-hbase-2.4-5.1.2 node03.xuzhihao.net:$PWD
 ```
 
 #### 3.1.6 重启HBase

@@ -332,7 +332,7 @@ vi /opt/hadoop-3.1.4/etc/hadoop/yarn-site.xml
     <!-- 配置yarn主节点的位置 -->
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>node01.51xssh.com</value>
+        <value>node01.xuzhihao.net</value>
     </property>
     <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
     <property>
@@ -418,7 +418,7 @@ start-all.sh
 
 3. 查看结果
 
-通过`http://node01.51xssh.com:8088/cluster`点击`history`进入flink管理界面查看执行结果
+通过`http://node01.xuzhihao.net:8088/cluster`点击`history`进入flink管理界面查看执行结果
 
 4. 关闭yarn-session
 

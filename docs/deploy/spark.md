@@ -293,7 +293,7 @@ vi /opt/hadoop-3.1.4/etc/hadoop/yarn-site.xml
     <!-- 配置yarn主节点的位置 -->
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>node01.51xssh.com</value>
+        <value>node01.xuzhihao.net</value>
     </property>
     <!-- NodeManager上运行的附属服务。需配置成mapreduce_shuffle,才可运行MR程序。-->
     <property>

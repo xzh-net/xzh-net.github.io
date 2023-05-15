@@ -68,7 +68,7 @@ make && make install
 
 ```bash
 # 添加用户 -r <realm> 为该用户所属的 Realm。在启动 turnserver 时需要指定 Realm ，只有该 Realm 下的用户才能登录
-turnadmin -a -u xzh -p 123456 -r 51xssh.com
+turnadmin -a -u xzh -p 123456 -r xuzhihao.net
 ```
 
 #### 1.5.2 生成证书
@@ -93,7 +93,7 @@ external-ip=39.105.58.136   # 公网ip
 relay-threads=50
 lt-cred-mech
 user=xzh:123456
-realm=51xssh.com
+realm=xuzhihao.net
 //**************************************************************************************//
 ```
 

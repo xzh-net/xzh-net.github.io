@@ -396,33 +396,33 @@ http {
   proxy_temp_file_write_size 1024k;
   
   # 加载其他配置
-  include /usr/local/openresty/nginx/conf/blob.51xssh.com.conf;
+  include /usr/local/openresty/nginx/conf/blob.xuzhihao.net.conf;
   # 负载均衡
-  include /usr/local/openresty/nginx/conf/blob.51xssh.com_upstream.conf;
+  include /usr/local/openresty/nginx/conf/blob.xuzhihao.net_upstream.conf;
 }
 ```
 
-#### 3.1.2 blob.51xssh.com_upstream.conf
+#### 3.1.2 blob.xuzhihao.net_upstream.conf
 
 ```conf
-upstream blob.51xssh.com {
+upstream blob.xuzhihao.net {
   ip_hash;
   server 192.168.3.200:7535;
   server 192.168.3.201:7535;
 }
 ```
 
-#### 3.1.3 blob.51xssh.com.conf
+#### 3.1.3 blob.xuzhihao.net.conf
 
 ```conf
 server {
 		listen 80;
-		server_name blob.51xssh.com;
+		server_name blob.xuzhihao.net;
 		rewrite ^(.*)$ https://$host$1 permanent;
 }
 server {
 		listen 443 ssl;
-		server_name blob.51xssh.com;
+		server_name blob.xuzhihao.net;
 		charset utf-8;
 		ssl_certificate /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_chain.crt;
 		ssl_certificate_key /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_key.key;
@@ -447,7 +447,7 @@ server {
 				add_header Access-Control-Allow-Origin *;
 				add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
 				add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
-				proxy_pass http://blob.51xssh.com;
+				proxy_pass http://blob.xuzhihao.net;
 		}
 }
 ```
@@ -492,7 +492,7 @@ upstream backend {
 2. ip_hash
 
 ```conf
-upstream blob.51xssh.com {
+upstream blob.xuzhihao.net {
   ip_hash;
   server 192.168.3.200:7535;
   server 192.168.3.201:7535;
@@ -620,7 +620,7 @@ curl -i --proxy 192.168.3.114:3182  www.baidu.com
 server
 { 
     listen 80;
-	server_name  ~^(?<serno>.+).51xssh.com$;
+	server_name  ~^(?<serno>.+).xuzhihao.net$;
 	server_name_in_redirect off; 
 	location / {
 		rewrite ^(.*)$ /$serno$1 break;
@@ -640,7 +640,7 @@ server
 ```conf
 server {
     listen 80;
-    server_name  www.51xssh.com;
+    server_name  www.xuzhihao.net;
     charset utf-8; 
     index index.html;
     location / {
@@ -673,7 +673,7 @@ server {
 
 ```bash
 server {
-	error_page 404 http://www.51xssh.com;
+	error_page 404 http://www.xuzhihao.net;
 }
 ```
 
@@ -745,7 +745,7 @@ location /postUser {
 
 ```conf
 location ~*\.(png|jpg|gif){
-    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com hwcq.*  ~\.hwcq\.;
+    valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer){
         return 403;
     }
@@ -755,7 +755,7 @@ location ~*\.(png|jpg|gif){
 
 ```conf
 location /images {
-    valid_referers none blocked www.51xssh.com 192.168.3.200 *.51xssh.com hwcq.*  ~\.hwcq\.;
+    valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer){
         rewrite ^/ http://www.web.com/images/forbidden.png;
     }
@@ -808,9 +808,9 @@ server {
 ```conf
 server {
     listen       80;
-    server_name  www.51xssh.com;
+    server_name  www.xuzhihao.net;
     location /console/ {
-        rewrite ^/(.*)$ http://www.51xssh.com/$1 permanent;
+        rewrite ^/(.*)$ http://www.xuzhihao.net/$1 permanent;
     }
 }
 ```
@@ -923,7 +923,7 @@ vi /usr/local/nginx/conf/nginx.conf
 server 
 {
   listen 80;
-  server_name www.51xssh.com;
+  server_name www.xuzhihao.net;
   charset utf-8; 
   location /	{
       root /home/www/; 
@@ -1153,14 +1153,14 @@ openssl req -new -key server.key -out server.csr    # 创建SSL证书签名请�
 cp server.key server.key.org        
 openssl rsa -in server.key.org -out server.key      # 利用私钥生成一个不需要输入密码的密钥文件
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt  # 生成SSL证书，有效期为365天
-openssl x509 -in www.51xssh.com.crt -noout -dates  # 验证到期时间
+openssl x509 -in www.xuzhihao.net.crt -noout -dates  # 验证到期时间
 ```
 
 ```conf
 server {
     listen       80; # 同时支持HTTP
     listen       443 ssl; # 添加HTTPS支持
-    server_name  www.51xssh.com; #修改域名
+    server_name  www.xuzhihao.net; #修改域名
 
     #ssl配置
     ssl_certificate      /usr/share/nginx/html/ssl/api/api.crt; # 配置证书
@@ -1214,22 +1214,22 @@ curl https://get.acme.sh | sh -s email=xcg992224@163.com
 export Ali_Key="Ali_Key"
 export Ali_Secret="Ali_Secret"
 source ~/.bashrc
-~/.acme.sh/acme.sh --issue --dns dns_ali -d 51xssh.com -d test.51xssh.com --debug  # 单证书
-~/.acme.sh/acme.sh --issue --dns dns_ali -d *.51xssh.com                            # 泛域证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net --debug  # 单证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d *.xuzhihao.net                            # 泛域证书
 ```
 
 2. http模式
 
 ```bash
-~/.acme.sh/acme.sh --issue -d zk.51xssh.com --webroot /var/www
+~/.acme.sh/acme.sh --issue -d zk.xuzhihao.net --webroot /var/www
 ```
 
 
 #### 4.2.3 分配证书
 
 ```bash
-acme.sh --issue --dns dns_ali -d 51xssh.com -d test.51xssh.com --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
-acme.sh --issue --dns dns_ali -d *.51xssh.com --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
+acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
+acme.sh --issue --dns dns_ali -d *.xuzhihao.net --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
 ```
 
 修改nginx配置配置文件

@@ -58,10 +58,10 @@ vim bookkeeper.conf
 编辑内容
 
 ```conf
-advertisedAddress=node01.51xssh.com
+advertisedAddress=node01.xuzhihao.net
 journalDirectory=/opt/apache-pulsar-2.10.1/data/bookkeeper/journal
 ledgerDirectories=/opt/apache-pulsar-2.10.1/data/bookkeeper/ledgers
-zkServers=node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181
+zkServers=node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181
 ```
 
 #### 1.2.4 修改broker集群的配置文件
@@ -75,9 +75,9 @@ vim broker.conf
 
 ```conf
 clusterName=pulsar-cluster
-zookeeperServers=node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181
-configurationStoreServers=node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181
-advertisedAddress=node01.51xssh.com
+zookeeperServers=node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181
+configurationStoreServers=node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181
+advertisedAddress=node01.xuzhihao.net
 ```
 
 #### 1.2.5 分发安装包
@@ -96,13 +96,13 @@ scp -r /opt/apache-pulsar-2.10.1 node03:$PWD
 cd /opt/apache-pulsar-2.10.1/conf
 vim bookkeeper.conf
 # 编辑内容
-advertisedAddress=node02.51xssh.com
+advertisedAddress=node02.xuzhihao.net
 ```
 
 ```bash
 vim broker.conf
 # 编辑内容
-advertisedAddress=node02.51xssh.com
+advertisedAddress=node02.xuzhihao.net
 ```
 
 2. node03节点执行
@@ -111,13 +111,13 @@ advertisedAddress=node02.51xssh.com
 cd /opt/apache-pulsar-2.10.1/conf
 vim bookkeeper.conf
 # 编辑内容
-advertisedAddress=node03.51xssh.com
+advertisedAddress=node03.xuzhihao.net
 ```
 
 ```bash
 vim broker.conf
 # 编辑内容
-advertisedAddress=node03.51xssh.com
+advertisedAddress=node03.xuzhihao.net
 ```
 
 #### 1.2.7 启动zk集群
@@ -134,12 +134,12 @@ cd /opt/apache-pulsar-2.10.1/bin
 
 ./pulsar initialize-cluster-metadata \
 --cluster pulsar-cluster \
---zookeeper node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181 \
---configuration-store node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181 \
---web-service-url http://node01.51xssh.com:8080,node02.51xssh.com:8080,node03.51xssh.com:8080 \
---web-service-url-tls https://node01.51xssh.com:8443,node02.51xssh.com:8443,node03.51xssh.com:8443 \
---broker-service-url pulsar://node01.51xssh.com:6650,node02.51xssh.com:6650,node03.51xssh.com:6650 \
---broker-service-url-tls pulsar+ssl://node01.51xssh.com::6651,node02.51xssh.com:6651,node03.51xssh.com:6651
+--zookeeper node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181 \
+--configuration-store node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181 \
+--web-service-url http://node01.xuzhihao.net:8080,node02.xuzhihao.net:8080,node03.xuzhihao.net:8080 \
+--web-service-url-tls https://node01.xuzhihao.net:8443,node02.xuzhihao.net:8443,node03.xuzhihao.net:8443 \
+--broker-service-url pulsar://node01.xuzhihao.net:6650,node02.xuzhihao.net:6650,node03.xuzhihao.net:6650 \
+--broker-service-url-tls pulsar+ssl://node01.xuzhihao.net::6651,node02.xuzhihao.net:6651,node03.xuzhihao.net:6651
 
 ./bookkeeper shell metaformat   # 初始化bookkeeper集群: 若出现提示输入Y/N: 请输入Y
 ```
@@ -246,15 +246,15 @@ cd /opt/apache-pulsar-2.10.1
 # 集群初始化
 ./pulsar initialize-cluster-metadata \
   --cluster cluster-1 \
-  --configuration-metadata-store zk:node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181/pulsar-cluster-1 \
-  --metadata-store zk:node01.51xssh.com:2181,node02.51xssh.com:2181,node03.51xssh.com:2181/pulsar-cluster-1 \
-  --web-service-url http://node01.51xssh.com:8080,node02.51xssh.com:8080,node03.51xssh.com:8080 \
-  --web-service-url-tls https://node01.51xssh.com:8443,node02.51xssh.com:8443,node03.51xssh.com:8443 \
-  --broker-service-url pulsar://node01.51xssh.com:6650,node02.51xssh.com:6650,node03.51xssh.com:6650 \
-  --broker-service-url-tls pulsar+ssl://node01.51xssh.com::6651,node02.51xssh.com:6651,node03.51xssh.com:6651
+  --configuration-metadata-store zk:node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181/pulsar-cluster-1 \
+  --metadata-store zk:node01.xuzhihao.net:2181,node02.xuzhihao.net:2181,node03.xuzhihao.net:2181/pulsar-cluster-1 \
+  --web-service-url http://node01.xuzhihao.net:8080,node02.xuzhihao.net:8080,node03.xuzhihao.net:8080 \
+  --web-service-url-tls https://node01.xuzhihao.net:8443,node02.xuzhihao.net:8443,node03.xuzhihao.net:8443 \
+  --broker-service-url pulsar://node01.xuzhihao.net:6650,node02.xuzhihao.net:6650,node03.xuzhihao.net:6650 \
+  --broker-service-url-tls pulsar+ssl://node01.xuzhihao.net::6651,node02.xuzhihao.net:6651,node03.xuzhihao.net:6651
 
 ./pulsar-admin clusters get cluster-1       # 获取集群配置
-./pulsar-admin clusters update cluster-1 --url http://node01.51xssh.com:8080 --broker-url pulsar://node01.51xssh.com:6650       # 修改集群配置
+./pulsar-admin clusters update cluster-1 --url http://node01.xuzhihao.net:8080 --broker-url pulsar://node01.xuzhihao.net:6650       # 修改集群配置
 ./pulsar-admin clusters delete cluster-1    # 删除集群
 ```
 

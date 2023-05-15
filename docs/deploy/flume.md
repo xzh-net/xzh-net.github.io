@@ -349,7 +349,7 @@ a1.sources.r1.port = 44444
 
 # Describe the sink
 a1.sinks.k1.type = org.apache.flume.sink.pulsar.PulsarSink
-a1.sinks.k1.serviceUrl = node01.51xssh.com:6650,node02.51xssh.com:6650,node03.51xssh.com:6650
+a1.sinks.k1.serviceUrl = node01.xuzhihao.net:6650,node02.xuzhihao.net:6650,node03.xuzhihao.net:6650
 a1.sinks.k1.topicName = test
 a1.sinks.k1.producerName = testProducer
 # Use a channel which buffers events in memory

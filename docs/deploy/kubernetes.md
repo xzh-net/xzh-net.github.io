@@ -1535,7 +1535,7 @@ metadata:
   namespace: dev
 spec:
   rules:
-  - host: nginx.51xssh.com
+  - host: nginx.xuzhihao.net
     http:
       paths:
       - path: /
@@ -1549,7 +1549,7 @@ kubectl apply -f ingress-http.yaml
 kubectl get ing ingress-http -n dev
 kubectl describe ing ingress-http -n dev  # 查详情
 
-curl -H 'Host:nginx.51xssh.com' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
+curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
 ```
 
 
@@ -1557,7 +1557,7 @@ curl -H 'Host:nginx.51xssh.com' http://192.168.2.201:30080  # 具体端口查看
 
 ```bash
 # 生成证书
-openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=51xssh.com"
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=xuzhihao.net"
 # 创建密钥
 kubectl create secret tls tls-secret --key tls.key --cert tls.crt
 ```
@@ -1571,10 +1571,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - tomcat.51xssh.com
+      - tomcat.xuzhihao.net
       secretName: tls-secret # 指定秘钥
   rules:
-  - host: tomcat.51xssh.com
+  - host: tomcat.xuzhihao.net
     http:
       paths:
       - path: /
@@ -1588,8 +1588,8 @@ kubectl apply -f ingress-https.yaml
 kubectl get ing ingress-https -n dev
 kubectl describe ing ingress-https -n dev
 
-curl -H 'Host:tomcat.51xssh.com' https://192.168.2.201:30443
-curl -k -H 'Host:tomcat.51xssh.com' https://192.168.2.201:30443
+curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
+curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
 
 ### 2.9 数据存储

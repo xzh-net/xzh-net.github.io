@@ -138,15 +138,15 @@ pprof_addr|debug pprof ip:port
 适用范围： 小程序开发、微信公众号开发、产品演示
 
 假设场景：
-- 有一个`已备案`域名51xssh.com，有一台公网机器ip为39.105.58.136
+- 有一个`已备案`域名xuzhihao.net，有一台公网机器ip为39.105.58.136
 - 内网开发站点127.0.0.1:8088
-- 想通过（http|https://www.51xssh.com访问127.0.0.1:8088）
+- 想通过（http|https://www.xuzhihao.net访问127.0.0.1:8088）
 
 使用步骤：
-- 将*.51xssh.com解析到公网服务器39.105.58.136
-- 点击刚才创建的客户端的域名管理，添加规则（域名：www.51xssh.com 内网目标：127.0.0.1:8088）
+- 将*.xuzhihao.net解析到公网服务器39.105.58.136
+- 点击刚才创建的客户端的域名管理，添加规则（域名：www.xuzhihao.net 内网目标：127.0.0.1:8088）
 
-现在访问（http|https://www.51xssh.com即可成功）
+现在访问（http|https://www.xuzhihao.net即可成功）
 
 客户端配置：
 ```conf
@@ -156,9 +156,9 @@ conn_type=tcp
 vkey=123456
 auto_reconnection=true
 [web]
-host=www.51xssh.com
+host=www.xuzhihao.net
 target_addr=127.0.0.1:8088
-host_change=www.51xssh.com
+host_change=www.xuzhihao.net
 header_set_proxy=nps
 ```
 

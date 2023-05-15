@@ -39,7 +39,7 @@ global_defs {
     notification_email { 
         xcg992224@163.com                       # 通知邮件，当keepalived发送切换时需要发email给具体的邮箱地址
     }
-    notification_email_from admin@51xssh.com  # 设置发件人的邮箱信息
+    notification_email_from admin@xuzhihao.net  # 设置发件人的邮箱信息
     smtp_server 192.168.200.1                   # 指定smpt服务地址
     smtp_connect_timeout 30                     # 指定smpt服务连接超时时间
     router_id LVS_DEVEL                         # 运行keepalived服务器的一个标识，可以用作发送邮件的主题信息
