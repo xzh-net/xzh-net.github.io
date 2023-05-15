@@ -16,9 +16,8 @@
 14. Node.js http://nodejs.cn/api/modules.html
 15. openjdk http://openjdk.java.net/projects/jdk8/
 16. mvn中央仓库 https://mvnrepository.com/
-17. 阿里云mvn仓库 https://maven.aliyun.com/mvn/search
-18. 数据结构可视化网 https://www.cs.usfca.edu/~galles/visualization/Algorithms.html
-19. 在线工具类 https://www.bejson.com/
-20. apache http://archive.apache.org/dist/
-21. 百度坐标拾取 http://api.map.baidu.com/lbsapi/getpoint/index.html
-22. 微软模板在线 https://www.officeplus.cn/
+17. 数据结构可视化网 https://www.cs.usfca.edu/~galles/visualization/Algorithms.html
+18. 在线工具类 https://www.bejson.com/
+19. apache http://archive.apache.org/dist/
+20. 百度坐标拾取 http://api.map.baidu.com/lbsapi/getpoint/index.html
+21. 微软模板在线 https://www.officeplus.cn/
