@@ -1727,17 +1727,16 @@ yum install -y rsync
 ### 2.7 快捷键
 
 ```bash
-ctrl + z / fg                       # 挂起
-ctrl + s / q                        # 锁屏
-ctrl + u                            # 前删除
-ctrl + k                            # 后删除
-Ctrl + Shift + c                    # 复制
-Ctrl + Shift + v                    # 粘贴    
+Ctrl + z / fg                       # 挂起
+Ctrl + s / q                        # 锁屏
 
+gg # 跳到文件头
+dd # 删除光标所在的整行	
+d0 # 删除从光标前一个字符开始到行首的内容
+d$ # 删除从光标所在处开始到行尾的内容
 0  # 光标移到行首(数字0)
 $  # 光标移至行尾
 shift + g # 跳到文件最后
-gg # 跳到文件头
 ```
 
 ## 3. 虚拟机设置
