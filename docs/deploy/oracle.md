@@ -45,7 +45,7 @@ chmod -R 775 /u01/app/oracle
     - 32位linux系统：可取最大值为 4GB （ 4294967296bytes ） -1byte ，即 4294967295 。建议值为多于内存的一半，所以如果是 32 为系统，一般可取值为 4294967295 。 32 位系统对 SGA 大小有限制，所以 SGA 肯定可以包含在单个共享内存段中。
     - 64位linux系统：可取的最大值为物理内存值 -1byte ，建议值为多于物理内存的一半，一般取值大于 SGA_MAX_SIZE 即可，可以取物理内存 -1byte 。  
 
-?> 内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
+> 内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
 
 vim /etc/sysctl.conf
 ```bash
@@ -158,7 +158,7 @@ DECLINE_SECURITY_UPDATES=true
 cd /u01/software/database/
 ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 ```
-?> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
+> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
 ```lua
 正在启动 Oracle Universal Installer...
 
@@ -422,7 +422,7 @@ echo "swapfree   swap    swap    sw  0   0" >> /etc/fstab
 ![](../../assets/_images/deploy/oracle/step11_error.png)
 
 
-?> 编辑 /home/oracle/app/oracle/product/11.2.0/dbhome_1/sysman/lib/ins_emagent.mk 约176行，可以搜索$(MK_EMAGENT_NMECTL) 关键字快速找到。
+> 编辑 /home/oracle/app/oracle/product/11.2.0/dbhome_1/sysman/lib/ins_emagent.mk 约176行，可以搜索$(MK_EMAGENT_NMECTL) 关键字快速找到。
 
 ![](../../assets/_images/deploy/oracle/step11_update.png)
 
