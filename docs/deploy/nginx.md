@@ -665,7 +665,7 @@ server {
 }
 ```
 
-?> `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
+> `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
 
 ### 3.6 错误页
 
@@ -914,7 +914,7 @@ mv nginx-fancyindex fancyindex
 
 2. 配置fancyindex路径
 
-?> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
+> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
 
 ```conf
 vi /usr/local/nginx/conf/nginx.conf
@@ -943,7 +943,7 @@ server
 
 #### 3.11.4 md在线预览
 
-?> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
+> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
 
 1. nginx配置
 
