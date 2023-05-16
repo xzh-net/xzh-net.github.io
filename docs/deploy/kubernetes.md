@@ -691,7 +691,7 @@ lifecycle:
 - liveness probes：存活性探针，用于检测应用实例当前是否处于正常运行状态，如果不是，k8s会重启容器
 - readiness probes：就绪性探针，用于检测应用实例当前是否可以接收请求，如果不能，k8s不会转发流量
 
-?> livenessProbe 决定是否重启容器，readinessProbe 决定是否将请求转发给容器。
+> livenessProbe 决定是否重启容器，readinessProbe 决定是否将请求转发给容器。
 
 上面两种探针目前均支持三种探测方式：
 
@@ -1149,7 +1149,7 @@ kubectl get pods -n dev -o wide
 
 上面介绍了污点的作用，我们可以在node上添加污点用于拒绝pod调度上来，但是如果就是想将一个pod调度到一个有污点的node上去，这时候应该怎么做呢？这就要使用到`容忍`。
 
-?> 污点就是拒绝，容忍就是忽略，Node通过污点拒绝pod调度上去，Pod通过容忍忽略拒绝
+> 污点就是拒绝，容忍就是忽略，Node通过污点拒绝pod调度上去，Pod通过容忍忽略拒绝
 
 ```yaml
 apiVersion: v1
@@ -1303,7 +1303,7 @@ kubectl get svc -n dev -o wide
 kubectl delete svc svc-nginx2 -n dev  # 删除service
 ```
 
-?> k8s访问svc的clusterip异常的慢
+> k8s访问svc的clusterip异常的慢
 
 Checksum Offload 是网卡的一个功能选项。如果该选项开启，则网卡层面会计算需要发送或者接收到的消息的校验和，从而节省 CPU 的计算开销。此时，在需要发送的消息到达网卡前，系统会在报头的校验和字段填充一个随机值。但是，尽管校验和卸载能够降低 CPU 的计算开销，但受到计算能力的限制，某些环境下的一些网络卡计算速度不如主频超过 400MHz 的 CPU 快
 
