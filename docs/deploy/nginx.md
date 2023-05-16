@@ -459,7 +459,7 @@ server {
 
 下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
 
-https://github.com/xuzhihao-net/InstallHelper/tree/main/nginx/nginx_upstream_check_module
+https://github.com/xzh-net/InstallHelper/tree/main/nginx/nginx_upstream_check_module
 
 ```bash
 cd /opt/nginx-1.20.2
@@ -558,7 +558,7 @@ stream {
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
-https://github.com/xuzhihao-net/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
+https://github.com/xzh-net/InstallHelper/tree/main/nginx/ngx_http_proxy_connect_module
 
 ```bash
 cd /opt/nginx-1.20.2
@@ -906,7 +906,7 @@ cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到ngin
 1. 下载模板
 
 ```bash
-wget https://codeload.github.com/xuzhihao-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
+wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
 cd /home/www
 unzip nginx-fancyindex.zip	
 mv nginx-fancyindex fancyindex

@@ -511,7 +511,7 @@ nohup sh mqbroker -c /usr/local/rocketmq/rocketmq-4.9.2/conf/2m-2s-sync/broker-a
 
 ### 2.1 下载
 
-https://github.com/xuzhihao-net/rocketmq-dashboard
+https://github.com/xzh-net/rocketmq-dashboard
 
 
 ### 2.2 编译运行
