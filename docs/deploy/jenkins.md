@@ -225,7 +225,7 @@ git --version #安装后查看版本
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_bulid_console.png)
 
-?> 代码的构建目录:/var/lib/jenkins/workspace
+> 代码的构建目录:/var/lib/jenkins/workspace
 
 #### 1.5.4 SSH密钥类型凭证
 
@@ -317,7 +317,7 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mvn_build2.png)
 
-?> 输入命令：mvn clean package
+> 输入命令：mvn clean package
 
 
 ### 1.7 Tomcat安装和配置
@@ -333,7 +333,7 @@ tar -xzf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
 /opt/apache-tomcat-8.5.66/bin/startup.sh        # 启动
 ```
 
-?> 地址为：http://172.17.17.196/8080
+> 地址为：http://172.17.17.196/8080
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat.png)
 
@@ -366,7 +366,7 @@ allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 
 把上面这行注释掉，重启
 
-?> 访问： http://192.168.66.102:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
+> 访问： http://192.168.66.102:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat2.png)
 
@@ -684,7 +684,7 @@ HH 1,15 1-11 *
 
 ![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook2.png)
 
-?> 注意：以下设置必须完成，否则会报错！Manage Jenkins->Configure System
+> 注意：以下设置必须完成，否则会报错！Manage Jenkins->Configure System
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
 
