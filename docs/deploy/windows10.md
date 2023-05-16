@@ -100,7 +100,7 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
         keystorePass="123456" /> 
 ```
 
-### 2.3 Golang
+### 2.3 Go
 
 #### 2.3.1 下载
 
