@@ -672,7 +672,7 @@ vim hdfs-site.xml
 </property>
 ```
 
-?> 远程补刀需要namenode互相免密登录，同时安装psmisc
+> 远程补刀需要namenode互相免密登录，同时安装psmisc
 
 ```bash
 ssh-copy-id node01  # 在node02节点执行
@@ -788,7 +788,7 @@ hdfs dfsadmin -safemode leave   # 离开安全模式
 
 HDFS Web UI，其文件浏览功能底层就是基于WebHDFS来操作HDFS实现的
 
-?> 官方参数说明：https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File
+官方参数说明：https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File
 
 #### 5.1.1 使用示例
 
