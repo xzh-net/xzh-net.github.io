@@ -311,7 +311,7 @@ systemctl enable grafana-server
 
 ### 3.4 客户端
 
-访问地址：http://ip:3000  admin/admin
+访问地址：http://ip:3000/  首次进入重置admin账号密码admin
 
 #### 3.4.1 linux监控
 
