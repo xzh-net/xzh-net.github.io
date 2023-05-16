@@ -317,7 +317,7 @@ systemctl enable grafana-server
 
 1. 添加Prometheus数据源
 
-Configuration -> Data Sources ->add data source -> Prometheus
+> Configuration -> Data Sources ->add data source -> Prometheus
 
 ![](../../assets/_images/deploy/prometheus/grafana1.png)
 ![](../../assets/_images/deploy/prometheus/grafana2.png)
