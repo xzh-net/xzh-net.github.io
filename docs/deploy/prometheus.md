@@ -116,7 +116,7 @@ cd /opt/prometheus
 
 ### 1.5 客户端
 
-?> 访问地址：http://ip:9090/targets
+访问地址：http://ip:9090/targets
 
 
 ## 2. node_exporter
@@ -239,7 +239,7 @@ docker run -d \
 
 2. 访问地址
 
-?> http://localhost:8090/containers/
+http://ip:8090/containers/
 
 ### 2.4 redis监控
 
@@ -311,11 +311,9 @@ systemctl enable grafana-server
 
 ### 3.4 客户端
 
-?> 访问地址：http://ip:3000 账号密码：admin/admin
+访问地址：http://ip:3000  admin/admin
 
 #### 3.4.1 linux监控
-
-?> 监控模板：https://grafana.com/grafana/dashboards/8919
 
 1. 添加Prometheus数据源
 
@@ -329,20 +327,20 @@ Configuration -> Data Sources ->add data source -> Prometheus
 
 ![](../../assets/_images/deploy/prometheus/grafana4.png)
 
-选择数据源
+3. 选择数据源
 
 ![](../../assets/_images/deploy/prometheus/grafana5.png)
 
 
 #### 3.4.2 mysql监控
 
-?> 监控模板：https://grafana.com/grafana/dashboards/7362
+https://grafana.com/grafana/dashboards/7362
 
 #### 3.4.3 容器监控
 
-?> 监控模板：https://grafana.com/grafana/dashboards/893
+https://grafana.com/grafana/dashboards/893
 
 #### 3.4.4 redis监控
 
-?> 监控模板：https://grafana.com/grafana/dashboards/763
+https://grafana.com/grafana/dashboards/763
 
