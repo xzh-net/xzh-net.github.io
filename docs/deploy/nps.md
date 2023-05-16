@@ -283,7 +283,7 @@ server_port=9004
 multi_account=multi_account.conf
 ```
 
-?> 注：windows系统可以配合proxifier进行全局代理。Linux还可以使用proxychains进行socks5配置，推荐linux使用proxychains进行配置，可以更好的联合其他工具进行嗅探收集内网信息和横向移动。
+> windows系统可以配合proxifier进行全局代理。Linux还可以使用proxychains进行socks5配置，推荐linux使用proxychains进行配置，可以更好的联合其他工具进行嗅探收集内网信息和横向移动。
 
 Proxifier是一款功能非常强大的socks5客户端，可以让不支持通过代理服务器工作的网络程序能通过HTTPS或SOCKS代理或代理链。
 
