@@ -143,7 +143,15 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ## 3. 虚拟机设置
 
-### 3.1 更换yum源
+### 3.1 网络配置
+
+```bash
+vi /etc/sysconfig/network-scripts/ifcfg-ens33   
+systemctl restart NetworkManager    # 重启网络
+ifdown ens33; ifup ens33
+```
+
+### 3.2 更换yum源
 
 1. 下载yum安装包
 
@@ -207,13 +215,5 @@ yum -y install vim*
 vi /etc/vimrc       # 添加 colorscheme murphy
 vi /etc/profile     # 添加 alias vi=vim
 source /etc/profile 
-
 ```
 
-### 3.2 网络设置
-
-```bash
-vi /etc/sysconfig/network-scripts/ifcfg-ens33   
-systemctl restart NetworkManager    # 重启网络
-ifdown ens33; ifup ens33
-```

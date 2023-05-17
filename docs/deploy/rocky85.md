@@ -2,28 +2,7 @@
 
 ## 1. 虚拟机设置
 
-### 1.1 更换yum源
-
-```bash
-sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
-    -i.bak \
-    /etc/yum.repos.d/Rocky-*.repo
- 
-dnf makecache
-```
-
-### 1.2 关闭防火墙
-
-```bash
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
-systemctl stop firewalld.service
-systemctl disable firewalld.service # 关闭
-systemctl enable --now cockpit.socket   # 开启web管理程序
-systemctl disable cockpit.socket
-```
-
-### 1.3 网络配置
+### 1.1 网络配置
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
@@ -56,6 +35,29 @@ ONBOOT=yes
 systemctl restart NetworkManager    # 重启网络
 ifdown enp0s3; ifup enp0s3
 ```
+
+
+### 1.2 更换yum源
+
+```bash
+sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
+    -i.bak \
+    /etc/yum.repos.d/Rocky-*.repo
+ 
+dnf makecache
+```
+
+### 1.3 关闭防火墙
+
+```bash
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+systemctl stop firewalld.service
+systemctl disable firewalld.service # 关闭
+systemctl enable --now cockpit.socket   # 开启web管理程序
+systemctl disable cockpit.socket
+```
+
 
 
 
