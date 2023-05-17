@@ -6,7 +6,7 @@
 
 1. 选择Graphical install(图形化安装)
 
-![](../../assets/_images/deploy/kali/1.png)
+![](../../assets/_images/deploy/debian/1.png)
 
 ## 2. 虚拟机设置
 
