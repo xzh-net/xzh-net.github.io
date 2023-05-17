@@ -1,5 +1,7 @@
 # Rocky 8.5
 
+- 官方网址：https://rockylinux.org
+
 ## 1. 虚拟机设置
 
 ### 1.1 网络配置
