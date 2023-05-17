@@ -1,8 +1,7 @@
 # CentOS Linux release 7.9.2009
 
-- https://ftp.redhat.com
-- https://www.rpmfind.net
-- https://rpm.pbone.net
+- 官方网址：https://www.centos.org
+- RPM资源：https://www.rpmfind.net
 
 ## 1. 服务
 

@@ -1,5 +1,7 @@
 # Red Hat Enterprise Linux Server release 7.9
 
+- 官方网址：https://www.redhat.com
+
 ## 1. 安装VMware
 
 ![](../../assets/_images/deploy/rhel7/Vm1.png)

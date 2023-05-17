@@ -1,7 +1,7 @@
 # kali-linux-2021.2
 
-- 官方网址：https://www.kali.org/
-- 下载地址：http://mirrors.ustc.edu.cn/kali-images/
+- 官方网址：https://www.kali.org
+- 下载地址：http://mirrors.ustc.edu.cn/kali-images
 
 ## 1. 安装系统
 
