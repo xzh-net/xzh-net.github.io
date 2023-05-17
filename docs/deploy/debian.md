@@ -10,7 +10,7 @@
 
 ## 2. 虚拟机设置
 
-### 2.1 设置root用户和远程登录
+### 2.1 SSH配置
 
 1. 修改root密码
 
@@ -62,7 +62,7 @@ ifconfig eth0 up    # 启用网卡
 dhclient eth0       # 分配IP
 ```
 
-### 2.3 更换apt国内源
+### 2.3 更换apt源
 
 ```bash
 vim /etc/apt/sources.list
