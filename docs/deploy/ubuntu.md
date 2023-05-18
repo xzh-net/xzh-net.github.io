@@ -78,6 +78,7 @@
 
 ![](../../assets/_images/deploy/ubuntu/18.png)
 
+手动挂载
 ```bash
 mkdir /mnt/ubuntushare
 sudo mount -t vboxsf share /mnt/ubuntushare
