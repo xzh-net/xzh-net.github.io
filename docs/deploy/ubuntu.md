@@ -74,6 +74,25 @@
 
 ![](../../assets/_images/deploy/ubuntu/17.png)
 
+18. 共享文件夹
+
+![](../../assets/_images/deploy/ubuntu/18.png)
+
+```bash
+mkdir /mnt/ubuntushare
+sudo mount -t vboxsf share /mnt/ubuntushare
+```
+
+自动挂载
+```bash
+echo 'share /mnt/ubuntushare vboxsf rw,auto 0 0' >> /etc/fstab  # 自动挂载
+cat /etc/fstab          # 查看写入分区信息
+```
+
+19. 挂载新的Linux磁盘
+
+
+
 
 ## 2. 虚拟机设置
 
