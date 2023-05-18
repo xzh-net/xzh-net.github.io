@@ -1280,6 +1280,25 @@ firewall-cmd --reload                                    # 重载防火墙配置
 
 ### 1.14 puppet
 
+### 1.15 mailx
+
+```bash
+yum install mailx
+
+vi /etc/mail.rc
+set from=xcg992224@163.com
+set smtp=smtps://smtp.163.com
+set smtp-auth-user=xcg992224@163.com
+set smtp-auth-password=xxxxxxxxxx
+set smtp-auth=login
+set ssl-verify=ignore
+set nss-config-dir=/etc/pki/nssdb
+```
+
+```bash
+echo "我们都是好孩子"|mailx -v -s "主题" xcg992224@163.com
+```
+
 ## 2. 命令
 
 ### 2.1 系统
