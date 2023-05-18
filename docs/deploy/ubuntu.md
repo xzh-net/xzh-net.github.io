@@ -114,7 +114,7 @@ sudo passwd root    # 修改密码
 apt-get install -y zip unzip telnet lsof wget net-tools
 ```
 
-### 2.2 SSH配置
+### 2.2 ssh配置
 
 ```bash
 vi /etc/ssh/sshd_config

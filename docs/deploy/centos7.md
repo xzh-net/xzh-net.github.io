@@ -1773,7 +1773,7 @@ systemctl disable firewalld.service # 关闭
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-### 3.2 SSH配置
+### 3.2 ssh配置
 
 ```bash
 vi /etc/ssh/sshd_config
