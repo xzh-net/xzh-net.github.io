@@ -91,7 +91,18 @@ cat /etc/fstab          # 查看写入分区信息
 
 19. 挂载新的Linux磁盘
 
+![](../../assets/_images/deploy/ubuntu/19.png)
 
+```bash
+fdisk -l
+sudo mkfs.ext4 /dev/sdb                 # 格式化
+sudo mkdir /mnt/sdb                     # 创建sdb文件夹
+sudo mount -t ext4 /dev/sdb /mnt/sdb    # 将新磁盘分区挂载到/mnt/sdb目录下
+df -lh                  # 查看磁盘使用情况和挂载情况
+umount /dev/sdb         # 卸载分区
+echo '/dev/sdb /mnt/sdb ext4 errors=remount-ro 0 1' >> /etc/fstab  # 自动挂载
+cat /etc/fstab          # 查看写入分区信息
+```
 
 
 ## 2. 虚拟机设置
