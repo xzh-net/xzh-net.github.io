@@ -77,18 +77,14 @@
 
 ## 2. 虚拟机设置
 
-### 2.2 SSH配置
-
-apt-get install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools
-
-
-1. 修改root密码
+### 2.1 初始化
 
 ```bash
-sudo passwd root
+sudo passwd root    # 修改密码
+apt-get install -y zip unzip telnet lsof wget net-tools
 ```
 
-2. 开启远程登录
+### 2.2 SSH配置
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -104,50 +100,42 @@ PasswordAuthentication yes  # 开启用户名和密码来验证
 update-rc.d ssh enable  # 开机启动
 ```
 
-### 2.2 网络配置
-
-设置静态ip
+### 2.3 网络配置
 
 ```bash
-vi /etc/network/interfaces
+vi /etc/netplan/00-network-manager-all.yaml
 ```
 
 ```bash
-auto eth0
-iface eth0 inet static
-address 192.168.2.129
-netmask 255.255.255.0
-gateway 192.168.2.1
+network:
+  ethernets:
+    enp0s3:
+      addresses:
+      - 172.17.17.161/24
+      nameservers:
+        addresses:
+        - 114.114.114.114
+        search: []
+      routes:
+      - to: default
+        via: 172.17.17.2
+  version: 2
 ```
-
-设置dns
 
 ```bash
-vim /etc/resolv.conf
+netplan apply
 ```
 
-```bash
-/etc/init.d/networking restart  # bug：需要重启
-ifconfig eth0 up    # 启用网卡
-dhclient eth0       # 分配IP
-```
 
-### 2.3 更换apt源
+### 2.4 更换apt源
 
 ```bash
 vim /etc/apt/sources.list
-```
-
-```bash
-deb http://mirrors.aliyun.com/kali kali-rolling main non-free contrib
-deb-src http://mirrors.aliyun.com/kali kali-rolling main non-free contrib
-```
-
-```bash
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
 apt update
 ```
 
-### 2.3 docker
+### 2.5 docker
 
 ```bash
 # 卸载
