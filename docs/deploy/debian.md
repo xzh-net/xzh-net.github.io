@@ -1,6 +1,8 @@
 # Debian 10.13
 
 - 官方网址：https://www.debian.org
+- 下载地址：http://cdimage.debian.org/cdimage/archive
+
 
 ## 1. 安装系统
 
