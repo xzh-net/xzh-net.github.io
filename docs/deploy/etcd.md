@@ -2,9 +2,8 @@
 
 Etcd是CoreOS基于Raft协议开发的分布式key-value存储，可用于服务发现、共享配置以及一致性保障（如数据库选主、分布式锁等）
 
-官方网站：https://etcd.io/
-
-下载地址：https://github.com/etcd-io/etcd/releases/download/v3.3.10/etcd-v3.3.10-linux-amd64.tar.gz
+- 官方网站：https://etcd.io
+- 下载地址：https://github.com-/etcd-io/etcd/releases/download/v3.3.10/etcd-v3.3.10-linux-amd64.tar.gz
 
 ## 1. 安装
 

@@ -1,10 +1,10 @@
 # Istio 1.6.8
 
+- 下载地址：https://github.com/istio/istio/releases/download/1.6.8/istio-1.6.8-linux-amd64.tar.gz
+
 ## 1. 安装
 
 ### 1.1 上传解压
-
-下载地址：https://github.com/istio/istio/releases/download/1.6.8/istio-1.6.8-linux-amd64.tar.gz
 
 ```bash
 mkdir -p /opt/software

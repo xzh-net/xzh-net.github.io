@@ -10,7 +10,7 @@ Prometheus是由SoundCloud开发的开源监控报警系统和时序列数据库
 
 ## 1. Prometheus
 
-### 1.1 下载解压
+### 1.1 上传解压
 
 ```bash
 cd /opt/software

@@ -2,13 +2,13 @@
 
 Apache Spark是一个快速的，用于海量数据处理的通用引擎
 
+- 下载地址：https://spark.apache.org/downloads.html
+
 ## 1. 安装
 
 ### 1.1 Local模式
 
 #### 1.1.1 上传解压
-
-下载地址：https://spark.apache.org/downloads.html
 
 ```bash
 mkdir -p /opt/software

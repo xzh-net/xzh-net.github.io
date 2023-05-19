@@ -1,5 +1,7 @@
 # PostgreSQL 12.4
 
+- 下载地址：http://www.postgresql.org/ftp/source/
+
 ## 1. 安装
 
 ### 1.1 单机
@@ -16,7 +18,6 @@ sudo systemctl start postgresql-12
 
 #### 1.2.1 下载
 
-http://www.postgresql.org/ftp/source/
 ```bash
 wget https://ftp.postgresql.org/pub/source/v12.4/postgresql-12.4.tar.gz --no-check-certificate
 ```

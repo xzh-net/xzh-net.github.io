@@ -2,9 +2,9 @@
 
 Keepalived是一款由C编写的软件，一般解决负载均衡器的高可用性问题，提供了负载均衡、健康检查和高可用的功能，高可用功能是由VRRP协议来实现的
 
-## 1. 安装
+- 官方网站：https://keepalived.org
 
-https://keepalived.org/
+## 1. 安装
 
 ### 1.1 安装依赖
 

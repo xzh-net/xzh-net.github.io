@@ -2,9 +2,8 @@
 
 ClickHouse 是俄罗斯的 Yandex 于 2016 年开源的列式存储数据库（DBMS），使用 C++语言编写，主要用于在线分析处理查询（OLAP），能够使用 SQL 查询实时生成分析数据报告。
 
-官网地址：https://clickhouse.com/
-
-下载地址：https://repo.yandex.ru/clickhouse/tgz/stable/
+- 官网地址：https://clickhouse.com
+- 下载地址：https://repo.yandex.ru/clickhouse/tgz/stable
 
 ## 1. 安装
 

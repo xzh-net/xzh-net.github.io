@@ -2,15 +2,13 @@
 
 RabbitMQ是一个开源的消息代理的队列服务器，用来通过普通协议在完全不同的应用之间共享数据。是使用Erlang语言来编写的，基于AMQP协议
 
-网站地址：https://www.rabbitmq.com/
+- 网站地址：https://www.rabbitmq.com/
+- rabbitmq下载地址: https://github.com/rabbitmq/rabbitmq-server/releases/tag/v3.9.12
+- erlang下载地址: https://github.com/rabbitmq/erlang-rpm/releases/tag/v23.3.4.10
 
 ## 1. 安装
 
-### 1.1 下载上传
-
-rabbitmq下载地址: https://github.com/rabbitmq/rabbitmq-server/releases/tag/v3.9.12
-
-erlang下载地址: https://github.com/rabbitmq/erlang-rpm/releases/tag/v23.3.4.10
+### 1.1 上传解压
 
 ```bash
 yum install -y gcc socat    # 安装依赖

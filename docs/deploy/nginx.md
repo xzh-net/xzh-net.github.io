@@ -1,8 +1,8 @@
 # Nginx 1.20.2
 
-## 1. 安装
+- 官方网站：http://nginx.org
 
-http://nginx.org/
+## 1. 安装
 
 ### 1.1 yum安装
 

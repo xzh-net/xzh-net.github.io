@@ -1,23 +1,10 @@
 # HAProxy 2.3.10
 
-负载均衡策略: 
-
-| **策略**               | **含义**                                                 |
-| ------------------ | ------------------------------------------------------------ |
-| roundrobin         | 表示简单的轮循，即客户端每访问一次，请求轮循跳转到后端不同的节点机器上 |
-| static-rr          | 基于权重轮循，根据权重轮循调度到后端不同节点                 |
-| leastconn          | 加权最少连接，表示最少连接者优先处理                         |
-| source             | 表示根据请求源IP，这个跟Nginx的IP_hash机制类似，使用其作为解决session问题的一种方法 |
-| uri                | 表示根据请求的URL，调度到后端不同的服务器                    |
-| url_param          | 表示根据请求的URL参数来进行调度                              |
-| hdr（name）        | 表示根据HTTP请求头来锁定每一次HTTP请求                       |
-| rdp-cookie（name） | 表示根据cookie（name）来锁定并哈希每一次TCP请求              |
+- 下载地址：https://src.fedoraproject.org/repo/pkgs/haproxy
 
 ## 1. 安装
 
 ### 1.1 下载
-
-https://src.fedoraproject.org/repo/pkgs/haproxy/
 
 ```bash
 curl https://www.lua.org/ftp/lua-5.4.3.tar.gz > /opt/software/lua-5.4.3.tar.gz 

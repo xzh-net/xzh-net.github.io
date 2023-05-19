@@ -2,9 +2,8 @@
 
 Apache Pulsar 是一个云原生企业级的发布订阅（pub-sub）消息系统
 
-官方网站：https://pulsar.apache.org
-
-下载地址：https://pulsar.apache.org/download
+- 官方网站：https://pulsar.apache.org
+- 下载地址：https://pulsar.apache.org/download
 
 ## 1. 安装
 

@@ -4,11 +4,11 @@ NPS是一款轻量级、高性能、功能强大的内网穿透代理服务器�
 
 原理：运行NPS服务的云服务器和运行NPS客户端的主机之间会创建一条TCP或UDP隧道，可以映射云服务器上的某个端口到客户端主机的指定端口，其他主机访问云服务器的这个端口的流量都会通过创建的这条隧道转发到映射的主机端口，实现内网穿透效果
 
+- 下载地址：https://github.com/ehang-io/nps/releases
+
 ## 1. 服务端
 
 ### 1.1 二进制安装
-
-下载地址：https://github.com/ehang-io/nps/releases
 
 ![](../../assets/_images/deploy/nps/nps1.png)
 
