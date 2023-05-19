@@ -1,4 +1,4 @@
-# Sacal IDEA 开发配置教程
+# Sacal IDEA 配置使用教程
 
 ![](../../assets/_images/java/tools/scala/1.png)
 

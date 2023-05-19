@@ -59,7 +59,7 @@
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
   - [使用ZeroBrane Studio调试lua脚本](java/tools/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
-  - [Sacla IDEA 开发配置教程](java/tools/scala)
+  - [Sacla IDEA 配置使用教程](java/tools/scala)
 
 - 学习笔记
   - [解决方案](java/project/scheme)

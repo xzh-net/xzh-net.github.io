@@ -1,11 +1,13 @@
 # C/C++ IDE CLion 配置使用教程
 
-## 1. 下载
+- Clion下载地址：https://www.jetbrains.com/clion/download
+- MinGw下载地址：https://sourceforge.net/projects/mingw-w64/files
 
-- Clion：https://www.jetbrains.com/clion/download/
-- MinGw：https://sourceforge.net/projects/mingw-w64/files/  选择mingw-w64，下载完成后解压到D盘根目录，如：D:\mingw64
+## 1. 安装
 
-## 2. 配置CLion Toolchain环境
+选择mingw-w64，下载完成后解压到D盘根目录，如：D:\mingw64
+
+## 2. 配置环境
 
 settings -> Build...>Toolchains -> 点加号 + （使用Mingw编译环境），相关环境参数如下图示：
 
