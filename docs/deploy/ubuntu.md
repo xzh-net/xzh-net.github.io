@@ -168,6 +168,8 @@ apt update
 
 ### 2.5 docker
 
+1. 安装
+
 ```bash
 # 卸载
 sudo apt-get remove docker docker-engine docker.io containerd runc  
@@ -186,12 +188,21 @@ systemctl start docker
 systemctl enable docker
 ```
 
+2. docker-compose
+
 ```bash
-$ docker volume create portainer_data
-$ docker run --name portainer
- -d -p 8000:8000 -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock 
--v portainer_data:/data portainer/portainer
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
 ```
 
+3. Portainer
 
-
+```bash
+docker volume create portainer_data
+docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
+    --restart=always \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v portainer_data:/data \
+    portainer/portainer-ce:2.18.2
+```

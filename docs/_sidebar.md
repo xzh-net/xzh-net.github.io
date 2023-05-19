@@ -2,8 +2,8 @@
   - [CentOS 7](deploy/centos7)
   - [Redhat 7](deploy/rhel7)
   - [Debian 10](deploy/debian)
-  - [Kali 2021.2](deploy/kali)
-  - [Ubuntu 22.04](deploy/ubuntu)
+  - [Kali 2021](deploy/kali)
+  - [Ubuntu 22](deploy/ubuntu)
   - [Rocky 8.5](deploy/rocky85)
   - [Windows 10](deploy/windows10)
 
