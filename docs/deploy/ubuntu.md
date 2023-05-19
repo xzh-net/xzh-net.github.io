@@ -1,6 +1,6 @@
 # Ubuntu 22.04.2 LTS
 
-- 官方网址：https://cn.ubuntu.com/
+- 官方网址：https://cn.ubuntu.com
 - 下载地址：https://releases.ubuntu.com
 
 ## 1. 安装系统
@@ -142,14 +142,14 @@ network:
   ethernets:
     enp0s3:
       addresses:
-      - 172.17.17.161/24
+      - 192.168.2.3/24
       nameservers:
         addresses:
         - 114.114.114.114
         search: []
       routes:
       - to: default
-        via: 172.17.17.2
+        via: 192.168.2.1
   version: 2
 ```
 
