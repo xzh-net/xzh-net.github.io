@@ -362,7 +362,7 @@ http {
   proxy_headers_hash_bucket_size 6400;  # 头部哈希表大小
   server_names_hash_bucket_size 512;    # 服务器名字的哈希表大小
   client_header_buffer_size 128k;       # 客户端请求头buffer大小
-  client_body_buffer_size 8m            # 请求主体缓冲区
+  client_body_buffer_size 8m;           # 请求主体缓冲区
   large_client_header_buffers 4 128k;   # 客户请求头缓冲大小
   # 静态资源优化
   sendfile on;                          # 开启高效的文件传输模式
@@ -726,7 +726,7 @@ location /getUser {
 	if ( $query_string ~* ^(.*)v=2.0$ ){
 		return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
 	}
-	return 200 '{"id":3,"name":"小牛心心","age":29}';
+	return 200 $time_local;
 }
 ```
 
