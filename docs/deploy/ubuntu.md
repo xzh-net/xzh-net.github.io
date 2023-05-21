@@ -70,6 +70,8 @@
 具体根据自己网络状况，可以选择 Cancel update and reboot 取消更新并重启
 ![](../../assets/_images/deploy/ubuntu/16.png)
 
+![](../../assets/_images/deploy/ubuntu/16_1.png)
+
 17. 输入ENTER确定重启
 
 ![](../../assets/_images/deploy/ubuntu/17.png)
@@ -105,6 +107,16 @@ echo '/dev/sdb /mnt/sdb ext4 errors=remount-ro 0 1' >> /etc/fstab  # 自动挂�
 cat /etc/fstab          # 查看写入分区信息
 ```
 
+20. 开启KVM
+
+![](../../assets/_images/deploy/ubuntu/20.png)
+
+```bash
+egrep -c '(vmx|svm)' /proc/cpuinfo  # 如果返回的结果不是0就说明可以虚拟化
+sudo apt install cpu-checker
+kvm-ok
+```
+
 
 ## 2. 虚拟机设置
 
@@ -134,7 +146,7 @@ update-rc.d ssh enable  # 开机启动
 ### 2.3 网络配置
 
 ```bash
-vi /etc/netplan/00-network-manager-all.yaml
+vi /etc/netplan/00-installer-config.yaml
 ```
 
 ```bash
@@ -166,7 +178,7 @@ deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe 
 apt update
 ```
 
-### 2.5 docker
+### 2.5 Docker
 
 1. 安装
 

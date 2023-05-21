@@ -1,6 +1,6 @@
 ![logo](icon.svg)
 
-# xzh <small>net</small>
+# xzh <small>.net</small>
 
 > 请忠于你内心深处的选择与坚守
 

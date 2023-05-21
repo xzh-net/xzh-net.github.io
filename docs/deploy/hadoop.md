@@ -399,9 +399,8 @@ stop-all.sh
 
 #### 2.8.1 Web UI
 
-HDFS集群：http://namenode_host:9870
-
-YARN集群：http://resourcemanager_host:8088
+- HDFS集群：http://namenode_host:9870
+- YARN集群：http://resourcemanager_host:8088
 
 #### 2.8.2 功能体验
 
@@ -483,7 +482,7 @@ vim exclude
 node04.xuzhihao.net
 ```
 
-?>注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役
+> 注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役
 
 #### 2.10.2 节点刷新
 
@@ -517,7 +516,7 @@ node03                  datanode  zookeeper  journal node
 
 ### 3.2 安装zookeeper集群
 
-?>需要设置免密登录
+> 需要设置免密登录
 
 ### 3.3 上传安装包
 
