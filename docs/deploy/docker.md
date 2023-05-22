@@ -3,7 +3,7 @@
 ## 1. 安装
 
 
-### 1.1 docker
+### 1.1 yum安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -16,7 +16,63 @@ systemctl start docker
 chkconfig docker on # 开机启动
 ```
 
-### 1.2 docker-compose
+### 1.2 离线安装
+
+- 下载地址：https://download.docker.com/linux/static/stable/x86_64/
+
+```bash
+tar zxf docker-18.06.1-ce.tgz # 上传解压
+sudo cp docker/* /usr/bin/    # 拷贝到全局命令中
+sudo dockerd &                # 启动
+```
+
+注册服务
+
+```bash
+sudo vi /usr/lib/systemd/system/docker.service
+```
+
+```yml
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network-online.target firewalld.service
+Wants=network-online.target
+ 
+[Service]
+Type=notify
+ExecStart=/usr/bin/dockerd
+ExecReload=/bin/kill -s HUP $MAINPID
+LimitNOFILE=infinity
+LimitNPROC=infinity
+TimeoutStartSec=0
+Delegate=yes
+KillMode=process
+Restart=on-failure
+StartLimitBurst=3
+StartLimitInterval=60s
+ 
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload           # 重载守护进程
+systemctl start docker
+systemctl enable docker
+```
+
+### 1.3 RPM安装
+
+
+```bash
+yum install -y yum-plugin-downloadonly
+yum install --downloadonly --downloaddir=/data/rpm/ docker-ce-18.06.3.ce-3.el7  # 只下载不安装
+cd /data/rpm
+yum localinstall *.rpm
+```
+
+### 1.4 Compose安装
 
 ```bash
 curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
@@ -25,7 +81,7 @@ cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
 ```
 
-### 1.3 修改镜像仓库
+### 1.5 修改镜像仓库
 
 - 网易：http://hub-mirror.c.163.com
 - Docker官方中国区：https://registry.docker-cn.com
@@ -33,9 +89,7 @@ docker-compose -v
 
 ```bash
 vi /etc/docker/daemon.json
-```
 
-```conf
 {
     "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
     "insecure-registries": ["192.168.3.200:5000"],
@@ -55,7 +109,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker 
 ```
 
-### 1.4 卸载
+### 1.6 卸载
 
 ```bash
 sudo yum remove docker \
