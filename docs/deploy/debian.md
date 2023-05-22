@@ -133,6 +133,8 @@ vim /etc/resolv.conf
 
 ### 2.4 更换apt源
 
+1. 网络源
+
 ```bash
 nano  /etc/apt/sources.list
 ```
@@ -155,7 +157,7 @@ deb-src http://mirrors.163.com/debian-security/ bullseye/updates main non-free c
 apt update
 ```
 
-### 2.5 配置光盘镜像源
+2. 光盘镜像源
 
 ![](../../assets/_images/deploy/debian/14.png)
 
@@ -172,7 +174,7 @@ deb [trusted=yes] file:/media/cdrom bullseye contrib main
 apt update
 ```
 
-### 2.6 安装vim
+### 2.5 安装vim
 
 ```bash
 apt-get install vim
