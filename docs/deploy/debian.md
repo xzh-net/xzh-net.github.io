@@ -98,7 +98,7 @@ sudo passwd root    # 修改root密码
 
 ```bash
 apt-get install ssh     # 安装
-echo -e "PasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config # 开启密码验证和root账号登录 
+echo -e "ListenAddress 0.0.0.0\nPasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config # 开启密码验证和root账号登录 
 service ssh start       # 启动ssh服务
 service ssh status      # 查看ssh服务状态
 update-rc.d ssh enable  # 添加开机自启动
