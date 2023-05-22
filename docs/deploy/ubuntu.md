@@ -180,7 +180,7 @@ apt update
 
 ### 2.5 Docker
 
-1. 安装
+1. 在线安装
 
 ```bash
 # 卸载
@@ -200,7 +200,7 @@ systemctl start docker
 systemctl enable docker
 ```
 
-2. docker-compose
+2. Compose安装
 
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
