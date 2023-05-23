@@ -1206,42 +1206,42 @@ curl https://get.acme.sh | sh -s email=xcg992224@163.com
 ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 ```
 
-#### 4.2.2 生成证书
+#### 4.2.2 HTTP生成
 
-1. dns模式
+acme.sh 会自动生成验证文件，并放到站点的根目录，然后自动完成验证，最后自动删除文件
 
 ```bash
-export Ali_Key="Ali_Key"
-export Ali_Secret="Ali_Secret"
+~/.acme.sh/acme.sh --issue -d test.xuzhihao.net --webroot /usr/local/nginx/html --insecure
+```
+
+ 
+#### 4.2.3 DNS生成
+
+acme.sh 会自动在域名上添加一条txt解析记录, 验证域名所有权。在签发证书前需要准备阿里云账户的Accesskey，打开以下地址并创建AccessKey即可：https://usercenter.console.aliyun.com/#/manage/ak
+
+```bash
+export Ali_Key="LTAI5tAGS2KAXbgF1yWib1U3"
+export Ali_Secret="xxxxxxxxxx"
 source ~/.bashrc
-~/.acme.sh/acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net --debug  # 单证书
-~/.acme.sh/acme.sh --issue --dns dns_ali -d *.xuzhihao.net                            # 泛域证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net   # 单证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d *.xuzhihao.net                    # 泛证书
 ```
 
-2. http模式
-
-```bash
-~/.acme.sh/acme.sh --issue -d zk.xuzhihao.net --webroot /var/www
-```
-
-
-#### 4.2.3 分配证书
-
-```bash
-acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
-acme.sh --issue --dns dns_ali -d *.xuzhihao.net --installcert --key-file /etc/nginx/cert.d/key.pem --fullchain-file /etc/nginx/cert.d/cert.pem --reloadcmd "nginx -s reload"
-```
-
-修改nginx配置配置文件
+#### 4.2.4 配置证书
 
 ```conf
-ssl_certificate /etc/nginx/cert.d/cert.pem;
-ssl_certificate_key /etc/nginx/cert.d/key.pem;
-ssl_session_cache shared:SSL:1m;
-ssl_session_timeout  10m;
-ssl_ciphers HIGH:!aNULL:!MD5;
-ssl_prefer_server_ciphers on;
+ssl_certificate /etc/nginx/cert.d/fullchain.cer;
+ssl_certificate_key /etc/nginx/cert.d/xuzhihao.net.key;
 ```
+
+相关文件的用途如下:
+- ca.cer：Let’s Encrypt的中级证书
+- fullchain.cer：包含中级证书的域名证书
+- test.xuzhihao.net.cer：无中级证书的域名证书
+- test.xuzhihao.net.conf：该域名的配置文件
+- test.xuzhihao.net.csr：该域名的CSR证书请求文件
+- test.xuzhihao.net.csr.conf：该域名的CSR请求文件的配置文件
+- test.xuzhihao.net.key：该域名证书的私钥
 
 ## 5. OpenRestry
 
