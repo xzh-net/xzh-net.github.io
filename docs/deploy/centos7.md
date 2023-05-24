@@ -1380,7 +1380,7 @@ find ./ -inum 105267651 -delete
 
 ### 2.3 磁盘
 
-1. 分区
+#### 2.3.1 分区
 
 ```bash
 fdisk -l
@@ -1409,7 +1409,7 @@ echo '/dev/sdb1 /data ext4 defaults 0 0' >> /etc/fstab  # 自动挂载
 cat /etc/fstab          # 查看写入分区信息
 ```
 
-2. 监控
+#### 2.3.2 IO监视
 
 ```bash
 yum install sysstat iotop -y
@@ -1437,7 +1437,7 @@ svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位�
 
 ### 2.4 网络
 
-1. 监控
+#### 2.4.1 路由
 
 ```bash
 ps -aux | grep redis          # 查看启动进程参数
@@ -1457,7 +1457,7 @@ route add -host 192.168.3.1 gw 192.168.1.110    # 对一个具体的ip添加路�
 rouate add -net 192.168.2.0/24 dev eth0         # 对一个网络添加一个新的路由（另一个网段）
 ```
 
-2. 端口检测
+#### 2.4.2 端口扫描
 
 ```bash
 yum install -y nc
@@ -1472,7 +1472,18 @@ nmap www.baidu.com
 
 ```
 
-3. 流量监控
+#### 2.4.3 tcpdump
+
+```bash
+yum install tcpdump
+
+tcpdump -n -X -i any port 445 -A    # 指定端口
+tcpdump -i em4                      # 指定网卡
+tcpdump -i em4 -nn 'src host 192.168.2.3'   # 监听来源ip
+tcpdump -i em4 -nn 'dst host 192.168.2.3'   # 监听返回ip
+```
+
+#### 2.4.4 流量监控
 
 ```bash
 wget http://gael.roualland.free.fr/ifstat/ifstat-1.1.tar.gz # 下载
