@@ -1274,6 +1274,7 @@ systemctl enable firewalld.service    # 随系统启动
 firewall-cmd --zone=public --add-port=80/tcp --permanent            # 开放端口
 firewall-cmd --zone=public --remove-port=9003/tcp --permanent       # 移除端口
 firewall-cmd --zone=public --add-port=30000-40000/tcp --permanent   # 批量开放端口
+firewall-cmd --zone=public --list-ports                  # 查看所有开启端口
 firewall-cmd --query-port=6379/tcp                       # 查看端口是否开启
 firewall-cmd --reload                                    # 重载防火墙配置
 ```
