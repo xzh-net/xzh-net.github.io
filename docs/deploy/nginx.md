@@ -340,65 +340,65 @@ error_log /var/log/nginx/nginx_error.log crit;
 pid /var/run/nginx.pid;
 worker_rlimit_nofile 102400;
 events {
-  use epoll;
-  worker_connections 102400;
+    use epoll;
+    worker_connections 102400;
 }
 
 http {
-  include mime.types;
-  default_type application/octet-stream;
-  # 自定义日志
-  log_format access '$host - $server_addr $remote_addr - $remote_user [$time_local] "$request" '
+    include mime.types;
+    default_type application/octet-stream;
+    # 自定义日志
+    log_format access '$host - $server_addr $remote_addr - $remote_user [$time_local] "$request" '
                 '$status $body_bytes_sent "$http_referer" '
                 '"$http_user_agent" "$remote_addr" "$http_x_forwarded_for" "$proxy_add_x_forwarded_for" "$http_x_real_ip" "$proxy_add_x_forwarded_for" "$upstream_addr"'; 
-  log_format post '$host - $remote_addr\t$remote_user\t[$time_local]\t"$request"\t$status\t$bytes_sent\t';
-  log_format ip '$host - $remote_addr - $remote_user [$time_local] "$request" - [$upstream_addr] - [$upstream_status]';
-  log_format rc escape=json '$remote_addr - $remote_user [$time_local] "$request" '
+    log_format post '$host - $remote_addr\t$remote_user\t[$time_local]\t"$request"\t$status\t$bytes_sent\t';
+    log_format ip '$host - $remote_addr - $remote_user [$time_local] "$request" - [$upstream_addr] - [$upstream_status]';
+    log_format rc escape=json '$remote_addr - $remote_user [$time_local] "$request" '
                 '$status $body_bytes_sent "$http_referer" '
                 '"$http_user_agent" "$http_x_forwarded_for" $request_body';
-  access_log  /var/log/nginx/ip_access.log  post;
-  # http参数
-  proxy_headers_hash_max_size  51200;   # 头部哈希表的最大值
-  proxy_headers_hash_bucket_size 6400;  # 头部哈希表大小
-  server_names_hash_bucket_size 512;    # 服务器名字的哈希表大小
-  client_header_buffer_size 128k;       # 客户端请求头buffer大小
-  client_body_buffer_size 8m;           # 请求主体缓冲区
-  large_client_header_buffers 4 128k;   # 客户请求头缓冲大小
-  # 静态资源优化
-  sendfile on;                          # 开启高效的文件传输模式
-  tcp_nopush on;                        # 提升网络传输效率
-  tcp_nodelay on;                       # 提高网络包传输
-  keepalive_timeout 60s;                # 开启TCP连接保持
-  # 资源压缩优化
-  gzip on;
-  gzip_types text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml text/javascript application/javascript application/x-javascript text/x-json application/json application/x-web-app-manifest+json text/css text/plain text/x-component font/opentype application/x-font-ttf application/vnd.ms-fontobject image/x-icon;   # 压缩文件类型
-  client_max_body_size 256m;            # 最大上传限制
-  gzip_vary on;                         # 压缩发送携带响应头
-  gzip_buffers 4 16k;                   # 缓存空间大小
-  gzip_disable "MSIE [1-6]\.";          # 关闭压缩的排除条件
-  gzip_http_version 1.1;                # 使用Gzip的HTTP最低版本
-  gzip_min_length 4k;                   # 关闭压缩传输数据大小限制/最小压缩限制
-  gzip_comp_level 3;                    # 压缩率
-  ##
-  open_file_cache max=102400 inactive=20s;
-  open_file_cache_valid 30s;
-  open_file_cache_min_uses 1;
-  server_tokens off;
-  ##
-  proxy_connect_timeout 30s;
-  proxy_send_timeout 150s;
-  proxy_read_timeout 150s;
-  ## 反向代理优化
-  proxy_buffering on;
-  proxy_buffer_size 1024k;
-  proxy_buffers 4 1024k;
-  proxy_busy_buffers_size 1024k;
-  proxy_temp_file_write_size 1024k;
+    access_log  /var/log/nginx/ip_access.log  post;
+    # http参数
+    proxy_headers_hash_max_size  51200;   # 头部哈希表的最大值
+    proxy_headers_hash_bucket_size 6400;  # 头部哈希表大小
+    server_names_hash_bucket_size 512;    # 服务器名字的哈希表大小
+    client_header_buffer_size 128k;       # 客户端请求头buffer大小
+    client_body_buffer_size 8m;           # 请求主体缓冲区
+    large_client_header_buffers 4 128k;   # 客户请求头缓冲大小
+    # 静态资源优化
+    sendfile on;                          # 开启高效的文件传输模式
+    tcp_nopush on;                        # 提升网络传输效率
+    tcp_nodelay on;                       # 提高网络包传输
+    keepalive_timeout 60s;                # 开启TCP连接保持
+    # 资源压缩优化
+    gzip on;
+    gzip_types text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml text/javascript application/javascript application/x-javascript text/x-json application/json application/x-web-app-manifest+json text/css text/plain text/x-component font/opentype application/x-font-ttf application/vnd.ms-fontobject image/x-icon;   # 压缩文件类型
+    client_max_body_size 256m;            # 最大上传限制
+    gzip_vary on;                         # 压缩发送携带响应头
+    gzip_buffers 4 16k;                   # 缓存空间大小
+    gzip_disable "MSIE [1-6]\.";          # 关闭压缩的排除条件
+    gzip_http_version 1.1;                # 使用Gzip的HTTP最低版本
+    gzip_min_length 4k;                   # 关闭压缩传输数据大小限制/最小压缩限制
+    gzip_comp_level 3;                    # 压缩率
+    ##
+    open_file_cache max=102400 inactive=20s;
+    open_file_cache_valid 30s;
+    open_file_cache_min_uses 1;
+    server_tokens off;
+    ##
+    proxy_connect_timeout 30s;
+    proxy_send_timeout 150s;
+    proxy_read_timeout 150s;
+    ## 反向代理优化
+    proxy_buffering on;
+    proxy_buffer_size 1024k;
+    proxy_buffers 4 1024k;
+    proxy_busy_buffers_size 1024k;
+    proxy_temp_file_write_size 1024k;
   
-  # 加载其他配置
-  include /usr/local/openresty/nginx/conf/blob.xuzhihao.net.conf;
-  # 负载均衡
-  include /usr/local/openresty/nginx/conf/blob.xuzhihao.net_upstream.conf;
+    # 加载其他配置
+    include /usr/local/openresty/nginx/conf/blob.xuzhihao.net.conf;
+    # 负载均衡
+    include /usr/local/openresty/nginx/conf/blob.xuzhihao.net_upstream.conf;
 }
 ```
 
@@ -416,39 +416,39 @@ upstream blob.xuzhihao.net {
 
 ```conf
 server {
-		listen 80;
-		server_name blob.xuzhihao.net;
-		rewrite ^(.*)$ https://$host$1 permanent;
+        listen 80;
+        server_name blob.xuzhihao.net;
+        rewrite ^(.*)$ https://$host$1 permanent;
 }
 server {
-		listen 443 ssl;
-		server_name blob.xuzhihao.net;
-		charset utf-8;
-		ssl_certificate /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_chain.crt;
-		ssl_certificate_key /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_key.key;
-		ssl_session_cache shared:SSL:20m;
+        listen 443 ssl;
+        server_name blob.xuzhihao.net;
+        charset utf-8;
+        ssl_certificate /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_chain.crt;
+        ssl_certificate_key /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_key.key;
+        ssl_session_cache shared:SSL:20m;
         ssl_session_timeout 5m;
-		ssl_buffer_size 256k;
-		ssl_session_tickets on;
-		ssl_stapling on;
-		ssl_stapling_verify on;
-		ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-		ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
-		ssl_prefer_server_ciphers on;
+        ssl_buffer_size 256k;
+        ssl_session_tickets on;
+        ssl_stapling on;
+        ssl_stapling_verify on;
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
+        ssl_prefer_server_ciphers on;
         resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
-		resolver_timeout 10s;
-		index index.html index.htm index.jsp index.do index.action;
-		access_log /usr/local/nginx/conf/sx/logs/sxgw.log;
-		location / {
-				proxy_redirect off;
-				proxy_set_header Host $host;
-				proxy_set_header X-Real-IP $remote_addr;
-				proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-				add_header Access-Control-Allow-Origin *;
-				add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-				add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
-				proxy_pass http://blob.xuzhihao.net;
-		}
+        resolver_timeout 10s;
+        index index.html index.htm index.jsp index.do index.action;
+        access_log /usr/local/nginx/conf/sx/logs/sxgw.log;
+        location / {
+                proxy_redirect off;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                add_header Access-Control-Allow-Origin *;
+                add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+                add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+                proxy_pass http://blob.xuzhihao.net;
+        }
 }
 ```
 
@@ -473,9 +473,9 @@ make && make install
 
 ```conf
 upstream backend {
-	server 192.168.3.200:9001 down;
-	server 192.168.3.201:9002 backup;
-	server 192.168.3.202:9003 max_fails=3 fail_timeout=30s;
+    server 192.168.3.200:9001 down;
+    server 192.168.3.201:9002 backup;
+    server 192.168.3.202:9003 max_fails=3 fail_timeout=30s;
 }
 ```
 
@@ -483,9 +483,9 @@ upstream backend {
 
 ```conf
 upstream backend {
-	server 192.168.200.146:9001 weight=10;
-	server 192.168.200.146:9002 weight=5;
-	server 192.168.200.146:9003 weight=3;
+    server 192.168.200.146:9001 weight=10;
+    server 192.168.200.146:9002 weight=5;
+    server 192.168.200.146:9003 weight=3;
 }
 ```
 
@@ -493,9 +493,9 @@ upstream backend {
 
 ```conf
 upstream blob.xuzhihao.net {
-  ip_hash;
-  server 192.168.3.200:7535;
-  server 192.168.3.201:7535;
+    ip_hash;
+    server 192.168.3.200:7535;
+    server 192.168.3.201:7535;
 }
 ```
 
@@ -503,10 +503,10 @@ upstream blob.xuzhihao.net {
 
 ```
 upstream backend {
-	least_conn;
-	server 192.168.200.146:9001;
-	server 192.168.200.146:9002;
-	server 192.168.200.146:9003;
+    least_conn;
+    server 192.168.200.146:9001;
+    server 192.168.200.146:9002;
+    server 192.168.200.146:9003;
 }
 ```
 
@@ -514,10 +514,10 @@ upstream backend {
 
 ```conf
 upstream backend {
-	hash &request_uri;
-	server 192.168.200.146:9001;
-	server 192.168.200.146:9002;
-	server 192.168.200.146:9003;
+    hash &request_uri;
+    server 192.168.200.146:9001;
+    server 192.168.200.146:9002;
+    server 192.168.200.146:9003;
 }
 ```
 
@@ -525,10 +525,10 @@ upstream backend {
 
 ```conf
 upstream backend {
-	fair;
-	server 192.168.200.146:9001;
-	server 192.168.200.146:9002;
-	server 192.168.200.146:9003;
+    fair;
+    server 192.168.200.146:9001;
+    server 192.168.200.146:9002;
+    server 192.168.200.146:9003;
 }
 ```
 
@@ -542,14 +542,14 @@ upstream backend {
 ```conf
 stream {
     upstream back{
-            server 192.168.3.200:3306 up;
-            server 192.168.3.201:3306 up;
+        server 192.168.3.200:3306 up;
+        server 192.168.3.201:3306 up;
     }
     server {
-            listen 3301;
-            proxy_connect_timeout 5s;
-            proxy_timeout 300s;
-            proxy_pass back;
+        listen 3301;
+        proxy_connect_timeout 5s;
+        proxy_timeout 300s;
+        proxy_pass back;
     }
 }
 ```
@@ -570,19 +570,19 @@ make && make install
 配置代理
 ```conf
 server {
-	listen 3182;
-	resolver  114.114.114.114;
+    listen 3182;
+    resolver  114.114.114.114;
 
-	proxy_connect;
-	proxy_connect_allow            443 563;
-	proxy_connect_connect_timeout  10s;
-	proxy_connect_read_timeout     10s;
-	proxy_connect_send_timeout     10s;
+    proxy_connect;
+    proxy_connect_allow            443 563;
+    proxy_connect_connect_timeout  10s;
+    proxy_connect_read_timeout     10s;
+    proxy_connect_send_timeout     10s;
 
-	location / {
-	  proxy_pass $scheme://$http_host$request_uri;
-	  proxy_set_header Host $host;
-	}
+    location / {
+        proxy_pass $scheme://$http_host$request_uri;
+        proxy_set_header Host $host;
+    }
 }
 ```
 
@@ -620,17 +620,17 @@ curl -i --proxy 192.168.3.114:3182  www.baidu.com
 server
 { 
     listen 80;
-	server_name  ~^(?<serno>.+).xuzhihao.net$;
-	server_name_in_redirect off; 
-	location / {
-		rewrite ^(.*)$ /$serno$1 break;
-		#proxy_pass http://127.0.0.1:8080;
-		root D:/workspace/;
-		proxy_set_header   Host    $host;
-		proxy_set_header   X-Real-IP   $remote_addr;
-		proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-	}
-	access_log logs/web.log;
+    server_name  ~^(?<serno>.+).xuzhihao.net$;
+    server_name_in_redirect off; 
+    location / {
+        rewrite ^(.*)$ /$serno$1 break;
+        #proxy_pass http://127.0.0.1:8080;
+        root D:/workspace/;
+        proxy_set_header   Host    $host;
+        proxy_set_header   X-Real-IP   $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    access_log logs/web.log;
 }
 ```
 
@@ -673,7 +673,7 @@ server {
 
 ```bash
 server {
-	error_page 404 http://www.xuzhihao.net;
+    error_page 404 http://www.xuzhihao.net;
 }
 ```
 
@@ -681,11 +681,11 @@ server {
 
 ```bash
 server{
-	error_page 404 /50x.html;
-	error_page 500 502 503 504 /50x.html;
-	location =/50x.html{
-		root html;
-	}
+    error_page 404 /50x.html;
+    error_page 500 502 503 504 /50x.html;
+    location =/50x.html{
+        root html;
+    }
 }
 ```
 
@@ -693,11 +693,11 @@ server{
 
 ```bash
 server{
-	error_page 404 @jump_to_error;
-	location @jump_to_error {
-		default_type text/plain;
-		return 404 'Not Found Page...';
-	}
+    error_page 404 @jump_to_error;
+    location @jump_to_error {
+        default_type text/plain;
+        return 404 'Not Found Page...';
+    }
 }
 ```
 
@@ -705,10 +705,10 @@ server{
 
 ```bash
 server{
-	error_page 404 =200 /50x.html;
-	location =/50x.html{
-		root html;
-	}
+    error_page 404 =200 /50x.html;
+    location =/50x.html{
+        root html;
+    }
 }
 ```
 
@@ -716,28 +716,28 @@ server{
 
 ```conf
 location /getUser {
-	default_type application/json;
-	add_header Content-Type 'text/html; charset=utf-8';
-	add_header Access-Control-Allow-Origin *;
-	add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
-	if ( $query_string ~* ^(.*)v=1.0$ ){
-		return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
-	}
-	if ( $query_string ~* ^(.*)v=2.0$ ){
-		return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
-	}
-	return 200 $time_local;
+    default_type application/json;
+    add_header Content-Type 'text/html; charset=utf-8';
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
+    if ( $query_string ~* ^(.*)v=1.0$ ){
+        return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
+    }
+    if ( $query_string ~* ^(.*)v=2.0$ ){
+        return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
+    }
+    return 200 $time_local;
 }
 ```
 
 ```conf
 location /postUser {
-	default_type application/json;
-	add_header Content-Type 'text/html; charset=utf-8';
-	if ($request_method !~* POST) {
-		return 403;
-	}
-	return 200 '{"id":3,"name":"小牛心心","age":29}';
+    default_type application/json;
+    add_header Content-Type 'text/html; charset=utf-8';
+    if ($request_method !~* POST) {
+        return 403;
+    }
+    return 200 '{"id":3,"name":"小牛心心","age":29}';
 }
 ```
 
@@ -795,11 +795,11 @@ location /images {
 
 ```conf
 server {
-	listen 80;
-	server_name www.web.name;
-	location /server {
-		rewrite ^/server-([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)\.html$ /server/$1/$2/$3/$4/$5.html last;
-	}
+    listen 80;
+    server_name www.web.name;
+    location /server {
+        rewrite ^/server-([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)\.html$ /server/$1/$2/$3/$4/$5.html last;
+    }
 }
 ```
 
@@ -807,7 +807,7 @@ server {
 
 ```conf
 server {
-    listen       80;
+    listen 80;
     server_name  www.xuzhihao.net;
     location /console/ {
         rewrite ^/(.*)$ http://www.xuzhihao.net/$1 permanent;
@@ -819,18 +819,18 @@ server {
 
 ```conf
 http{
-	proxy_cache_path /usr/local/proxy_cache levels=2:1 keys_zone=xzh:200m inactive=1d max_size=20g; # 缓存文件的存放路径
-	upstream backend{
-		server 192.168.3.200:8080;
-	}
-	server {
-		listen       8080;
+    proxy_cache_path /usr/local/proxy_cache levels=2:1 keys_zone=xzh:200m inactive=1d max_size=20g; # 缓存文件的存放路径
+    upstream backend{
+        server 192.168.3.200:8080;
+    }
+    server {
+        listen 8080;
         server_name  localhost;
         location / {
             if ($request_uri ~ /.*\.js$){
                 set $nocache 1;
             }
-        	proxy_cache xzh;                    # 和缓存区名称保存一致
+            proxy_cache xzh;                    # 和缓存区名称保存一致
             proxy_cache_key xuzhihao;           # 缓存的key值
             # proxy_cache_key $scheme$proxy_host$request_uri;   
             proxy_cache_min_uses 10;            # 10次以后缓存
@@ -840,9 +840,9 @@ http{
             add_header nginx-cache "$upstream_cache_status";  # 缓存状态
             proxy_no_cache $nocache $cookie_nocache $arg_nocache $arg_comment;  # 不缓存条件
             proxy_cache_bypass $nocache $cookie_nocache $arg_nocache $arg_comment;  # 从服务器获取并且缓存？？？没明白意义何在
-        	proxy_pass http://backend/js/;
+            proxy_pass http://backend/js/;
         }
-	}
+    }
 }
 ```
 
@@ -873,9 +873,9 @@ make upgrade
 
 ```conf
 server{
-	location ~ /purge(/.*) {
-		proxy_cache_purge xzh xuzhihao;
-	}
+    location ~ /purge(/.*) {
+        proxy_cache_purge xzh xuzhihao;
+    }
 }
 ```
 
@@ -886,7 +886,6 @@ server{
 ```bash
 cd /opt/software
 wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
-
 ```
 
 #### 3.11.2 解压编译
@@ -1109,7 +1108,7 @@ deny all;
 http {
     # include blockip.conf;
     server {
-        listen       28101;
+        listen 28101;
         server_name  _;
         # include blockip.conf;
         location /  {
@@ -1274,7 +1273,7 @@ location /lua{
 
 ```lua
 init_by_lua_block{
-	redis = require "resty.redis"
+    redis = require "resty.redis"
     mysql = require "resty.mysql"
     cjson = require "cjson"
 }
@@ -1306,57 +1305,55 @@ init_by_lua_block{
     mysql = require "resty.mysql"
     cjson = require "cjson"
 }
-location /{
-			default_type "text/html";
-			content_by_lua_block{
-				
-				--获取请求的参数username
-				local param = ngx.req.get_uri_args()["username"]
-				--建立mysql数据库的连接
-				local db = mysql:new()
-				local ok,err = db:connect{
-					host="192.168.200.111",
-					port=3306,
-					user="root",
-					password="123456",
-					database="nginx_db"
-				}
-				if not ok then
-				 ngx.say("failed connect to mysql:",err)
-				 return
-				end
-				--设置连接超时时间
-				db:set_timeout(1000)
-				--查询数据
-				local sql = "";
-				if not param then
-					sql="select * from users"
-				else
-					sql="select * from users where username=".."'"..param.."'"
-				end
-				local res,err,errcode,sqlstate=db:query(sql)
-				if not res then
-				 ngx.say("failed to query from mysql:",err)
-				 return
-				end
-				--连接redis
-				local rd = redis:new()
-				ok,err = rd:connect("192.168.200.111",6379)
-				if not ok then
-				 ngx.say("failed to connect to redis:",err)
-				 return
-				end
-				rd:set_timeout(1000)
-				--循环遍历数据
-				for i,v in ipairs(res) do
-				 rd:set("user_"..v.username,cjson.encode(v))
-				end
-				ngx.say("success")
-				rd:close()
-				db:close()
-			}
-			
-		}
+location / {
+        default_type "text/html";
+        content_by_lua_block {
+            --获取请求的参数username
+            local param = ngx.req.get_uri_args()["username"]
+            --建立mysql数据库的连接
+            local db = mysql:new()
+            local ok,err = db:connect{
+                host="192.168.200.111",
+                port=3306,
+                user="root",
+                password="123456",
+                database="nginx_db"
+            }
+            if not ok then
+                ngx.say("failed connect to mysql:",err)
+                return
+            end
+            --设置连接超时时间
+            db:set_timeout(1000)
+            --查询数据
+            local sql = "";
+            if not param then
+                sql="select * from users"
+            else
+                sql="select * from users where username=".."'"..param.."'"
+            end
+            local res,err,errcode,sqlstate=db:query(sql)
+            if not res then
+                ngx.say("failed to query from mysql:",err)
+                return
+            end
+            --连接redis
+            local rd = redis:new()
+            ok,err = rd:connect("192.168.200.111",6379)
+            if not ok then
+                ngx.say("failed to connect to redis:",err)
+                return
+            end
+            rd:set_timeout(1000)
+            --循环遍历数据
+            for i,v in ipairs(res) do
+                rd:set("user_"..v.username,cjson.encode(v))
+            end
+            ngx.say("success")
+            rd:close()
+            db:close()
+        }
+}
 ```
 
 7. `header_filter_by_lua*`
