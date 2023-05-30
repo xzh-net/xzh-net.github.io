@@ -2,7 +2,7 @@
 
 - 官方网址：https://www.redhat.com
 
-## 1. 安装VMware
+## 1. VMware
 
 ![](../../assets/_images/deploy/rhel7/Vm1.png)
 ![](../../assets/_images/deploy/rhel7/Vm2.png)
@@ -53,17 +53,19 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 ![](../../assets/_images/deploy/rhel7/8.png)
 ![](../../assets/_images/deploy/rhel7/9.png)
 
-2. 安装
+2. 选择图形化安装
 
-> 选择 `Install Red Hat Enterprise Linux 7.9`
+选择 `Install Red Hat Enterprise Linux 7.9`
 
 ![](../../assets/_images/deploy/rhel7/10.png)
 
-语言选择界面，正式生产服务器建议安装英文版本，Continue继续
+3. 选择语言
+
+正式生产服务器建议安装英文版本
 
 ![](../../assets/_images/deploy/rhel7/11.png)
 
-3. 设置时区
+4. 设置时区
 
 ![](../../assets/_images/deploy/rhel7/12.png)
 
@@ -71,7 +73,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/13.png)
 
-4. 设置安装源
+5. 设置安装源
 
 ![](../../assets/_images/deploy/rhel7/14.png)
 
@@ -84,7 +86,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/17.png)
 
-5. 安装软件
+6. 设置软件选择
 
 ![](../../assets/_images/deploy/rhel7/18.png)
 
@@ -92,7 +94,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/19.png)
 
-6. 磁盘分区
+7. 设置系统分区
 
 ![](../../assets/_images/deploy/rhel7/20.png)
 
@@ -111,12 +113,12 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 ![](../../assets/_images/deploy/rhel7/24.png)
 ![](../../assets/_images/deploy/rhel7/25.png)
 
-7. KDUMP设置
+8. KDUMP设置
 
 ![](../../assets/_images/deploy/rhel7/26.png)
 ![](../../assets/_images/deploy/rhel7/27.png)
 
-8. 网络主机设置
+9. 设置网络和主机名
 
 ![](../../assets/_images/deploy/rhel7/28.png)
 
@@ -125,7 +127,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 ![](../../assets/_images/deploy/rhel7/29.png)
 ![](../../assets/_images/deploy/rhel7/30.png)
 
-9. 安全策略
+10. 安全策略
 
 ![](../../assets/_images/deploy/rhel7/31.png)
 
@@ -133,11 +135,11 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/32.png)
 
-10. 设置管理员密码
+11. 设置管理员密码
 
 ![](../../assets/_images/deploy/rhel7/33.png)
 
-11. 系统重启
+12. 系统重启
 
 ![](../../assets/_images/deploy/rhel7/34.png)
 

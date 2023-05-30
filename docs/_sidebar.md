@@ -1,10 +1,11 @@
 - 操作系统
   - [CentOS 7](deploy/centos7)
   - [Redhat 7](deploy/rhel7)
-  - [Debian 10](deploy/debian)
-  - [Kali 2021](deploy/kali)
-  - [Ubuntu 22](deploy/ubuntu)
+  - [Debian 10](deploy/debian10)
+  - [Kali 2021](deploy/kali2021)
+  - [Ubuntu 22](deploy/ubuntu22)
   - [Rocky 8.5](deploy/rocky85)
+  - [银河麒麟 V10](deploy/kylinv10)
   - [Windows 10](deploy/windows10)
 
 - 数据库
