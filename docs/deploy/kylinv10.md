@@ -69,17 +69,21 @@
 ### 2.1 初始化
 
 ```bash
-sudo passwd root    # 修改root密码
+nkvers  # 查看版本
+yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
+systemctl stop firewalld.service
+systemctl disable firewalld.service # 关闭
 ```
 
 ### 2.2 ssh配置
 
 ```bash
-apt-get install ssh     # 安装
 echo -e "ListenAddress 0.0.0.0\nPasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config # 开启密码验证和root账号登录 
-service ssh start       # 启动ssh服务
-service ssh status      # 查看ssh服务状态
-update-rc.d ssh enable  # 添加开机自启动
+
+service sshd start
+systemctl enable sshd   # 开机启动
 ```
 
 ### 2.3 网络配置
@@ -87,20 +91,32 @@ update-rc.d ssh enable  # 添加开机自启动
 1. 设置静态ip
 
 ```bash
-ip addr
-vi /etc/network/interfaces
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+BOOTPROTO=none
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=enp0s3
+UUID=a49310b5-f18f-472b-b407-3ed5a385fa7c
+DEVICE=enp0s3
+ONBOOT=no
+IPADDR=192.168.2.3
+PREFIX=24
+GATEWAY=192.168.2.1
+DNS1=114.114.114.114
+IPV6_PRIVACY=no
 ```
 
 ```bash
-auto enp0s3
-iface enp0s3 inet static
-address 192.168.2.3
-netmask 255.255.255.0
-gateway 192.168.2.1
-```
-
-```bash
-systemctl restart networking
+systemctl restart network
 ```
 
 2. 设置dns
@@ -108,53 +124,3 @@ systemctl restart networking
 ```bash
 vim /etc/resolv.conf
 ```
-
-### 2.4 更换apt源
-
-1. 网络源
-
-```bash
-nano  /etc/apt/sources.list
-```
-
-```bash
-# deb [trusted=yes] file:/media/cdrom bullseye contrib main
-# deb http://security.debian.org/debian-security bullseye-security main contrib
-# deb-src http://security.debian.org/debian-security bullseye-security main contrib
-deb http://mirrors.163.com/debian/ bullseye main non-free contrib
-deb http://mirrors.163.com/debian/ bullseye-updates main non-free contrib
-deb http://mirrors.163.com/debian/ bullseye-backports main non-free contrib
-deb-src http://mirrors.163.com/debian/ bullseye main non-free contrib
-deb-src http://mirrors.163.com/debian/ bullseye-updates main non-free contrib
-deb-src http://mirrors.163.com/debian/ bullseye-backports main non-free contrib
-deb http://mirrors.163.com/debian-security/ bullseye/updates main non-free contrib
-deb-src http://mirrors.163.com/debian-security/ bullseye/updates main non-free contrib
-```
-
-```bash
-apt update
-```
-
-2. 光盘镜像源
-
-![](../../assets/_images/deploy/kylin/14.png)
-
-```bash
-cat  /proc/sys/dev/cdrom/info   # 查看光驱设备
-mount /dev/sr0 /media/cdrom     # 手动挂载
-```
-
-添加源
-
-```bash
-nano /etc/apt/sources.list
-deb [trusted=yes] file:/media/cdrom bullseye contrib main
-apt update
-```
-
-### 2.5 安装vim
-
-```bash
-apt-get install vim
-```
-
