@@ -548,6 +548,18 @@ sh /data/oracle_restart.sh
 nohup sh /data/oracle_restart.sh &     # 后台执行
 ```
 
+#### 2.1.3 关闭监听
+
+```bash
+lsnrctl status
+lsnrctl
+set log_status off
+save_config
+show log_status
+stop
+start
+```
+
 ### 2.2 表空间
 
 #### 2.2.1 临时表空间
