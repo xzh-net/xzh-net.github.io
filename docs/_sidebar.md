@@ -5,7 +5,7 @@
   - [Kali 2021](deploy/kali2021)
   - [Ubuntu 22](deploy/ubuntu22)
   - [Rocky 8.5](deploy/rocky85)
-  - [银河麒麟 V10](deploy/kylinv10)
+  - [Kylin V10](deploy/kylinv10)
   - [Windows 10](deploy/windows10)
 
 - 数据库
