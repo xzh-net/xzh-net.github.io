@@ -1747,8 +1747,27 @@ JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
 $JAVA ${JAVA_OPT} $@
 ```
 
+#### 2.6.4 Java（reset.sh）
 
-#### 2.6.4 xsync
+```bash
+PIDS=$(ps -ef|grep worker-center | grep -v grep | awk '{print $2}')
+
+start(){
+    nohup java -jar -Xms128M -Xmx128M -XX:MetaspaceSize=128M -XX:MaxMetaspaceSize=128M worker-center-4.5.1.jar  &> nohup.out -p -i &
+    echo "started"
+}
+echo "$PIDS"
+
+for PID in $PIDS
+    do kill -9 $PID 
+    echo " $PID has been killed"
+done
+
+start
+ps -aux |grep worker-center
+```
+
+#### 2.6.5 xsync
 
 ```bash
 yum install -y rsync
