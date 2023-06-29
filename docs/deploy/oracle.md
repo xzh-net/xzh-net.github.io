@@ -1010,10 +1010,15 @@ GROUP BY OWNER ORDER BY 2 DESC;
 -- 查询某用户下所有表的记录总数
 SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'SHJG0814';
 
---查看户下所有表的各自的记录条数
+-- 查看户下所有表的各自的记录条数
 SELECT T.TABLE_NAME "表名",T.NUM_ROWS "记录条数" FROM USER_TABLES T;
-```
 
+-- 查看户下所有存储过程
+SELECT * FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'PROCEDURE' AND OWNER='SHJG0814'
+
+-- 按关键字查找出现的位置
+SELECT * FROM USER_SOURCE WHERE UPPER(TEXT) LIKE UPPER('%keywords%');
+```
 
 ## 4. PL/SQL
 
