@@ -10,6 +10,7 @@
 
 - 数据库
   - [Oracle](deploy/oracle)
+  - [DM](deploy/dm)
   - [PostgreSQL](deploy/postgre)
   - [MySQL](deploy/mysql)
   - [SQL Server](deploy/mssql)
