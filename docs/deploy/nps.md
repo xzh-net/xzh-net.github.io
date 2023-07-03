@@ -82,89 +82,26 @@ disconnect_timeout|客户端连接超时，单位 5s，默认值 60，即 300s =
 
 ## 2. 客户端
 
-### 2.1 配置文件
-
-```conf
-[common]
-server_addr=127.0.0.1:8024
-conn_type=tcpf
-vkey=123
-auto_reconnection=true
-max_conn=1000
-flow_limit=1000
-rate_limit=1000
-basic_username=11
-basic_password=3
-web_username=user
-web_password=1234
-crypt=true
-compress=true
-#pprof_addr=0.0.0.0:9999
-disconnect_timeout=60
-
-[health_check_test1]
-health_check_timeout=1
-health_check_max_failed=3
-health_check_interval=1
-health_http_url=/
-health_check_type=http
-health_check_target=127.0.0.1:8083,127.0.0.1:8082
-
-[health_check_test2]
-health_check_timeout=1
-health_check_max_failed=3
-health_check_interval=1
-health_check_type=tcp
-health_check_target=127.0.0.1:8083,127.0.0.1:8082
-```
-
-项 | 含义
----|---
-server_addr | 服务端ip/域名:port
-conn_type | 与服务端通信模式(tcp或kcp)
-vkey|服务端配置文件中的密钥(非web)
-username|socks5或http(s)密码保护用户名(可忽略)
-password|socks5或http(s)密码保护密码(可忽略)
-compress|是否压缩传输(true或false或忽略)
-crypt|是否加密传输(true或false或忽略)
-rate_limit|速度限制，可忽略
-flow_limit|流量限制，可忽略
-remark|客户端备注，可忽略
-max_conn|最大连接数，可忽略
-pprof_addr|debug pprof ip:port
-
-### 2.2 域名代理
+### 2.1 域名代理
 
 适用范围： 小程序开发、微信公众号开发、产品演示
 
 假设场景：
-- 有一个`已备案`域名xuzhihao.net，有一台公网机器ip为39.105.58.136
+- 有一个`已备案`域名hwcq.online，有一台公网机器ip为39.105.58.136
 - 内网开发站点127.0.0.1:8088
-- 想通过（http|https://www.xuzhihao.net访问127.0.0.1:8088）
+- 想通过www.hwcq.online访问127.0.0.1:8088
 
 使用步骤：
-- 将*.xuzhihao.net解析到公网服务器39.105.58.136
-- 点击刚才创建的客户端的域名管理，添加规则（域名：www.xuzhihao.net 内网目标：127.0.0.1:8088）
+- 将*.hwcq.online解析到公网服务器39.105.58.136
+- 点击刚才创建的客户端的域名管理，添加规则（域名：www.hwcq.online 内网目标：127.0.0.1:8088）
 
-现在访问（http|https://www.xuzhihao.net即可成功）
+现在访问www.hwcq.online即可成功
 
-客户端配置：
-```conf
-[common]
-server_addr=vpsip:8024
-conn_type=tcp
-vkey=123456
-auto_reconnection=true
-[web]
-host=www.xuzhihao.net
-target_addr=127.0.0.1:8088
-host_change=www.xuzhihao.net
-header_set_proxy=nps
-```
+服务端配置：
 
 ![](../../assets/_images/deploy/nps/nps12.png)
 
-服务端配置(可选)
+参数配置(可选)
 ```conf
 #HTTP(S) proxy port, no startup if empty
 http_proxy_ip=0.0.0.0
@@ -176,12 +113,31 @@ https_default_cert_file=conf/server.pem
 https_default_key_file=conf/server.key
 ```
 
+客户端配置：
+```conf
+[common]
+server_addr=39.105.58.136:8024
+conn_type=tcp
+vkey=123456
+auto_reconnection=true
+[web]
+host=www.hwcq.online
+target_addr=127.0.0.1:8088
+host_change=www.hwcq.online
+header_set_proxy=nps
+```
 
-### 2.3 tcp隧道模式
+### 2.2 TCP隧道
 
-#### 2.3.1 ssh访问内网
+#### 2.2.1 ssh访问内网
 
-使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的22端口，实现SSH连接。
+使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的22端口，实现ssh连接。
+
+服务端配置：
+
+![](../../assets/_images/deploy/nps/nps11.png)
+
+客户端配置：
 
 ```conf
 [common]
@@ -195,14 +151,18 @@ target_addr=127.0.0.1:22
 server_port=8090
 ```
 
-![](../../assets/_images/deploy/nps/nps11.png)
-
 ![](../../assets/_images/deploy/nps/nps10.png)
 
 
-#### 2.3.2 mstsc访问内网
+#### 2.2.2 mstsc访问内网
 
 使用场景: 通过公网服务器39.105.58.136的8090端口，连接内网机器192.168.2.3的3389端口
+
+服务端配置：
+
+![](../../assets/_images/deploy/nps/nps5.png)
+
+客户端配置：
 
 ```conf
 [common]
@@ -216,16 +176,18 @@ target_addr=127.0.0.1:3389
 server_port=8090
 ```
 
-![](../../assets/_images/deploy/nps/nps4.png)
-
-![](../../assets/_images/deploy/nps/nps5.png)
-
 ![](../../assets/_images/deploy/nps/nps6.png)
 
 ![](../../assets/_images/deploy/nps/nps7.png)
 
 
-#### 2.3.3 http反向代理
+#### 2.2.3 http反向代理
+
+服务端配置：
+
+![](../../assets/_images/deploy/nps/nps8.png)
+
+客户端配置：
 
 ```conf
 [common]
@@ -236,14 +198,12 @@ vkey=123456
 mode=tcp
 target_addr=127.0.0.1:8088
 server_port=9090
-
 ```
-![](../../assets/_images/deploy/nps/nps8.png)
 
 ![](../../assets/_images/deploy/nps/nps9.png)
 
 
-### 2.4 udp隧道模式
+### 2.3 UDP隧道
 
 ```conf
 [common]
@@ -257,7 +217,7 @@ target_addr=127.0.0.1:8080
 server_port=9002
 ```
 
-### 2.5 http代理模式
+### 2.4 HTTP代理
 
 ```conf
 [common]
@@ -270,7 +230,11 @@ mode=httpProxy
 server_port=9003
 ```
 
-### 2.6 socks5代理模式
+### 2.5 SOCKS5代理
+
+使用场景：在外网环境下如同使用vpn一样访问内网设备或者资源，想将公网服务器39.105.58.136的9004端口作为socks5代理，达到访问内网任意设备或者资源的效果
+
+客户端配置：
 
 ```conf
 [common]
@@ -283,7 +247,7 @@ server_port=9004
 multi_account=multi_account.conf
 ```
 
-> windows系统可以配合proxifier进行全局代理。Linux还可以使用proxychains进行socks5配置，推荐linux使用proxychains进行配置，可以更好的联合其他工具进行嗅探收集内网信息和横向移动。
+> windows可以配合proxifier进行全局代理。Linux还可以使用proxychains进行socks5配置，推荐linux使用proxychains进行配置，可以更好的联合其他工具进行嗅探收集内网信息和横向移动。
 
 Proxifier是一款功能非常强大的socks5客户端，可以让不支持通过代理服务器工作的网络程序能通过HTTPS或SOCKS代理或代理链。
 
@@ -306,39 +270,42 @@ Proxifier是一款功能非常强大的socks5客户端，可以让不支持通�
 ![](../../assets/_images/deploy/nps/nps15.png)
 
 
-### 2.7 私密代理模式
+### 2.6 私密代理
 
 tcp隧道暴露了公网vps的监听端口。如果其他人得到了vps的ip，通过端口扫描得到了开放的端口，将会很容易连接上部署的tcp隧道，这是一个很不安全的行为。为了更加安全管理内网设备，nps支持建立私密代理，通过给隧道设置连接密码，增加了隧道的安全性和私密性。攻击机也需要配置nps客户端
 
+服务端配置：
+![](../../assets/_images/deploy/nps/nps16.png)
+
 客户端配置：
 ```conf
 [common]
 server_addr=39.105.58.136:8024
 conn_type=tcp
-vkey=123456
+vkey=888888
 [secret_ssh]
 mode=secret
-password=ssh2
+password=123456
 target_addr=127.0.0.1:22
 ```
 
 攻击机配置：
 ```bash
-./npc -server=39.105.58.136:8024 -vkey=888888 -type=tcp -password=ssh2 -local_type=secret
+./npc -server=39.105.58.136:8024 -vkey=888888 -type=tcp -password=123456 -local_type=secret
 ssh -p 2000 root@127.0.0.1
 ```
 
-### 2.8 p2p代理模式
+如需指定本地端口可加参数`-local_port=xxxx`，默认为2000
+
+### 2.7 P2P代理
+
+适用范围： 大流量传输场景，流量不经过公网服务器，但是由于p2p穿透和nat类型关系较大，不保证100%成功，支持大部分nat类型` ./npc nat -stun_addr=stun.stunprotocol.org:3478`
 
 ```bash
-vi /etc/nps/conf/nps.conf
-```
+vi /etc/nps/conf/nps.conf   # 服务器开启p2p
 
-服务器开启p2p
-```conf
-#p2p
-p2p_ip=39.105.58.136    # 公网ip
-p2p_port=6000           # 请在防火墙开放6000~6002(额外添加2个端口)udp端口
+p2p_ip=39.105.58.136        # 公网ip
+p2p_port=6000               # 请在防火墙开放6000~6002(额外添加2个端口)udp端口
 ```
 
 客户端配置：
@@ -346,20 +313,20 @@ p2p_port=6000           # 请在防火墙开放6000~6002(额外添加2个端口)
 [common]
 server_addr=39.105.58.136:8024
 conn_type=tcp
-vkey=123456
+vkey=999999
 [p2p_ssh]
 mode=p2p
-password=123
+password=123456
 target_addr=127.0.0.1:22
 ```
 
 攻击机配置：
 ```bash
-./npc -server=39.105.58.136:8024 -vkey=999999 -type=tcp -password=123 -target=127.0.0.1:22
+./npc -server=39.105.58.136:8024 -vkey=999999 -type=tcp -password=123456 -target=127.0.0.1:22
 ssh -p 2000 root@127.0.0.1
 ```
 
-### 2.9 文件访问模式
+### 2.8 文件访问
 
 利用nps提供一个公网可访问的本地文件服务，此模式仅客户端使用配置文件模式方可启动
 
