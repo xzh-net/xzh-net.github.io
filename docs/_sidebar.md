@@ -10,7 +10,6 @@
 
 - 数据库
   - [Oracle](deploy/oracle)
-  - [DM](deploy/dm)
   - [PostgreSQL](deploy/postgre)
   - [MySQL](deploy/mysql)
   - [SQL Server](deploy/mssql)
@@ -19,6 +18,7 @@
   - [HBase](deploy/hbase)
   - [Mycat](deploy/mycat)
   - [Debezium](deploy/debezium)
+  - [DM](deploy/dm)
 
 - 应用
   - [Nginx](deploy/nginx)
