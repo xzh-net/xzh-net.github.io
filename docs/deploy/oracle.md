@@ -624,7 +624,7 @@ select username,default_tablespace from dba_users where username='xzh';
 alter tablespace xzh_data ADD datafile '/u01/app/oracle/xzh/xzh.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
 ```
 
-### 2.3 创建用户授权
+### 2.3 用户授权
 
 ```sql
 create user xzh0610 identified by 123456
@@ -787,7 +787,7 @@ find /opt/DB/ -mtime +5 -type f -name '*.dmp.gz' -exec rm {} \;
 find /opt/DB/ -mtime +5 -type f -name '*.log' -exec rm {} \;
 ```
 
-### 2.6 生成AWR报告
+### 2.6 AWR报告
 
 ```bash
 su - oracle
@@ -801,6 +801,17 @@ conn /as sysdba
 # 输入报告名称
 ```
 
+### 2.7 审计日志
+
+```bash
+sqlplus /nolog
+connect / as sysdba
+show parameter audit_trail;
+alter system set audit_trail=none scope=spfile;
+shutdown immediate;
+startup;
+truncate table SYS.AUD$;
+```
 
 ## 3. 表操作
 
