@@ -1050,14 +1050,14 @@ org.apache.flume.source.taildir.TailFile
 public boolean updatePos(String path, long inode, long pos) throws IOException {
     //update by xzh
     //if (this.inode == inode && this.path.equals(path)) {
-    if (this.inode == inode)
-      setPos(pos);
-      updateFilePos(pos);
-      logger.info("Updated position, file: " + path + ", inode: " + inode + ", pos: " + pos);
-      return true;
-    }
-    return false;
-  }
+      if (this.inode == inode)
+        setPos(pos);
+        updateFilePos(pos);
+        logger.info("Updated position, file: " + path + ", inode: " + inode + ", pos: " + pos);
+        return true;
+      }
+      return false;
+    //}
 ```
 
 #### 3.1.2 修改ReliableTaildirEventReader
