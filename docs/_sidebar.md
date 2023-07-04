@@ -48,13 +48,13 @@
   - [Hadoop](deploy/hadoop)
   - [Spark](deploy/spark)
   - [Flink](deploy/flink)
-  - [Flume](deploy/flume) 
+  - [Flume](deploy/flume)
   - [Kafka](deploy/kafka)
 
 - 数仓
   - [Hive](deploy/hive)
   - [ClickHouse](deploy/clickhouse)
-  - [Kettle](deploy/kettle) 
+  - [Kettle](deploy/kettle)
   - [DataX](deploy/datax)
 
 - 开发工具
@@ -81,7 +81,7 @@
   - [Spring的底层原理与源码实现](java/frame/spring)
   - [Spring Mvc](java/frame/springmvc)
   - [Spring Boot](java/frame/springboot)
-  - [Mybatis源码](java/frame/mybatis)  
+  - [Mybatis源码](java/frame/mybatis)
   - [Netty原理和源码](java/network/netty)
   - [Tomcat原理和源码](java/network/tomcat)
   - [Dubbo源码解析](java/distributed/dubbo)
