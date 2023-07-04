@@ -2,7 +2,9 @@
 
 ## 1. 安装
 
-### 1.1 静默安装
+### 1.1 二进制安装
+
+### 1.2 docker安装
 
 ## 2. 库操作
 
@@ -16,7 +18,7 @@ select tablespace_name from dba_tablespaces;
 select tablespace_name,file_name from dba_data_files;
 ```    
 
-### 2.2 用户创建授权
+### 2.2 用户授权
 
 ```bash
 create user xzh identified by 123456789 limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
