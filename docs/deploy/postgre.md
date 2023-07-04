@@ -4,7 +4,7 @@
 
 ## 1. 安装
 
-### 1.1 单机
+### 1.1 yum安装
 
 ```bash
 sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -169,23 +169,6 @@ ALTER USER postgres WITH PASSWORD 'postgres'; # 修改用户默认密码
 /usr/local/pgsql/bin/psql test
 ```
 
-### 1.3 pg_stat_statements安装
-
-```bash
-cd /home/postgresql-12.4/contrib/
-make && make install
-su - postgres
-cd $PGDATA
-#vi postgresql.conf
-shared_preload_libraries = 'pg_stat_statements'
-pg_stat_statements.max = 1000
-pg_stat_statements.track = all
-
-service postgresql start
-psql \c
-create extension pg_stat_statements;
-```
-
 ### 1.4 主备流复制
 
 #### 1.4.1 主节点
@@ -193,7 +176,7 @@ create extension pg_stat_statements;
 1. 修改pg_hba.conf
 
 ```bash
-host replication replica 0.0.0.0/0 md5
+host replication replica 0.0.0.0/0 md5  # 没有添加，否则开启注释
 ```
 
 2. 添加流复制用户
@@ -383,7 +366,7 @@ COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：�
 
 ## 3. 库操作
 
-### 3.1 建库用户授权
+### 3.1 用户授权
 
 ```bash
 create user "sonar" with password '123456';
@@ -501,6 +484,23 @@ cd /usr/local/pgsql/bin
 ./pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
 cd /data/pgdata/12/data/archivedir
 pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
+```
+
+### 4.4 AWR报告
+
+```bash
+cd /home/postgresql-12.4/contrib/
+make && make install
+su - postgres
+cd $PGDATA
+#vi postgresql.conf
+shared_preload_libraries = 'pg_stat_statements'
+pg_stat_statements.max = 1000
+pg_stat_statements.track = all
+
+service postgresql start
+psql \c
+create extension pg_stat_statements;
 ```
 
 ## 4. 表操作
@@ -666,7 +666,7 @@ SELECT C
 	A.attnum ASC
 ```
 
-### 4.4 pg_stat_statements
+### 4.4 SQL监控
 
 pg_stat_statements模块提供一种方法追踪一个服务器所执行的所有 SQL 语句的执行统计信息
 
