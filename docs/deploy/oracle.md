@@ -813,6 +813,23 @@ startup;
 truncate table SYS.AUD$;
 ```
 
+### 2.8 修改密码
+
+```bash
+# 直接修改
+password zhangsan
+# 使用SQL语句查找密码过期用户所属的profile
+select username,profile from dba_users;  
+# 查看对应的概要文件(如default)的密码有效期设置（一般默认为180天）
+SELECT * FROM dba_profiles s WHERE s.profile='DEFAULT' AND resource_name='PASSWORD_LIFE_TIME';
+# 然后使用SQL语句将该用户所属的profile修改为永不过期
+alter profile default limit PASSWORD_LIFE_TIME unlimited;
+# 将密码过期用户的密码更新，使用如下SQL
+alter user zhangsan identified by "密码" account unlock;
+# 解锁用户
+alter user zhangsan account unlock;
+```
+
 ## 3. 表操作
 
 ### 3.1 系统参数
