@@ -47,6 +47,7 @@ cd /usr/local/redis/bin
 #### 1.1.5 客户端测试
 
 ```bash
+redis-cli -h host -p port -a password
 /usr/local/redis/bin/redis-cli -p 6380
 /usr/local/redis/bin/redis-benchmark -n 10000  -q
 ./redis-benchmark -h 127.0.0.1 -p 6379 -t set,lpush -n 10000 -q
@@ -400,7 +401,6 @@ PEXPIREAT key milliseconds-timestamp # 设置 key 的过期时间亿以毫秒计
 ```bash
 redis-server --version
 redis-server /opt/redis/redis.conf
-redis-cli -h host -p port -a password
 CLIENT PAUSE timeout        # 在指定时间内终止运行来自客户端的命令
 DEBUG OBJECT key            # 获取 key 的调试信息
 FLUSHDB                     # 删除当前数据库的所有key
