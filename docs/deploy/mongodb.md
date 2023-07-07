@@ -793,6 +793,8 @@ db.createUser({user: "xzh", pwd: "123456", roles: ["readWrite"]})
 ## 3. 命令
 
 ```bash
+mongo --host=127.0.0.1 --port=27017
+
 # 数据操作
 use test        # 选择切换数据库
 show dbs        # 查看有权限查看的所有的数据库命令
