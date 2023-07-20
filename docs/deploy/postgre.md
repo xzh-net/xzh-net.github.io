@@ -506,6 +506,7 @@ create extension pg_stat_statements;
 ## 4. 表操作
 
 ### 4.1 锁表
+
 ```sql
 -- 执行中sql
 SELECT pgsa.datname AS database_name
@@ -544,9 +545,33 @@ where pid in (
 -- 解锁
 SELECT pg_cancel_backend(pid);
 
+-- PID查询sql
+SELECT
+	procpid,
+	START,
+	now( ) - START AS lap,
+	current_query 
+FROM
+	(
+	SELECT
+		backendid,
+		pg_stat_get_backend_pid ( S.backendid ) AS procpid,
+		pg_stat_get_backend_activity_start ( S.backendid ) AS START,
+		pg_stat_get_backend_activity ( S.backendid ) AS current_query 
+	FROM
+		( SELECT pg_stat_get_backend_idset ( ) AS backendid ) AS S 
+	) AS S 
+WHERE
+	current_query <> '' 
+	AND procpid = 34171 
+ORDER BY
+	lap DESC;
+
+-- kill 进程
+SELECT pg_terminate_backend ( pid )
 ```
 
-### 4.2 占用统计
+### 4.2 统计
 
 
 ```sql
@@ -706,6 +731,20 @@ SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_t
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 5;
 -- 查询总最耗时 SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
+-- 找不到mean_time字段的时候使用
+SELECT
+  userid AS 执行者ID,
+  dbid AS 执行数据库ID,
+  query AS 执行的语句 ,
+  calls AS 执行次数 ,
+  total_time AS 执行总时间,
+  total_time / calls AS 执行平均时间,
+  ROWS AS 影响的总行数 
+FROM
+  pg_stat_statements 
+ORDER BY
+  total_time / calls DESC 
+  LIMIT 10
 
 -- 响应时间抖动最严重 SQL
 select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
@@ -716,6 +755,7 @@ select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_w
 -- 清理历史统计信息
 select pg_stat_statements_reset(); 
 ```
+
 
 ## 5. PG/SQL
 
