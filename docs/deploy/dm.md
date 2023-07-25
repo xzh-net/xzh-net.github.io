@@ -2,15 +2,13 @@
 
 ## 1. 安装
 
-### 1.1 二进制安装
-
-#### 1.1.1 安装前准备
+### 1.1 安装前准备
 
 环境CentOS7_x86_64架构，数据库版本dm8_rh7_64_ent_8.1.1.87
 
 安装前必须创建 dmdba 用户，禁止使用 root 用户安装数据库。
 
-1. 创建用户
+#### 1.1.1 创建用户
 
 ```bash
 groupadd dinstall
@@ -18,7 +16,7 @@ useradd -g dinstall -m -d /home/dmdba -s /bin/bash dmdba
 passwd dmdba
 ```
 
-2. 修改文件打开最大数
+#### 1.1.2 修改文件打开最大数
 
 永久生效
 
@@ -44,7 +42,7 @@ ulimit -a
 ulimit -n 65536
 ```
 
-3. 挂载镜像
+#### 1.1.3 挂载镜像
 
 切换到 root 用户，将 DM 数据库的 iso 安装包保存在任意位置，例如 /opt 目录下，执行如下命令挂载镜像：
 
@@ -55,7 +53,7 @@ mkdir /mnt
 mount -o loop /opt/dm8_20230418_x86_rh6_64.iso /mnt
 ```
 
-4. 创建安装目录
+#### 1.1.4 创建安装目录
 
 使用 root 用户建立文件夹，待 dmdba 用户建立完成后需将文件所有者更改为 dmdba 用户，否则无法安装到该目录下
 
@@ -63,7 +61,7 @@ mount -o loop /opt/dm8_20230418_x86_rh6_64.iso /mnt
 mkdir /dm8
 ```
 
-5. 修改安装目录权限
+#### 1.1.5 修改安装目录权限
 
 将新建的安装路径目录权限的用户修改为 dmdba，用户组修改为 dinstall。命令如下：
 
@@ -72,11 +70,11 @@ chown dmdba:dinstall -R /dm8/
 chmod -R 755 /dm8   # 给安装路径下的文件设置 755 权限
 ```
 
-#### 1.1.2 数据库安装
+### 1.2 数据库安装
 
 DM 数据库在 Linux 环境下支持命令行安装和图形化安装
 
-1. 命令行安装
+#### 1.2.1 命令行安装
 
 ```bash
 su - dmdba
@@ -98,10 +96,7 @@ cd /mnt/
 
 数据库安装完成后，需要切换至 root 用户执行上图中的命令 /dm8/script/root/root_installer.sh 创建 DmAPService，否则会影响数据库备份
 
-
-2. 图形化安装
-
-3. 配置环境变量
+#### 1.2.2 配置环境变量
 
 切换到 root 用户进入 dmdba 用户的根目录下，配置对应的环境变量。DM_HOME 变量和动态链接库文件的加载路径在程序安装成功后会自动导入。命令如下：
 
@@ -123,9 +118,7 @@ su - dmdba
 source .bash_profile
 ```
 
-#### 1.1.3 配置实例
-
-1. 命令行配置实例
+### 1.3 配置实例
 
 使用 dmdba 用户配置实例，进入到 DM 数据库安装目录下的 bin 目录中，使用 dminit 命令初始化实例
 
@@ -142,33 +135,39 @@ cd /dm8/bin
    - case_sensitive 标识符大小写敏感，默认值为 Y 。当大小写敏感时，小写的标识符应用双引号括起，否则被转换为大写；当大小写不敏感时，系统不自动转换标识符的大小写，在标识符比较时也不区分大小写，只能是 Y、y、N、n、1、0 之一。
    - charset 字符集选项。0 代表 GB18030；1 代表 UTF-8；2 代表韩文字符集 EUC-KR；取值 0、1 或 2 之一。默认值为 0。
 
-可以使用默认参数初始化实例，需要附加实例存放路径。此处以初始化实例到 /dm/data 目录下为例（执行初始化命令前，需要使用 root 用户授予 /dm/data 目录相应权限，可以参考修改目录权限），初始化命令如下：
+可以使用默认参数初始化实例，需要附加实例存放路径。此处以初始化实例到 /dm8/data 目录下为例，初始化命令如下：
 
 ```bash
-./dminit path=/dm/data
+./dminit path=/dm8/data
 ```
 
-1. 图形化配置实例
+### 1.4 注册服务
 
-
-
-#### 1.1.4 注册服务
-
-#### 1.1.5 启停服务
-
-### 1.2 docker安装
-
-请在达梦数据库官网下载 [Docker](https://eco.dameng.com/download/) 安装包，拷贝安装包到 `/opt` 目录下，执行以下命令导入安装包：
+注册服务需使用 root 用户进行注册。使用 root 用户进入数据库安装目录的 /dm8/script/root 下，如下所示：
 
 ```bash
-docker load -i dm8_20220822_rev166351_x86_rh6_64_ctm.tar
-docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8_01 -v /data/dm8_01:/opt/dmdbms/data dm8_single:v8.1.2.128_ent_x86_64_ctm_pack4
+cd /dm8/script/root
+./dm_service_installer.sh -t dmserver -dm_ini /dm8/data/DAMENG/dm.ini -p DMSERVER
 ```
 
-> 注意: 
-> 
-> 1.如果使用 docker 容器里面的 disql，进入容器后，先执行 source /etc/profile 防止中文乱码。  
-> 2.新版本 Docker 镜像中数据库默认用户名/密码为 SYSDBA/SYSDBA001  
+用户可根据自己的环境更改 dm.ini 文件的路径以及服务名，如下所示：
+
+```bash
+./dm_service_installer.sh -h
+```
+
+### 1.5 启停服务
+
+```bash
+systemctl start DmServiceDMSERVER.service
+systemctl stop DmServiceDMSERVER.service
+systemctl restart DmServiceDMSERVER.service
+systemctl status DmServiceDMSERVER.service
+```
+
+### 1.6 客户端测试
+
+SYSDBA/SYSDBA
 
 ## 2. 库操作
 
