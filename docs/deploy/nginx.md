@@ -1119,7 +1119,6 @@ http {
                 proxy_pass http://127.0.0.1:18101;
                 # include blockip.conf;
         }
-        
     }
 }
 ```
@@ -1137,6 +1136,24 @@ location / {
     if ($http_user_agent ~* "scrapy|python|curl|java|wget|httpclient|okhttp") {
         return 503;
     }
+}
+```
+
+### 3.13 URL美化
+
+解决VUE项目下`#`号参数被拦截的问题
+
+```bash
+location / {
+	root /home/www/software/;
+	index index.html index.htm;
+	try_files $uri $uri/ /index.html;
+}
+
+location /console {
+	alias /home/www/lowcode_console;
+	index index.html index.htm;
+	try_files $uri $uri/ /console/index.html;
 }
 ```
 
