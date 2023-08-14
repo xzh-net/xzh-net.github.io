@@ -2028,12 +2028,12 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-### 4.4 Go
+### 4.4 Golang
 
 ```bash
-wget  https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
-tar zxvf go1.13.4.linux-amd64.tar.gz
-mv go /usr/local/
+wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
+tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
+
 echo 'export PATH=$PATH:/usr/local/go/bin'>>/etc/profile            # SDK
 echo 'export GOPATH=/home/xzh/go'>>/etc/profile                     # 工作空间
 echo 'export GOBIN=/home/xzh/go/bin'>>/etc/profile                  # 生成可执行文件路径
