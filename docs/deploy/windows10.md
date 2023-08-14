@@ -100,34 +100,59 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
         keystorePass="123456" /> 
 ```
 
-### 2.3 Go
+### 2.3 Golang
 
-#### 2.3.1 下载
+- 官方网站：https://go.dev/
+- 下载地址：https://dl.google.com/go/go1.13.4.windows-386.msi
 
-https://golang.google.cn/dl/
+#### 2.3.1 设置环境变量
 
-#### 2.3.2 设置环境变量
+![](../../assets/_images/deploy/win10/go_1.png)
 
-```java
-GO111MODULE
-on
-GOPROXY
-https://goproxy.cn
+![](../../assets/_images/deploy/win10/go_2.png)
+
+![](../../assets/_images/deploy/win10/go_3.png)
+
+![](../../assets/_images/deploy/win10/go_4.png)
+
+
+添加代理地址或者使用终端命令
+
+![](../../assets/_images/deploy/win10/go_5.png)
+
+```bash
+go env -w GO111MODULE=on
+go env -w GOPROXY=https://goproxy.cn,direct
+
+go version
+go env
 ```
 
-#### 2.3.2 模块初始化
+#### 2.3.2 初始化项目
 
 ```bash
 go mod init xzh/markdown-renderer
 ```
 
+```go
+package main
+import (
+    "fmt"
+)
+func main()  {
+    fmt.Println("hello,word")
+}
+```
+
+```bash
+go run hello.go
+```
+
 ### 2.4 Python Anaconda
 
-#### 2.4.1 下载
+下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
 
-https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
-
-#### 2.4.2 设置环境变量
+#### 2.4.1 设置环境变量
 
 ```java
 PATH
@@ -137,7 +162,7 @@ C:\ProgramData\Anaconda3\Library\bin
 C:\ProgramData\Anaconda3\Library\mingw-w64
 ```
 
-#### 2.4.3 更换服务器源
+#### 2.4.2 更换服务器源
 
 打开`Anaconda Prompt`程序，执行`conda config --set show_channel_urls yes`
 
@@ -160,7 +185,7 @@ custom_channels:
   simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
 ```
 
-#### 2.4.4 命令
+#### 2.4.3 常用命令
 
 ```bash
 conda info -e                       # 查看当前系统中创建的虚拟环境，自带一个base环境
@@ -188,9 +213,7 @@ PATH
 
 ## 3. 常用工具
 
-### 3.1 VirtualBox
-
-重置UUID
+### 3.1 VirtualBox重置ID
 
 ```bash
 cd C:\Program Files\Oracle\VirtualBox
