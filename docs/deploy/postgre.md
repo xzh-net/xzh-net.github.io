@@ -59,7 +59,11 @@ chown postgres /data/pg_backup
 
 #### 1.2.5 系统参数优化
 
+1. 内核参数
+
+```bash
 vi /etc/sysctl.conf
+```
 
 ```conf
 kernel.shmmax = 68719476736
@@ -72,11 +76,17 @@ net.core.rmem_default = 1048576
 net.core.rmem_max = 4194304
 net.core.wmem_default = 262144
 net.core.wmem_max = 1048576
+```
 
+```bash
 sysctl -p
 ```
 
+2. 资源限制锁
+
+```bash
 vi /etc/security/limits.conf
+```
 
 ```conf
 * soft nofile 131072
@@ -124,7 +134,6 @@ listen_addresses = '*'
 vi pg_hba.conf       # 配置对数据库的访问权限，末尾添加
 host    all             all             0.0.0.0/0        md5  # 所有地址访问
 host    replication     all             0.0.0.0/0        md5  # 物理备份 -R
-
 ```
 
 #### 1.2.9 设置开机自启动
@@ -164,7 +173,8 @@ service postgresql restart
 
 ```bash
 psql
-ALTER USER postgres WITH PASSWORD 'postgres'; # 修改用户默认密码
+# 修改用户默认密码
+ALTER USER postgres WITH PASSWORD 'postgres'; 
 /usr/local/pgsql/bin/createdb test
 /usr/local/pgsql/bin/psql test
 ```
