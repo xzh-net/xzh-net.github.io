@@ -107,45 +107,34 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
 
 #### 2.3.1 设置环境变量
 
+安装
+
 ![](../../assets/_images/deploy/win10/go_1.png)
+
+设置安装路径
 
 ![](../../assets/_images/deploy/win10/go_2.png)
 
+设置工程代码路径
+
 ![](../../assets/_images/deploy/win10/go_3.png)
+
+在path中增加：C:\Go\bin;%GOPATH%\bin;
 
 ![](../../assets/_images/deploy/win10/go_4.png)
 
-
-添加代理地址或者使用终端命令
-
-![](../../assets/_images/deploy/win10/go_5.png)
+GO111MODULE设置
 
 ```bash
 go env -w GO111MODULE=on
 go env -w GOPROXY=https://goproxy.cn,direct
+```
 
+验证
+
+```bash
 go version
 go env
-```
-
-#### 2.3.2 初始化项目
-
-```bash
-go mod init xzh/markdown-renderer
-```
-
-```go
-package main
-import (
-    "fmt"
-)
-func main()  {
-    fmt.Println("hello,word")
-}
-```
-
-```bash
-go run hello.go
 ```
 
 ### 2.4 Python Anaconda

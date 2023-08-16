@@ -2030,13 +2030,16 @@ npm install ts-node -g --force  # 配合插件Code Runner
 
 ### 4.4 Golang
 
+#### 4.4.1 配置环境
+
 ```bash
 wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
 tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
 
-echo 'export PATH=$PATH:/usr/local/go/bin'>>/etc/profile            # SDK
+echo 'export GOROOT=/usr/local/go'>>/etc/profile                    # go安装目录
 echo 'export GOPATH=/home/xzh/go'>>/etc/profile                     # 工作空间
-echo 'export GOBIN=/home/xzh/go/bin'>>/etc/profile                  # 生成可执行文件路径
+echo 'export GOBIN=$GOPATH/bin'>>/etc/profile                       # 生成可执行文件路径
+echo 'export PATH=$PATH:$GOROOT/bin'>>/etc/profile                  # 全局配置
 echo 'export GO111MODULE=on'>>/etc/profile                          # 模块支持
 echo 'export GOPROXY=https://goproxy.cn'>>/etc/profile              # 模块代理
 echo 'export http_proxy=http://172.17.17.165:7890'>>/etc/profile    # 翻墙
@@ -2045,6 +2048,30 @@ source /etc/profile
 
 go version
 go env
+```
+
+#### 4.4.2 环境验证
+
+```bash
+mkdir /home/xzh/go/src/markdown-renderer -p
+cd markdown-renderer
+go mod init xzh/markdown-renderer
+vi main.go
+```
+
+```go
+package main
+import (
+    "fmt"
+)
+func main()  {
+    fmt.Println("hello,word")
+}
+```
+
+```bash
+go run main.go
+go install
 ```
 
 ### 4.5 Python
