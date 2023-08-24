@@ -647,7 +647,7 @@ server {
         root /home/project;
     }
     location /download/ {               
-        root  /home/project/;           # root表示物理路径,在/home/project/下必须有download文件夹，把/home/project/download作为根路径
+        root  /home/project/;           # root表示物理路径，在/home/project/下必须有download文件夹，把/home/project/download作为根路径
     }
     location /emoji/ {                  
         alias /home/project/;           # alias表示虚拟路径，不对应任何文件夹，把/home/project/作为根路径

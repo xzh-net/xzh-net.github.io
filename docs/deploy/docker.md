@@ -1045,6 +1045,19 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
+7. 其他版本
+
+```bash
+docker run -p 9201:9200 -p 9303:9300 --name elasticsearch8 \
+-e "discovery.type=single-node" \
+-e "cluster.name=elasticsearch8" \
+-e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
+-e "xpack.security.enabled=false" \
+-v /data/elasticsearch862/plugins:/usr/share/elasticsearch/plugins \
+-v /data/elasticsearch862/config:/usr/share/elasticsearch/config \
+-v /data/elasticsearch862/data:/usr/share/elasticsearch/data \
+-d elasticsearch:8.6.2
+```
 
 #### 3.8.2 Logstash
 
