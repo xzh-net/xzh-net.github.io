@@ -2074,7 +2074,7 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 设置使用jvm内存大小
     volumes:
       - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins  # 插件文件挂载
-      - /data/elasticsearch/data:/usr/share/elasticsearch/dat         # 数据文件挂载
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data        # 数据文件挂载
     ports:
       - 9200:9200
       - 9300:9300
