@@ -1054,7 +1054,6 @@ docker run -p 9201:9200 -p 9303:9300 --name elasticsearch8 \
 -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
 -e "xpack.security.enabled=false" \
 -v /data/elasticsearch862/plugins:/usr/share/elasticsearch/plugins \
--v /data/elasticsearch862/config:/usr/share/elasticsearch/config \
 -v /data/elasticsearch862/data:/usr/share/elasticsearch/data \
 -d elasticsearch:8.6.2
 ```
@@ -2075,7 +2074,6 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 设置使用jvm内存大小
     volumes:
       - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins  # 插件文件挂载
-      - /data/elasticsearch/config:/usr/share/elasticsearch/config    # 配置文件挂载
       - /data/elasticsearch/data:/usr/share/elasticsearch/dat         # 数据文件挂载
     ports:
       - 9200:9200
