@@ -2063,7 +2063,7 @@ vi docker-compose-elk.yml
 ```yml
 version: '3'
 networks:
-  es_network:
+  es:
 services:
   elasticsearch:
     image: elasticsearch:7.6.2
@@ -2081,7 +2081,7 @@ services:
       - 9200:9200
       - 9300:9300
     networks:
-      - es_network  
+      - es  
   kibana:
     image: kibana:7.6.2
     container_name: kibana
@@ -2094,7 +2094,7 @@ services:
     ports:
       - 5601:5601
     networks:
-      - es_network  
+      - es  
   logstash:
     image: logstash:7.6.2
     container_name: logstash
@@ -2112,7 +2112,7 @@ services:
       - 4562:4562
       - 4563:4563
     networks:
-      - es_network  
+      - es  
 ```
 
 ### 5.3 spark.yml
