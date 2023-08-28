@@ -1346,16 +1346,16 @@ echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/r
 # 压缩
 zip -r xzh2021.zip * -x  './node_modules/*'         # 排除指定文件夹
 tar -zcvf xzh2021.tar.gz  --exclude=node_modules *  # 排除指定文件夹
-tar –zcvf jpg.tar *.jpg             # 压缩
-tar –xvf file.tar                   # 解压
-tar zxvf file.tar -C /home/data/    # 解压到指定路径
+tar -zcvf jpg.tar *.jpg              # 打包所有图片
+tar -zxvf file.tar -C /home/data/    # 解压到指定路径
 
 # 拷贝复制
 cp -f xxx.log               # 复制并强制覆盖同名文件
 mkdir -p /home/docker/data  # 级联创建目录
 mkdir -p src/{test,main}/{java,resources}       # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
 ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java            # 创建软连接
-scp -r vjsp.workflow -P {port} root@20.255.122.15:/opt/code     # 远程复制
+scp -r /tmp/access.logs -P {port} root@20.255.122.15:/opt/code          # 远程复制
+sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home    # 自动输入密钥
 
 # Find查找
 grep "www.xuzhihao.net" *           # 当前路径下按关键字过滤
