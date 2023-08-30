@@ -248,6 +248,8 @@ exit
 
 #### 1.2.1 一键安装和配置VNC图形化相关
 
+下载脚本：https://github.com/xzh-net/other/tree/main/oracle11g
+
 ```bash
 #!/bin/bash
 #因为脚本内容大量中文，临时设置中文环境
