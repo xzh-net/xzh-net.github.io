@@ -399,10 +399,10 @@ http {
         '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
         default    'date-not-found';
     }
-    # 加载其他配置
-    include /usr/local/openresty/nginx/conf/blob.xuzhihao.net.conf;
-    # 负载均衡
-    include /usr/local/openresty/nginx/conf/blob.xuzhihao.net_upstream.conf;
+
+    include /usr/local/nginx/conf/blob.xuzhihao.net.conf;             # Http代理
+    include /usr/local/nginx/conf/blob.xuzhihao.net_upstream.conf;    # 负载均衡
+    include /usr/local/nginx/conf/openfire.xuzhihao.net.conf;         # Tcp代理
 }
 ```
 
@@ -453,6 +453,58 @@ server {
                 add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
                 proxy_pass http://blob.xuzhihao.net;
         }
+}
+```
+
+#### 3.1.4 openfire.xuzhihao.net.tcp
+
+```conf
+tcp {
+    timeout 1d;
+    proxy_read_timeout 10d;
+    proxy_send_timeout 10d;
+    proxy_connect_timeout 30;
+    upstream op5222 {
+            ip_hash;
+            server 172.17.16.51:5222;
+            server 172.17.16.52:5222;
+            server 172.17.16.53:5222;
+            check interval=3000 rise=2 fall=5 timeout=1000;
+    }
+    upstream op7070 {
+            ip_hash;
+            server 172.17.16.51:7070;
+            server 172.17.16.52:7070;
+            server 172.17.16.53:7070;
+            check interval=3000 rise=2 fall=5 timeout=1000;
+    }
+    server  {
+            listen 5223 ssl;
+            ssl_certificate      /cnf/cert/vjsp.cn.pem;
+            ssl_certificate_key  /cnf/cert/vjsp.cn.key;
+            ssl_session_cache    shared:SSL:1m;
+            ssl_session_timeout  5m;
+            ssl_ciphers  HIGH:!aNULL:!MD5;
+            ssl_prefer_server_ciphers  on;
+            proxy_connect_timeout 15s;
+            proxy_pass op5222;
+            so_keepalive on;
+            tcp_nodelay on;
+            access_log /nglog/tcp.5223.log;
+    }
+    server  {
+            listen 7443 ssl;
+            ssl_certificate      /cnf/cert/vjsp.cn.pem;
+            ssl_certificate_key  /cnf/cert/vjsp.cn.key;
+            ssl_session_cache    shared:SSL:1m;
+            ssl_session_timeout  5m;
+            ssl_ciphers  HIGH:!aNULL:!MD5;
+            ssl_prefer_server_ciphers  on;
+            proxy_pass op7070;
+            so_keepalive on;
+            tcp_nodelay on;
+            access_log /nglog/tcp.7443.log;
+    }
 }
 ```
 
