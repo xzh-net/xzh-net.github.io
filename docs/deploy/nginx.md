@@ -394,7 +394,11 @@ http {
     proxy_buffers 4 1024k;
     proxy_busy_buffers_size 1024k;
     proxy_temp_file_write_size 1024k;
-  
+    ## 日志规则
+    map $time_iso8601 $logdate {
+        '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
+        default    'date-not-found';
+    }
     # 加载其他配置
     include /usr/local/openresty/nginx/conf/blob.xuzhihao.net.conf;
     # 负载均衡
@@ -424,8 +428,8 @@ server {
         listen 443 ssl;
         server_name blob.xuzhihao.net;
         charset utf-8;
-        ssl_certificate /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_chain.crt;
-        ssl_certificate_key /usr/local/nginx/conf/sx/sxgw.vjspnet.cn_key.key;
+        ssl_certificate /usr/local/nginx/conf/cert/blob.xuzhihao.net_chain.crt;
+        ssl_certificate_key /usr/local/nginx/conf/cert/blob.xuzhihao.net_key.key;
         ssl_session_cache shared:SSL:20m;
         ssl_session_timeout 5m;
         ssl_buffer_size 256k;
@@ -438,7 +442,7 @@ server {
         resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
         resolver_timeout 10s;
         index index.html index.htm index.jsp index.do index.action;
-        access_log /usr/local/nginx/conf/sx/logs/sxgw.log;
+         access_log logs/blob.xuzhihao.net/access_${logdate}.log;
         location / {
                 proxy_redirect off;
                 proxy_set_header Host $host:$server_port;
@@ -618,17 +622,17 @@ curl -i --proxy 192.168.3.114:3182  www.baidu.com
 
 ```conf
 server
-{ 
+{
     listen 80;
     server_name  ~^(?<serno>.+).xuzhihao.net$;
     server_name_in_redirect off; 
     location / {
         rewrite ^(.*)$ /$serno$1 break;
-        #proxy_pass http://127.0.0.1:8080;
         root D:/workspace/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP$remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #proxy_pass http://127.0.0.1:8080;
     }
     access_log logs/web.log;
 }
@@ -1098,7 +1102,7 @@ server {
 
 单独网站屏蔽IP的方法，把include blocksip.conf放到网址对应的在server{}语句块，所有网站屏蔽IP的方法，把include blocksip.conf放到http {}语句块。
 
-```bash
+```conf
 include blockip.conf; 
 # 添加内容
 allow  180.164.67.212;
