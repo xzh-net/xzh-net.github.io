@@ -410,9 +410,9 @@ http {
 
 ```conf
 upstream blob.xuzhihao.net {
-  ip_hash;
-  server 192.168.3.200:7535;
-  server 192.168.3.201:7535;
+    ip_hash;
+    server 192.168.3.200:7535;
+    server 192.168.3.201:7535;
 }
 ```
 
@@ -420,39 +420,39 @@ upstream blob.xuzhihao.net {
 
 ```conf
 server {
-        listen 80;
-        server_name blob.xuzhihao.net;
-        rewrite ^(.*)$ https://$host$1 permanent;
+    listen 80;
+    server_name blob.xuzhihao.net;
+    rewrite ^(.*)$ https://$host$1 permanent;
 }
 server {
-        listen 443 ssl;
-        server_name blob.xuzhihao.net;
-        charset utf-8;
-        ssl_certificate /usr/local/nginx/conf/cert/blob.xuzhihao.net_chain.crt;
-        ssl_certificate_key /usr/local/nginx/conf/cert/blob.xuzhihao.net_key.key;
-        ssl_session_cache shared:SSL:20m;
-        ssl_session_timeout 5m;
-        ssl_buffer_size 256k;
-        ssl_session_tickets on;
-        ssl_stapling on;
-        ssl_stapling_verify on;
-        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-        ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
-        ssl_prefer_server_ciphers on;
-        resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
-        resolver_timeout 10s;
-        index index.html index.htm index.jsp index.do index.action;
-         access_log logs/blob.xuzhihao.net/access_${logdate}.log;
-        location / {
-                proxy_redirect off;
-                proxy_set_header Host $host:$server_port;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                add_header Access-Control-Allow-Origin *;
-                add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-                add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
-                proxy_pass http://blob.xuzhihao.net;
-        }
+    listen 443 ssl;
+    server_name blob.xuzhihao.net;
+    charset utf-8;
+    ssl_certificate /usr/local/nginx/conf/cert/blob.xuzhihao.net_chain.crt;
+    ssl_certificate_key /usr/local/nginx/conf/cert/blob.xuzhihao.net_key.key;
+    ssl_session_cache shared:SSL:20m;
+    ssl_session_timeout 5m;
+    ssl_buffer_size 256k;
+    ssl_session_tickets on;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
+    ssl_prefer_server_ciphers on;
+    resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
+    resolver_timeout 10s;
+    index index.html index.htm index.jsp index.do index.action;
+    access_log logs/blob.xuzhihao.net/access_${logdate}.log;
+    location / {
+        proxy_redirect off;
+        proxy_set_header Host $host:$server_port;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        proxy_pass http://blob.xuzhihao.net;
+    }
 }
 ```
 
@@ -465,45 +465,45 @@ tcp {
     proxy_send_timeout 10d;
     proxy_connect_timeout 30;
     upstream op5222 {
-            ip_hash;
-            server 172.17.16.51:5222;
-            server 172.17.16.52:5222;
-            server 172.17.16.53:5222;
-            check interval=3000 rise=2 fall=5 timeout=1000;
+        ip_hash;
+        server 172.17.16.51:5222;
+        server 172.17.16.52:5222;
+        server 172.17.16.53:5222;
+        check interval=3000 rise=2 fall=5 timeout=1000;
     }
     upstream op7070 {
-            ip_hash;
-            server 172.17.16.51:7070;
-            server 172.17.16.52:7070;
-            server 172.17.16.53:7070;
-            check interval=3000 rise=2 fall=5 timeout=1000;
+        ip_hash;
+        server 172.17.16.51:7070;
+        server 172.17.16.52:7070;
+        server 172.17.16.53:7070;
+        check interval=3000 rise=2 fall=5 timeout=1000;
     }
     server  {
-            listen 5223 ssl;
-            ssl_certificate      /cnf/cert/vjsp.cn.pem;
-            ssl_certificate_key  /cnf/cert/vjsp.cn.key;
-            ssl_session_cache    shared:SSL:1m;
-            ssl_session_timeout  5m;
-            ssl_ciphers  HIGH:!aNULL:!MD5;
-            ssl_prefer_server_ciphers  on;
-            proxy_connect_timeout 15s;
-            proxy_pass op5222;
-            so_keepalive on;
-            tcp_nodelay on;
-            access_log /nglog/tcp.5223.log;
+        listen 5223 ssl;
+        ssl_certificate      /cnf/cert/vjsp.cn.pem;
+        ssl_certificate_key  /cnf/cert/vjsp.cn.key;
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+        proxy_connect_timeout 15s;
+        proxy_pass op5222;
+        so_keepalive on;
+        tcp_nodelay on;
+        access_log /nglog/tcp.5223.log;
     }
     server  {
-            listen 7443 ssl;
-            ssl_certificate      /cnf/cert/vjsp.cn.pem;
-            ssl_certificate_key  /cnf/cert/vjsp.cn.key;
-            ssl_session_cache    shared:SSL:1m;
-            ssl_session_timeout  5m;
-            ssl_ciphers  HIGH:!aNULL:!MD5;
-            ssl_prefer_server_ciphers  on;
-            proxy_pass op7070;
-            so_keepalive on;
-            tcp_nodelay on;
-            access_log /nglog/tcp.7443.log;
+        listen 7443 ssl;
+        ssl_certificate      /cnf/cert/vjsp.cn.pem;
+        ssl_certificate_key  /cnf/cert/vjsp.cn.key;
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+        proxy_pass op7070;
+        so_keepalive on;
+        tcp_nodelay on;
+        access_log /nglog/tcp.7443.log;
     }
 }
 ```
@@ -557,7 +557,7 @@ upstream blob.xuzhihao.net {
 
 3. least_conn
 
-```
+```conf
 upstream backend {
     least_conn;
     server 192.168.200.146:9001;
@@ -597,7 +597,7 @@ upstream backend {
 
 ```conf
 stream {
-    upstream back{
+    upstream back {
         server 192.168.3.200:3306 up;
         server 192.168.3.201:3306 up;
     }
@@ -673,8 +673,7 @@ curl -i --proxy 192.168.3.114:3182  www.baidu.com
 ```
 
 ```conf
-server
-{
+server {
     listen 80;
     server_name  ~^(?<serno>.+).xuzhihao.net$;
     server_name_in_redirect off; 
@@ -727,7 +726,7 @@ server {
 
 #### 3.6.1 指定具体跳转地址
 
-```bash
+```conf
 server {
     error_page 404 http://www.xuzhihao.net;
 }
@@ -735,11 +734,11 @@ server {
 
 #### 3.6.2 指定重定向地址
 
-```bash
-server{
+```conf
+server {
     error_page 404 /50x.html;
     error_page 500 502 503 504 /50x.html;
-    location =/50x.html{
+    location =/50x.html {
         root html;
     }
 }
@@ -747,8 +746,8 @@ server{
 
 #### 3.6.3 使用location的@符号
 
-```bash
-server{
+```conf
+server {
     error_page 404 @jump_to_error;
     location @jump_to_error {
         default_type text/plain;
@@ -759,10 +758,10 @@ server{
 
 #### 3.6.4 修改指定状态码
 
-```bash
-server{
+```conf
+server {
     error_page 404 =200 /50x.html;
-    location =/50x.html{
+    location =/50x.html {
         root html;
     }
 }
@@ -800,7 +799,7 @@ location /postUser {
 ### 3.8 防盗链
 
 ```conf
-location ~*\.(png|jpg|gif){
+location ~*\.(png|jpg|gif) {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer){
         return 403;
@@ -874,9 +873,9 @@ server {
 ### 3.10 web缓存
 
 ```conf
-http{
+http {
     proxy_cache_path /usr/local/proxy_cache levels=2:1 keys_zone=xzh:200m inactive=1d max_size=20g; # 缓存文件的存放路径
-    upstream backend{
+    upstream backend {
         server 192.168.3.200:8080;
     }
     server {
@@ -928,7 +927,7 @@ make upgrade
 在nginx配置文件中进行如下配置
 
 ```conf
-server{
+server {
     location ~ /purge(/.*) {
         proxy_cache_purge xzh xuzhihao;
     }
@@ -975,8 +974,7 @@ mv nginx-fancyindex fancyindex
 vi /usr/local/nginx/conf/nginx.conf
 
 # 修改内容
-server 
-{
+server {
   listen 80;
   server_name www.xuzhihao.net;
   charset utf-8; 
@@ -1187,7 +1185,7 @@ awk '{print $1}' /var/log/nginx/access.log |sort |uniq -c|sort -n
 
 2. 通过User-Agent过滤爬虫
 
-```bash
+```conf
 location / {
     if ($http_user_agent ~* "scrapy|python|curl|java|wget|httpclient|okhttp") {
         return 503;
@@ -1199,7 +1197,7 @@ location / {
 
 解决VUE项目下`#`号参数被拦截的问题
 
-```bash
+```conf
 location / {
 	root /home/www/software/;
 	index index.html index.htm;
