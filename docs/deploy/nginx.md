@@ -1080,63 +1080,58 @@ server {
         auth_basic "off";
         proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
     }
-
     #fixup fancyindex subrequest
     location ^~ /fancyindex/ {
         auth_basic "off";
         alias /home/www/fancyindex/;
     }
-
     #fixup favicon.ico
     location /favicon.ico {
         alias /home/www/fancyindex/meta/favicon.ico;
     }
-
     location =/fancyindex/fancyindex.conf {
         deny  all;
     }
-
     location =/fancyindex/README.md {
         deny  all;
     }
-
     location =passwd {
         deny  all;
     }
-
-  add_header X-Frame-Options "SAMEORIGIN";
-  add_header X-XSS-Protection "1; mode=block";
-  add_header X-Content-Type-Options "nosniff";
-
-  location = /favicon.ico { access_log off; log_not_found off; }
-  location = /robots.txt  { access_log off; log_not_found off; }
-
-  location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|ttf|ttc|otf|eot|woff)$ {
-    auth_basic "off";
-    expires max;
-    access_log off;
-    add_header Pragma public;
-    add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-  }
-
-  location ~* \.(?:css|js)$ {
-    auth_basic "off";
-    expires 1y;
-    add_header Cache-Control "public";
-  }
-
-  # deny access to . files, for security
-  location ~ /\.(?!well-known).* {
-    access_log off;
-    log_not_found off;
-    deny all;
-  }
-
-  location ~* (?:\.(?:bak|config|db|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
-    deny all;
-    access_log off;
-    log_not_found off;
-  }
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+    location = /favicon.ico { 
+        access_log off; 
+        log_not_found off; 
+    }
+    location = /robots.txt  { 
+        access_log off; 
+        log_not_found off; 
+    }
+    location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|ttf|ttc|otf|eot|woff)$ {
+        auth_basic "off";
+        expires max;
+        access_log off;
+        add_header Pragma public;
+        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    }
+    location ~* \.(?:css|js)$ {
+        auth_basic "off";
+        expires 1y;
+        add_header Cache-Control "public";
+    }
+    # deny access to . files, for security
+    location ~ /\.(?!well-known).* {
+        access_log off;
+        log_not_found off;
+        deny all;
+    }
+    location ~* (?:\.(?:bak|config|db|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
 }
 ```
 
