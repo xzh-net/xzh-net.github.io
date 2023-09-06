@@ -478,7 +478,7 @@ tcp {
         server 172.17.16.53:7070;
         check interval=3000 rise=2 fall=5 timeout=1000;
     }
-    server  {
+    server {
         listen 5223 ssl;
         ssl_certificate      /cnf/cert/vjsp.cn.pem;
         ssl_certificate_key  /cnf/cert/vjsp.cn.key;
@@ -492,7 +492,7 @@ tcp {
         tcp_nodelay on;
         access_log /nglog/tcp.5223.log;
     }
-    server  {
+    server {
         listen 7443 ssl;
         ssl_certificate      /cnf/cert/vjsp.cn.pem;
         ssl_certificate_key  /cnf/cert/vjsp.cn.key;
@@ -801,7 +801,7 @@ location /postUser {
 ```conf
 location ~*\.(png|jpg|gif) {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
-    if ($invalid_referer){
+    if ($invalid_referer) {
         return 403;
     }
     root /usr/local/nginx/html;
@@ -811,7 +811,7 @@ location ~*\.(png|jpg|gif) {
 ```conf
 location /images {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
-    if ($invalid_referer){
+    if ($invalid_referer) {
         rewrite ^/ http://www.web.com/images/forbidden.png;
     }
     root /usr/local/nginx/html;
@@ -975,22 +975,22 @@ vi /usr/local/nginx/conf/nginx.conf
 
 # 修改内容
 server {
-  listen 80;
-  server_name www.xuzhihao.net;
-  charset utf-8; 
-  location /	{
-      root /home/www/; 
-      fancyindex on;                                 # 开启nginx目录浏览功能 
-      fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
-      fancyindex_exact_size off;                     # 文件大小从KB开始显示 
-      fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
-      fancyindex_footer "/fancyindex/footer.html";   # 设置footer为当前目录下的footer.html
-      fancyindex_ignore "fancyindex";                # 忽略
-      fancyindex_ignore "cgi";                       # 忽略
-      fancyindex_ignore ".php";                      # 忽略
-      fancyindex_time_format "%Y-%m-%d %H:%M:%S";
-      fancyindex_name_length 200;
-  }
+    listen 80;
+    server_name www.xuzhihao.net;
+    charset utf-8; 
+    location / {
+        root /home/www/; 
+        fancyindex on;                                 # 开启nginx目录浏览功能 
+        fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
+        fancyindex_exact_size off;                     # 文件大小从KB开始显示 
+        fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
+        fancyindex_footer "/fancyindex/footer.html";   # 设置footer为当前目录下的footer.html
+        fancyindex_ignore "fancyindex";                # 忽略
+        fancyindex_ignore "cgi";                       # 忽略
+        fancyindex_ignore ".php";                      # 忽略
+        fancyindex_time_format "%Y-%m-%d %H:%M:%S";
+        fancyindex_name_length 200;
+    }
 }
 ```
 
@@ -1160,7 +1160,7 @@ http {
         listen 28101;
         server_name  _;
         # include blockip.conf;
-        location /  {
+        location / {
                 proxy_redirect off;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
