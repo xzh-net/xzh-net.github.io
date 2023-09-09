@@ -681,11 +681,11 @@ server {
     server_name_in_redirect off; 
     location / {
         rewrite ^(.*)$ /$serno$1 break;
-        root D:/workspace/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP$remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #root D:/workspace/;
         #proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
     access_log logs/web.log;
 }
@@ -1163,12 +1163,12 @@ http {
         server_name  _;
         # include blockip.conf;
         location / {
-                proxy_redirect off;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_pass http://127.0.0.1:18101;
-                # include blockip.conf;
+            proxy_redirect off;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass http://127.0.0.1:18101;
+            # include blockip.conf;
         }
     }
 }
