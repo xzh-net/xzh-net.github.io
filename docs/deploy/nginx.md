@@ -446,14 +446,14 @@ server {
     index index.html index.htm index.jsp index.do index.action;
     access_log logs/blob.xuzhihao.net/access_${logdate}.log;
     location / {
-        proxy_redirect off;
-        proxy_set_header Host $host:$server_port;
+        proxy_pass http://blob.xuzhihao.net;
+        proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
-        proxy_pass http://blob.xuzhihao.net;
+        add_header Access-Control-Allow-Credentials 'true';
+        add_header Access-Control-Allow-Headers 'Authorization,Content-Type,X-Requested-With';
     }
 }
 ```
