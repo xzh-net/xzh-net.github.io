@@ -437,7 +437,7 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
     # 在线查询证书吊销状态，每个机构是否验证信任链要求不一，没有则不添加，开启后如产生DNS污染问题通过resolver添加IP解决
-    ssl_trusted_certificate /www/cert/fullchain.pem
+    ssl_trusted_certificate /www/cert/fullchain.pem;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
     ssl_prefer_server_ciphers on;
