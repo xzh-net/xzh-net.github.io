@@ -1228,14 +1228,13 @@ server {
     server_name  www.xuzhihao.net; #修改域名
 
     #ssl配置
-    ssl_certificate      /usr/share/nginx/html/ssl/api/api.crt; # 配置证书
-    ssl_certificate_key  /usr/share/nginx/html/ssl/api/api_nopass.key; # 配置证书私钥
-    ssl_protocols        TLSv1 TLSv1.1 TLSv1.2; # 配置SSL协议版本 # 配置SSL加密算法
-    ssl_ciphers          ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
-    ssl_prefer_server_ciphers  on; # 优先采取服务器算法
-    ssl_session_cache    shared:SSL:10m; # 配置共享会话缓存大小
-    ssl_session_timeout  10m; # 配置会话超时时间
-
+    ssl_certificate /usr/share/nginx/html/ssl/api/api.crt;              # 配置证书
+    ssl_certificate_key /usr/share/nginx/html/ssl/api/api_nopass.key;   # 配置证书私钥
+    ssl_prefer_server_ciphers on;
+    ssl_session_timeout 10m;
+    ssl_session_cache shared:SSL:10m;
+    ssl_protocols TLSv1.1 TLSv1.2;
+    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256::!MD5;  # 最好的安全性，依赖openssl版本
     location / {
         proxy_pass   http://192.168.3.101:8080;         # 设置代理服务访问地址
         proxy_set_header  Host $http_host;              # 设置客户端真实的域名（包括端口号）
