@@ -629,17 +629,15 @@ make && make install
 ```conf
 server {
     listen 3182;
-    resolver  114.114.114.114;
-
+    resolver 114.114.114.114;
     proxy_connect;
-    proxy_connect_allow            443 563;
+    proxy_connect_allow            443 80;
     proxy_connect_connect_timeout  10s;
     proxy_connect_read_timeout     10s;
     proxy_connect_send_timeout     10s;
-
+    access_log logs/access_proxy.log main;
     location / {
-        proxy_pass $scheme://$http_host$request_uri;
-        proxy_set_header Host $host;
+        proxy_pass $scheme://$host$request_uri;
     }
 }
 ```
@@ -662,9 +660,9 @@ win客户端验证
 
 linux客户端验证
 ```bash
-curl -i www.baidu.com
+curl -i https://openapi.alipay.com/gateway.do
 #如果未加环境变量代理设置，则可以通过临时代理访问
-curl -i --proxy 192.168.3.114:3182  www.baidu.com
+curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
 ```
 
 
