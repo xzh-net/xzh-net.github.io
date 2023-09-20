@@ -2050,22 +2050,22 @@ go version
 go env
 ```
 
-#### 4.4.2 环境验证
+#### 4.4.2 验证
 
 ```bash
-mkdir /home/xzh/go/src/markdown-renderer -p
-cd markdown-renderer
-go mod init xzh/markdown-renderer
-vi main.go
+vi test.go
 ```
 
 ```go
 package main
-import (
-    "fmt"
-)
-func main()  {
-    fmt.Println("hello,word")
+
+import "fmt"
+
+func init() {
+	fmt.Println("初始化")
+}
+func main() {
+	fmt.Println("hello,word")
 }
 ```
 
