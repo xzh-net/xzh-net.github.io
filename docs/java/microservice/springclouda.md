@@ -493,15 +493,15 @@ spring:
 
 ## 3. RocketMQ
 
-[消息队列/RocketMQ](/share/distributed/mq?id=rocketmq)
+[消息队列/RocketMQ](/deploy/rocketmq)
 
 ## 4. Dubbo：Apache Dubbo
 
-[Dubbo源码解析](/share/distributed/dubbo)
+[Dubbo源码解析](/java/distributed/dubbo)
 
 ## 5. Seata微服务分布式事务解决方案
 
-[分布式事务Seata](/share/distributed/seata)
+[分布式事务Seata](/java/distributed/seata)
   
 ## 6. Alibaba Cloud ACM
 
