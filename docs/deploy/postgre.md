@@ -141,7 +141,8 @@ host    replication     all             0.0.0.0/0        md5  # 物理备份 -R
 ```bash
 su - root
 cd /home/postgresql-12.4/contrib/start-scripts
-#vi linux
+vi linux
+# 找到对应位置修改内容
 prefix=/usr/local/pgsql
 PGDATA="/data/pgdata/12/data"
 ```
@@ -173,8 +174,8 @@ service postgresql restart
 
 ```bash
 psql
-# 修改用户默认密码
-ALTER USER postgres WITH PASSWORD 'postgres'; 
+ALTER USER postgres WITH PASSWORD 'postgres'; # 修改用户默认密码
+quit
 /usr/local/pgsql/bin/createdb test
 /usr/local/pgsql/bin/psql test
 ```
@@ -621,6 +622,8 @@ select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespa
 
 -- 查询所有表的行数
 SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
+vacuum tablename     -- 更新某个表
+vacuum               -- 在某个数据库中执行直接更新该数据库所有表
 ```
 
 ### 4.3 表注释
