@@ -477,11 +477,10 @@ echo "backup finished" his
 
 ```bash
 mkdir -p $PGDATA/archivedir/  # 创建归档目录
-vi $PGDATA/pg_archive.sh      # 轮转脚本
+vi $PGDATA/pg_archive.sh      # 创建轮转脚本
 test ! -f $PGDATA/archivedir/$1 && cp --preserve=timestamps $2 $PGDATA/archivedir/$1 ; find $PGDATA/archivedir/ -type f -mtime +7 -exec rm -f {} \;
 
-
-# 修改归档配置
+vi postgresql.conf    # 修改归档配置
 wal_level = replica 
 archive_mode = on
 archive_command = 'pg_archive.sh %f %p'
@@ -495,23 +494,6 @@ cd /usr/local/pgsql/bin
 ./pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
 cd /data/pgdata/12/data/archivedir
 pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
-```
-
-### 4.4 AWR报告
-
-```bash
-cd /home/postgresql-12.4/contrib/
-make && make install
-su - postgres
-cd $PGDATA
-#vi postgresql.conf
-shared_preload_libraries = 'pg_stat_statements'
-pg_stat_statements.max = 1000
-pg_stat_statements.track = all
-
-service postgresql start
-psql \c
-create extension pg_stat_statements;
 ```
 
 ## 4. 表操作
@@ -704,9 +686,9 @@ SELECT C
 	A.attnum ASC
 ```
 
-### 4.4 SQL监控
+### 4.4 pg_stat_statements
 
-pg_stat_statements模块提供一种方法追踪一个服务器所执行的所有 SQL 语句的执行统计信息
+`pg_stat_statements`模块提供一种方法追踪一个服务器所执行的所有 SQL 语句的执行统计信息
 
 ```lua
 userid	oid	pg_authid.oid	执行该语句的用户的 OID
@@ -734,7 +716,68 @@ blk_read_time	double precision	 	该语句花在读取块上的总时间，以�
 blk_write_time	double precision	 	该语句花在写入块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
 ```
 
+#### 4.4.1 安装
+
+```bash
+cd /home/postgresql-12.4/contrib/
+make && make install
+su - postgres
+cd $PGDATA
+
+#vi postgresql.conf
+shared_preload_libraries = 'pg_stat_statements'
+track_io_timing = on                # 用于跟踪IO消耗的时间
+track_activity_query_size = 2048    # 设置单条SQL的最长长度，超过被截断显示（可选）
+pg_stat_statements.max = 1000       # 采样参数，在pg_stat_statements中最多保留多少条统计信息，通过LRU算法，覆盖老的记录
+pg_stat_statements.track = all      # all - (所有SQL包括函数内嵌套的SQL), top - 直接执行的SQL(函数内的sql不被跟踪), none - (不跟踪)
+pg_stat_statements.track_utility = off  # 是否跟踪非DML语句 (例如DDL，DCL)，on表示跟踪, off表示不跟踪 
+pg_stat_statements.save = on            # 重启后是否保留统计信息
+
+service postgresql start
+psql \c
+create extension pg_stat_statements;
+```
+
+#### 4.4.2 分析
+
+```bash
+createdb bench    # 建压测库
+pgbench -i -s 50 bench  # 初始化数据：-s 数量因子倍数，默认10万条
+```
+
 ```sql
+INSERT INTO testmem1 SELECT
+generate_series ( 1, 999999 ),
+'xzh' || generate_series ( 1, 999999 ) :: TEXT || random( ) :: TEXT,
+generate_series ( 1, 999999 ) :: TEXT || 'sure',
+generate_series ( 1, 999999 ),
+random( ) :: TEXT,
+random( ) :: TEXT,
+random( ) :: TEXT,
+'hwcq',
+generate_series ( 1, 999999 );
+select pg_database_size('bench')/1024/1024||'M'; # 查看压测库大小
+```
+
+```bash
+nohup pgbench -c 100 -T 20 -r bench > file.out  2>&1  # 100个session执行20s
+more file.out
+```
+
+```sql
+-- 查询sql命中
+SELECT
+	query,
+	calls,
+	total_time,
+	ROWS,
+	100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS hit_percent 
+FROM
+	pg_stat_statements 
+ORDER BY
+	total_time DESC 
+	LIMIT 5;
+
 -- 查询单次调用最耗 IO SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time)/calls DESC LIMIT 5;
 -- 查询总最耗 IO SQL TOP 5
@@ -744,6 +787,16 @@ SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_t
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 5;
 -- 查询总最耗时 SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
+
+-- 响应时间抖动最严重 SQL
+select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
+-- 最耗共享内存 SQL
+select userid::regrole, dbid, query from pg_stat_statements order by (shared_blks_hit+shared_blks_dirtied) desc limit 5;
+-- 最耗临时空间 SQL
+select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_written desc limit 5;  
+-- 清理历史统计信息
+select pg_stat_statements_reset(); 
+
 -- 找不到mean_time字段的时候使用
 SELECT
   userid AS 执行者ID,
@@ -758,17 +811,7 @@ FROM
 ORDER BY
   total_time / calls DESC 
   LIMIT 10
-
--- 响应时间抖动最严重 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
--- 最耗共享内存 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by (shared_blks_hit+shared_blks_dirtied) desc limit 5;
--- 最耗临时空间 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_written desc limit 5;  
--- 清理历史统计信息
-select pg_stat_statements_reset(); 
 ```
-
 
 ## 5. PG/SQL
 
