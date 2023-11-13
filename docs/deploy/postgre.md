@@ -645,7 +645,7 @@ SELECT
             pg_type T,
             pg_description d 
         WHERE
-            C.relname = 'product' 
+            C.relname = 'tableName' 
             AND A.attnum > 0 
             AND A.attrelid = C.oid 
             AND A.atttypid = T.oid 
