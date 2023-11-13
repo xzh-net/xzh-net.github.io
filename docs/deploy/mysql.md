@@ -1,4 +1,4 @@
-# MySQL 5.7.29
+# MySQL 5.7.44
 
 ## 1. 安装
 
@@ -9,7 +9,7 @@
 ```bash
 rpm -qa|grep mariadb
 rpm -qa | grep -i mysql
-rpm -e mysql-community-server-5.7.29-1.el7.x86_64 --nodeps
+rpm -e mysql-community-server-5.7.44-1.el7.x86_64 --nodeps
 ```
 
 #### 1.1.2 上传解压
@@ -17,8 +17,7 @@ rpm -e mysql-community-server-5.7.29-1.el7.x86_64 --nodeps
 ```bash
 cd /opt/software/
 mkdir -p mysql
-wget https://cdn.mysql.com/archives/mysql-5.7/mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar
-tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
+tar xvf mysql-5.7.44-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
 ```
 
 #### 1.1.3 执行安装
@@ -26,7 +25,7 @@ tar xvf mysql-5.7.29-1.el7.x86_64.rpm-bundle.tar -C /opt/software/mysql
 ```bash
 yum -y install libaio
 cd /opt/software/mysql
-rpm -ivh mysql-community-common-5.7.29-1.el7.x86_64.rpm mysql-community-libs-5.7.29-1.el7.x86_64.rpm mysql-community-client-5.7.29-1.el7.x86_64.rpm mysql-community-server-5.7.29-1.el7.x86_64.rpm
+rpm -ivh mysql-community-common-5.7.44-1.el7.x86_64.rpm mysql-community-libs-5.7.44-1.el7.x86_64.rpm mysql-community-client-5.7.44-1.el7.x86_64.rpm mysql-community-server-5.7.44-1.el7.x86_64.rpm
 ```
 
 #### 1.1.4 修改配置
@@ -46,28 +45,20 @@ pid-file=/var/run/mysqld/mysqld.pid
 #### 1.1.5 初始化
 
 ```bash
-mysqld --initialize 					# 初始化mysql
-chown mysql:mysql /var/lib/mysql -R 	# 更改所属组
-cat /var/log/mysqld.log | grep password	# 初始密码
-systemctl start mysqld.service      	# 启动mysql
+mysqld --initialize                         # 初始化mysql
+chown mysql:mysql /var/lib/mysql -R         # 更改所属组
+cat /var/log/mysqld.log | grep password     # 初始密码
+systemctl start mysqld                      # 启动mysql
+systemctl enable mysqld                     # 设置开机启动
+ps aux | grep mysqld 
 ```
 
-#### 1.1.6 启动服务
-
-```bash
-systemctl start mysqld
-systemctl stop mysqld
-systemctl status mysqld
-systemctl enable  mysqld    # 设置开机启动
-ps aux | grep mysqld        
-```
-
-#### 1.1.7 客户端测试
+#### 1.1.6 客户端测试
 
 ```bash
 mysql -u root -p
-set password = password('hadoop');
-grant all privileges on *.* to 'root' @'%' identified by 'hadoop';
+set password = password('123456');
+grant all privileges on *.* to 'root' @'%' identified by '123456';
 flush privileges;
 ```
 
@@ -76,16 +67,15 @@ flush privileges;
 1. 停止服务
 
 ```bash
-systemctl stop mysqld.service
+systemctl stop mysqld
 ```
 
 2. 删除依赖
 
 ```bash
 rpm -qa | grep -i mysql 
-yum remove -y mysql-community-libs-5.7.29-1.el7.x86_64 mysql-community-common-5.7.29-1.el7.x86_64 mysql-community-client-5.7.29-1.el7.x86_64 mysql-community-server-5.7.29-1.el7.x86_64
-
-rpm -qa | grep -i mysql
+yum remove -y mysql-community-libs-5.7.44-1.el7.x86_64 mysql-community-common-5.7.44-1.el7.x86_64 mysql-community-client-5.7.44-1.el7.x86_64 mysql-community-server-5.7.44-1.el7.x86_64
+rpm -qa | grep -i mysql     # 确认删除依赖
 ```
 
 3. 删除配置
