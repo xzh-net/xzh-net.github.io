@@ -755,8 +755,8 @@ generate_series ( 1, 999999 ),
 random( ) :: TEXT,
 random( ) :: TEXT,
 random( ) :: TEXT,
-'hwcq',
-generate_series ( 1, 999999 );
+'hwcq', generate_series ( 1, 999999 );
+
 select pg_database_size('bench')/1024/1024||'M'; # 查看压测库大小
 ```
 
