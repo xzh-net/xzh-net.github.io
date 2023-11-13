@@ -110,7 +110,7 @@ show tables;
 
 #### 1.3.1 安装MySQL
 
-[MySQL 5.7.29](devops/database/mysql?id=_11-单机)
+[MySQL 5.7.44](devops/database/mysql?id=_11-单机)
 
 #### 1.3.2 上传解压
 
