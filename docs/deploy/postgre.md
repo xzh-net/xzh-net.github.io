@@ -540,25 +540,25 @@ SELECT pg_cancel_backend(pid);
 
 -- PID查询sql
 SELECT
-	procpid,
-	START,
-	now( ) - START AS lap,
-	current_query 
+    procpid,
+    START,
+    now( ) - START AS lap,
+    current_query 
 FROM
-	(
-	SELECT
-		backendid,
-		pg_stat_get_backend_pid ( S.backendid ) AS procpid,
-		pg_stat_get_backend_activity_start ( S.backendid ) AS START,
-		pg_stat_get_backend_activity ( S.backendid ) AS current_query 
-	FROM
-		( SELECT pg_stat_get_backend_idset ( ) AS backendid ) AS S 
-	) AS S 
+    (
+    SELECT
+        backendid,
+        pg_stat_get_backend_pid ( S.backendid ) AS procpid,
+        pg_stat_get_backend_activity_start ( S.backendid ) AS START,
+        pg_stat_get_backend_activity ( S.backendid ) AS current_query 
+    FROM
+        ( SELECT pg_stat_get_backend_idset ( ) AS backendid ) AS S 
+    ) AS S 
 WHERE
-	current_query <> '' 
-	AND procpid = 34171 
+    current_query <> '' 
+    AND procpid = 34171 
 ORDER BY
-	lap DESC;
+    lap DESC;
 
 -- kill 进程
 SELECT pg_terminate_backend ( pid )
@@ -570,20 +570,20 @@ SELECT pg_terminate_backend ( pid )
 ```sql
 -- 查询所有数据库大小
 SELECT
-	d.datname AS NAME,
-	pg_catalog.pg_get_userbyid ( d.datdba ) AS OWNER,
+    d.datname AS NAME,
+    pg_catalog.pg_get_userbyid ( d.datdba ) AS OWNER,
 CASE
-		WHEN pg_catalog.has_database_privilege ( d.datname, 'CONNECT' ) THEN
-		pg_catalog.pg_size_pretty ( pg_catalog.pg_database_size ( d.datname ) ) ELSE'No Access' 
-END AS SIZE 
+        WHEN pg_catalog.has_database_privilege ( d.datname, 'CONNECT' ) THEN
+        pg_catalog.pg_size_pretty ( pg_catalog.pg_database_size ( d.datname ) ) ELSE 'No Access' 
+    END AS SIZE 
 FROM
-	pg_catalog.pg_database d 
+    pg_catalog.pg_database d 
 ORDER BY
 CASE
-		WHEN pg_catalog.has_database_privilege ( d.datname, 'CONNECT' ) THEN
-		pg_catalog.pg_database_size ( d.datname ) 
+        WHEN pg_catalog.has_database_privilege ( d.datname, 'CONNECT' ) THEN
+        pg_catalog.pg_database_size ( d.datname ) 
 END DESC 
-	LIMIT 20
+    LIMIT 20
  
 -- 查询所有表大小
 select relname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_tables;
@@ -608,9 +608,53 @@ vacuum tablename     -- 更新某个表
 vacuum               -- 在某个数据库中执行直接更新该数据库所有表
 ```
 
-### 4.3 表注释
+### 4.3 表结构注释
 
 ```sql
+-- 获取指定表的结构
+SELECT
+    C.relname AS 表名,
+    A.attname AS 列名,
+    ( CASE WHEN A.attnotnull = TRUE THEN TRUE ELSE FALSE END ) AS 是否非空,
+    (
+    CASE
+            
+            WHEN (
+            SELECT
+                COUNT( pg_constraint.* ) 
+            FROM
+                pg_constraint
+                INNER JOIN pg_class ON pg_constraint.conrelid = pg_class.oid
+                INNER JOIN pg_attribute ON pg_attribute.attrelid = pg_class.oid 
+                AND pg_attribute.attnum = ANY ( pg_constraint.conkey )
+                INNER JOIN pg_type ON pg_type.oid = pg_attribute.atttypid 
+            WHERE
+                pg_class.relname = C.relname 
+                AND pg_constraint.contype = 'p' 
+                AND pg_attribute.attname = A.attname 
+                ) > 0 THEN
+            TRUE ELSE FALSE 
+            END 
+            ) AS 是否是主键,
+            concat_ws ( '', T.typname ) AS 字段类型,
+            ( CASE WHEN A.attlen > 0 THEN A.attlen ELSE A.atttypmod - 4 END ) AS 长度,
+            d.description AS 备注 
+        FROM
+            pg_class C,
+            pg_attribute A,
+            pg_type T,
+            pg_description d 
+        WHERE
+            C.relname = 'product' 
+            AND A.attnum > 0 
+            AND A.attrelid = C.oid 
+            AND A.atttypid = T.oid 
+            AND d.objoid = A.attrelid 
+            AND d.objsubid = A.attnum 
+        ORDER BY
+        C.relname DESC,
+    A.attnum ASC
+
 -- 查询所有表注释
 SELECT tb.table_name, d.description 
 FROM information_schema.tables tb
@@ -641,49 +685,6 @@ FROM information_schema.columns col
 WHERE col.table_schema = 'public' AND description IS NULL
 ORDER BY col.table_name, col.ordinal_position;
 
--- 获取指定表的结构
-SELECT C
-	.relname AS 表名,
-	A.attname AS 列名,
-	( CASE WHEN A.attnotnull = TRUE THEN TRUE ELSE FALSE END ) AS 是否非空,
-	(
-	CASE
-			
-			WHEN (
-			SELECT COUNT
-				( pg_constraint.* ) 
-			FROM
-				pg_constraint
-				INNER JOIN pg_class ON pg_constraint.conrelid = pg_class.oid
-				INNER JOIN pg_attribute ON pg_attribute.attrelid = pg_class.oid 
-				AND pg_attribute.attnum = ANY ( pg_constraint.conkey )
-				INNER JOIN pg_type ON pg_type.oid = pg_attribute.atttypid 
-			WHERE
-				pg_class.relname = C.relname 
-				AND pg_constraint.contype = 'p' 
-				AND pg_attribute.attname = A.attname 
-				) > 0 THEN
-			TRUE ELSE FALSE 
-			END 
-			) AS 是否是主键,
-			concat_ws ( '', T.typname ) AS 字段类型,
-			( CASE WHEN A.attlen > 0 THEN A.attlen ELSE A.atttypmod - 4 END ) AS 长度,
-			d.description AS 备注 
-		FROM
-			pg_class C,
-			pg_attribute A,
-			pg_type T,
-			pg_description d 
-		WHERE
-			C.relname = 'product' 
-			AND A.attnum > 0 
-			AND A.attrelid = C.oid 
-			AND A.atttypid = T.oid 
-			AND d.objoid = A.attrelid 
-			AND d.objsubid = A.attnum 
-		ORDER BY
-		C.relname DESC,
-	A.attnum ASC
 ```
 
 ### 4.4 pg_stat_statements
@@ -691,29 +692,29 @@ SELECT C
 `pg_stat_statements`模块提供一种方法追踪一个服务器所执行的所有 SQL 语句的执行统计信息
 
 ```lua
-userid	oid	pg_authid.oid	执行该语句的用户的 OID
-dbid	oid	pg_database.oid	在其中执行该语句的数据库的 OID
-queryid	bigint	 	内部哈希码，从语句的解析树计算得来
-query	text	 	语句的文本形式
-calls	bigint	 	被执行的次数
-total_time	double precision	 	在该语句中花费的总时间，以毫秒计
-min_time	double precision	 	在该语句中花费的最小时间，以毫秒计
-max_time	double precision	 	在该语句中花费的最大时间，以毫秒计
-mean_time	double precision	 	在该语句中花费的平均时间，以毫秒计
-stddev_time	double precision	 	在该语句中花费时间的总体标准偏差，以毫秒计
-rows	bigint	 	该语句检索或影响的行总数
-shared_blks_hit	bigint	 	该语句造成的共享块缓冲命中总数
-shared_blks_read	bigint	 	该语句读取的共享块的总数
-shared_blks_dirtied	bigint	 	该语句弄脏的共享块的总数
-shared_blks_written	bigint	 	该语句写入的共享块的总数
-local_blks_hit	bigint	 	该语句造成的本地块缓冲命中总数
-local_blks_read	bigint	 	该语句读取的本地块的总数
-local_blks_dirtied	bigint	 	该语句弄脏的本地块的总数
-local_blks_written	bigint	 	该语句写入的本地块的总数
-temp_blks_read	bigint	 	该语句读取的临时块的总数
-temp_blks_written	bigint	 	该语句写入的临时块的总数
-blk_read_time	double precision	 	该语句花在读取块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
-blk_write_time	double precision	 	该语句花在写入块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
+userid    oid    执行该语句的用户的 OID
+dbid    oid    在其中执行该语句的数据库的 OID
+queryid    bigint         内部哈希码，从语句的解析树计算得来
+query    text         语句的文本形式
+calls    bigint         被执行的次数
+total_time    double precision         在该语句中花费的总时间，以毫秒计
+min_time    double precision         在该语句中花费的最小时间，以毫秒计
+max_time    double precision         在该语句中花费的最大时间，以毫秒计
+mean_time    double precision         在该语句中花费的平均时间，以毫秒计
+stddev_time    double precision         在该语句中花费时间的总体标准偏差，以毫秒计
+rows    bigint         该语句检索或影响的行总数
+shared_blks_hit    bigint         该语句造成的共享块缓冲命中总数
+shared_blks_read    bigint         该语句读取的共享块的总数
+shared_blks_dirtied    bigint         该语句弄脏的共享块的总数
+shared_blks_written    bigint         该语句写入的共享块的总数
+local_blks_hit    bigint         该语句造成的本地块缓冲命中总数
+local_blks_read    bigint         该语句读取的本地块的总数
+local_blks_dirtied    bigint         该语句弄脏的本地块的总数
+local_blks_written    bigint         该语句写入的本地块的总数
+temp_blks_read    bigint         该语句读取的临时块的总数
+temp_blks_written    bigint         该语句写入的临时块的总数
+blk_read_time    double precision         该语句花在读取块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
+blk_write_time    double precision         该语句花在写入块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
 ```
 
 #### 4.4.1 安装
@@ -767,16 +768,16 @@ more file.out
 ```sql
 -- 查询sql命中
 SELECT
-	query,
-	calls,
-	total_time,
-	ROWS,
-	100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS hit_percent 
+    query,
+    calls,
+    total_time,
+    ROWS,
+    100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS hit_percent 
 FROM
-	pg_stat_statements 
+    pg_stat_statements 
 ORDER BY
-	total_time DESC 
-	LIMIT 5;
+    total_time DESC 
+    LIMIT 5;
 
 -- 查询单次调用最耗 IO SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time)/calls DESC LIMIT 5;
@@ -890,10 +891,10 @@ ALTER TABLE major_stats OWNER TO postgres;
 ```sql
 create or replace function fun_stu_major()
 returns trigger as 
-	$BODY$
-	DECLARE
-	rec record;
-	BEGIN
+    $BODY$
+    DECLARE
+    rec record;
+    BEGIN
 DELETE FROM major_stats;--将统计表里面的旧数据清空
 FOR rec IN (SELECT major,sum(score) as total_score,count(*) as total_students 
 FROM stu_score GROUP BY major) LOOP
@@ -1085,46 +1086,46 @@ CREATE OR REPLACE FUNCTION "public"."proc_init_flow_cando"(IN "v_partnerid" text
   RETURNS "pg_catalog"."refcursor" AS $BODY$
 DECLARE
 
-		V_SPZT   smallint;
-		V_FLOWZT smallint;
-		V_USER   varchar(2000);
-		V_YJ     varchar(4000);s
+        V_SPZT   smallint;
+        V_FLOWZT smallint;
+        V_USER   varchar(2000);
+        V_YJ     varchar(4000);s
 
 BEGIN
-		SELECT MAX(FLOWZT)
-		INTO   V_FLOWZT
-		FROM   TS_FLOW_MAIN_MX
-		WHERE  FLOWCID = V_FLOWCID
-		AND    PARTNERID = V_PARTNERID;
-		SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
-		INTO   V_SPZT, V_USER, V_YJ
-		FROM   TS_FLOW_PATH_COM A
-		INNER  JOIN VJSP_USERS B
-		ON     A.TS_MK_USERID = B.USERID
-		WHERE  A.TS_MK_PID = V_PATHID
-		AND    A.PARTNERID = V_PARTNERID;
-		
-		IF V_SPZT != 1 THEN
-				IF V_FLOWZT = 3 THEN
-						SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
-						INTO   V_SPZT, V_USER, V_YJ
-						FROM   TS_FLOW_PATH_COM A
-						INNER  JOIN VJSP_USERS B
-						ON     A.TS_MK_USERID = B.USERID
-						WHERE  A.FLOWCID = V_FLOWCID
-						AND    A.TS_MK_SQ_ZT = 3
-						AND    A.PARTNERID = V_PARTNERID;
-				ELSIF V_FLOWZT = 2 THEN
-						V_SPZT := 2;
-				ELSE
-						V_SPZT := 1;
-				END IF;
-				OPEN V_OUT FOR
-						SELECT V_SPZT AS ZT, V_USER AS VUSER, V_YJ AS YJ ;
-		ELSE
-				OPEN V_OUT FOR
-						SELECT 1  WHERE 1 = 2;
-		END IF;
+        SELECT MAX(FLOWZT)
+        INTO   V_FLOWZT
+        FROM   TS_FLOW_MAIN_MX
+        WHERE  FLOWCID = V_FLOWCID
+        AND    PARTNERID = V_PARTNERID;
+        SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
+        INTO   V_SPZT, V_USER, V_YJ
+        FROM   TS_FLOW_PATH_COM A
+        INNER  JOIN VJSP_USERS B
+        ON     A.TS_MK_USERID = B.USERID
+        WHERE  A.TS_MK_PID = V_PATHID
+        AND    A.PARTNERID = V_PARTNERID;
+        
+        IF V_SPZT != 1 THEN
+                IF V_FLOWZT = 3 THEN
+                        SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
+                        INTO   V_SPZT, V_USER, V_YJ
+                        FROM   TS_FLOW_PATH_COM A
+                        INNER  JOIN VJSP_USERS B
+                        ON     A.TS_MK_USERID = B.USERID
+                        WHERE  A.FLOWCID = V_FLOWCID
+                        AND    A.TS_MK_SQ_ZT = 3
+                        AND    A.PARTNERID = V_PARTNERID;
+                ELSIF V_FLOWZT = 2 THEN
+                        V_SPZT := 2;
+                ELSE
+                        V_SPZT := 1;
+                END IF;
+                OPEN V_OUT FOR
+                        SELECT V_SPZT AS ZT, V_USER AS VUSER, V_YJ AS YJ ;
+        ELSE
+                OPEN V_OUT FOR
+                        SELECT 1  WHERE 1 = 2;
+        END IF;
 END;
 
  
