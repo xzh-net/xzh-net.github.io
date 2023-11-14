@@ -13,7 +13,7 @@ tar -zxvf istio-1.6.8-linux-amd64.tar.gz -C /opt
 mv /opt/istio-1.6.8 /opt/istio
 ```
 
-### 1.2 安装istio
+### 1.2 安装
 
 ```bash           
 mv /opt/istio/bin/istioctl /usr/local/bin
@@ -22,9 +22,19 @@ kubectl get crd -n istio-system | wc -l       # 统计个数
 kubectl get pod,svc -n istio-system           # 查看核心组件资源
 ```
 
-### 1.3 安装bookinfo
+### 1.3 卸载
 
-#### 1.3.1 准备工作
+```bash
+/opt/istio/samples/bookinfo/platform/kube/cleanup.sh    # 清空应用，输入命名空间 bookinfo
+istioctl manifest generate --set profile=demo | kubectl delete --ignore-not-found=true -f -
+kubectl delete -f /opt/istio/samples/bookinfo/platform/kube/bookinfo.yaml 
+kubectl delete namespace istio-system             # 删除命名空间
+kubectl label namespace default istio-injection-  # 关闭自动注入
+```
+
+## 2 安装bookinfo
+
+### 2.1 准备工作
 
 ```bash
 kubectl create ns bookinfo    # 创建命名空间
@@ -32,14 +42,14 @@ kubectl label namespace bookinfo istio-injection=enabled    # 开启自动注入
 istioctl kube-inject -f first-istio.yaml | kubectl apply -f -   # 可选操作，不必执行
 ```
 
-#### 1.3.2 执行安装
+### 2.2 执行安装
 
 ```bash
 kubectl apply -f /opt/istio/samples/bookinfo/platform/kube/bookinfo.yaml -n bookinfo
 kubectl get pod,svc -n bookinfo
 ```
 
-#### 1.3.3 通过ingress访问
+### 2.3 通过ingress访问
 
 查看productpage应用service暴漏端口
 
@@ -78,7 +88,7 @@ kubectl get Ingress -n bookinfo             # 查看创建绑定
 
 访问地址：productpage.istio.qy.com:30080（k8s中将ingress的80映射为30080）
 
-#### 1.3.4 通过istio的ingressgateway访问
+### 2.4 通过istio的ingressgateway访问
 
 ```bash
 kubectl apply -f /opt/istio/samples/bookinfo/networking/bookinfo-gateway.yaml -n bookinfo
@@ -99,9 +109,9 @@ kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.por
 
 访问地址：http://192.168.2.203:31561/productpage
 
-#### 1.3.5 流量管理
+### 2.5 流量管理
 
-##### 1.3.5.1 放开自定义权限
+#### 2.5.1 放开自定义权限
 
 先执行这个文件之后gateway路由规则才可以自定义
 
@@ -110,7 +120,7 @@ kubectl apply -f /opt/istio/samples/bookinfo/networking/destination-rule-all.yam
 kubectl get DestinationRule -n bookinfo       # 查看路由规则
 ```
 
-##### 1.3.5.2 基于版本控制
+#### 2.5.2 基于版本控制
 
 所有的路由的流量全部都切换到v3版本也就是全部都是红星的版本
 
@@ -119,7 +129,7 @@ kubectl apply -f /opt/istio/samples/bookinfo/networking/virtual-service-reviews-
 kubectl delete -f /opt/istio/samples/bookinfo/networking/virtual-service-reviews-v3.yaml -n bookinfo   # 删除版本控制
 ```
 
-##### 1.3.5.3 基于权重控制
+#### 2.5.3 基于权重控制
 
 此时会把所有的路由的流量会在v1和v3之间进行切换，各占50%
 
@@ -128,7 +138,7 @@ kubectl apply -f /opt/istio/samples/bookinfo/networking/virtual-service-reviews-
 kubectl delete -f /opt/istio/samples/bookinfo/networking/virtual-service-reviews-50-v3.yaml -n bookinfo    # 删除权重控制
 ```
 
-##### 1.3.5.4 基于用户控制
+#### 2.5.4 基于用户控制
 
 在登录的时候会在header头部增加一个jason，如果是jason登录那么会访问v2版本，其它的人访问的是v3
 
@@ -137,7 +147,7 @@ kubectl apply -f /opt/istio/samples/bookinfo/networking/virtual-service-reviews-
 kubectl delete -f /opt/istio/samples/bookinfo/networking/virtual-service-reviews-jason-v2-v3.yaml -n bookinfo    # 删除用户控制
 ```
 
-##### 1.3.5.5 故障注入
+### 2.6 故障注入
 
 在访问的的时候会在header头部增加一个jason，如果是jason访问那么会访问v2版本，其它的人访问的是v3。 访问v3版本的人会注入一个50%几率的延迟2S请求访问
 
@@ -172,7 +182,7 @@ spec:
 kubectl apply -f test.yaml -n bookinfo
 ```
 
-##### 1.3.5.6 流量迁移
+### 2.7 流量迁移
 
 一个常见的用例是将流量从一个版本的微服务逐渐迁移到另一个版本。在 Istio 中，您可以通过配置一系列规则来实现此目标， 这些规则将一定百分比的流量路由到一个或另一个服务。在本任务中，您将会把 50％ 的流量发送到 `reviews:v1`，另外 50％ 的流量发送到 `reviews:v3`。然后，再把 100％ 的流量发送到 `reviews:v3` 来完成迁移。
 
@@ -194,11 +204,11 @@ kubectl apply -f virtual-service-reviews-50-v3.yaml
 kubectl apply -f virtual-service-reviews-v3.yaml
 ```
 
-### 1.4 监控
+## 3. 监控
 
 Prometheus存储服务的监控数据，数据来自于istio组件mixer上报，Grafana开源数据可视化工具，展示Prometheus收集到的监控数据
  
-#### 1.4.1 Prometheus
+### 3.1 Prometheus
 
 ```bash
 kubectl get all -n istio-system   # 查看istio自带组件
@@ -236,7 +246,7 @@ kubectl get ingress -n istio-system
 
 访问地址：prometheus.istio.qy.com:30080（k8s中将ingress的80映射为30080）
 
-#### 1.4.2 Grafana
+### 3.2 Grafana
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -268,12 +278,3 @@ kubectl get ingress -n istio-system
 
 访问地址：grafana.istio.qy.com:30080（k8s中将ingress的80映射为30080）
 
-### 1.5 卸载
-
-```bash
-/opt/istio/samples/bookinfo/platform/kube/cleanup.sh    # 清空应用，输入命名空间 bookinfo
-istioctl manifest generate --set profile=demo | kubectl delete --ignore-not-found=true -f -
-kubectl delete -f /opt/istio/samples/bookinfo/platform/kube/bookinfo.yaml 
-kubectl delete namespace istio-system             # 删除命名空间
-kubectl label namespace default istio-injection-  # 关闭自动注入
-```
