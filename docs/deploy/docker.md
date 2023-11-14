@@ -494,11 +494,11 @@ docker run -d -p 8086:8086 \
       -v /mydata/influxdb2/data:/var/lib/influxdb2 \
       -v /mydata/influxdb2/config:/etc/influxdb2 \
       -e DOCKER_INFLUXDB_INIT_MODE=setup \
-	    -e DOCKER_INFLUXDB_INIT_USERNAME=my-user \
+        -e DOCKER_INFLUXDB_INIT_USERNAME=my-user \
       -e DOCKER_INFLUXDB_INIT_PASSWORD=my-password \
       -e DOCKER_INFLUXDB_INIT_ORG=org \
       -e DOCKER_INFLUXDB_INIT_BUCKET=bucket \
-	    --name influxdb2 \
+        --name influxdb2 \
       influxdb:2.0.6
 ```
 
@@ -532,11 +532,11 @@ deleteall "test", "10010"
 
 ```bash
 docker run -d -p 6041:6041 \
-	-v /mydata/taos/conf:/etc/taos \
-	-v /mydata/taos/data:/var/lib/taos \
-	-v /mydata/taos/logs:/var/log/taos \
-	--name tdengine 
-	tdengine:2.0.19.1
+    -v /mydata/taos/conf:/etc/taos \
+    -v /mydata/taos/data:/var/lib/taos \
+    -v /mydata/taos/logs:/var/log/taos \
+    --name tdengine 
+    tdengine:2.0.19.1
 ```
 
 ### 3.4 数仓工具
@@ -571,7 +571,7 @@ docker run -dti --network=host --name storage -p 8888:8888 -p 23000:23000  \
 
 ```bash
 docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /mydata/fdfs:/var/local/fdfs \
-	-d registry.cn-beijing.aliyuncs.com/tianzuo/fastdfs
+    -d registry.cn-beijing.aliyuncs.com/tianzuo/fastdfs
 ```
 
 #### 3.5.2 MinIO
@@ -614,39 +614,39 @@ hadoop fs -cat /wordcount/output/part-r-00000
 ```
 
 ```lua
-组件	节点	默认端口	配置	用途说明
-HDFS	DataNode	50010	dfs.datanode.address	datanode服务端口，用于数据传输
-HDFS	DataNode	50075	dfs.datanode.http.address	http服务的端口
-HDFS	DataNode	50475	dfs.datanode.https.address	https服务的端口
-HDFS	DataNode	50020	dfs.datanode.ipc.address	ipc服务的端口
-HDFS	NameNode	50070	dfs.namenode.http-address	http服务的端口
-HDFS	NameNode	50470	dfs.namenode.https-address	https服务的端口
-HDFS	NameNode	8020	fs.defaultFS	接收Client连接的RPC端口，用于获取文件系统metadata信息。
-HDFS	journalnode	8485	dfs.journalnode.rpc-address	RPC服务
-HDFS	journalnode	8480	dfs.journalnode.http-address	HTTP服务
-HDFS	ZKFC	8019	dfs.ha.zkfc.port	ZooKeeper FailoverController，用于NN HA
-YARN	ResourceManager	8032	yarn.resourcemanager.address	RM的applications manager(ASM)端口
-YARN	ResourceManager	8030	yarn.resourcemanager.scheduler.address	scheduler组件的IPC端口
-YARN	ResourceManager	8031	yarn.resourcemanager.resource-tracker.address	IPC
-YARN	ResourceManager	8033	yarn.resourcemanager.admin.address	IPC
-YARN	ResourceManager	8088	yarn.resourcemanager.webapp.address	http服务端口
-YARN	NodeManager	8040	yarn.nodemanager.localizer.address	localizer IPC
-YARN	NodeManager	8042	yarn.nodemanager.webapp.address	http服务端口
-YARN	NodeManager	8041	yarn.nodemanager.address	NM中container manager的端口
-YARN	JobHistory Server	10020	mapreduce.jobhistory.address	IPC
-YARN	JobHistory Server	19888	mapreduce.jobhistory.webapp.address	http服务端口
-HBase	Master	60000	hbase.master.port	IPC
-HBase	Master	60010	hbase.master.info.port	http服务端口
-HBase	RegionServer	60020	hbase.regionserver.port	IPC
-HBase	RegionServer	60030	hbase.regionserver.info.port	http服务端口
-HBase	HQuorumPeer	2181	hbase.zookeeper.property.clientPort	HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
-HBase	HQuorumPeer	2888	hbase.zookeeper.peerport	HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
-HBase	HQuorumPeer	3888	hbase.zookeeper.leaderport	HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
-Hive	Metastore	9083	/etc/default/hive-metastore中export PORT=<port>来更新默认端口	 
-Hive	HiveServer	10000	/etc/hive/conf/hive-env.sh中export HIVE_SERVER2_THRIFT_PORT=<port>来更新默认端口	 
-ZooKeeper	Server	2181	/etc/zookeeper/conf/zoo.cfg中clientPort=<port>	对客户端提供服务的端口
-ZooKeeper	Server	2888	/etc/zookeeper/conf/zoo.cfg中server.x=[hostname]:nnnnn[:nnnnn]，标蓝部分	follower用来连接到leader，只在leader上监听该端口。
-ZooKeeper	Server	3888	/etc/zookeeper/conf/zoo.cfg中server.x=[hostname]:nnnnn[:nnnnn]，标蓝部分	用于leader选举的。只在electionAlg是1,2或3(默认)时需要。
+组件    节点    默认端口    配置    用途说明
+HDFS    DataNode    50010    dfs.datanode.address    datanode服务端口，用于数据传输
+HDFS    DataNode    50075    dfs.datanode.http.address    http服务的端口
+HDFS    DataNode    50475    dfs.datanode.https.address    https服务的端口
+HDFS    DataNode    50020    dfs.datanode.ipc.address    ipc服务的端口
+HDFS    NameNode    50070    dfs.namenode.http-address    http服务的端口
+HDFS    NameNode    50470    dfs.namenode.https-address    https服务的端口
+HDFS    NameNode    8020    fs.defaultFS    接收Client连接的RPC端口，用于获取文件系统metadata信息。
+HDFS    journalnode    8485    dfs.journalnode.rpc-address    RPC服务
+HDFS    journalnode    8480    dfs.journalnode.http-address    HTTP服务
+HDFS    ZKFC    8019    dfs.ha.zkfc.port    ZooKeeper FailoverController，用于NN HA
+YARN    ResourceManager    8032    yarn.resourcemanager.address    RM的applications manager(ASM)端口
+YARN    ResourceManager    8030    yarn.resourcemanager.scheduler.address    scheduler组件的IPC端口
+YARN    ResourceManager    8031    yarn.resourcemanager.resource-tracker.address    IPC
+YARN    ResourceManager    8033    yarn.resourcemanager.admin.address    IPC
+YARN    ResourceManager    8088    yarn.resourcemanager.webapp.address    http服务端口
+YARN    NodeManager    8040    yarn.nodemanager.localizer.address    localizer IPC
+YARN    NodeManager    8042    yarn.nodemanager.webapp.address    http服务端口
+YARN    NodeManager    8041    yarn.nodemanager.address    NM中container manager的端口
+YARN    JobHistory Server    10020    mapreduce.jobhistory.address    IPC
+YARN    JobHistory Server    19888    mapreduce.jobhistory.webapp.address    http服务端口
+HBase    Master    60000    hbase.master.port    IPC
+HBase    Master    60010    hbase.master.info.port    http服务端口
+HBase    RegionServer    60020    hbase.regionserver.port    IPC
+HBase    RegionServer    60030    hbase.regionserver.info.port    http服务端口
+HBase    HQuorumPeer    2181    hbase.zookeeper.property.clientPort    HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
+HBase    HQuorumPeer    2888    hbase.zookeeper.peerport    HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
+HBase    HQuorumPeer    3888    hbase.zookeeper.leaderport    HBase-managed ZK mode，使用独立的ZooKeeper集群则不会启用该端口。
+Hive    Metastore    9083    /etc/default/hive-metastore中export PORT=<port>来更新默认端口     
+Hive    HiveServer    10000    /etc/hive/conf/hive-env.sh中export HIVE_SERVER2_THRIFT_PORT=<port>来更新默认端口     
+ZooKeeper    Server    2181    /etc/zookeeper/conf/zoo.cfg中clientPort=<port>    对客户端提供服务的端口
+ZooKeeper    Server    2888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]:nnnnn[:nnnnn]，标蓝部分    follower用来连接到leader，只在leader上监听该端口。
+ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]:nnnnn[:nnnnn]，标蓝部分    用于leader选举的。只在electionAlg是1,2或3(默认)时需要。
 ```
 
 
@@ -1291,7 +1291,7 @@ docker-compose-prometheus.yml
 ```yml
 version: '2'
 services:
-####################prometheus###############
+    # prometheus
   prometheus:
     image: "prom/prometheus"
     hostname: prometheus
@@ -1302,7 +1302,7 @@ services:
       - /mydata/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     restart: always
 
-###############node-exporter###############
+    # node-exporter
   node-exporter:
     image: "prom/node-exporter"
     hostname: node-exporter
@@ -1413,8 +1413,8 @@ http_server {
     enabled         on;
     listen          8080;
     dir             ./objs/nginx/html;
-	# 开启 https 支持，需要开放 8088端口
-	# https {
+    # 开启 https 支持，需要开放 8088端口
+    # https {
         # enabled on;
         # listen 8088;
         # key ./conf/woniu.key;
@@ -1438,23 +1438,23 @@ vhost __defaultVhost__ {
         hls_m3u8_file   [app]/[stream].m3u8;
         hls_ts_file     [app]/[stream]-[seq].ts;
     }
-	
-	# dvr设置
-	dvr {
+
+    # dvr设置
+    dvr {
         enabled             off;
         dvr_path            ./objs/nginx/html/[app]/[stream]/[2006]/[01]/[02]/[timestamp].flv;
         dvr_plan            segment;
         dvr_duration        30;
         dvr_wait_keyframe   on;
     }
-	
-	# rtc 设置
-	rtc {
-		enabled     on;
-		bframe      discard;
+
+    # rtc 设置
+    rtc {
+        enabled     on;
+        bframe      discard;
     }
-	
-	# SRS支持refer防盗链：检查用户从哪个网站过来的。譬如不是从公司的页面过来的人都不让看。
+
+    # SRS支持refer防盗链：检查用户从哪个网站过来的。譬如不是从公司的页面过来的人都不让看。
     refer {
         # whether enable the refer hotlink-denial.
         # default: off.
@@ -1475,43 +1475,43 @@ vhost __defaultVhost__ {
         # default: not specified.
         play      github.com github.io;
     }
-	
-	# http 回调
-	http_hooks {
-	
-		# 事件：发生该事件时，即回调指定的HTTP地址。
-		# HTTP地址：可以支持多个，以空格分隔，SRS会依次回调这些接口。
-		# 数据：SRS将数据POST到HTTP接口。
-		# 返回值：SRS要求HTTP服务器返回HTTP200并且response内容为整数错误码（0表示成功），其他错误码会断开客户端连接。
-		
+    
+    # http 回调
+    http_hooks {
+    
+        # 事件：发生该事件时，即回调指定的HTTP地址。
+        # HTTP地址：可以支持多个，以空格分隔，SRS会依次回调这些接口。
+        # 数据：SRS将数据POST到HTTP接口。
+        # 返回值：SRS要求HTTP服务器返回HTTP200并且response内容为整数错误码（0表示成功），其他错误码会断开客户端连接。
+        
         # whether the http hooks enable.
         # default off.
         enabled         on;
         
-		# 当客户端连接到指定的vhost和app时
+        # 当客户端连接到指定的vhost和app时
         on_connect      http://127.0.0.1:8085/api/v1/clients http://localhost:8085/api/v1/clients;
         
-		# 当客户端关闭连接，或者SRS主动关闭连接时
+        # 当客户端关闭连接，或者SRS主动关闭连接时
         on_close        http://127.0.0.1:8085/api/v1/clients http://localhost:8085/api/v1/clients;
        
-		# 当客户端发布流时，譬如flash/FMLE方式推流到服务器
+        # 当客户端发布流时，譬如flash/FMLE方式推流到服务器
         on_publish      http://127.0.0.1:8085/api/v1/streams http://localhost:8085/api/v1/streams;
         
-		# 当客户端停止发布流时
+        # 当客户端停止发布流时
         on_unpublish    http://127.0.0.1:8085/api/v1/streams http://localhost:8085/api/v1/streams;
         
-		# 当客户端开始播放流时
+        # 当客户端开始播放流时
         on_play         http://127.0.0.1:8085/api/v1/sessions http://localhost:8085/api/v1/sessions;
         
-		# 当客户端停止播放时。备注：停止播放可能不会关闭连接，还能再继续播放。
+        # 当客户端停止播放时。备注：停止播放可能不会关闭连接，还能再继续播放。
         on_stop         http://127.0.0.1:8085/api/v1/sessions http://localhost:8085/api/v1/sessions;
         
-		# 当DVR录制关闭一个flv文件时
+        # 当DVR录制关闭一个flv文件时
         on_dvr          http://127.0.0.1:8085/api/v1/dvrs http://localhost:8085/api/v1/dvrs;
-		
+        
         # 当HLS生成一个ts文件时
         on_hls          http://127.0.0.1:8085/api/v1/hls http://localhost:8085/api/v1/hls;
-		
+        
         # when srs reap a ts file of hls, call this hook,
         on_hls_notify   http://127.0.0.1:8085/api/v1/hls/[app]/[stream]/[ts_url][param];
     }
