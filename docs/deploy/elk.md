@@ -526,7 +526,7 @@ cd /home/elastic/filebeat-7.6.2
 cp -p filebeat.yml filebeat.yml.bak
 
 vi filebeat.yml
-####################
+    ##
 filebeat.inputs:
 - type: log
   enabled: true
@@ -548,7 +548,7 @@ filebeat.inputs:
   fields:
     docType: point-log
     project: microservices-platform
-####################
+    ##
 hosts: ["172.17.17.194:5044"]
 bulk_max_size: 2048
 ```
