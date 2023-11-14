@@ -32,7 +32,7 @@ kubectl delete namespace istio-system             # 删除命名空间
 kubectl label namespace default istio-injection-  # 关闭自动注入
 ```
 
-## 2 安装bookinfo
+## 2. bookinfo案例
 
 ### 2.1 准备工作
 
@@ -86,7 +86,7 @@ kubectl get Ingress -n bookinfo             # 查看创建绑定
 192.168.2.201 productpage.istio.qy.com
 ```
 
-访问地址：productpage.istio.qy.com:30080（k8s中将ingress的80映射为30080）
+> 访问地址：http://productpage.istio.qy.com:30080 k8s中将ingress的80映射为30080
 
 ### 2.4 通过istio的ingressgateway访问
 
@@ -107,7 +107,7 @@ kubectl get po -l istio=ingressgateway -n istio-system -o jsonpath='{.items[0].s
 kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}'
 ```
 
-访问地址：http://192.168.2.203:31561/productpage
+> 访问地址：http://192.168.2.203:31561/productpage
 
 ### 2.5 流量管理
 
