@@ -278,10 +278,35 @@ select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; 
 psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
 ```
 
+## 2. 模块
 
-## 2. 命令
+### 2.1 pg_stat_statements
 
-### 2.1 基本信息
+pg_stat_statements模块提供一种方法追踪一个服务器所执行的所有SQL语句的执行统计信息，可以用于统计数据库的资源开销，分析
+
+```bash
+cd /home/postgresql-12.4/contrib/
+make && make install
+su - postgres
+cd $PGDATA
+
+#vi postgresql.conf
+shared_preload_libraries = 'pg_stat_statements'
+track_io_timing = on                # 用于跟踪IO消耗的时间
+track_activity_query_size = 2048    # 设置单条SQL的最长长度，超过被截断显示（可选）
+pg_stat_statements.max = 1000       # 采样参数，在pg_stat_statements中最多保留多少条统计信息，通过LRU算法，覆盖老的记录
+pg_stat_statements.track = all      # all - (所有SQL包括函数内嵌套的SQL), top - 直接执行的SQL(函数内的sql不被跟踪), none - (不跟踪)
+pg_stat_statements.track_utility = off  # 是否跟踪非DML语句 (例如DDL，DCL)，on表示跟踪, off表示不跟踪 
+pg_stat_statements.save = on            # 重启后是否保留统计信息
+
+service postgresql start
+psql \c
+create extension pg_stat_statements;
+```
+
+## 3. 命令
+
+### 3.1 基本信息
 
 ```bash
 psql -h localhost -p 5432 -U postgres -W #使用指定用户和IP端口登陆
@@ -343,7 +368,7 @@ pg_create_logical_replication_slot(slotname,decodingname);
 pg_logical_slot_get_changes();
 ```
 
-### 2.2 建表语句
+### 3.2 建表语句
 
 ```bash
 set timezone = 'Etc/UTC';
@@ -375,9 +400,9 @@ COMMENT ON COLUMN "public"."car"."create_time" IS '创建时间';
 COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：是）';
 ```
 
-## 3. 库操作
+## 4. 库操作
 
-### 3.1 用户授权
+### 4.1 用户授权
 
 ```bash
 create user "sonar" with password '123456';
@@ -397,9 +422,9 @@ UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
 ```
 
-### 3.2 备份恢复
+### 4.2 备份恢复
 
-#### 3.2.1 逻辑备份
+#### 4.2.1 逻辑备份
 
 ```bash
 # 单表导出sql语句，多表使用-t sys_user -t sys_menu
@@ -416,7 +441,7 @@ pg_dump --help
 pg_restore --help
 ```
 
-#### 3.2.2 物理备份
+#### 4.2.2 物理备份
 
 ```bash
 pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R # 备份base和pg_wal
@@ -436,7 +461,7 @@ service postgresql start
 select pg_wal_replay_resume();  # 停止恢复
 ```
 
-#### 3.2.3 PITR数据恢复
+#### 4.2.3 PITR数据恢复
 
 ```bash
 # 恢复到指定事务id
@@ -453,7 +478,7 @@ select pg_wal_replay_resume();  # 停止恢复
 ```
 
 
-#### 3.2.4 定时备份
+#### 4.2.4 定时备份
 
 ```bash
 crontab -e
@@ -471,9 +496,9 @@ rm -rf /opt/db/vjsp10010260_$sevendays_time.dump
 echo "backup finished" his
 ```
 
-### 3.3 归档日志
+### 4.3 归档日志
 
-#### 3.3.1 自动清理
+#### 4.3.1 自动清理
 
 ```bash
 mkdir -p $PGDATA/archivedir/  # 创建归档目录
@@ -486,7 +511,7 @@ archive_mode = on
 archive_command = 'pg_archive.sh %f %p'
 ```
 
-#### 3.3.2 手动清理
+#### 4.3.2 手动清理
 
 ```bash
 su - postgres
@@ -496,76 +521,22 @@ cd /data/pgdata/12/data/archivedir
 pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
 ```
 
-## 4. 表操作
-
-### 4.1 锁表
+### 4.4 表空间
 
 ```sql
--- 执行中sql
-SELECT pgsa.datname AS database_name
-    , pgsa.usename AS user_name
-    , pgsa.client_addr AS client_addr
-    , pgsa.application_name AS application_name
-    , pgsa.state AS state
- , pgsa.backend_start AS backend_start
- , pgsa.xact_start AS xact_start
- , extract(epoch FROM now() - pgsa.xact_start) AS xact_time, pgsa.query_start AS query_start
- , extract(epoch FROM now() - pgsa.query_start) AS query_time
- , pgsa.query AS query_sql
-FROM pg_stat_activity pgsa
-WHERE pgsa.state != 'idle'
- AND pgsa.state != 'idle in transaction'
- AND pgsa.state != 'idle in transaction (aborted)'
-ORDER BY query_time DESC
-LIMIT 5
+-- 查询单个表空间大小
+select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
+ 
+-- 查询所有表空间大小
+select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
+-- 或
+select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
 
--- 查找锁表的pid
-select pid from pg_locks l join pg_class t on l.relation = t.oid where t.relkind = 'r' and t.relname = 'lockedtable';
-
--- 查找锁表的语句
-select pid, state, usename, query, query_start from pg_stat_activity 
-where pid in ( select pid from pg_locks l join pg_class t on l.relation = t.oid and t.relkind = 'r' where t.relname =  'lockedtable');
-
--- 查找所有活动的被锁的表
-select pid, state, usename, query, query_start 
-from pg_stat_activity 
-where pid in (
-  select pid from pg_locks l 
-  join pg_class t on l.relation = t.oid 
-  and t.relkind = 'r' 
-);
-
--- 解锁
-SELECT pg_cancel_backend(pid);
-
--- PID查询sql
-SELECT
-    procpid,
-    START,
-    now( ) - START AS lap,
-    current_query 
-FROM
-    (
-    SELECT
-        backendid,
-        pg_stat_get_backend_pid ( S.backendid ) AS procpid,
-        pg_stat_get_backend_activity_start ( S.backendid ) AS START,
-        pg_stat_get_backend_activity ( S.backendid ) AS current_query 
-    FROM
-        ( SELECT pg_stat_get_backend_idset ( ) AS backendid ) AS S 
-    ) AS S 
-WHERE
-    current_query <> '' 
-    AND procpid = 34171 
-ORDER BY
-    lap DESC;
-
--- kill 进程
-SELECT pg_terminate_backend ( pid )
 ```
 
-### 4.2 统计
+## 5. 表操作
 
+### 5.1 表结构
 
 ```sql
 -- 查询所有数据库大小
@@ -584,33 +555,7 @@ CASE
         pg_catalog.pg_database_size ( d.datname ) 
 END DESC 
     LIMIT 20
- 
--- 查询所有表大小
-select relname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_tables;
- 
--- 查询所有表的总大小，包括其索引大小
-select relname, pg_size_pretty(pg_total_relation_size(relid)) as size from pg_stat_user_tables;
 
--- 查询单个索引大小
-select pg_size_pretty(pg_relation_size('index')) as size;
-
--- 查询单个表空间大小
-select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
- 
--- 查询所有表空间大小
-select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
--- 或
-select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
-
--- 查询所有表的行数
-SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
-vacuum tablename     -- 更新某个表
-vacuum               -- 在某个数据库中执行直接更新该数据库所有表
-```
-
-### 4.3 表结构注释
-
-```sql
 -- 获取指定表的结构
 SELECT
     C.relname AS 表名,
@@ -687,59 +632,299 @@ ORDER BY col.table_name, col.ordinal_position;
 
 ```
 
-### 4.4 pg_stat_statements
+### 5.2 锁表
 
-`pg_stat_statements`模块提供一种方法追踪一个服务器所执行的所有 SQL 语句的执行统计信息
+```sql
+-- 执行中sql
+SELECT pgsa.datname AS database_name
+    , pgsa.usename AS user_name
+    , pgsa.client_addr AS client_addr
+    , pgsa.application_name AS application_name
+    , pgsa.state AS state
+ , pgsa.backend_start AS backend_start
+ , pgsa.xact_start AS xact_start
+ , extract(epoch FROM now() - pgsa.xact_start) AS xact_time, pgsa.query_start AS query_start
+ , extract(epoch FROM now() - pgsa.query_start) AS query_time
+ , pgsa.query AS query_sql
+FROM pg_stat_activity pgsa
+WHERE pgsa.state != 'idle'
+ AND pgsa.state != 'idle in transaction'
+ AND pgsa.state != 'idle in transaction (aborted)'
+ORDER BY query_time DESC
+LIMIT 5
+
+-- 查找锁表的pid
+select pid from pg_locks l join pg_class t on l.relation = t.oid where t.relkind = 'r' and t.relname = 'lockedtable';
+
+-- 查找锁表的语句
+select pid, state, usename, query, query_start from pg_stat_activity 
+where pid in ( select pid from pg_locks l join pg_class t on l.relation = t.oid and t.relkind = 'r' where t.relname =  'lockedtable');
+
+-- 查找所有活动的被锁的表
+select pid, state, usename, query, query_start 
+from pg_stat_activity 
+where pid in (
+  select pid from pg_locks l 
+  join pg_class t on l.relation = t.oid 
+  and t.relkind = 'r' 
+);
+
+-- 解锁
+SELECT pg_cancel_backend(pid);
+
+-- PID查询sql
+SELECT
+    procpid,
+    START,
+    now( ) - START AS lap,
+    current_query 
+FROM
+    (
+    SELECT
+        backendid,
+        pg_stat_get_backend_pid ( S.backendid ) AS procpid,
+        pg_stat_get_backend_activity_start ( S.backendid ) AS START,
+        pg_stat_get_backend_activity ( S.backendid ) AS current_query 
+    FROM
+        ( SELECT pg_stat_get_backend_idset ( ) AS backendid ) AS S 
+    ) AS S 
+WHERE
+    current_query <> '' 
+    AND procpid = 34171 
+ORDER BY
+    lap DESC;
+
+-- kill 进程
+SELECT pg_terminate_backend ( pid )
+```
+
+
+## 6. 统计信息
+
+统计信息主要分为两类：
+
+- `负载指标`统计信息（Monitoring stats），通过stat collector进程进行实时采集更新的负载指标，记录一些对磁盘块、表、索引相关的统计信息，SQL语句执行代价信息
+- `数据分布状态描述`统计信息（Data distribution stats），这些统计信息为优化器选择最优执行计划提供依据，分为后台进程autovacuum lancher触发和手动执行analyze table进行手动采集
+
+### 6.1 负载指标统计
+
+#### 6.1.1 pg_stat_database
+
+通过pg_stat_database我们可以大致的了解一个数据库的历史运行情况，比较常见的一个问题定位有
+
+- 当tup_returned值远大于tup_fetched时，说明该数据库下存在较多全表扫描SQL，结合pg_stat_statments来定位具体慢SQL或者结合pg_stat_user_tables来定位全表扫描相关表
+- 当tup_updated的数值比较大时，说明数据库有很频繁的更新，这个时候就需要关注一下vacuum相关的指标和长事务，如果没有及时进行垃圾回收会造成数据膨胀的比较厉害，一定程度会响应表查询效率
+- 当temp_files的数值比较大时，说明存在很多的排序，hash，或者聚合这种操作，可以通过增大work_mem减少临时文件的产生，并且同时这些操作的性能也会有较大的提升
+
+```sql
+select * from pg_stat_database where datname='hckq';
+```
 
 ```lua
-userid    oid    执行该语句的用户的 OID
-dbid    oid    在其中执行该语句的数据库的 OID
-queryid    bigint         内部哈希码，从语句的解析树计算得来
-query    text         语句的文本形式
-calls    bigint         被执行的次数
-total_time    double precision         在该语句中花费的总时间，以毫秒计
-min_time    double precision         在该语句中花费的最小时间，以毫秒计
-max_time    double precision         在该语句中花费的最大时间，以毫秒计
-mean_time    double precision         在该语句中花费的平均时间，以毫秒计
-stddev_time    double precision         在该语句中花费时间的总体标准偏差，以毫秒计
-rows    bigint         该语句检索或影响的行总数
-shared_blks_hit    bigint         该语句造成的共享块缓冲命中总数
-shared_blks_read    bigint         该语句读取的共享块的总数
-shared_blks_dirtied    bigint         该语句弄脏的共享块的总数
-shared_blks_written    bigint         该语句写入的共享块的总数
-local_blks_hit    bigint         该语句造成的本地块缓冲命中总数
-local_blks_read    bigint         该语句读取的本地块的总数
-local_blks_dirtied    bigint         该语句弄脏的本地块的总数
-local_blks_written    bigint         该语句写入的本地块的总数
-temp_blks_read    bigint         该语句读取的临时块的总数
-temp_blks_written    bigint         该语句写入的临时块的总数
-blk_read_time    double precision         该语句花在读取块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
-blk_write_time    double precision         该语句花在写入块上的总时间，以毫秒计（如果track_io_timing被启用，否则为零）
+datid                 | 45361                           //数据库oid
+datname               | hckq                            //数据库名称
+numbackends           | 58                              //访问当前数据库连接数量
+xact_commit           | 56996933                        //该数据库事务提交总量
+xact_rollback         | 17754                           //该数据库事务回滚总量
+blks_read             | 1066706826461                   //总磁盘物理读的块数，这里read也可能是从page cache读取，如果这里很高需要结合blk_read_time看是否真的存在很多实际从磁盘读取的情况。
+blks_hit              | 626755052417                    //在shared_buffer命中的块数
+tup_returned          | 7744672353046                   //对于表来说是全表扫描的行数，对于索引是通过索引方法返回的索引行数，如果这个值数量明显大于tup_fetched，说明当前数据库存在大量全表扫描的情况。
+tup_fetched           | 1048558532626                   //指通过索引返回的行数
+tup_inserted          | 3643226                         //插入的行数
+tup_updated           | 1173502495                      //更新的行数
+tup_deleted           | 110792                          //删除的行数
+conflicts             | 0                               //与恢复冲突取消的查询次数(只会在备库上发生)
+temp_files            | 231767532                       //产生临时文件的数量，如果这个值很高说明work_mem需要调大
+temp_bytes            | 65209734849881                  //临时文件的大小
+deadlocks             | 430                             //死锁的数量，如果这个值很大说明业务逻辑有问题
+blk_read_time         | 0                               //数据库中花费在读取文件的时间，这个值较高说明内存较小，需要频繁的从磁盘中读入数据文件
+blk_write_time        | 0                               //数据库中花费在写数据文件的时间，pg中脏页一般都写入page cache，如果这个值较高，说明page cache较小，操作系统的page cache需要更积极的写入。
+stats_reset           | 2023-09-06 14:12:22.841839+08   //统计信息重置的时间
 ```
 
-#### 4.4.1 安装
+#### 6.1.2 pg_stat_user_tables
 
-```bash
-cd /home/postgresql-12.4/contrib/
-make && make install
-su - postgres
-cd $PGDATA
+通过pg_stat_user_tables，我们可以知道当前数据库下哪些表发生全表扫描频繁，哪些表变更比较频繁，对于变更较频繁的表可多关注其vacuum相关的指标，避免表膨胀
 
-#vi postgresql.conf
-shared_preload_libraries = 'pg_stat_statements'
-track_io_timing = on                # 用于跟踪IO消耗的时间
-track_activity_query_size = 2048    # 设置单条SQL的最长长度，超过被截断显示（可选）
-pg_stat_statements.max = 1000       # 采样参数，在pg_stat_statements中最多保留多少条统计信息，通过LRU算法，覆盖老的记录
-pg_stat_statements.track = all      # all - (所有SQL包括函数内嵌套的SQL), top - 直接执行的SQL(函数内的sql不被跟踪), none - (不跟踪)
-pg_stat_statements.track_utility = off  # 是否跟踪非DML语句 (例如DDL，DCL)，on表示跟踪, off表示不跟踪 
-pg_stat_statements.save = on            # 重启后是否保留统计信息
-
-service postgresql start
-psql \c
-create extension pg_stat_statements;
+```sql
+select * from pg_stat_user_tables where relname='t1';
 ```
 
-#### 4.4.2 分析
+```lua
+relid               | 47798                             //表的oid
+schemaname          | public                            //schema模式
+relname             | t1                                //表名称
+seq_scan            | 1705895                           //发生全表扫描次数
+seq_tup_read        | 487983248809                      //全表扫描数据行数，如果这个值很大说明对这个表进行sql很有可能都是全表扫描，需要结合具体的执行计划来看
+idx_scan            | 3073852035                        //索引扫描测试
+idx_tup_fetch       | 17609938963                       //通过索引扫描返回的行数
+n_tup_ins           | 17606                             //插入数据行数
+n_tup_upd           | 46413                             //更新数据行数
+n_tup_del           | 0                                 //删除数据行数
+n_tup_hot_upd       | 20624                             //hot update的数据行数，这个值与n_tup_upd越接近说明update的性能较好，更新数据时不会更新索引。
+n_live_tup          | 299112                            //活着的行数量
+n_dead_tup          | 34                                //死亡的行数量,无效数据行
+n_mod_since_analyze | 16746                             //上次analyze的时间
+last_vacuum         |                                   //上次手动vacuum的时间
+last_autovacuum     | 2023-10-09 15:10:47.935799+08     //上次autovacuum的时间
+last_analyze        |                                   //上次手动analyze的时间
+last_autoanalyze    | 2023-11-06 14:50:04.634755+08     //上次自动analyze的时间
+vacuum_count        | 0                                 //vacuum的次数
+autovacuum_count    | 1                                 //autovacuum的次数
+analyze_count       | 0                                 //analyze的次数
+autoanalyze_count   | 1                                 //自动analyze的次数
+```
+
+其他查询信息
+```sql
+-- 查询所有表大小
+select relname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_tables order by pg_relation_size(relid) DESC;
+-- 查询所有表的总大小，包括其索引大小
+select relname, pg_size_pretty(pg_total_relation_size(relid)) as size from pg_stat_user_tables order by pg_relation_size(relid) desc
+
+-- 查询所有表的行数
+SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
+vacuum tablename     -- 更新某个表
+vacuum               -- 在某个数据库中执行直接更新该数据库所有表
+```
+
+#### 6.1.3 pg_stat_user_indexes
+
+通过pg_stat_user_indexes我们可以查看对应索引的使用情况，可以协助我们判断哪些索引当前基本不使用，对这些无效的冗余索引，可进行索引删除
+
+```sql
+select * from pg_stat_user_indexes where relname='t1';
+```
+
+```lua
+relid         | 17087           //相关表的oid
+indexrelid    | 17094           //索引oid
+schemaname    | public          //schema模式
+relname       | t1              //表名
+indexrelname  | t1_pkey         //索引名
+idx_scan      | 149             //通过索引扫描的次数，如果这个值很小，说明这个索引很少被用到，可以考虑进行删除
+idx_tup_read  | 154             //通过任意索引方法返回的索引行数
+idx_tup_fetch | 140             //通过索引方法返回的数据行数
+```
+
+其他查询信息
+```sql
+-- 查询单个索引大小
+select pg_size_pretty(pg_relation_size('index')) as size;
+-- 查询索引ddl
+select * from pg_indexes where tablename='t1'; 
+```
+
+#### 6.1.4 pg_statio_user_tables
+
+通过对pg_statio_user_tables的查询，如果heap_blks_read，idx_blks_read很高说明shared_buffer较小，存在频繁需要从磁盘或者page cache读取到shared_buffer中
+
+```sql
+select * from pg_statio_user_tables where relname='t1';
+```
+
+```lua
+relid           | 17087         //相关表oid
+schemaname      | public        //schema模式
+relname         | t1            //表名
+heap_blks_read  | 54            //指从page cache或者磁盘中读入表的块数
+heap_blks_hit   | 13620         //指在shared_buffer中命中表的块数
+idx_blks_read   | 16            //指从page cache或者磁盘中读入索引的块数
+idx_blks_hit    | 19536         //在shared_buffer中命中的索引的块数
+toast_blks_read | 0             //从page cache或者磁盘中读入toast表的块数
+toast_blks_hit  | 0             //指在shared_buffer中命中toast表的块数
+tidx_blks_read  | 0             //从page cache或者磁盘中读入toast表索引的块数
+tidx_blks_hit   | 0             //指在shared_buffer中命中toast表索引的块数
+```
+
+
+#### 6.1.5 pg_stat_bgwriter
+
+```sql
+select * from pg_stat_bgwriter;
+```
+
+```lua
+checkpoints_timed     | 9208            //指超过checkpoint_timeout的时间后触发的检查点
+checkpoints_req       | 18              //指手动触发的检查点或者因为wal文件数量到达max_wal_size大小时也会增加，如果这个值大于checkpoints_timed，说明checkpoint_timeout设置的不合理。
+checkpoint_write_time | 1404403         //指从shared_buffer中write到page cache花费的时间
+checkpoint_sync_time  | 980             //指checkpoint调用fsync将脏数据同步到磁盘花费的时间，如果这个时间很长容易造成IO的抖动，这时候需要增加checkpoint_timeout或者增加checkpoint_completion_target。
+buffers_checkpoint    | 19861           //checkpoint写入的脏块的数量
+buffers_clean         | 1868            //通过bgwriter写入的块的数量
+maxwritten_clean      | 0               //指bgwriter超过bgwriter_lru_maxpages时停止的次数，如果这个值很高说明需要增加bgwriter_lru_maxpages的大小
+buffers_backend       | 404509          //通过backend写入的块数量
+buffers_backend_fsync | 0               //指backend需要fsync的次数
+buffers_alloc         | 54296           //被分配的缓冲区数量
+stats_reset           | 2020-09-23 15:14:57.052247+08
+```
+
+
+#### 6.1.6 pg_stat_replication
+
+pg_stat_replication仅仅在主从架构下才会显示相关数据。根据对pg_stat_replication表的查询可以查看当前复制的模式、复制配置信息、复制位点信息等
+
+```sql
+select * from pg_stat_replication;
+```
+
+```lua
+pid              | 15040                    //负责流复制进程的pid
+usesysid         | 16384                    //用户ID
+usename          | repl                     //复制用户
+application_name | walreceiver              //这是同步复制的通常设置，它可以通过连接字符串传递到master。
+client_addr      | 192.168.1.171            //客户端地址
+client_hostname  |                          //客户端主机名称，可在postgres.conf中对log_hostname参数设置，启动DNS反向查找
+client_port      | 58690                    //客户端用来和WALsender进行通信使用的TPC端口号，如果不本地UNIX套接字被使用了将显示-1。
+backend_start    | 2020-09-05 13:42:30.108815+08    //流复制开始时间
+backend_xmin     |
+state            | streaming                //复制模式
+sent_lsn         | 0/3000148                //发送到连接的最后的位点
+write_lsn        | 0/3000148                //standby数据库落盘的位点
+flush_lsn        | 0/3000148                //standby数据库flush的位点
+replay_lsn       | 0/3000148                //standby数据库重放的位点
+write_lag        |                          //写延迟间隙
+flush_lag        |                          //flush延迟间隙
+replay_lag       |                          //重放延迟间隙
+sync_priority    | 0                        //复制优先级权重
+sync_state       | async                    //同步模式，同步or异步
+reply_time       | 2020-09-05 13:49:41.269624+08    //
+```
+
+#### 6.2.7 pg_stat_statements
+
+pg_stat_statements模块提供一种跟踪执行统计服务器执行的所有SQL语句的手段。该模块默认是不开启的，如果需要开启需要我们手动对其进进行编译安装，修改配置文件并重启数据库，并在使用前手动载入该模块
+
+```sql
+select * from  pg_stat_statements limit 1;
+```
+
+```lua
+userid              | 10                        //用户id
+dbid                | 13547                     //数据库oid
+queryid             | 1194713979                //查询id
+query               | SELECT * FROM pg_available_extensions WHERE name = 'pg_stat_statements'   //查询SQL
+calls               | 1                         //调用次数
+total_time          | 53.363875                 //SQL总共执行时间
+min_time            | 53.363875                 //SQL最小执行时间
+max_time            | 53.363875                 //SQL最大执行时间
+mean_time           | 53.363875                 //SQL平均执行时间
+stddev_time         | 0                         //SQL花费时间的表中偏差
+rows                | 1                         //SQL返回或者影响的行数
+shared_blks_hit     | 1                         //SQL在在shared_buffer中命中的块数
+shared_blks_read    | 0                         //SQL从page cache或者磁盘中读取的块数
+shared_blks_dirtied | 0                         //SQL语句弄脏的shared_buffer的块数
+shared_blks_written | 0                         //SQL语句写入的块数
+local_blks_hit      | 0                         //临时表中命中的块数
+local_blks_read     | 0                         //临时表需要读的块数
+local_blks_dirtied  | 0                         //临时表弄脏的块数
+local_blks_written  | 0                         //临时表写入的块数
+temp_blks_read      | 0                         //从临时文件读取的块数
+temp_blks_written   | 0                         //从临时文件写入的数据块数
+blk_read_time       | 0                         //从磁盘或者读取花费的时间
+blk_write_time      | 0                         //从磁盘写入花费的时
+```
+
+其他查询信息
 
 ```bash
 createdb bench    # 建压测库
@@ -814,9 +999,43 @@ ORDER BY
   LIMIT 10
 ```
 
-## 5. PG/SQL
+### 6.2 数据分布统计
 
-### 5.1 VIEW
+#### 6.2.1 pg_stats
+
+通过对pg_stats的查询，可以查看每个字段的数据分析统计信息，类似SQL Server的直方图，为优化器选择最佳执行计划提供依据，pg_stats只有管理员账号才可以访问
+
+```sql
+select * from pg_stats where tablename='t1' limit 1
+```
+
+```lua
+schemaname             | public         //schema模式
+tablename              | t1             //表名
+attname                | id             //列名
+inherited              | f              //如果为真，那么说明还字段存在包是继承而来的子字段，不只是指定表的值。
+null_frac              | 0              //该字段为空记录数的百分比
+avg_width              | 4              //该字段每行的平均长度
+n_distinct             | -1             //如果大于零，就是在字段中唯一数值的估计数目。如果小于零， 就是唯一数值的数目被行数除的负数。用负数形式是因为ANALYZE 认为独立数值的数目是随着表增长而增长； 正数的形式用于在字段看上去好像有固定的可能值数目的情况下。比如， -1 表示一个唯一字段，独立数值的个数和行数相同。
+most_common_vals       |                //该字段最常用数值的列表。如果看上去没有啥数值比其它更常见，则为 null。主键一般为null。
+most_common_freqs      |                //该字段最常用数值的频率，也就是说，每个出现的次数除以行数。 如果most_common_vals是 null ，则为 null。
+histogram_bounds       | {1,100,200,300,400,500,600,700,}   //一个数值的列表，它把字段的数值分成几组大致相同热门的组。
+correlation            | 1              //统计与字段值的物理行序和逻辑行序有关。它的范围从 -1 到 +1 。 在数值接近 -1 或者 +1 的时候，在字段上的索引扫描将被认为比它接近零的时候开销更少， 因为减少了对磁盘的随机访问。如果字段数据类型没有<操作符，那么这个字段为null
+most_common_elems      |                //经常在字段值中出现的非空元素值的列表。（标量类型为空。）
+most_common_elem_freqs |                //最常见元素值的频率列表，也就是，至少包含一个给定值的实例的行的分数。 每个元素频率跟着两到三个附加的值；它们是在每个元素频率之前的最小和最大值， 还有可选择的null元素的频率。（当most_common_elems 为null时，为null）
+elem_count_histogram   |                //该字段中值的不同非空元素值的统计直方图，跟着不同非空元素的平均值。（标量类型为空。）
+```
+
+### 6.3 统计信息更新
+
+```sql
+show autovacuum
+analyze verbose t1
+```
+
+## 7. PG/SQL
+
+### 7.1 VIEW
 
 1. dual解决方案
 
@@ -854,7 +1073,7 @@ UNION
 ALTER TABLE "view_of_user" OWNER TO "postgres";
 ```
 
-### 5.2 TRIGGER
+### 7.2 TRIGGER
 
 1. 分数表
 
@@ -917,9 +1136,9 @@ for each row
 execute procedure fun_stu_major()
 ```
 
-### 5.3 FUNCTION
+### 7.3 FUNCTION
 
-#### 5.3.1 循环函数
+#### 7.3.1 循环函数
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."f_actuser"("v_flowcid" text)
@@ -956,7 +1175,7 @@ $BODY$
   COST 100
 ```
 
-#### 5.3.2 执行sql函数
+#### 7.3.2 执行sql函数
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."Untitled"("formno" text)
@@ -1077,9 +1296,9 @@ $BODY$
 ALTER FUNCTION "public"."Untitled"("""formno""" "pg_catalog"."text") OWNER TO "postgres";
 ```
 
-### 5.4 PROCEDURE
+### 7.4 PROCEDURE
 
-#### 5.4.1 返回游标过程
+#### 7.4.1 返回游标过程
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."proc_init_flow_cando"(IN "v_partnerid" text, IN "v_flowcid" text, IN "v_pathid" text, OUT "v_out" refcursor)
@@ -1134,7 +1353,7 @@ $BODY$
   COST 100
 ```
 
-#### 5.4.2 执行sql过程
+#### 7.4.2 执行sql过程
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_delete_crm_target"("v_year" int8=0, "v_tstype" int8=0, "v_spid" text=NULL::text, "v_sptypeid" text=NULL::text)
@@ -1157,7 +1376,7 @@ $BODY$
   COST 100
 ```
 
-#### 5.4.3 遍历过程
+#### 7.4.3 遍历过程
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_crm_insert_seqdetail"("v_sfaid" text, "v_seqid" text, "v_execdate" timestamp)
