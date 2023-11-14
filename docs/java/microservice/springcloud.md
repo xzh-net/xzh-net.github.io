@@ -924,7 +924,6 @@ spring:
                 redis-rate-limiter.replenishRate: 1 # 令牌桶的每秒放的数量/每秒填充平均速率
                 redis-rate-limiter.burstCapacity: 2 # 令牌桶的最大令牌数
                 key-resolver: "#{@ipKeyResolver}" # 获取限流 KEY 的 Bean 的名字/使用SpEL从容器中获取对象
-  ##### Redis 配置项 #####
   redis:
     host: 127.0.0.1
     port: 6379
