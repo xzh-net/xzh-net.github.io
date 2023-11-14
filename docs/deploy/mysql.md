@@ -2,7 +2,7 @@
 
 ## 1. 安装
 
-### 1.1 单机
+### 1.1 RPM安装
 
 #### 1.1.1 卸载mariadb
 
@@ -269,13 +269,12 @@ BEGIN
 END
 ```
 
-## 5. 集群
+## 5. 主从复制
 
-### 5.1 主从复制
 
-#### 5.1.1 主库安装
+### 5.1 主库安装
 
-##### 5.1.1.1 创建配置文件
+#### 5.1.1. 创建配置文件
 
 创建目录
 ```bash
@@ -360,7 +359,7 @@ expire_logs_days：binlog日志过期时间，默认不过期
 max_connections：mysql最大连接数
 ```
 
-##### 5.1.1.2 启动主库
+#### 5.1.2 启动主库
 
 创建启动命令
 ```
@@ -382,7 +381,7 @@ docker run -d \
     mysql:5.7.25
 ```
 
-##### 5.1.1.3 主库创建用于同步的账号
+#### 5.1.3 主库创建用于同步的账号
 
 登录进主库
 ```bash
@@ -397,11 +396,11 @@ mysql -uroot -p1q2w3e4r
 GRANT REPLICATION SLAVE ON *.* to 'backup'@'%' identified by '123456';
 ```
 
-#### 5.1.2 从库安装
+### 5.2 从库安装
 
 进入从库的服务器执行以下操作，建议是不同于主库的服务器，如果服务器相同需要修改3306端口为其他的值
 
-##### 5.1.2.1 创建配置文件
+#### 5.2.1 创建配置文件
 
 创建目录
 ```bash
@@ -467,7 +466,7 @@ max_connections=3600
 - server_id：设为2
 - read-only：设为只读
 
-##### 5.1.2.2 启动从库
+#### 5.2.2 启动从库
 
 创建启动命令
 ```
@@ -489,7 +488,7 @@ docker run -d \
     mysql:5.7.25
 ```
 
-##### 5.1.2.3 关联主库
+#### 5.2.3 关联主库
 
 登录进从库
 ```bash
@@ -512,7 +511,7 @@ master_password：主库用于同步的帐号密码
 master_auto_position：slave连接master将使用基于GTID的复制协议
 ```
 
-##### 5.1.2.4 启动并查看slave
+#### 5.2.4 启动并查看slave
 ```bash
 ## 启动slave
 start slave;
@@ -522,14 +521,14 @@ show slave status\G
 - Slave_IO_Running和Slave_SQL_Running 都为Yes就代表配置成功了
 - Seconds_Behind_Master：为主从延时(ms)
 
-##### 5.1.2.5 创建从库的普通用户
+#### 5.2.5 创建从库的普通用户
 
 read_only=1只读模式，可以限定普通用户进行数据修改的操作，但不会限定具有super权限的用户（如超级管理员root用户）的数据修改操作，所以需要另外创建普通账号来操作从库
 ```sql
 GRANT select,insert,update,delete,create,drop,alter ON *.* to 'zlt'@'%' identified by '1q2w3e4r';
 ```
 
-#### 5.1.3 主库查看同步信息
+### 5.3 主库查看同步信息
 
 登录主库，查看binlog线程，执行以下语句查看正在执行的线程:
 ```bash
@@ -537,9 +536,9 @@ show processlist    # 查看binlog线程
 show slave hosts    # 查看所有从库信息
 ```
 
-### 5.2 主从切换
+## 6. 主从切换
 
-#### 5.2.1 对主库进行锁表
+### 6.1 对主库进行锁表
 
 ```bash
 flush tables with read lock;
@@ -548,7 +547,7 @@ flush tables with read lock;
 在flush tables with read lock成功获得锁之前，必须等待所有语句执行完成（包括SELECT）。所以如果有个慢查询在执行，或者一个打开的事务，或者其他进程拿着表锁，flush tables with read lock就会被阻塞，直到所有的锁被释放
 
 
-#### 5.2.2 检查master同步状态
+### 6.2 检查master同步状态
 
 在主库执行
 ```sql
@@ -556,7 +555,7 @@ show processlist;
 ```
 如果显示Master has sent all binlog to slave; waiting for more updates，则可以执行下一步了，否则需要等待
 
-#### 5.2.3 检查slave同步状态
+### 6.3 检查slave同步状态
 
 在从库执行
 ```sql
@@ -564,7 +563,7 @@ show processlist;
 ```
 确保显示为 Slave has read all relay log; waiting for more updates
 
-#### 5.2.4 提升slave为master
+### 6.4 提升slave为master
 
 在从库执行以下语句
 
@@ -584,7 +583,7 @@ GRANT REPLICATION SLAVE ON *.* to 'backup'@'%' identified by '123456';
 修改配置并重启
 - 修改从库的my.cnf文件，将read-only的值改为0并重启mysql
 
-#### 5.2.5 将原来master变为slave
+### 6.5 将原来master变为slave
 
 修改配置并重启
 - 修改主库的my.cnf文件，将read-only的值改为1并重启mysql
@@ -606,9 +605,9 @@ show slave status\G
 Slave_IO_Running和Slave_SQL_Running都显示Yes就代表成功了
 
 
-### 5.3 主主复制
+## 7. 主主复制
 
-#### 5.3.1 主库配置文件
+### 7.1 主库配置文件
 
 ```conf
 [client]
@@ -662,7 +661,7 @@ auto_increment_increment = 2
 !includedir /etc/mysql/conf.d/
 ```
 
-#### 5.3.2 第二主库配置文件
+### 7.2 第二主库配置文件
 
 ```conf
 [client]
@@ -716,7 +715,7 @@ auto_increment_increment = 2
 !includedir /etc/mysql/conf.d/
 ```
 
-#### 5.3.3 总结
+### 7.3 总结
 
 主主配置与主从配置的区别在于以下2点：
 - 两个库的read-only都为0，同为可写可读
