@@ -16,9 +16,20 @@
   - [MongoDB](deploy/mongodb)
   - [Redis](deploy/redis)
   - [HBase](deploy/hbase)
-  - [Mycat](deploy/mycat)
-  - [Debezium](deploy/debezium)
   - [DM](deploy/dm)
+
+- 大数据
+  - [Hadoop](deploy/hadoop)
+  - [Spark](deploy/spark)
+  - [Flink](deploy/flink)
+  - [Flume](deploy/flume)
+  - [Kafka](deploy/kafka)
+
+- 数仓
+  - [Hive](deploy/hive)
+  - [ClickHouse](deploy/clickhouse)
+  - [Kettle](deploy/kettle)
+  - [DataX](deploy/datax)
 
 - 应用
   - [Nginx](deploy/nginx)
@@ -35,7 +46,7 @@
   - [TURN Server](deploy/turnserver)
   - [Nps](deploy/nps)
 
-- 微服务
+- 中间件
   - [Prometheus](deploy/prometheus)
   - [Elastic Stack](deploy/elk)
   - [Zookeeper](deploy/zookeeper)
@@ -43,19 +54,8 @@
   - [RabbitMQ](deploy/rabbitmq)
   - [RocketMQ](deploy/rocketmq)
   - [Pulsar](deploy/pulsar)
-
-- 大数据
-  - [Hadoop](deploy/hadoop)
-  - [Spark](deploy/spark)
-  - [Flink](deploy/flink)
-  - [Flume](deploy/flume)
-  - [Kafka](deploy/kafka)
-
-- 数仓
-  - [Hive](deploy/hive)
-  - [ClickHouse](deploy/clickhouse)
-  - [Kettle](deploy/kettle)
-  - [DataX](deploy/datax)
+  - [Mycat](deploy/mycat)
+  - [Debezium](deploy/debezium)
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
