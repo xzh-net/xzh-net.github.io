@@ -811,6 +811,8 @@ idx_tup_fetch | 140             //通过索引方法返回的数据行数
 ```sql
 -- 查询单个索引大小
 select pg_size_pretty(pg_relation_size('index')) as size;
+-- 查询所有索引大小倒序
+select indexrelname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_indexes where schemaname='public' order by pg_relation_size(relid) desc;
 -- 查询索引ddl
 select * from pg_indexes where tablename='t1'; 
 ```
