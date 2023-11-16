@@ -10,26 +10,13 @@
 
 - 数据库
   - [Oracle](deploy/oracle)
-  - [PostgreSQL](deploy/postgre)
+  - [PostgreSQL](deploy/postgres)
   - [MySQL](deploy/mysql)
   - [SQL Server](deploy/mssql)
   - [MongoDB](deploy/mongodb)
   - [Redis](deploy/redis)
   - [HBase](deploy/hbase)
   - [DM](deploy/dm)
-
-- 大数据
-  - [Hadoop](deploy/hadoop)
-  - [Spark](deploy/spark)
-  - [Flink](deploy/flink)
-  - [Flume](deploy/flume)
-  - [Kafka](deploy/kafka)
-
-- 数仓
-  - [Hive](deploy/hive)
-  - [ClickHouse](deploy/clickhouse)
-  - [Kettle](deploy/kettle)
-  - [DataX](deploy/datax)
 
 - 应用
   - [Nginx](deploy/nginx)
@@ -56,6 +43,19 @@
   - [Pulsar](deploy/pulsar)
   - [Mycat](deploy/mycat)
   - [Debezium](deploy/debezium)
+
+- 大数据
+  - [Hadoop](deploy/hadoop)
+  - [Spark](deploy/spark)
+  - [Flink](deploy/flink)
+  - [Flume](deploy/flume)
+  - [Kafka](deploy/kafka)
+
+- 数仓
+  - [Hive](deploy/hive)
+  - [ClickHouse](deploy/clickhouse)
+  - [Kettle](deploy/kettle)
+  - [DataX](deploy/datax)
 
 - 开发工具
   - [阿里开源的诊断神器Arthas](java/tools/arthas)
