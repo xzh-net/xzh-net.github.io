@@ -97,9 +97,20 @@ rabbitmqctl forget_cluster_node rabbit@rabbitName     # 移除节点/下线
 
 #### 3.1.1 启动实例
 
+启动第一个节点
 ```bash
-sudo RABBITMQ_NODE_PORT=5672 RABBITMQ_NODENAME=rabbit-1 rabbitmq-server start
-sudo RABBITMQ_NODE_PORT=5673 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15673}]" RABBITMQ_NODENAME=rabbit-2 rabbitmq-server start &
+sudo RABBITMQ_NODE_PORT=5673 RABBITMQ_NODENAME=rabbit-1 rabbitmq-server start & 
+```
+
+启动第二个节点
+```bash
+sudo RABBITMQ_NODE_PORT=5674 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15674}]" RABBITMQ_NODENAME=rabbit-2 rabbitmq-server start &
+```
+
+结束命令
+```bash
+rabbitmqctl -n rabbit1 stop
+rabbitmqctl -n rabbit2 stop
 ```
 
 #### 3.1.2 验证
