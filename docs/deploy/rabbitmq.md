@@ -12,8 +12,8 @@ RabbitMQ是一个开源的消息代理的队列服务器，用来通过普通协
 
 ```bash
 yum install -y gcc socat    # 安装依赖
-mkdir -p /opt/rabbitmq
-cd /opt/rabbitmq            # 上传文件
+mkdir -p /opt/software
+cd /opt/software            # 上传文件
 rpm -ivh erlang-23.3.4.10-1.el7.x86_64.rpm
 rpm -ivh rabbitmq-server-3.9.12-1.el7.noarch.rpm
 ```
@@ -24,6 +24,8 @@ rpm -ivh rabbitmq-server-3.9.12-1.el7.noarch.rpm
 - https://github.com/rabbitmq/rabbitmq-server/blob/master/deps/rabbit/docs/rabbitmq.conf.example
 - https://github.com/rabbitmq/rabbitmq-server/blob/master/deps/rabbit/docs/advanced.config.example
 - https://www.rabbitmq.com/configure.html#config-items
+
+创建配置文件
 
 ```bash
 cd /etc/rabbitmq
@@ -38,9 +40,11 @@ management.tcp.port=15672
 management.tcp.ip=0.0.0.0
 ```
 
+加载默认配置
+
 ```bash
 cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.9.12/sbin/
-vi rabbitmq-defaults                
+vi rabbitmq-defaults
 # 添加配置文件路径
 CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 ```
@@ -99,12 +103,12 @@ rabbitmqctl forget_cluster_node rabbit@rabbitName     # 移除节点/下线
 
 启动第一个节点
 ```bash
-sudo RABBITMQ_NODE_PORT=5673 RABBITMQ_NODENAME=rabbit-1 rabbitmq-server start & 
+sudo RABBITMQ_NODE_PORT=5673 RABBITMQ_NODENAME=rabbit1 rabbitmq-server start & 
 ```
 
 启动第二个节点
 ```bash
-sudo RABBITMQ_NODE_PORT=5674 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15674}]" RABBITMQ_NODENAME=rabbit-2 rabbitmq-server start &
+sudo RABBITMQ_NODE_PORT=5674 RABBITMQ_NODENAME=rabbit2 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15674}]" rabbitmq-server start &
 ```
 
 结束命令
@@ -119,40 +123,40 @@ rabbitmqctl -n rabbit2 stop
 ps aux|grep rabbitmq
 ```
 
-#### 3.1.3 rabbit-1作为主节点
+#### 3.1.3 rabbit1作为主节点
 
 ```bash
-sudo rabbitmqctl -n rabbit-1 stop_app
-sudo rabbitmqctl -n rabbit-1 reset
-sudo rabbitmqctl -n rabbit-1 start_app
+sudo rabbitmqctl -n rabbit1 stop_app
+sudo rabbitmqctl -n rabbit1 reset
+sudo rabbitmqctl -n rabbit1 start_app
 ```
 
-#### 3.1.4 rabbit-2作为从节点
+#### 3.1.4 rabbit2作为从节点
 
 ```bash
-sudo rabbitmqctl -n rabbit-2 stop_app
-sudo rabbitmqctl -n rabbit-2 reset
-sudo rabbitmqctl -n rabbit-2 join_cluster rabbit-1@localhost
-sudo rabbitmqctl -n rabbit-2 start_app
+sudo rabbitmqctl -n rabbit2 stop_app
+sudo rabbitmqctl -n rabbit2 reset
+sudo rabbitmqctl -n rabbit2 join_cluster rabbit1@localhost
+sudo rabbitmqctl -n rabbit2 start_app
 ```
 
 #### 3.1.5 验证集群状态
 
 ```bash
-sudo rabbitmqctl cluster_status -n rabbit-1
+sudo rabbitmqctl cluster_status -n rabbit1
 ```
 
 #### 3.1.6 集群添加账号
 
 ```bash
-rabbitmqctl -n rabbit-1 add_user test 123456
-rabbitmqctl -n rabbit-1 set_user_tags test administrator 
+rabbitmqctl -n rabbit1 add_user test 123456
+rabbitmqctl -n rabbit1 set_user_tags test administrator 
 ```
 
 #### 3.1.7 开启镜像同步
 
 ```
-rabbitmqctl -n rabbit-1 set_policy ha-all "^" '{"ha-mode":"all"}'
+rabbitmqctl -n rabbit1 set_policy ha-all "^" '{"ha-mode":"all"}'
 ```
 
 
@@ -187,7 +191,7 @@ scp /var/lib/rabbitmq/.erlang.cookie root@rabbit-node3:/var/lib/rabbitmq/
 chmod 600 /var/lib/rabbitmq/.erlang.cookie
 ```
 
-#### 3.2.4 启动服务
+#### 3.2.3 启动服务
 
 停掉所有的MQ节点然后使用集群的方式启动，三台机器分别执行
 
@@ -195,7 +199,7 @@ chmod 600 /var/lib/rabbitmq/.erlang.cookie
 systemctl start rabbitmq-server
 ```
 
-#### 3.2.5 加入集群
+#### 3.2.4 加入集群
 
 在node2和node3分别执行以下命令，使rabbit-node2加入node1，rabbit-node3加入node1，--ram标识内存节点，集群必须保证有一个磁盘节点
 
@@ -210,19 +214,19 @@ rabbitmqctl forget_cluster_node rabbit@rabbit-node3 # 移除节点
 rabbitmqctl cluster_status                          # 查看集群状态
 ```
 
-#### 3.2.6 添加用户、授权
+#### 3.2.5 添加用户、授权
 
 ```bash
 rabbitmqctl add_user root 123456                  
 rabbitmqctl set_user_tags root administrator
 ```
 
-#### 3.2.7 设置镜像队列策略
+#### 3.2.6 设置镜像队列策略
 
 将所有队列设置为镜像队列，在主节点执行
 
 ```bash
-rabbitmqctl -n rabbit-1 set_policy ha-all "^" '{"ha-mode":"all"}'
+rabbitmqctl -n rabbit1 set_policy ha-all "^" '{"ha-mode":"all"}'
 ```
 
 ### 3.3 高可用
