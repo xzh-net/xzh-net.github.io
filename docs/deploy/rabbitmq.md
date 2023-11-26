@@ -11,9 +11,9 @@ RabbitMQ是一个开源的消息代理的队列服务器，用来通过普通协
 ### 1.1 上传解压
 
 ```bash
-yum install -y gcc socat    # 安装依赖
 mkdir -p /opt/software
 cd /opt/software            # 上传文件
+yum install -y gcc socat    # 安装依赖
 rpm -ivh erlang-23.3.4.10-1.el7.x86_64.rpm
 rpm -ivh rabbitmq-server-3.9.12-1.el7.noarch.rpm
 ```
@@ -25,7 +25,7 @@ rpm -ivh rabbitmq-server-3.9.12-1.el7.noarch.rpm
 - https://github.com/rabbitmq/rabbitmq-server/blob/master/deps/rabbit/docs/advanced.config.example
 - https://www.rabbitmq.com/configure.html#config-items
 
-创建配置文件
+#### 1.2.1 新建配置文件
 
 ```bash
 cd /etc/rabbitmq
@@ -40,13 +40,28 @@ management.tcp.port=15672
 management.tcp.ip=0.0.0.0
 ```
 
-加载默认配置
+#### 1.2.2 加载配置文件
 
 ```bash
 cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.9.12/sbin/
 vi rabbitmq-defaults
 # 添加配置文件路径
 CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+```
+
+#### 1.2.3 配置环境变量
+
+```bash
+mkdir -p /data/rabbitmq/{log,mnesia}
+```
+
+```bash
+cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.9.12/sbin/
+vi rabbitmq-env
+# 添加配置文件路径
+RABBITMQ_LOG_BASE=/data/rabbitmq/log
+RABBITMQ_MNESIA_BASE=/data/rabbitmq/mnesia
+RABBITMQ_DISTRIBUTION_BUFFER_SIZE=51200
 ```
 
 ### 1.3 启动服务
@@ -56,6 +71,7 @@ systemctl start rabbitmq-server
 rabbitmq-plugins enable rabbitmq_management        # 启用管理插件
 rabbitmqctl add_user admin 123456                  # 添加用户
 rabbitmqctl set_user_tags admin administrator      # 用户授权,administartor为管理员权限，四种权限【management、policymaker、monitoring、administrator】
+rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 cd /var/log/rabbitmq                               # 查看日志
 ```
 
@@ -98,67 +114,96 @@ rabbitmqctl forget_cluster_node rabbit@rabbitName     # 移除节点/下线
 
 ### 3.1 单机多实例
 
+#### 3.1.1 创建配置文件
 
-#### 3.1.1 启动实例
-
-启动第一个节点
 ```bash
-sudo RABBITMQ_NODE_PORT=5673 RABBITMQ_NODENAME=rabbit1 rabbitmq-server start & 
+cd /etc/rabbitmq
 ```
 
-启动第二个节点
 ```bash
-sudo RABBITMQ_NODE_PORT=5674 RABBITMQ_NODENAME=rabbit2 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15674}]" rabbitmq-server start &
+echo "listeners.tcp.default = 5671
+management.listener.port = 15671
+vm_memory_high_watermark.relative = 0.2
+vm_memory_high_watermark_paging_ratio = 0.2
+disk_free_limit.absolute = 1GB
+cluster_partition_handling = autoheal
+default_vhost = /">>rabbitmq1.conf
 ```
 
-结束命令
 ```bash
-rabbitmqctl -n rabbit1 stop
-rabbitmqctl -n rabbit2 stop
+echo "listeners.tcp.default = 5672
+management.listener.port = 15672
+vm_memory_high_watermark.relative = 0.2
+vm_memory_high_watermark_paging_ratio = 0.2
+disk_free_limit.absolute = 1GB
+cluster_partition_handling = autoheal
+default_vhost = /">>rabbitmq2.conf
 ```
 
-#### 3.1.2 验证
-
 ```bash
-ps aux|grep rabbitmq
+echo "listeners.tcp.default = 5673
+management.listener.port = 15673
+vm_memory_high_watermark.relative = 0.2
+vm_memory_high_watermark_paging_ratio = 0.2
+disk_free_limit.absolute = 1GB
+cluster_partition_handling = autoheal
+default_vhost = /">>rabbitmq3.conf
 ```
 
-#### 3.1.3 rabbit1作为主节点
+
+#### 3.1.2 启动服务
 
 ```bash
-sudo rabbitmqctl -n rabbit1 stop_app
-sudo rabbitmqctl -n rabbit1 reset
-sudo rabbitmqctl -n rabbit1 start_app
+RABBITMQ_NODE_PORT=5671 RABBITMQ_NODENAME=rabbit1 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15671}]"  RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq1.conf rabbitmq-server -detached
+RABBITMQ_NODE_PORT=5672 RABBITMQ_NODENAME=rabbit2 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15672}]"  RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq2.conf rabbitmq-server -detached
+RABBITMQ_NODE_PORT=5673 RABBITMQ_NODENAME=rabbit3 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15673}]"  RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq3.conf rabbitmq-server -detached
 ```
 
-#### 3.1.4 rabbit2作为从节点
+#### 3.1.3 rabbit2和rabbit3加入集群
 
+1号节点启动
 ```bash
-sudo rabbitmqctl -n rabbit2 stop_app
-sudo rabbitmqctl -n rabbit2 reset
-sudo rabbitmqctl -n rabbit2 join_cluster rabbit1@localhost
-sudo rabbitmqctl -n rabbit2 start_app
+rabbitmqctl -n rabbit1 stop_app 
+rabbitmqctl -n rabbit1 reset
+rabbitmqctl -n rabbit1 start_app
 ```
 
-#### 3.1.5 验证集群状态
-
+2号节点加入
 ```bash
-sudo rabbitmqctl cluster_status -n rabbit1
+rabbitmqctl -n rabbit2 stop_app
+rabbitmqctl -n rabbit2 reset
+rabbitmqctl -n rabbit2 join_cluster rabbit1@localhost
+rabbitmqctl -n rabbit2 start_app
 ```
 
-#### 3.1.6 集群添加账号
+3号节点加入
+```bash
+rabbitmqctl -n rabbit3 stop_app
+rabbitmqctl -n rabbit3 reset
+rabbitmqctl -n rabbit3 join_cluster rabbit1@localhost
+rabbitmqctl -n rabbit3 start_app
+```
+
+验证集群状态
 
 ```bash
+rabbitmqctl cluster_status -n rabbit1
+```
+
+#### 3.1.4 添加用户授权
+
+```bash
+rabbitmq-plugins -n rabbit1 enable rabbitmq_management
 rabbitmqctl -n rabbit1 add_user test 123456
-rabbitmqctl -n rabbit1 set_user_tags test administrator 
+rabbitmqctl -n rabbit1 set_permissions -p "/" test  ".*" ".*" ".*"
+rabbitmqctl -n rabbit1 set_user_tags test administrator
 ```
 
-#### 3.1.7 开启镜像同步
+#### 3.1.5 开启镜像同步
 
 ```
 rabbitmqctl -n rabbit1 set_policy ha-all "^" '{"ha-mode":"all"}'
 ```
-
 
 ### 3.2 镜像队列集群
 
@@ -208,20 +253,16 @@ rabbitmqctl stop_app
 rabbitmqctl reset           
 rabbitmqctl join_cluster --ram rabbit@rabbit-node1
 rabbitmqctl start_app    
-
-rabbitmqctl set_cluster_name rabbitmq_cd_itcast     # 修改集群的名字
-rabbitmqctl forget_cluster_node rabbit@rabbit-node3 # 移除节点
-rabbitmqctl cluster_status                          # 查看集群状态
 ```
 
-#### 3.2.5 添加用户、授权
+#### 3.2.5 添加用户授权
 
 ```bash
 rabbitmqctl add_user root 123456                  
 rabbitmqctl set_user_tags root administrator
 ```
 
-#### 3.2.6 设置镜像队列策略
+#### 3.2.6 开启镜像同步
 
 将所有队列设置为镜像队列，在主节点执行
 
@@ -229,7 +270,7 @@ rabbitmqctl set_user_tags root administrator
 rabbitmqctl -n rabbit1 set_policy ha-all "^" '{"ha-mode":"all"}'
 ```
 
-### 3.3 高可用
+## 4. 高可用
 
 1. [HAProxy安装](deploy/haproxy)
 2. [KeepAlived安装](deploy/keepalived)
