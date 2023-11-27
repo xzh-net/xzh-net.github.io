@@ -49,21 +49,6 @@ vi rabbitmq-defaults
 CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 ```
 
-#### 1.2.3 配置环境变量
-
-```bash
-mkdir -p /data/rabbitmq/{log,mnesia}
-```
-
-```bash
-cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.9.12/sbin/
-vi rabbitmq-env
-# 添加配置文件路径
-RABBITMQ_LOG_BASE=/data/rabbitmq/log
-RABBITMQ_MNESIA_BASE=/data/rabbitmq/mnesia
-RABBITMQ_DISTRIBUTION_BUFFER_SIZE=51200
-```
-
 ### 1.3 启动服务
 
 ```bash
