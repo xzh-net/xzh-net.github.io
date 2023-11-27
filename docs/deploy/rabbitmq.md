@@ -90,7 +90,7 @@ rabbitmqctl add_vhost vhostpath                       # 创建虚拟主机
 rabbitmqctl list_permissions -p vhostpath             # 列出虚拟主机上的所有权限
 rabbitmqctl delete_vhost vhost vhostpath              # 删除虚拟主机
 
-rabbitmqctl cluster_status                            # 查看集群状态
+rabbitmqctl cluster_status -n rabbit1                 # 查看集群状态
 rabbitmqctl set_cluster_name my_rabbitmq_cluster      # 设置集群名称
 rabbitmqctl forget_cluster_node rabbit@rabbitName     # 移除节点/下线
 ```
@@ -134,7 +134,6 @@ disk_free_limit.absolute = 1GB
 cluster_partition_handling = autoheal
 default_vhost = /">>rabbitmq3.conf
 ```
-
 
 #### 3.1.2 启动服务
 
