@@ -90,9 +90,9 @@ rabbitmqctl add_vhost vhostpath                       # 创建虚拟主机
 rabbitmqctl list_permissions -p vhostpath             # 列出虚拟主机上的所有权限
 rabbitmqctl delete_vhost vhost vhostpath              # 删除虚拟主机
 
-rabbitmqctl cluster_status -n rabbit1                 # 查看集群状态
-rabbitmqctl set_cluster_name my_rabbitmq_cluster      # 设置集群名称
-rabbitmqctl forget_cluster_node rabbit@rabbitName     # 移除节点/下线
+rabbitmqctl cluster_status                            # 查看集群状态
+rabbitmqctl set_cluster_name xzh_cluster              # 设置集群名称
+rabbitmqctl forget_cluster_node rabbit@rabbit-node3   # 移除节点/下线  
 ```
 
 ## 3. 集群
@@ -178,15 +178,15 @@ rabbitmqctl cluster_status -n rabbit1
 
 ```bash
 rabbitmq-plugins -n rabbit1 enable rabbitmq_management
-rabbitmqctl -n rabbit1 add_user test 123456
-rabbitmqctl -n rabbit1 set_permissions -p "/" test  ".*" ".*" ".*"
-rabbitmqctl -n rabbit1 set_user_tags test administrator
+rabbitmqctl -n rabbit1 add_user admin 123456
+rabbitmqctl -n rabbit1 set_permissions -p "/" admin  ".*" ".*" ".*"
+rabbitmqctl -n rabbit1 set_user_tags admin administrator
 ```
 
 #### 3.1.5 开启镜像同步
 
 ```
-rabbitmqctl -n rabbit1 set_policy ha-all "^" '{"ha-mode":"all"}'
+rabbitmqctl set_policy ha-all "^" '{"ha-mode":"all"}'
 ```
 
 ### 3.2 镜像队列集群
@@ -242,8 +242,10 @@ rabbitmqctl start_app
 #### 3.2.5 添加用户授权
 
 ```bash
-rabbitmqctl add_user root 123456                  
+rabbitmq-plugins enable rabbitmq_management
+rabbitmqctl add_user admin 123456
 rabbitmqctl set_user_tags root administrator
+rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 ```
 
 #### 3.2.6 开启镜像同步
@@ -251,7 +253,7 @@ rabbitmqctl set_user_tags root administrator
 将所有队列设置为镜像队列，在主节点执行
 
 ```bash
-rabbitmqctl -n rabbit1 set_policy ha-all "^" '{"ha-mode":"all"}'
+rabbitmqctl set_policy ha-all "^" '{"ha-mode":"all"}'
 ```
 
 ## 4. 高可用
