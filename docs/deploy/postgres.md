@@ -926,7 +926,44 @@ blk_read_time       | 0                         //从磁盘或者读取花费的
 blk_write_time      | 0                         //从磁盘写入花费的时
 ```
 
-其他查询信息
+```sql
+-- 查询单次调用最耗 IO SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time)/calls DESC LIMIT 5;
+-- 查询总最耗 IO SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time) DESC LIMIT 5;
+
+-- 查询单次调用最耗时 SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 5;
+-- 查询总最耗时 SQL TOP 5
+SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
+
+-- 响应时间抖动最严重 SQL
+select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
+-- 最耗共享内存 SQL
+select userid::regrole, dbid, query from pg_stat_statements order by (shared_blks_hit+shared_blks_dirtied) desc limit 5;
+-- 最耗临时空间 SQL
+select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_written desc limit 5;  
+-- 清理历史统计信息
+select pg_stat_statements_reset(); 
+
+-- 执行效率
+SELECT
+    userid AS 执行者ID ,
+    dbid AS 执行数据库ID ,
+    query AS 执行的语句 ,
+    calls AS 执行次数 ,
+    total_time AS 执行总时间,
+    total_time / calls AS 执行平均时间 ,
+    ROWS AS 影响的总行数 ,
+    100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS hit_percent 
+FROM
+    pg_stat_statements 
+ORDER BY
+    total_time / calls DESC 
+    LIMIT 50
+```
+
+压测
 
 ```bash
 createdb bench    # 建压测库
@@ -950,43 +987,6 @@ select pg_database_size('bench')/1024/1024||'M'; # 查看压测库大小
 ```bash
 nohup pgbench -c 100 -T 20 -r bench > file.out  2>&1  # 100个session执行20s
 more file.out
-```
-
-```sql
--- 查询单次调用最耗 IO SQL TOP 5
-SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time)/calls DESC LIMIT 5;
--- 查询总最耗 IO SQL TOP 5
-SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time) DESC LIMIT 5;
-
--- 查询单次调用最耗时 SQL TOP 5
-SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 5;
--- 查询总最耗时 SQL TOP 5
-SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
-
--- 响应时间抖动最严重 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
--- 最耗共享内存 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by (shared_blks_hit+shared_blks_dirtied) desc limit 5;
--- 最耗临时空间 SQL
-select userid::regrole, dbid, query from pg_stat_statements order by temp_blks_written desc limit 5;  
--- 清理历史统计信息
-select pg_stat_statements_reset(); 
-
--- 执行效率
-SELECT
-    userid AS 执行者 ID ,
-    dbid AS 执行数据库 ID ,
-    query AS 执行的语句 ,
-    calls AS 执行次数 ,
-    total_time AS 执行总时间,
-    total_time / calls AS 执行平均时间 ,
-    ROWS AS 影响的总行数 ,
-    100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS hit_percent 
-FROM
-    pg_stat_statements 
-ORDER BY
-    total_time / calls DESC 
-    LIMIT 50
 ```
 
 ### 6.2 数据分布统计
