@@ -319,6 +319,8 @@ psql -h localhost -p 5432 -U postgres -W #使用指定用户和IP端口登陆
 \d [schema.]table   #查看表的结构
 ```
 
+### 3.2 系统参数
+
 ```bash
 show data_directory;            # 查看数据目录
 show archive_mode;              # 是否开启归档
@@ -368,9 +370,9 @@ pg_create_logical_replication_slot(slotname,decodingname);
 pg_logical_slot_get_changes();
 ```
 
-### 3.2 建表语句
+### 3.3 建表
 
-```bash
+```sql
 set timezone = 'Etc/UTC';
 set timezone = 'Asia/Shanghai';
 show timezone;
