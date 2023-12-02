@@ -846,7 +846,52 @@ select count(*) from v$session;                          -- 查看数据库当�
 SELECT NAME FROM v$controlfile;                          -- 查看控制文件 
 select value from v$parameter where name = 'processes';  -- 最大连接
 alter system set processes = value scope = spfile;       -- 修改连接数需重启
+```
 
+
+### 3.3 建表
+
+```sql
+create table ATEST
+(
+  id             NUMBER(20),
+  car_no         VARCHAR2(100),
+  start_price    NUMBER(10,2),
+  view_num       NUMBER(5),
+  on_status      NUMBER(1) default 0,
+  on_time        TIMESTAMP(6),
+  register_date  DATE default sysdate,
+  create_user_id NUMBER(20),
+  create_time    TIMESTAMP(6) WITH TIME ZONE,
+  is_deleted     NUMBER(1) default 0
+);
+
+comment on column ATEST.start_price  is '起拍价格';
+comment on column ATEST.view_num  is '库存数量';
+comment on column ATEST.on_status  is '上架状态';
+comment on column ATEST.on_time  is '上架时间';
+comment on column ATEST.register_date  is '注册日期';
+comment on column ATEST.create_user_id  is '创建人';
+comment on column ATEST.create_time  is '创建时间';
+comment on column ATEST.is_deleted  is '是否删除';
+```
+
+
+```sql
+SELECT
+    * 
+FROM
+    (
+    SELECT
+        tt.*,
+        ROWNUM AS RN 
+    FROM
+        ( SELECT t.* FROM TABLE_NAME t WHERE 1 = 1 ORDER BY CDATE DESC ) tt 
+    WHERE
+        ROWNUM &lt;= #{pageNum}*#{pageSize}
+    ) rs 
+WHERE
+    rs.RN > #{pageNum-1}*#{pageSize}
 ```
 
 ### 3.2 锁表
@@ -871,7 +916,7 @@ SELECT 'ALTER SYSTEM KILL SESSION ''' || SID || ',' || SERIAL# || '''' || ';'
 select spid, osuser, s.program from v$session s, v$process p where s.paddr = p.addr and s.sid = {sid};
 ```
 
-### 3.3 等待事件
+### 3.4 等待事件
 
 ```sql
 -- 查看当前等待事件及数量，如果是库问题 优化参数或调整业务逻辑等，如果是sql问题 继续
@@ -938,12 +983,13 @@ SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
  WHERE PADDR IN (SELECT ADDR FROM V$PROCESS WHERE SPID IN (55751,15842));
 ```
 
-### 3.4 统计
+## 4. 统计信息
 
-#### 3.4.1 内存
+### 4.1 负载指标统计
+
+#### 4.1.1 SGA/PGA使用率
 
 ```sql
--- 查询SGA/PGA使用率
 SELECT
 	name,
 	total,
@@ -974,8 +1020,13 @@ FROM
 	FROM
 	dual 
 	);
-  
--- 查询占用share pool内存大于10M的sql
+```
+
+#### 4.1.2 共享池占用率
+
+占用内存大于10M的sql
+
+```sql
 SELECT substr(sql_text, 1, 100) "Stmt",
        count(*),
        sum(sharable_mem) "Mem",
@@ -984,8 +1035,13 @@ SELECT substr(sql_text, 1, 100) "Stmt",
   FROM v$sql
  GROUP BY substr(sql_text, 1, 100)
 HAVING sum(sharable_mem) > 10000000;
+```
 
--- 查询version count过高SQL
+#### 4.1.2 Version Count
+
+version count过高的SQL
+
+```sql
 SELECT address,
        sql_id,
        hash_value,
@@ -997,7 +1053,10 @@ SELECT address,
  WHERE version_count > 10;
 ```
 
-#### 3.4.2 空间
+### 4.2 数据分布统计
+
+
+#### 4.2.1 空间
 
 ```sql
 -- 查看当前用户下所有表空间的使用情况
@@ -1034,27 +1093,24 @@ WHERE SEGMENT_NAME IN (SELECT T2.OBJECT_NAME
 GROUP BY OWNER ORDER BY 2 DESC;
 ```
 
-#### 3.4.3 数据
+#### 4.2.2 数据
 
 ```sql
 -- 查询某用户下所有表的记录总数
 SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'SHJG0814';
-
 -- 查看户下所有表的各自的记录条数
 SELECT T.TABLE_NAME "表名",T.NUM_ROWS "记录条数" FROM USER_TABLES T;
-
 -- 查看户下所有存储过程
 SELECT * FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'PROCEDURE' AND OWNER='SHJG0814'
-
 -- 按关键字查找出现的位置
 SELECT * FROM USER_SOURCE WHERE UPPER(TEXT) LIKE UPPER('%keywords%');
 ```
 
-## 4. PL/SQL
+## 5. PL/SQL
 
-### 4.1 匿名块
+### 5.1 匿名块
 
-#### 4.1.1 遍历更新
+#### 5.1.1 遍历更新
 
 ```sql
 DECLARE
@@ -1075,7 +1131,7 @@ BEGIN
 END;
 ```
 
-#### 4.1.2 DLL遍历更新
+#### 5.1.2 DLL遍历更新
 
 ```sql
 DECLARE
@@ -1107,7 +1163,7 @@ BEGIN
 END;
 ```
 
-### 4.2 FUNCTION函数
+### 5.2 FUNCTION函数
 
 ```sql
 CREATE OR REPLACE FUNCTION FUN_OTO_ORDERBYSHOP(P_USERID IN CHAR)
@@ -1140,9 +1196,9 @@ BEGIN
 END;
 ```
 
-### 4.3 PROCEDURE过程
+### 5.3 PROCEDURE过程
 
-#### 4.3.1 动态执行SQL
+#### 5.3.1 动态执行SQL
 
 ```sql
 CREATE OR REPLACE PROCEDURE PROC_updateSortCommon(V_GNID   NUMBER, --审批状态
@@ -1194,7 +1250,7 @@ BEGIN
 END;
 ```
 
-### 4.4 BLOB
+### 5.4 BLOB
 
 ```sql
 --blob查询
@@ -1202,7 +1258,7 @@ select * from qrtz_job_details_local t
 where dbms_lob.instr(job_data,utl_raw.cast_to_raw('declarano'),1,1)<>0;
 ```
 
-### 4.5 Shell调试
+### 5.5 Shell调试
 
 有入参的返回游标过程 vi proc-debug.sh
 ```shell
