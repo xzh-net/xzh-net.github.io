@@ -1037,7 +1037,7 @@ SELECT substr(sql_text, 1, 100) "Stmt",
 HAVING sum(sharable_mem) > 10000000;
 ```
 
-#### 4.1.2 Version Count
+#### 4.1.3 Version Count
 
 version count过高的SQL
 
