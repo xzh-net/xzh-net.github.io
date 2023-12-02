@@ -180,6 +180,17 @@ quit
 /usr/local/pgsql/bin/psql test
 ```
 
+```bash
+psql -h localhost -p 5432 -U postgres -W # 使用指定用户和IP端口登陆
+\q                  # 退出psql命令行
+\du                 # 查看角色属性
+\l                  # 查看数据库列表
+\l *template*       # 查看包含template字符的数据库
+\c test             # 切换到test数据库
+\d                  # 查看当前schema中所有的表
+\d [schema.]table   #查看表的结构
+```
+
 ### 1.4 主备流复制
 
 #### 1.4.1 主节点
@@ -304,22 +315,143 @@ psql \c
 create extension pg_stat_statements;
 ```
 
-## 3. 命令
+## 3. 库操作
 
-### 3.1 基本信息
+### 3.1 用户授权
 
 ```bash
-psql -h localhost -p 5432 -U postgres -W #使用指定用户和IP端口登陆
-\q              #退出psql命令行
-\du             #查看角色属性
-\l              #查看数据库列表
-\l *template*   #查看包含template字符的数据库
-\c test         #切换到test数据库
-\d              #查看当前schema中所有的表
-\d [schema.]table   #查看表的结构
+create user "sonar" with password '123456';
+create database "sonardb" template template1 owner "sonar";
+grant all privileges on database "sonardb" to "sonar";
+flush privileges
+
+drop user sonar;  # 删除用户
+drop database if exists sonardb;  # 删除库
+select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 库锁释放
 ```
 
-### 3.2 系统参数
+无法删除正在连接中的数据库
+
+```sql
+UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
+```
+
+### 3.2 备份恢复
+
+#### 3.2.1 逻辑备份
+
+```bash
+# 单表导出sql语句，多表使用-t sys_user -t sys_menu
+pg_dump -h localhost -U postgres -p 5432 -W oauth_center -t oauth_client_details --column-inserts > oauth_client_details.sql
+psql -h localhost -U postgres < /home/postgres/oauth_client_details.sql oauth_center    # sql还原
+
+pg_dump -h localhost -p 5432 -U postgres -d oauth_center -F t -f oauth_center.sql       # 导出copy语句
+pg_restore -h localhost -U postgres -d oauth_center -v oauth_center.sql                 # 还原copy语句
+
+pg_dump -h localhost -U postgres -F c -f /home/postgres/oauth_center.dump oauth_center  # 二进制备份
+pg_restore -h localhost -U postgres -d  oauth_center  /home/postgres/oauth_center.dump  # 二进制还原
+
+pg_dump --help
+pg_restore --help
+```
+
+#### 3.2.2 物理备份
+
+```bash
+pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R # 备份base和pg_wal
+cd /data/pg_backup/
+rm -rf /data/pgdata/12/data/*      # 清空数据库
+rm -rf /data/pgdata/12/archive/*   # 清空wal 
+tar xf base.tar -C $PGDATA
+tar xf pg_wal.tar -C /data/pgdata/12/archive/
+
+# vi postgresql.auto.conf 
+primary_conninfo = 'user=postgres password=123456 host=localhost port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
+restore_command = 'cp /data/pgdata/12/archive/%f %p'
+recovery_target = 'immediate'
+# touch /data/pgdata/12/data/recovery.signal
+# 启动数据库后
+service postgresql start
+select pg_wal_replay_resume();  # 停止恢复
+```
+
+#### 3.2.3 PITR数据恢复
+
+```bash
+# 恢复到指定事务id
+pg_waldump  0000000100000084000000EC
+# vi postgresql.auto.conf
+restore_command = 'cp /data/pgdata/12/archive/%f %p'
+recovery_target_xid='501'
+# 恢复到指定时间
+recovery_target_time = '2019-04-02 13:16:49.007657+08'
+# 恢复到指定还原点
+recovery_target_name = 'xzh-before-delete0227'
+# 启动数据库后
+select pg_wal_replay_resume();  # 停止恢复
+```
+
+
+#### 3.2.4 定时备份
+
+```bash
+crontab -e
+30 1 * * * sh /data/shell/bakup.sh  # 每天凌晨1点半执行
+```
+
+```bash
+#!/bin/bash
+cur_time=$(date '+%Y-%m-%d')
+sevendays_time=$(date -d -10days '+%Y-%m-%d')
+
+/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /opt/db/vjsp10010260_$cur_time.dump VJSP10010260
+scp /opt/db/vjsp10010260_$cur_time.dump root@192.168.42.38:/mydata/db
+rm -rf /opt/db/vjsp10010260_$sevendays_time.dump
+echo "backup finished" his
+```
+
+### 3.3 归档日志
+
+#### 3.3.1 自动清理
+
+```bash
+mkdir -p $PGDATA/archivedir/  # 创建归档目录
+vi $PGDATA/pg_archive.sh      # 创建轮转脚本
+test ! -f $PGDATA/archivedir/$1 && cp --preserve=timestamps $2 $PGDATA/archivedir/$1 ; find $PGDATA/archivedir/ -type f -mtime +7 -exec rm -f {} \;
+
+vi postgresql.conf    # 修改归档配置
+wal_level = replica 
+archive_mode = on
+archive_command = 'pg_archive.sh %f %p'
+```
+
+#### 3.3.2 手动清理
+
+```bash
+su - postgres
+cd /usr/local/pgsql/bin
+./pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
+cd /data/pgdata/12/data/archivedir
+pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
+```
+
+### 3.4 表空间
+
+```sql
+-- 查询单个表空间大小
+select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
+ 
+-- 查询所有表空间大小
+select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
+-- 或
+select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
+
+```
+
+## 4. 表操作
+
+### 4.1 系统参数
 
 ```bash
 show data_directory;            # 查看数据目录
@@ -370,175 +502,7 @@ pg_create_logical_replication_slot(slotname,decodingname);
 pg_logical_slot_get_changes();
 ```
 
-### 3.3 建表
-
-```sql
-set timezone = 'Etc/UTC';
-set timezone = 'Asia/Shanghai';
-show timezone;
-
-CREATE TABLE "public"."car" (
-  "id" int8 NOT NULL,
-  "car_no" varchar(15),
-  "start_price" numeric(11,2),
-  "view_num" int4,
-  "on_status" int2,
-  "on_time" timestamp(6),
-  "register_date" date,
-  "create_user_id" int8,
-  "create_time" timestamptz(6),
-  "is_deleted" int2 DEFAULT 0,
-  PRIMARY KEY ("id")
-);
-
-COMMENT ON COLUMN "public"."car"."car_no" IS '车辆编号';
-COMMENT ON COLUMN "public"."car"."start_price" IS '起拍价格';
-COMMENT ON COLUMN "public"."car"."view_num" IS '查看数量';
-COMMENT ON COLUMN "public"."car"."on_status" IS '上架状态（0：下架；1：上架）';
-COMMENT ON COLUMN "public"."car"."on_time" IS '上架时间';
-COMMENT ON COLUMN "public"."car"."register_date" IS '注册日期';
-COMMENT ON COLUMN "public"."car"."create_user_id" IS '创建用户id';
-COMMENT ON COLUMN "public"."car"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：是）';
-```
-
-## 4. 库操作
-
-### 4.1 用户授权
-
-```bash
-create user "sonar" with password '123456';
-create database "sonardb" template template1 owner "sonar";
-grant all privileges on database "sonardb" to "sonar";
-flush privileges
-
-drop user sonar;  # 删除用户
-drop database if exists sonardb;  # 删除库
-select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 库锁释放
-```
-
-无法删除正在连接中的数据库
-
-```sql
-UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
-SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
-```
-
-### 4.2 备份恢复
-
-#### 4.2.1 逻辑备份
-
-```bash
-# 单表导出sql语句，多表使用-t sys_user -t sys_menu
-pg_dump -h localhost -U postgres -p 5432 -W oauth_center -t oauth_client_details --column-inserts > oauth_client_details.sql
-psql -h localhost -U postgres < /home/postgres/oauth_client_details.sql oauth_center    # sql还原
-
-pg_dump -h localhost -p 5432 -U postgres -d oauth_center -F t -f oauth_center.sql       # 导出copy语句
-pg_restore -h localhost -U postgres -d oauth_center -v oauth_center.sql                 # 还原copy语句
-
-pg_dump -h localhost -U postgres -F c -f /home/postgres/oauth_center.dump oauth_center  # 二进制备份
-pg_restore -h localhost -U postgres -d  oauth_center  /home/postgres/oauth_center.dump  # 二进制还原
-
-pg_dump --help
-pg_restore --help
-```
-
-#### 4.2.2 物理备份
-
-```bash
-pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R # 备份base和pg_wal
-cd /data/pg_backup/
-rm -rf /data/pgdata/12/data/*      # 清空数据库
-rm -rf /data/pgdata/12/archive/*   # 清空wal 
-tar xf base.tar -C $PGDATA
-tar xf pg_wal.tar -C /data/pgdata/12/archive/
-
-# vi postgresql.auto.conf 
-primary_conninfo = 'user=postgres password=123456 host=localhost port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
-restore_command = 'cp /data/pgdata/12/archive/%f %p'
-recovery_target = 'immediate'
-# touch /data/pgdata/12/data/recovery.signal
-# 启动数据库后
-service postgresql start
-select pg_wal_replay_resume();  # 停止恢复
-```
-
-#### 4.2.3 PITR数据恢复
-
-```bash
-# 恢复到指定事务id
-pg_waldump  0000000100000084000000EC
-# vi postgresql.auto.conf
-restore_command = 'cp /data/pgdata/12/archive/%f %p'
-recovery_target_xid='501'
-# 恢复到指定时间
-recovery_target_time = '2019-04-02 13:16:49.007657+08'
-# 恢复到指定还原点
-recovery_target_name = 'xzh-before-delete0227'
-# 启动数据库后
-select pg_wal_replay_resume();  # 停止恢复
-```
-
-
-#### 4.2.4 定时备份
-
-```bash
-crontab -e
-30 1 * * * sh /data/shell/bakup.sh  # 每天凌晨1点半执行
-```
-
-```bash
-#!/bin/bash
-cur_time=$(date '+%Y-%m-%d')
-sevendays_time=$(date -d -10days '+%Y-%m-%d')
-
-/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /opt/db/vjsp10010260_$cur_time.dump VJSP10010260
-scp /opt/db/vjsp10010260_$cur_time.dump root@192.168.42.38:/mydata/db
-rm -rf /opt/db/vjsp10010260_$sevendays_time.dump
-echo "backup finished" his
-```
-
-### 4.3 归档日志
-
-#### 4.3.1 自动清理
-
-```bash
-mkdir -p $PGDATA/archivedir/  # 创建归档目录
-vi $PGDATA/pg_archive.sh      # 创建轮转脚本
-test ! -f $PGDATA/archivedir/$1 && cp --preserve=timestamps $2 $PGDATA/archivedir/$1 ; find $PGDATA/archivedir/ -type f -mtime +7 -exec rm -f {} \;
-
-vi postgresql.conf    # 修改归档配置
-wal_level = replica 
-archive_mode = on
-archive_command = 'pg_archive.sh %f %p'
-```
-
-#### 4.3.2 手动清理
-
-```bash
-su - postgres
-cd /usr/local/pgsql/bin
-./pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
-cd /data/pgdata/12/data/archivedir
-pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
-```
-
-### 4.4 表空间
-
-```sql
--- 查询单个表空间大小
-select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
- 
--- 查询所有表空间大小
-select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
--- 或
-select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
-
-```
-
-## 5. 表操作
-
-### 5.1 表结构
+### 4.2 表结构
 
 ```sql
 -- 查询所有数据库大小
@@ -634,7 +598,39 @@ ORDER BY col.table_name, col.ordinal_position;
 
 ```
 
-### 5.2 锁表
+### 4.3 建表
+
+```sql
+set timezone = 'Etc/UTC';
+set timezone = 'Asia/Shanghai';
+show timezone;
+
+CREATE TABLE "public"."car" (
+  "id" int8 NOT NULL,
+  "car_no" varchar(15),
+  "start_price" numeric(11,2),
+  "view_num" int4,
+  "on_status" int2,
+  "on_time" timestamp(6),
+  "register_date" date,
+  "create_user_id" int8,
+  "create_time" timestamptz(6),
+  "is_deleted" int2 DEFAULT 0,
+  PRIMARY KEY ("id")
+);
+
+COMMENT ON COLUMN "public"."car"."car_no" IS '车辆编号';
+COMMENT ON COLUMN "public"."car"."start_price" IS '起拍价格';
+COMMENT ON COLUMN "public"."car"."view_num" IS '查看数量';
+COMMENT ON COLUMN "public"."car"."on_status" IS '上架状态（0：下架；1：上架）';
+COMMENT ON COLUMN "public"."car"."on_time" IS '上架时间';
+COMMENT ON COLUMN "public"."car"."register_date" IS '注册日期';
+COMMENT ON COLUMN "public"."car"."create_user_id" IS '创建用户id';
+COMMENT ON COLUMN "public"."car"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：是）';
+```
+
+### 4.4 锁表
 
 ```sql
 -- 执行中sql
@@ -701,16 +697,16 @@ SELECT pg_terminate_backend ( pid )
 ```
 
 
-## 6. 统计信息
+## 5. 统计信息
 
 统计信息主要分为两类：
 
 - `负载指标`统计信息（Monitoring stats），通过stat collector进程进行实时采集更新的负载指标，记录一些对磁盘块、表、索引相关的统计信息，SQL语句执行代价信息
 - `数据分布状态描述`统计信息（Data distribution stats），这些统计信息为优化器选择最优执行计划提供依据，分为后台进程autovacuum lancher触发和手动执行analyze table进行手动采集
 
-### 6.1 负载指标统计
+### 5.1 负载指标统计
 
-#### 6.1.1 pg_stat_database
+#### 5.1.1 pg_stat_database
 
 通过pg_stat_database我们可以大致的了解一个数据库的历史运行情况，比较常见的一个问题定位有
 
@@ -744,7 +740,7 @@ blk_write_time        | 0                               //数据库中花费在�
 stats_reset           | 2023-09-06 14:12:22.841839+08   //统计信息重置的时间
 ```
 
-#### 6.1.2 pg_stat_user_tables
+#### 5.1.2 pg_stat_user_tables
 
 通过pg_stat_user_tables，我们可以知道当前数据库下哪些表发生全表扫描频繁，哪些表变更比较频繁，对于变更较频繁的表可多关注其vacuum相关的指标，避免表膨胀
 
@@ -790,7 +786,7 @@ vacuum tablename     -- 更新某个表
 vacuum               -- 在某个数据库中执行直接更新该数据库所有表
 ```
 
-#### 6.1.3 pg_stat_user_indexes
+#### 5.1.3 pg_stat_user_indexes
 
 通过pg_stat_user_indexes我们可以查看对应索引的使用情况，可以协助我们判断哪些索引当前基本不使用，对这些无效的冗余索引，可进行索引删除
 
@@ -819,7 +815,7 @@ select indexrelname, pg_size_pretty(pg_relation_size(relid)) as size from pg_sta
 select * from pg_indexes where tablename='t1'; 
 ```
 
-#### 6.1.4 pg_statio_user_tables
+#### 5.1.4 pg_statio_user_tables
 
 通过对pg_statio_user_tables的查询，如果heap_blks_read，idx_blks_read很高说明shared_buffer较小，存在频繁需要从磁盘或者page cache读取到shared_buffer中
 
@@ -842,7 +838,7 @@ tidx_blks_hit   | 0             //指在shared_buffer中命中toast表索引的�
 ```
 
 
-#### 6.1.5 pg_stat_bgwriter
+#### 5.1.5 pg_stat_bgwriter
 
 ```sql
 select * from pg_stat_bgwriter;
@@ -863,7 +859,7 @@ stats_reset           | 2020-09-23 15:14:57.052247+08
 ```
 
 
-#### 6.1.6 pg_stat_replication
+#### 5.1.6 pg_stat_replication
 
 pg_stat_replication仅仅在主从架构下才会显示相关数据。根据对pg_stat_replication表的查询可以查看当前复制的模式、复制配置信息、复制位点信息等
 
@@ -894,7 +890,7 @@ sync_state       | async                    //同步模式，同步or异步
 reply_time       | 2020-09-05 13:49:41.269624+08    //
 ```
 
-#### 6.2.7 pg_stat_statements
+#### 5.2.7 pg_stat_statements
 
 pg_stat_statements模块提供一种跟踪执行统计服务器执行的所有SQL语句的手段。该模块默认是不开启的，如果需要开启需要我们手动对其进进行编译安装，修改配置文件并重启数据库，并在使用前手动载入该模块
 
@@ -991,9 +987,9 @@ nohup pgbench -c 100 -T 20 -r bench > file.out  2>&1  # 100个session执行20s
 more file.out
 ```
 
-### 6.2 数据分布统计
+### 5.2 数据分布统计
 
-#### 6.2.1 pg_stats
+#### 5.2.1 pg_stats
 
 通过对pg_stats的查询，可以查看每个字段的数据分析统计信息，类似SQL Server的直方图，为优化器选择最佳执行计划提供依据，pg_stats只有管理员账号才可以访问
 
@@ -1018,16 +1014,16 @@ most_common_elem_freqs |                //最常见元素值的频率列表，�
 elem_count_histogram   |                //该字段中值的不同非空元素值的统计直方图，跟着不同非空元素的平均值。（标量类型为空。）
 ```
 
-### 6.3 统计信息更新
+### 5.3 统计信息更新
 
 ```sql
 show autovacuum
 analyze verbose tableName
 ```
 
-## 7. PG/SQL
+## 6. PG/SQL
 
-### 7.1 VIEW
+### 6.1 VIEW
 
 1. dual解决方案
 
@@ -1065,7 +1061,7 @@ UNION
 ALTER TABLE "view_of_user" OWNER TO "postgres";
 ```
 
-### 7.2 TRIGGER
+### 6.2 TRIGGER
 
 1. 分数表
 
@@ -1128,9 +1124,9 @@ for each row
 execute procedure fun_stu_major()
 ```
 
-### 7.3 FUNCTION
+### 6.3 FUNCTION
 
-#### 7.3.1 循环函数
+#### 6.3.1 循环函数
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."f_actuser"("v_flowcid" text)
@@ -1167,7 +1163,7 @@ $BODY$
   COST 100
 ```
 
-#### 7.3.2 执行sql函数
+#### 6.3.2 执行sql函数
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."Untitled"("formno" text)
@@ -1288,9 +1284,9 @@ $BODY$
 ALTER FUNCTION "public"."Untitled"("""formno""" "pg_catalog"."text") OWNER TO "postgres";
 ```
 
-### 7.4 PROCEDURE
+### 6.4 PROCEDURE
 
-#### 7.4.1 返回游标过程
+#### 6.4.1 返回游标过程
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."proc_init_flow_cando"(IN "v_partnerid" text, IN "v_flowcid" text, IN "v_pathid" text, OUT "v_out" refcursor)
@@ -1345,7 +1341,7 @@ $BODY$
   COST 100
 ```
 
-#### 7.4.2 执行sql过程
+#### 6.4.2 执行sql过程
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_delete_crm_target"("v_year" int8=0, "v_tstype" int8=0, "v_spid" text=NULL::text, "v_sptypeid" text=NULL::text)
@@ -1368,7 +1364,7 @@ $BODY$
   COST 100
 ```
 
-#### 7.4.3 遍历过程
+#### 6.4.3 遍历过程
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_crm_insert_seqdetail"("v_sfaid" text, "v_seqid" text, "v_execdate" timestamp)
