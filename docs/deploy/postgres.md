@@ -123,17 +123,29 @@ initdb -D $PGDATA
 
 #### 1.2.8 应用配置
 
+修改参数
+
 ```bash
 cd /data/pgdata/12/data
-vi postgresql.conf    # 配置PostgreSQL数据库服务器的相应的参数
+vi postgresql.conf    
+```
+
+```conf
 max_connections = 2000
 listen_addresses = '*'
 ```
 
+配置访问权限
+
+```bash
+vi pg_hba.conf
+```
+
 ```conf
-vi pg_hba.conf       # 配置对数据库的访问权限，末尾添加
-host    all             all             0.0.0.0/0        md5  # 所有地址访问
-host    replication     all             0.0.0.0/0        md5  # 物理备份 -R
+# IPv4 local connections:
+host    all             all             0.0.0.0/0            md5
+# Allow replication connections
+host    replication     all             0.0.0.0/0            md5
 ```
 
 #### 1.2.9 设置开机自启动
@@ -210,7 +222,7 @@ alter user replica with password '123456';
 
 3. 修改postgresql.conf
 
-```bash
+```conf
 listen_addresses = '*'                     
 port = 5432
 max_connections = 1200
@@ -219,13 +231,15 @@ full_page_writes = on
 wal_log_hints = off
 max_wal_senders = 50
 hot_standby = on
-log_destination = 'csvlog'
 logging_collector = on
+log_destination = 'csvlog'
 log_directory = 'log'
-log_filename = 'postgresql-%Y-%m-%d_%H%M%S'
+log_filename = 'postgresql-%d.log'      # 保存一个月的日志,每天一个文件
+log_truncate_on_rotation = on
+log_file_mode = 0600
 log_rotation_age = 1d
-log_rotation_size = 10MB
-log_statement = 'mod'
+log_rotation_size = 0
+log_statement = 'all'
 log_timezone = 'PRC'
 timezone = 'PRC'
 unix_socket_directories = '/tmp'
@@ -242,12 +256,12 @@ wal_buffers = 16MB
 wal_writer_delay = 200ms
 commit_delay = 0
 commit_siblings = 5
-wal_level = replica # 支持wal归档和复制
+wal_level = replica         # 开启归档
 archive_mode = on
-archive_command = 'test ! -f /data/pgdata/12/data/archivedir/%f && cp %p /data/pgdata/12/data/archivedir/%f'
-archive_timeout = 60s     # 切换到一个新的wal段时间，定时归档间隔
-max_wal_senders = 4       # 流复制连接个数
-wal_keep_segments = 16    # 流复制保留的最多的xlog数目
+archive_command = 'test ! -f /data/pgdata/12/archive/%f && cp %p /data/pgdata/12/archive/%f'
+archive_timeout = 60s       # 切换到一个新的wal段时间，定时归档间隔
+max_wal_senders = 4         # 流复制连接个数
+wal_keep_segments = 16      # 流复制保留的最多的xlog数目
 ```
 
 #### 1.4.2 从节点
@@ -411,29 +425,67 @@ rm -rf /opt/db/vjsp10010260_$sevendays_time.dump
 echo "backup finished" his
 ```
 
-### 3.3 归档日志
+### 3.3 审计日志
 
-#### 3.3.1 自动清理
+开启审计
 
 ```bash
-mkdir -p $PGDATA/archivedir/  # 创建归档目录
-vi $PGDATA/pg_archive.sh      # 创建轮转脚本
-test ! -f $PGDATA/archivedir/$1 && cp --preserve=timestamps $2 $PGDATA/archivedir/$1 ; find $PGDATA/archivedir/ -type f -mtime +7 -exec rm -f {} \;
-
-vi postgresql.conf    # 修改归档配置
-wal_level = replica 
-archive_mode = on
-archive_command = 'pg_archive.sh %f %p'
+cd /data/pgdata/12/data
 ```
 
-#### 3.3.2 手动清理
+```conf
+logging_collector = on
+log_destination = 'csvlog'
+log_directory = 'log'
+log_filename = 'postgresql-%d.log'      # 保存一个月的日志,每天一个文件
+log_truncate_on_rotation = on
+log_file_mode = 0600
+log_rotation_age = 1d
+log_rotation_size = 0
+log_statement = 'all'
+log_timezone = 'PRC'
+```
+
+重启应用
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile restart
+```
+
+
+### 3.4 归档日志
+
+开启归档
+
+```bash
+cd /data/pgdata/12/data
+vi postgresql.conf 
+```
+
+```conf
+wal_level = replica         # 开启归档
+archive_mode = on
+fsync = on
+archive_command = 'test ! -f /data/pgdata/12/archive/%f && cp %p /data/pgdata/12/archive/%f'
+max_wal_size = 4GB          # xlog最多占用空间
+min_wal_size = 1GB
+```
+
+重启应用
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile restart
+```
+
+
+手动清理
 
 ```bash
 su - postgres
-cd /usr/local/pgsql/bin
-./pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
-cd /data/pgdata/12/data/archivedir
-pg_archivecleanup ./ 0000000100000084000000EC   # 清除同步块
+pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
+cd /data/pgdata/12/archive
+pg_archivecleanup ./ 0000000100000000000000C8   # 清除同步块
+
 ```
 
 ### 3.4 表空间
