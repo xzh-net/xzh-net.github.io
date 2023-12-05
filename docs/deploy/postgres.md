@@ -467,8 +467,7 @@ wal_level = replica         # 开启归档
 archive_mode = on
 fsync = on
 archive_command = 'test ! -f /data/pgdata/12/archive/%f && cp %p /data/pgdata/12/archive/%f'
-max_wal_size = 4GB          # xlog最多占用空间
-min_wal_size = 1GB
+archive_timeout = 60s
 ```
 
 重启应用
@@ -482,10 +481,9 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 
 ```bash
 su - postgres
-pg_controldata /data/pgdata/12/data/          # 查找最后一个同步块
-cd /data/pgdata/12/archive
+pg_controldata -D /data/pgdata/12/data/ | grep 'REDO WAL file'
+cd /data/pgdata/12/pg_wal
 pg_archivecleanup ./ 0000000100000000000000C8   # 清除同步块
-
 ```
 
 ### 3.5 表空间
