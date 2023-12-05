@@ -231,8 +231,8 @@ full_page_writes = on
 wal_log_hints = off
 max_wal_senders = 50
 hot_standby = on
-logging_collector = on
 log_destination = 'csvlog'
+logging_collector = on
 log_directory = 'log'
 log_filename = 'postgresql-%d.log'      # 保存一个月的日志,每天一个文件
 log_truncate_on_rotation = on
@@ -240,8 +240,8 @@ log_file_mode = 0600
 log_rotation_age = 1d
 log_rotation_size = 0
 log_statement = 'all'
-log_timezone = 'PRC'
-timezone = 'PRC'
+log_timezone = 'Asia/Shanghai'
+timezone = 'Asia/Shanghai'
 unix_socket_directories = '/tmp'
 shared_buffers = 512MB
 temp_buffers = 16MB
@@ -434,8 +434,8 @@ cd /data/pgdata/12/data
 ```
 
 ```conf
-logging_collector = on
 log_destination = 'csvlog'
+logging_collector = on
 log_directory = 'log'
 log_filename = 'postgresql-%d.log'      # 保存一个月的日志,每天一个文件
 log_truncate_on_rotation = on
@@ -443,7 +443,7 @@ log_file_mode = 0600
 log_rotation_age = 1d
 log_rotation_size = 0
 log_statement = 'all'
-log_timezone = 'PRC'
+log_timezone = 'Asia/Shanghai'
 ```
 
 重启应用
