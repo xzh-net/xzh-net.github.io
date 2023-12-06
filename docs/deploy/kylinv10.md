@@ -1,4 +1,4 @@
-# Kylin-Server-V10-SP3
+# Kylin Server V10 SP3
 
 - 官方网址：https://www.kylinos.cn
 
