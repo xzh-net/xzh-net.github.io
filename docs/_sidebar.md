@@ -6,6 +6,7 @@
   - [Ubuntu 22](deploy/ubuntu22)
   - [Rocky 8.5](deploy/rocky85)
   - [Kylin V10](deploy/kylinv10)
+  - [NeoKylin V7](deploy/neokylin7)
   - [Windows 10](deploy/windows10)
 
 - 数据库
