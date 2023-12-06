@@ -362,25 +362,55 @@ pg_restore --help
 
 #### 3.2.2 物理备份
 
+1. 备份base和pg_wal
+
 ```bash
-pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R # 备份base和pg_wal
-cd /data/pg_backup/
+pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R
+```
+
+2. 清空数据
+
+```bash
 rm -rf /data/pgdata/12/data/*      # 清空数据库
 rm -rf /data/pgdata/12/archive/*   # 清空wal 
+```
+
+3. 还原数据
+
+```bash
+cd /data/pg_backup/
 tar xf base.tar -C $PGDATA
 tar xf pg_wal.tar -C /data/pgdata/12/archive/
+```
 
+4. 修改配置
+
+```bash
 # vi postgresql.auto.conf 
-primary_conninfo = 'user=postgres password=123456 host=localhost port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
+primary_conninfo = 'user=postgres password=postgres host=localhost port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
 restore_command = 'cp /data/pgdata/12/archive/%f %p'
 recovery_target = 'immediate'
-# touch /data/pgdata/12/data/recovery.signal
-# 启动数据库后
-service postgresql start
+```
+
+```bash
+touch /data/pgdata/12/data/recovery.signal
+```
+
+5. 启动数据库
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile start
 select pg_wal_replay_resume();  # 停止恢复
 ```
 
 #### 3.2.3 PITR数据恢复
+
+```sql
+select pg_create_restore_point('point-20231206');  -- 创建还原点
+```
+
+
+1. 修改配置
 
 ```bash
 # 恢复到指定事务id
@@ -391,11 +421,15 @@ recovery_target_xid='501'
 # 恢复到指定时间
 recovery_target_time = '2019-04-02 13:16:49.007657+08'
 # 恢复到指定还原点
-recovery_target_name = 'xzh-before-delete0227'
-# 启动数据库后
-select pg_wal_replay_resume();  # 停止恢复
+recovery_target_name = 'point-20231206'
 ```
 
+2. 启动数据库
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile start
+select pg_wal_replay_resume();  # 停止恢复
+```
 
 #### 3.2.4 定时备份
 
@@ -417,7 +451,7 @@ echo "backup finished" his
 
 ### 3.3 审计日志
 
-开启审计
+1. 开启审计
 
 ```bash
 cd /data/pgdata/12/data
@@ -436,7 +470,7 @@ log_statement = 'all'
 log_timezone = 'Asia/Shanghai'
 ```
 
-重启应用
+2. 重启应用
 
 ```bash
 pg_ctl -D /data/pgdata/12/data -l logfile restart
@@ -445,7 +479,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 
 ### 3.4 归档日志
 
-开启归档
+1. 开启归档
 
 ```bash
 cd /data/pgdata/12/data
@@ -460,14 +494,14 @@ archive_command = 'test ! -f /data/pgdata/12/archive/%f && cp %p /data/pgdata/12
 archive_timeout = 60s
 ```
 
-重启应用
+2. 重启应用
 
 ```bash
 pg_ctl -D /data/pgdata/12/data -l logfile restart
 ```
 
 
-手动清理
+3. 手动清理
 
 ```bash
 su - postgres
@@ -475,6 +509,8 @@ pg_controldata -D /data/pgdata/12/data/ | grep 'REDO WAL file'
 cd /data/pgdata/12/pg_wal
 pg_archivecleanup ./ 0000000100000000000000C8   # 清除同步块
 ```
+
+4. 相关命令
 
 ```sql
 show data_directory;                -- 查看数据目录
@@ -500,51 +536,7 @@ select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespa
 
 ## 4. 表操作
 
-### 4.1 系统参数
-
-```bash
-select pg_create_restore_point('xzh-before-delete0227');  # 创建还原点
-select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
-psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
-select pg_current_xlog_location();  # 查看当前日志文件lsn位置：
-select pg_current_wal_lsn();
-select pg_current_xlog_insert_location(); # 当前xlog buffer中的insert位置
-select pg_xlogfile_name(lsn); # 查看某个lsn对应的日志名
-select pg_walfile_name(lsn);
-select pg_xlogfile_name_offset('lsn');  # 查看某个lsn在日志中的偏移量
-select pg_walfile_name_offset('lsn');
-select pg_xlog_location_diff('lsn','lsn');  # 查看两个lsn位置的差距
-select pg_wal_lsn_diff('lsn','lsn');
-select pg_last_xlog_receive_location(); # 查看备库接收到的lsn位置
-select pg_last_wal_receive_lsn();
-select pg_last_xlog_relay_location(); # 查看备库回放的lsn位置
-select pg_last_xact_replay_timestamp();
-select pg_relation_filepath('test'::regclass); # 查看表的数据文件路径
-select pg_relation_filenode('test');
-select 'test'::regclass::oid; # 查看表的oid
-select pg_backend_pid();  # 查看当前会话pid
-select gernate_series(1,8,2); # 生成序列
-select gen_random_uuid(); # 生成uuid(pg13新特性)
-select pg_reload_conf();  # 重载配置文件信息
-select pg_postmaster_start_time();  # 查看数据库启动时间
-select has_any_column_privilege(user,table,privilege);  # 查看用户表、列等权限信息
-select has_any_column_privilege(table,privilege);
-select has_column_privilege(user,table,column,privilege);
-select has_table_privilege(user,table,privilege);
-select txid_current_snapshot(); # 查看当前快照信息
-select pg_rotate_logfile(); # 切换一个运行日志
-select pg_xlog_replay_pause();  # 暂停、恢复回放进程
-select pg_xlog_replay_resume();
-select pg_export_snapshot();  # 导出一个快照
-select pg_relation_size();  # 查看对象的大小信息
-select pg_table_size();
-select pg_total_relation_size();
-pg_create/drop_physical_replication_slot(slotname); # 物理、逻辑复制槽
-pg_create_logical_replication_slot(slotname,decodingname);
-pg_logical_slot_get_changes();
-```
-
-### 4.2 表结构
+### 4.1 表结构
 
 ```sql
 -- 查询所有数据库大小
@@ -640,7 +632,7 @@ ORDER BY col.table_name, col.ordinal_position;
 
 ```
 
-### 4.3 建表
+### 4.2 建表
 
 ```sql
 set timezone = 'Etc/UTC';
@@ -672,7 +664,7 @@ COMMENT ON COLUMN "public"."car"."create_time" IS '创建时间';
 COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：是）';
 ```
 
-### 4.4 锁表
+### 4.3 锁表
 
 ```sql
 -- 执行中sql
