@@ -4,25 +4,15 @@
 
 ## 1. 安装
 
-### 1.1 yum安装
+### 1.1 编译安装
 
-```bash
-sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-sudo yum install -y postgresql12-server
-sudo /usr/pgsql-12/bin/postgresql-12-setup initdb
-sudo systemctl enable postgresql-12
-sudo systemctl start postgresql-12
-```
-
-### 1.2 编译安装
-
-#### 1.2.1 下载
+#### 1.1.1 下载
 
 ```bash
 wget https://ftp.postgresql.org/pub/source/v12.4/postgresql-12.4.tar.gz --no-check-certificate
 ```
 
-#### 1.2.2 安装依赖
+#### 1.1.2 安装依赖
 
 ```bash
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
@@ -32,7 +22,7 @@ yum update
 yum install -y gcc readline-devel zlib-devel docbook-dtds docbook-style-xsl fop libxslt readline-devel.x86_64 zlib-devel.x86_64 libmemcached libpqxx
 ```
 
-#### 1.2.3 解压编译
+#### 1.1.3 解压编译
 
 ```bash
 tar -zxvf postgresql-12.4.tar.gz -C /home/
@@ -42,7 +32,7 @@ cd postgresql-12.4
 make && make install
 ```
 
-#### 1.2.4 创建用户组和目录授权
+#### 1.1.4 创建用户组和目录授权
 
 ```bash
 useradd postgres
@@ -57,7 +47,7 @@ chown postgres /data/pgdata/12/archive
 chown postgres /data/pg_backup 
 ```
 
-#### 1.2.5 系统参数优化
+#### 1.1.5 系统参数优化
 
 1. 内核参数
 
@@ -99,7 +89,7 @@ vi /etc/security/limits.conf
 * hard memlock 50000000
 ```
 
-#### 1.2.6 设置环境变量
+#### 1.1.6 设置环境变量
 
 ```bash
 su - postgres
@@ -114,14 +104,14 @@ source .bash_profile
 # psql --version
 ```
 
-#### 1.2.7 数据库初使化
+#### 1.1.7 数据库初使化
 
 ```bash
 su - postgres
 initdb -D $PGDATA
 ```
 
-#### 1.2.8 应用配置
+#### 1.1.8 应用配置
 
 修改参数
 
@@ -148,7 +138,7 @@ host    all             all             0.0.0.0/0            md5
 host    replication     all             0.0.0.0/0            md5
 ```
 
-#### 1.2.9 设置开机自启动
+#### 1.1.9 设置开机自启动
 
 ```bash
 su - root
@@ -169,7 +159,7 @@ chkconfig --add postgresql
 chkconfig
 ```
 
-#### 1.2.10 启动服务
+#### 1.1.10 启动服务
 
 ```bash
 pg_ctl -D /data/pgdata/12/data -l logfile start
@@ -182,7 +172,7 @@ service postgresql stop
 service postgresql restart
 ```
 
-#### 1.2.11 测试
+#### 1.1.11 测试
 
 ```bash
 psql
@@ -203,9 +193,9 @@ psql -h localhost -p 5432 -U postgres -W # 使用指定用户和IP端口登陆
 \d [schema.]table   #查看表的结构
 ```
 
-### 1.4 主备流复制
+### 1.2 主备流复制
 
-#### 1.4.1 主节点
+#### 1.2.1 主节点
 
 1. 修改pg_hba.conf
 
@@ -264,7 +254,7 @@ max_wal_senders = 4         # 流复制连接个数
 wal_keep_segments = 16      # 流复制保留的最多的xlog数目
 ```
 
-#### 1.4.2 从节点
+#### 1.2.2 从节点
 
 1. 清空数据
 
@@ -486,6 +476,15 @@ cd /data/pgdata/12/pg_wal
 pg_archivecleanup ./ 0000000100000000000000C8   # 清除同步块
 ```
 
+```sql
+show data_directory;                -- 查看数据目录
+show archive_mode;                  -- 是否开启归档
+select * from pg_ls_logdir();       -- 查看日志目录文件
+select pg_switch_wal();             -- 切换日志
+select pg_walfile_name(pg_current_wal_insert_lsn());        -- 查看当前日志
+select * from pg_ls_waldir() order by modification desc;    -- 查看日志最后修改时间
+```
+
 ### 3.5 表空间
 
 ```sql
@@ -504,16 +503,9 @@ select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespa
 ### 4.1 系统参数
 
 ```bash
-show data_directory;            # 查看数据目录
-show archive_mode;              # 是否开启归档
-select * from pg_ls_logdir();   # 查看日志目录文件
-select pg_switch_wal();         # 切换日志
-select pg_walfile_name(pg_current_wal_insert_lsn());      # 查看当前日志
-select * from pg_ls_waldir() order by modification desc;  # 查看日志最后修改时间
 select pg_create_restore_point('xzh-before-delete0227');  # 创建还原点
 select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
 psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
-
 select pg_current_xlog_location();  # 查看当前日志文件lsn位置：
 select pg_current_wal_lsn();
 select pg_current_xlog_insert_location(); # 当前xlog buffer中的insert位置
