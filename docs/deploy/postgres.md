@@ -297,14 +297,20 @@ psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
 
 ### 2.1 pg_stat_statements
 
-pg_stat_statements模块提供一种方法追踪一个服务器所执行的所有SQL语句的执行统计信息，可以用于统计数据库的资源开销，分析
+pg_stat_statements模块提供一种方法追踪一个服务器所执行的所有SQL语句的执行统计信息
+
+1. 编译插件
 
 ```bash
-cd /home/postgresql-12.4/contrib/
+cd /home/postgresql-12.4/contrib/pg_stat_statements
 make && make install
 su - postgres
 cd $PGDATA
+```
 
+2. 修改配置
+
+```bash
 #vi postgresql.conf
 shared_preload_libraries = 'pg_stat_statements'
 track_io_timing = on                # 用于跟踪IO消耗的时间
@@ -313,10 +319,40 @@ pg_stat_statements.max = 1000       # 采样参数，在pg_stat_statements中最
 pg_stat_statements.track = all      # all - (所有SQL包括函数内嵌套的SQL), top - 直接执行的SQL(函数内的sql不被跟踪), none - (不跟踪)
 pg_stat_statements.track_utility = off  # 是否跟踪非DML语句 (例如DDL，DCL)，on表示跟踪, off表示不跟踪 
 pg_stat_statements.save = on            # 重启后是否保留统计信息
+```
 
-service postgresql start
+3. 重启服务
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile restart
 psql \c
 create extension pg_stat_statements;
+```
+
+### 2.2 passwordcheck
+
+passwordcheck模块是在`CREATE ROLE`或者`CREATE USER`期间检查用户密码是否符合指定的规则模块
+
+1. 编译插件
+
+```bash
+cd /home/postgresql-12.4/contrib/passwordcheck
+make && make install
+su - postgres
+cd $PGDATA
+```
+
+2. 修改配置
+
+```bash
+#vi postgresql.conf
+shared_preload_libraries = 'pg_stat_statements,passwordcheck'
+```
+
+3. 重启服务
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile restart
 ```
 
 ## 3. 库操作
