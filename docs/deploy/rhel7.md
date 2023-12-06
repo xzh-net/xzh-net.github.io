@@ -39,7 +39,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/Vm12.png)
 
-## 2. 安装系统
+## 2. 安装
 
 1. 新建虚拟机
 
