@@ -4,7 +4,7 @@
 - 下载地址：http://cdimage.debian.org/cdimage/archive
 
 
-## 1. 安装系统
+## 1. 安装
 
 1. 选择图形化安装
 
