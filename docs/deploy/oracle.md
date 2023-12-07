@@ -158,29 +158,31 @@ DECLINE_SECURITY_UPDATES=true
 cd /u01/software/database/
 ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 ```
-> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
+
 ```lua
+[oracle@oracledb database]$ ./runInstaller -silent -responseFile /home/oracle/response/db_install.rsp -ignorePrereq
 正在启动 Oracle Universal Installer...
 
-检查临时空间: 必须大于 120 MB。   实际为 41029 MB    通过
-检查交换空间: 必须大于 150 MB。   实际为 3967 MB    通过
-...
- /u01/app/oracle/inventory/logs/installActions2022-06-09_04-14-01PM.log
-以下配置脚本需要以 "root" 用户的身份执行。
- #!/bin/sh 
- #要运行的 Root 脚本
+检查临时空间: 必须大于 120 MB。   实际为 44483 MB    通过
+检查交换空间: 必须大于 150 MB。   实际为 8063 MB    通过
+准备从以下地址启动 Oracle Universal Installer /tmp/OraInstall2023-12-07_04-57-24PM. 请稍候...[oracle@oracledb database]$ [WARNING] [INS-32055] 主产品清单位于 Oracle 基目录中。
+   原因: 主产品清单位于 Oracle 基目录中。
+   操作: Oracle 建议将此主产品清单放置在 Oracle 基目录之外的位置中。
+可以在以下位置找到本次安装会话的日志:
+ /u01/app/oracle/inventory/logs/installActions2023-12-07_04-57-24PM.log
+Oracle Database 11g 的 安装 已成功。
+请查看 '/u01/app/oracle/inventory/logs/silentInstall2023-12-07_04-57-24PM.log' 以获取详细资料。
 
-/u01/app/oracle/inventory/orainstRoot.sh
-/u01/app/oracle/product/11.2.0/dbhome_1/root.sh
-要执行配置脚本, 请执行以下操作:
-	 1. 打开一个终端窗口
-	 2. 以 "root" 身份登录
-	 3. 运行脚本
-	 4. 返回此窗口并按 "Enter" 键继续
+以 root 用户的身份执行以下脚本:
+	1. /u01/app/oracle/inventory/orainstRoot.sh
+	2. /u01/app/oracle/product/11.2.0/dbhome_1/root.sh
+
 
 Successfully Setup Software.
-
 ```
+
+> 等待...[WARING]可暂时忽略，此时安装程序仍在后台进行，如果出现[FATAL]，则安装程序已经异常停止了,当出现 Successfully Setup Software. 证明已经安装成功，然后根据提示操作
+
 
 ```bash
 su - root
@@ -195,7 +197,27 @@ su - oracle
 source .bash_profile
 netca /silent /responsefile /home/oracle/response/netca.rsp
 ```
-成功运行后，在 `/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/` 中生成`listener.ora`和`sqlnet.ora`
+
+```lua
+[oracle@oracledb ~]$ netca /silent /responsefile /home/oracle/response/netca.rsp
+
+正在对命令行参数进行语法分析:
+参数"silent" = true
+参数"responsefile" = /home/oracle/response/netca.rsp
+完成对命令行参数进行语法分析。
+Oracle Net Services 配置:
+完成概要文件配置。
+Oracle Net 监听程序启动:
+    正在运行监听程序控制: 
+      /u01/app/oracle/product/11.2.0/dbhome_1/bin/lsnrctl start LISTENER
+    监听程序控制完成。
+    监听程序已成功启动。
+监听程序配置完成。
+成功完成 Oracle Net Services 配置。退出代码是0
+```
+
+> 成功运行后，在 `/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/` 中生成`listener.ora`和`sqlnet.ora`
+
 ```bash
 cat $ORACLE_HOME/network/admin/listener.ora     # 查看监听器配置文件
 cat $ORACLE_HOME/network/admin/sqlnet.ora       # 查看监听服务名配置文件
@@ -208,8 +230,8 @@ netstat -tunlp|grep 1521
 
 ```bash
 su - oracle
-egrep -v "(^#|^$)" /home/oracle/response/dbca.rsp # 查看建库相应文件配置信息
-vim /home/oracle/response/dbca.rsp # 编辑应答文件
+egrep -v "(^#|^$)" /home/oracle/response/dbca.rsp       # 查看建库相应文件配置信息
+vim /home/oracle/response/dbca.rsp      # 编辑应答文件
 
 # 设置CREATEDATABASE以下参数
 GDBNAME = "orcl"
@@ -224,7 +246,9 @@ TOTALMEMORY = "4096"
 ```bash
 dbca -silent -responseFile /home/oracle/response/dbca.rsp
 ```
-执行完后会先清屏，清屏之后没有提示，直接输入oracle用户的密码，回车，再输入一次，再回车。稍等一会，会开始自动创建，建库后进行实例进程检查 
+
+> 执行完后会先清屏，清屏之后没有提示，直接输入oracle用户的密码，回车，再输入一次，再回车。稍等一会，会开始自动创建，建库后进行实例进程检查 
+
 ```bash
 ps -ef | grep ora_ | grep -v grep
 ```
