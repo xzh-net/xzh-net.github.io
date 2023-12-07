@@ -61,3 +61,17 @@
 11. 系统重启
 
 ![](../../assets/_images/deploy/neokylin/11.png)
+
+
+## 2. 虚拟机设置
+
+### 2.1 初始化
+
+```bash
+nkvers  # 查看版本
+yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
+systemctl stop firewalld.service
+systemctl disable firewalld.service # 关闭
+```
