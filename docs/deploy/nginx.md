@@ -1213,12 +1213,13 @@ location /console {
 ```bash
 mkdir /root/cert
 cd /root/cert
-openssl genrsa -des3 -out server.key 1024           # 创建SSL证书私钥
-openssl req -new -key server.key -out server.csr    # 创建SSL证书签名请求文件
-cp server.key server.key.org        
-openssl rsa -in server.key.org -out server.key      # 利用私钥生成一个不需要输入密码的密钥文件
-openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt  # 生成SSL证书，有效期为365天
-openssl x509 -in www.xuzhihao.net.crt -noout -dates  # 验证到期时间
+openssl genrsa -des3 -out private.key 2048              # 生成私钥文件
+openssl req -new -key private.key -out server.csr       # 生成证书请求文件（CSR）
+cp private.key private.key.org        
+openssl rsa -in private.key.org -out private.key        # 利用私钥生成一个不需密码的密钥
+openssl x509 -req -days 365 -in server.csr -signkey private.key -out server.crt  # 生成自签名证书365天
+
+openssl x509 -in server.crt -noout -dates               # 验证到期时间
 ```
 
 ```conf
@@ -1228,8 +1229,8 @@ server {
     server_name  www.xuzhihao.net; #修改域名
 
     #ssl配置
-    ssl_certificate /usr/share/nginx/html/ssl/api/api.crt;              # 配置证书
-    ssl_certificate_key /usr/share/nginx/html/ssl/api/api_nopass.key;   # 配置证书私钥
+    ssl_certificate /usr/share/nginx/html/ssl/api/server.crt;           # 配置证书
+    ssl_certificate_key /usr/share/nginx/html/ssl/api/private.key;      # 配置证书私钥
     ssl_prefer_server_ciphers on;
     ssl_session_timeout 10m;
     ssl_session_cache shared:SSL:10m;
@@ -1249,11 +1250,6 @@ server {
         root   /usr/share/nginx/html;
     }
 }
-```
-
-```bash
-openssl genrsa -des3 -out server.key 2048
-openssl req -new -x509 -key server.key -out server.crt -days 3650
 ```
 
 ### 4.2 Let’s Encrypt自动申请
