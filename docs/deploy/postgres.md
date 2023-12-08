@@ -284,11 +284,9 @@ standby_mode = 'on'
 primary_conninfo = 'user=replication password=123456 host=192.168.3.200 port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
 ```
 
-5. 验证
+#### 1.2.3 监控状态
 
 ```bash
-# 启动从库以后再启动主库
-select pg_wal_replay_resume(); 
 select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
 psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
 ```
