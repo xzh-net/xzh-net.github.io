@@ -477,11 +477,17 @@ crontab -e
 ```bash
 #!/bin/bash
 cur_time=$(date '+%Y-%m-%d')
-sevendays_time=$(date -d -10days '+%Y-%m-%d')
-
-/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /opt/db/vjsp10010260_$cur_time.dump VJSP10010260
-scp /opt/db/vjsp10010260_$cur_time.dump root@192.168.42.38:/mydata/db
-rm -rf /opt/db/vjsp10010260_$sevendays_time.dump
+find /data/pg_backup -mtime +30 -type f -name '*.tgz' -exec rm {} \;
+## 备份
+/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /data/pg_backup/user_center.$cur_time.dmp user_center
+/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /data/pg_backup/oauth_center.$cur_time.dmp oauth_center
+## 打包
+tar zcvf pgsql-backup.$cur_time.tgz *.dmp
+## 传输（2选1）
+scp pgsql-backup.$cur_time.tgz postgres@192.168.2.100:/data/pg_backup
+sshpass -p "123456" scp -o StrictHostKeyChecking=no pgsql-backup.$cur_time.tgz postgres@192.168.2.100:/data/pg_backup
+## 删除备份
+rm -rf /data/pg_backup/*.dmp
 echo "backup finished" his
 ```
 
