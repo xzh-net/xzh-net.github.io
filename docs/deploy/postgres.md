@@ -390,7 +390,7 @@ pg_dump -h localhost -p 5432 -U postgres -d oauth_center -F t -f oauth_center.sq
 pg_restore -h localhost -U postgres -d oauth_center -v oauth_center.sql                 # 还原copy语句
 
 pg_dump -h localhost -U postgres -F c -f /home/postgres/oauth_center.dump oauth_center  # 二进制备份
-pg_restore -h localhost -U postgres -d  oauth_center  /home/postgres/oauth_center.dump  # 二进制还原
+pg_restore -h localhost -U postgres -d oauth_center /home/postgres/oauth_center.dump    # 二进制还原
 
 pg_dump --help
 pg_restore --help
