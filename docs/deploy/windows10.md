@@ -206,5 +206,5 @@ PATH
 
 ```bash
 cd C:\Program Files\Oracle\VirtualBox
-VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\mediasoup\c7.vdi"
+VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\centos7\centos7.vdi"
 ```
