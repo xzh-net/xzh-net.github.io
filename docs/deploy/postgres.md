@@ -113,7 +113,7 @@ initdb -D $PGDATA
 
 #### 1.1.8 应用配置
 
-修改参数
+1. 修改参数
 
 ```bash
 cd /data/pgdata/12/data
@@ -125,7 +125,7 @@ max_connections = 2000
 listen_addresses = '*'
 ```
 
-配置访问权限
+2. 配置访问权限
 
 ```bash
 vi pg_hba.conf
@@ -152,7 +152,6 @@ PGDATA="/data/pgdata/12/data"
 将linux文件拷贝到/etc/init.d/目录下，并命名为postgresql
 ```bash
 chmod a+x linux
-su root
 cp linux /etc/init.d/postgresql
 cd /etc/init.d
 chkconfig --add postgresql
