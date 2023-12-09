@@ -175,11 +175,12 @@ service postgresql restart
 #### 1.1.11 测试
 
 ```bash
-psql
-ALTER USER postgres WITH PASSWORD 'postgres'; # 修改用户默认密码
-quit
 /usr/local/pgsql/bin/createdb test
 /usr/local/pgsql/bin/psql test
+
+# 修改用户默认密码
+psql
+ALTER USER postgres WITH PASSWORD 'postgres'; 
 ```
 
 ```bash
@@ -297,7 +298,7 @@ standby_mode = 'on'
 
 ```bash
 cd /data/pgdata/12/data
-vi postgre.auto.conf
+vi postgresql.auto.conf
 ```
 
 ```conf
@@ -314,8 +315,8 @@ pg_ctl -D /data/pgdata/12/data -l logfile start
 #### 1.2.3 验证主从
 
 ```bash
-select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
-psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"     # 监控状态[从]
+psql -c "\x" -c "select * from pg_stat_replication;"      # 监控状态[主]
+psql -c "\x" -c "select * from pg_stat_wal_receiver;"     # 监控状态[从]
 ```
 
 ## 2. 模块
