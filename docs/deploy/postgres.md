@@ -197,20 +197,28 @@ psql -h localhost -p 5432 -U postgres -W # 使用指定用户和IP端口登陆
 
 #### 1.2.1 主节点
 
-1. 修改pg_hba.conf
-
-```bash
-host replication replica 0.0.0.0/0 md5  # 没有添加，否则开启注释
-```
-
-2. 添加流复制用户
+1. 添加流复制用户
 
 ```sql
 create role replica with replication login password '123456';
-alter user replica with password '123456';
 ```
 
-3. 修改postgresql.conf
+2. 设置流复制权限
+
+```bash
+cd /data/pgdata/12/data
+vi pg_hba.conf
+```
+
+```conf
+host replication replica 0.0.0.0/0 md5      # 没有添加，否则开启注释
+```
+
+3. 修改配置文件
+
+```bash
+vi postgresql.conf
+```
 
 ```conf
 listen_addresses = '*'                     
@@ -254,11 +262,18 @@ max_wal_senders = 4         # 流复制连接个数
 wal_keep_segments = 16      # 流复制保留的最多的xlog数目
 ```
 
+4. 启动主库
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile start
+```
+
 #### 1.2.2 从节点
 
 1. 清空数据
 
 ```bash
+su - postgres
 rm -rf /data/pgdata/12/data/*         # 数据主目录
 rm -rf /data/pgdata/12/archive/*      # 归档恢复路径
 ```
@@ -266,9 +281,9 @@ rm -rf /data/pgdata/12/archive/*      # 归档恢复路径
 2. 恢复数据和归档
 
 ```bash
-pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h 192.168.3.200 -p 5432 -R # 备份base和pg_wal
-tar xf base.tar -C $PGDATA
-tar xf base.tar -C /data/pgdata/12/archive
+pg_basebackup -D /data/pg_backup/ -Ft -Pv -U replica -h 192.168.3.200 -p 5432 -R    # 备份base和pg_wal
+tar xf base.tar -C /data/pgdata/12/data
+tar xf pg_wal.tar -C /data/pgdata/12/archive
 ```
 
 3. 修改standby.signal
@@ -278,13 +293,25 @@ vi standby.signal
 standby_mode = 'on'
 ```
 
-4. 修改postgre.auto.conf
+4. 修改配置
 
 ```bash
+cd /data/pgdata/12/data
+vi postgre.auto.conf
+```
+
+```conf
 primary_conninfo = 'user=replication password=123456 host=192.168.3.200 port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
 ```
 
-#### 1.2.3 监控状态
+5. 启动从库
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile start
+```
+
+
+#### 1.2.3 验证主从
 
 ```bash
 select pid,state,client_addr,sync_priority,sync_state from pg_stat_replication; # 监控状态[主]
