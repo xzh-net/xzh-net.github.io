@@ -150,6 +150,7 @@ PGDATA="/data/pgdata/12/data"
 ```
 
 将linux文件拷贝到`/etc/init.d/`目录下，并命名为`postgresql`
+
 ```bash
 chmod a+x linux
 cp linux /etc/init.d/postgresql
