@@ -419,7 +419,7 @@ psql -h localhost -U postgres -p 5432 -f all.sql
 ```
 
 2. tar格式
-   
+
 ```bash
 pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Ft -f oauth_center.tar    # 备份
 pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar     # 恢复
