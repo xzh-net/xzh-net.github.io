@@ -2,7 +2,7 @@
 
 ## 1. 安装
 
-### 1.1 静默安装11.2.0.1.0
+### 1.1 静默
 
 #### 1.1.1 安装依赖
 
@@ -41,26 +41,30 @@ chmod -R 775 /u01/app/oracle
 
 #### 1.1.6 修改内核参数
 
-  kernel.shmmax官方建议值：
-    - 32位linux系统：可取最大值为 4GB （ 4294967296bytes ） -1byte ，即 4294967295 。建议值为多于内存的一半，所以如果是 32 为系统，一般可取值为 4294967295 。 32 位系统对 SGA 大小有限制，所以 SGA 肯定可以包含在单个共享内存段中。
-    - 64位linux系统：可取的最大值为物理内存值 -1byte ，建议值为多于物理内存的一半，一般取值大于 SGA_MAX_SIZE 即可，可以取物理内存 -1byte 。  
+kernel.shmmax官方建议值：
+- 32位linux系统：可取最大值为4GB（4294967296bytes）-1byte，即4294967295。建议值为多于内存的一半，所以如果是32为系统，一般可取值为4294967295。32位系统对SGA大小有限制，所以SGA肯定可以包含在单个共享内存段中。
+- 64位linux系统：可取的最大值为物理内存值-1byte，建议值为多于物理内存的一半，一般取值大于SGA_MAX_SIZE即可，可以取物理内存-1byte。内存为32G时，该值为`34359738367`（32x1024x1024x1024-1）
 
-> 内存为 12G 时，该值为 12x1024x1024x1024-1 = 12884901887
-
-vim /etc/sysctl.conf
 ```bash
+vim /etc/sysctl.conf
+```
+
+```conf
 fs.aio-max-nr=1048576
 fs.file-max=6815744
 kernel.shmall=2097152
 kernel.shmmni=4096
-kernel.shmmax = 8589934591
+kernel.shmmax = 34359738367
 kernel.sem=250 32000 100 128
 net.ipv4.ip_local_port_range=9000 65500
 net.core.rmem_default=262144
 net.core.rmem_max=4194304
 net.core.wmem_default=262144
 net.core.wmem_max=1048586
-# 使内核新配置生效
+```
+
+使内核新配置生效
+```bash
 sysctl -p
 ```
 
@@ -268,7 +272,7 @@ exit
 ```
 
 
-### 1.2 图形化安装11.2.0.4.0
+### 1.2 图形化
 
 #### 1.2.1 一键安装和配置VNC图形化相关
 
