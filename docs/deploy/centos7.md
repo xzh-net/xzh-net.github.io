@@ -1482,6 +1482,11 @@ nc -lk 44444                # 开启监听服务
 nc 192.168.2.100 44444      # 客户端连接
 ```
 
+```bash
+yum install nc --downloadonly --downloaddir=/opt/
+yum localinstall *.rpm
+```
+
 2. 端口检测
 
 ```bash
