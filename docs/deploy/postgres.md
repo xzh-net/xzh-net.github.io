@@ -412,7 +412,7 @@ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user'
 
 ```bash
 pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_client_details --column-inserts -f oauth_client_details.sql    # 导出多表使用-t tb1 -t tb2
-psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql       # 恢复
+psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql   # 恢复
 # pg_dumpall不支持导出SQL文件以外的其他格式
 pg_dumpall -h localhost -U postgres -p 5432 -v -f all.sql
 psql -h localhost -U postgres -p 5432 -f all.sql
@@ -428,8 +428,8 @@ pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar 
 3. 自定义格式
 
 ```bash
-pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup       # 备份
-pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup        # 恢复
+pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup # 备份
+pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup  # 恢复
 ```
 
 #### 3.2.2 物理备份
