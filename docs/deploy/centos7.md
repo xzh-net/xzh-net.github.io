@@ -1410,31 +1410,29 @@ echo '/dev/sdb1 /data ext4 defaults 0 0' >> /etc/fstab  # 自动挂载
 cat /etc/fstab          # 查看写入分区信息
 ```
 
-#### 2.3.2 IO监视
+#### 2.3.2 FIO
+
+FIO 是一个多线程IO生成工具，可以生成多种IO模式（随机、顺序、读、写四大类），用来测试磁盘设备的性能
 
 ```bash
-yum install sysstat iotop -y
-iostat -d -x -k 1 10          # -d:设备状态 静态显示每秒的统计（单位kilobytes ） 1s刷新一次，刷新10次
-iostat -xz 1
-iostat -mx 5 -t >> vmdisk.log 
+yum install fio -y
 ```
 
-参数说明
 ```bash
-rrqm/s：每秒这个设备相关的读取请求有多少被Merge了（当系统调用需要读取数据的时候，VFS将请求发到各个FS，如果FS发现不同的读取请求读取的是相同Block的数据，FS会将这个请求合并Merge）；
-wrqm/s：每秒这个设备相关的写入请求有多少被Merge了。
-r/s： 该设备的每秒完成的读请求数（merge合并之后的）
-w/s:  该设备的每秒完成的写请求数（merge合并之后的）
-rsec/s：每秒读取的扇区数；
-wsec/：每秒写入的扇区数。
-rKB/s：每秒发送给该设备的总读请求数 
-wKB/s：每秒发送给该设备的总写请求数 
-avgrq-sz 平均请求扇区的大小
-avgqu-sz 是平均请求队列的长度。毫无疑问，队列长度越短越好。    
-await：  每一个IO请求的处理的平均时间（单位是微秒毫秒）。这里可以理解为IO的响应时间，一般地系统IO响应时间应该低于5ms，如果大于10ms就比较大了。这个时间包括了队列时间和服务时间，也就是说，一般情况下，await大于svctm，它们的差值越小，则说明队列时间越短，反之差值越大，队列时间越长，说明系统出了问题。
-svctm:    表示平均每次设备I/O操作的服务时间（以毫秒为单位）。如果svctm的值与await很接近，表示几乎没有I/O等待，磁盘性能很好，如果await的值远高于svctm的值，则表示I/O队列等待太长，系统上运行的应用程序将变慢。
-%util： 在统计时间内所有处理IO时间，除以总共统计时间。例如，如果统计间隔1秒，该设备有0.8秒在处理IO，而0.2秒闲置，那么该设备的%util = 0.8/1 = 80%，所以该参数暗示了设备的繁忙程度。一般地，如果该参数是100%表示设备已经接近满负荷运行了（当然如果是多磁盘，即使%util是100%，因为磁盘的并发能力，所以磁盘使用未必就到了瓶颈）。
+# 4k顺序读
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=read -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_100read_4k >> fio.report
+# 4k顺序写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=write -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_100write_4k
+# 4k随机读
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randread -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_100read_4k
+# 4k随机写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randwrite -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_100write_4k
+# 4k顺序混合读写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=rw -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_70read_4k
+# 4k随机混合读写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_70read_4k
 ```
+
 
 ### 2.4 网络
 
