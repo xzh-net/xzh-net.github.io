@@ -53,16 +53,29 @@ CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 
 ```bash
 systemctl start rabbitmq-server
-rabbitmq-plugins enable rabbitmq_management        # 启用管理插件
+rabbitmq-plugins enable rabbitmq_management        # 开启管控台
 rabbitmqctl add_user admin 123456                  # 添加用户
 rabbitmqctl set_user_tags admin administrator      # 用户授权,administartor为管理员权限，四种权限【management、policymaker、monitoring、administrator】
 rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 cd /var/log/rabbitmq                               # 查看日志
 ```
 
-### 1.4 WebUI
-
 访问地址：http://0.0.0.0:15672
+
+### 1.4 插件管理
+
+```bash
+wget https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.9.0/rabbitmq_delayed_message_exchange-3.9.0.ez
+cp rabbitmq_delayed_message_exchange-3.9.0.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.9.12/plugins/
+rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
+rabbitmq-plugins enable rabbitmq_mqtt               # 1883
+rabbitmq-plugins enable rabbitmq_web_mqtt           # 15675
+rabbitmq-plugins enable rabbitmq_stomp              # 61613
+rabbitmq-plugins enable rabbitmq_web_stomp          # 15674
+```
+
+
 
 ## 2. 命令
 
