@@ -347,16 +347,10 @@ events {
 http {
     include mime.types;
     default_type application/octet-stream;
-    # 自定义日志
-    log_format access '$host - $server_addr $remote_addr - $remote_user [$time_local] "$request" '
-                '$status $body_bytes_sent "$http_referer" '
-                '"$http_user_agent" "$remote_addr" "$http_x_forwarded_for" "$proxy_add_x_forwarded_for" "$http_x_real_ip" "$proxy_add_x_forwarded_for" "$upstream_addr"'; 
-    log_format post '$host - $remote_addr\t$remote_user\t[$time_local]\t"$request"\t$status\t$bytes_sent\t';
-    log_format ip '$host - $remote_addr - $remote_user [$time_local] "$request" - [$upstream_addr] - [$upstream_status]';
-    log_format rc escape=json '$remote_addr - $remote_user [$time_local] "$request" '
-                '$status $body_bytes_sent "$http_referer" '
-                '"$http_user_agent" "$http_x_forwarded_for" $request_body';
-    access_log  /var/log/nginx/ip_access.log  post;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
     server_tokens   off;                    # 关闭错误页面中版本号
     sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
     tcp_nopush on;                          # 提升网络传输效率，在一个数据包里发送所有头文件
