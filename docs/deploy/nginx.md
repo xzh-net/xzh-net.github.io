@@ -357,44 +357,53 @@ http {
                 '$status $body_bytes_sent "$http_referer" '
                 '"$http_user_agent" "$http_x_forwarded_for" $request_body';
     access_log  /var/log/nginx/ip_access.log  post;
-    # http参数
-    proxy_headers_hash_max_size  51200;   # 头部哈希表的最大值
-    proxy_headers_hash_bucket_size 6400;  # 头部哈希表大小
-    server_names_hash_bucket_size 512;    # 服务器名字的哈希表大小
-    client_header_buffer_size 128k;       # 客户端请求头buffer大小
-    client_body_buffer_size 8m;           # 请求主体缓冲区
-    large_client_header_buffers 4 128k;   # 客户请求头缓冲大小
-    # 静态资源优化
-    sendfile on;                          # 开启高效的文件传输模式
-    tcp_nopush on;                        # 提升网络传输效率
-    tcp_nodelay on;                       # 提高网络包传输
-    keepalive_timeout 60s;                # 开启TCP连接保持
-    # 资源压缩优化
+    server_tokens   off;                    # 关闭错误页面中版本号
+    sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
+    tcp_nopush on;                          # 提升网络传输效率，在一个数据包里发送所有头文件
+    tcp_nodelay on;                         # 禁用Nagle算法，取消合并，即数据包立即发送出去
+    keepalive_timeout 60s;                  # 长连接超时时间,设置为0，则表示禁用长连接
+    proxy_headers_hash_max_size  51200;     # 头部哈希表的最大值
+    proxy_headers_hash_bucket_size 6400;    # 头部哈希表大小
+    server_names_hash_bucket_size 512;      # 服务器名字的哈希表大小
+    send_timeout 30s;                       # 设置发送响应到客户端的超时时间，默认为60s
+    # 请求头处理
+    client_header_buffer_size 1k;           # 请求头缓冲区大小
+    large_client_header_buffers 4 8k;       # 请求头最大缓冲区空间
+    client_header_timeout 60s;              # 设置读取客户端请求头超时时间，默认为60s,响应408
+    # 请求体处理
+    client_max_body_size 1m;                # 请求主体最大限制，上传文件大小，默认值为1m（1024kb）
+    client_body_buffer_size 16k;            # 请求主体缓冲区大小，如果主体大于缓冲区并且小于主体最大限制，则将文件存储到临时文件中（client_body_temp）
+    client_body_timeout 60s;                # 设置读取客户端主体内容体超时时间，默认为60s,响应408
+    client_body_temp_path /data/temp/;      # 请求主体临时保存路径
+    client_body_in_file_only off;           # 将请求体存储在临时文件中，默认关闭。clean：请求后删除,on：请求后不删除
+    client_body_in_single_buffer off;       # 默认关闭，开启优化读取$request_body变量时涉及的I/O操作
+    # 代理区处理-响应缓冲区
+    proxy_buffering on;                     # 开启响应缓冲区
+    proxy_buffers 8 8k;                     # 代理缓冲区空间，每个worker进程可以使用8个大小为8k的缓冲区
+    proxy_buffer_size 8k;                   # 单个代理缓冲区空间
+    proxy_busy_buffers_size 8k;             # 设置标注“client-ready”缓冲区的最大尺寸
+    proxy_max_temp_file_size 1024k          # 当proxy_buffers放不下后端服务器的响应内容时,写入临时文件
+    proxy_temp_file_write_size 64k;         # 当缓存被代理的服务器响应到临时文件时文件写入速度
+    # 代理区处理-超时时间
+    proxy_connect_timeout 60s;              # 与后端/上游服务器建立连接的超时时间，默认为60s，此时间不超过75s
+    proxy_read_timeout 60s;                 # 设置从后端/上游服务器读取响应的超时时间，默认为60s
+    proxy_send_timeout 60s;                 # 设置往后端/上游服务器发送请求的超时时间，默认为60s
+    
+    # 采用gzip压缩的形式发送数据，减少发送数据量，但会增加请求处理时间及CPU处理时间
     gzip on;
-    gzip_types text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml text/javascript application/javascript application/x-javascript text/x-json application/json application/x-web-app-manifest+json text/css text/plain text/x-component font/opentype application/x-font-ttf application/vnd.ms-fontobject image/x-icon;   # 压缩文件类型
-    client_max_body_size 256m;            # 最大上传限制
-    gzip_vary on;                         # 压缩发送携带响应头
-    gzip_buffers 4 16k;                   # 缓存空间大小
-    gzip_disable "MSIE [1-6]\.";          # 关闭压缩的排除条件
-    gzip_http_version 1.1;                # 使用Gzip的HTTP最低版本
-    gzip_min_length 4k;                   # 关闭压缩传输数据大小限制/最小压缩限制
-    gzip_comp_level 3;                    # 压缩率
-    ##
-    open_file_cache max=102400 inactive=20s;
-    open_file_cache_valid 30s;
-    open_file_cache_min_uses 1;
-    server_tokens off;
-    ##
-    proxy_connect_timeout 30s;
-    proxy_send_timeout 150s;
-    proxy_read_timeout 150s;
-    ## 反向代理优化
-    proxy_buffering on;
-    proxy_buffer_size 1024k;
-    proxy_buffers 4 1024k;
-    proxy_busy_buffers_size 1024k;
-    proxy_temp_file_write_size 1024k;
-    ## 日志规则
+    gzip_types text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml text/javascript application/javascript application/x-javascript text/x-json application/json application/x-web-app-manifest+json text/css text/plain text/x-component font/opentype application/x-font-ttf application/vnd.ms-fontobject image/x-icon;     # 压缩文件类型
+    gzip_vary on;                       # 根据请求头来判断是否需要压缩
+    gzip_buffers 16 8k;                 # 缓存空间大小
+    gzip_disable "MSIE [1-6]\.";        # 为指定的客户端禁用gzip功能
+    gzip_http_version 1.1;              # 使用Gzip的HTTP最低版本
+    gzip_min_length 4k;                 # 小于4k字节则不压缩
+    gzip_comp_level 3;                  # 压缩等级，1-9，9最慢压缩比最大
+
+    # 文件描述符缓存
+    open_file_cache max=10000 inactive=30s;    # 开启缓存的同时也指定了缓存文件的最大数量，30s如果文件没有请求则删除缓存
+    open_file_cache_valid 60s;          # 60s检查一次缓存的有效信息
+    open_file_cache_min_uses 5;         # 件缓存最小的访问次数，只有访问超过5次的才会被缓存
+    # 日志规则
     map $time_iso8601 $logdate {
         '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
         default    'date-not-found';
