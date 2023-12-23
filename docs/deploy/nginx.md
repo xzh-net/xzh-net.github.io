@@ -351,12 +351,12 @@ http {
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
     access_log  /var/log/nginx/access.log  main;
+    # 其他参数
     server_tokens   off;                    # 关闭错误页面中版本号
     sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
     tcp_nopush on;                          # 提升网络传输效率，在一个数据包里发送所有头文件
     tcp_nodelay on;                         # 禁用Nagle算法，取消合并，即数据包立即发送出去
     server_names_hash_bucket_size 128;      # 服务器名字的哈希表大小
-    # 其他参数
     keepalive_timeout 60s;                  # 长连接超时时间,设置为0，则表示禁用长连接
     send_timeout 30s;                       # 设置发送响应到客户端的超时时间，默认为60s
     # 请求头处理
