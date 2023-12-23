@@ -1339,7 +1339,6 @@ exec /sbin/init
 
 ```bash
 # 替换
-ls -a
 sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
 echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   # 文件批量拷贝至当前目录下的指定文件夹内
 
@@ -1350,26 +1349,21 @@ tar -zcvf jpg.tar *.jpg              # 打包所有图片
 tar -zxvf file.tar -C /home/data/    # 解压到指定路径
 
 # 拷贝复制
-cp -f xxx.log               # 复制并强制覆盖同名文件
-mkdir -p /home/docker/data  # 级联创建目录
-mkdir -p src/{test,main}/{java,resources}       # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
-ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java            # 创建软连接
+cp -f xxx.log                       # 复制并强制覆盖同名文件
+mkdir -p /home/docker/data          # 级联创建目录
+mkdir -p src/{test,main}/{java,resources}                               # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
+ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java                    # 创建软连接
 scp -r /tmp/access.logs -P {port} root@20.255.122.15:/opt/code          # 远程复制
 sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home    # 自动输入密钥
 
 # Find查找
-grep "www.xuzhihao.net" *           # 当前路径下按关键字过滤
+ll | grep hwcq.online
+grep -n "hwcq.online" -r ./         # 当前路径下文件内容递归按关键字查找
 find / -type f -size +100M          # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
 find / -name memcached              # 查找应用
-find / -name 'meeting' -type d      # 查找meeting文件夹所在的位置
-find / -name 'server.xml' -print    # 查找server.xml文件的位置
-find . -iname 'Configure'           # 查找关键字忽略大小写
-
-find /opt/software -name '*.mysql' -print   # 在目录下找后缀是.mysql的文件
-find /usr -atime 3 –print                   # 会从/usr目录开始往下找，找最近3天之内存取过的文件。
-find /usr -ctime 5 –print                   # 会从/usr目录开始往下找，找最近5天之内修改过的文件。
-find /doc -user xzh -name 'j*' –print               # 会从/doc目录开始往下找，找用户xzh的、文件名开头是j的文件。  
-find /doc \( -name 'ja*' -o- -name 'ma*' \) –print  # 会从/doc目录开始往下找，找寻文件名是ja开头或者ma开头的文件。
+find / -name 'conf' -type d         # 查找conf文件夹
+find / -iname 'SerVer.xml'          # 查找server.xml文件的位置,忽略大小写
+find / -name '*.mysql'              # 在目录下找后缀是.mysql的文件
 
 # 删除
 find /doc -name '*bak' -exec rm {} \;               # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
