@@ -30,23 +30,22 @@ vi /etc/keepalived/keepalived.conf
 
 ```conf
 global_defs {
-    router_id keep166;
+    router_id node166;          # 访问到主机，本机的hostname，需要修改
 }
 
 vrrp_script chk_nginx {
-    script "/etc/keepalived/nginx_check.sh"
-    interval 2
+    script "/etc/keepalived/nginx_check.sh" # 检测脚本位置
+    interval 2                              # 检测脚本执行的间隔,秒
     weight -20
 }
 
 vrrp_instance VI_1 {
-    state MASTER
-    interface enp0s3
-    virtual_router_id 166
-    mcast_src_ip 172.17.17.166
-    priority 100
-    nopreempt
-    advert_int 1
+    state MASTER                # 备份服务器上将 MASTER 改为 BACKUP
+    interface enp0s3            # 网卡名称
+    virtual_router_id 166       # 主、备机的 virtual_router_id 必须相同
+    priority 100                # 主、备机取不同的优先级，主机值较大，备份机值较小，一般主100从90
+    advert_int 1                # 主、备每隔1秒发送心跳
+    nopreempt                   # 非抢占模式
     authentication {
         auth_type PASS
         auth_pass 1111
@@ -94,10 +93,9 @@ vrrp_instance VI_1 {
     state MASTER
     interface enp0s3
     virtual_router_id 166
-    mcast_src_ip 172.17.17.166
     priority 100
-    nopreempt
     advert_int 1
+    nopreempt
     authentication {
         auth_type PASS
         auth_pass 1111
@@ -128,9 +126,8 @@ vrrp_script chk_nginx {
 vrrp_instance VI_1 {
     state BACKUP
     interface enp0s3
-    virtual_router_id 167
+    virtual_router_id 166
     priority 90
-    mcast_src_ip 172.17.17.167
     advert_int 1
     authentication {
         auth_type PASS
