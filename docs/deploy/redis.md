@@ -138,20 +138,28 @@ cd /usr/local/redis/bin
 ./redis-server ../conf/redis-6381.conf
 ```
 
+#### 1.2.5 验证
+
+```bash
+/usr/local/redis/bin/redis-cli -p 6379
+info replication
+```
+
 ### 1.3 哨兵
 
 #### 1.3.1 主配置26379
 
 ```bash
+mkdir -p /data/redis/26379
 vi /usr/local/redis/conf/sentinel-26379.conf
 ```
 
-```bash
+```conf
 port 26379
 daemonize yes
 protected-mode no
 logfile "26379.log"
-dir /usr/local/redis/data/26379
+dir /data/redis/26379
 sentinel monitor mymaster 192.168.3.200 6379 2
 sentinel auth-pass mymaster 123456
 sentinel down-after-milliseconds mymaster 30000
@@ -162,15 +170,16 @@ sentinel failover-timeout mymaster 180000
 #### 1.3.2 从配置26380
 
 ```bash
+mkdir -p /data/redis/26380
 vi /usr/local/redis/conf/sentinel-26380.conf
 ```
 
-```bash
+```conf
 port 26380
 daemonize yes
 protected-mode no
 logfile "26380.log"
-dir /usr/local/redis/data/26380
+dir /data/redis/26380
 sentinel monitor mymaster 192.168.3.200 6379 2
 sentinel auth-pass mymaster 123456
 sentinel down-after-milliseconds mymaster 30000
@@ -181,15 +190,16 @@ sentinel failover-timeout mymaster 180000
 #### 1.3.3 从配置26381
 
 ```bash
+mkdir -p /data/redis/26381
 vi /usr/local/redis/conf/sentinel-26381.conf
 ```
 
-```bash
+```conf
 port 26381
 daemonize yes
 protected-mode no
 logfile "26381.log"
-dir /usr/local/redis/data/26381
+dir /data/redis/26381
 sentinel monitor mymaster 192.168.3.200 6379 2
 sentinel auth-pass mymaster 123456
 sentinel down-after-milliseconds mymaster 30000
@@ -206,14 +216,16 @@ cd /usr/local/redis/bin
 ./redis-sentinel ../conf/sentinel-26381.conf
 ```
 
+#### 1.3.5 验证
+
+```bash
+/usr/local/redis/bin/redis-cli -p 6379
+info replication
+```
+
 ### 1.4 集群
 
 #### 1.4.1 配置文件
-
-```bash
-cd /usr/local/redis/data
-mkdir 6379 6380 6381 26379 26380 26381
-```
 
 ```bash
 vi /usr/local/redis/conf/redis-6379.conf
@@ -224,9 +236,9 @@ port 6379
 daemonize yes
 protected-mode no
 logfile "6379.log"
-dir /usr/local/redis/data/6379
+dir /data/redis/6379
 cluster-enabled yes
-cluster-config-file /usr/local/redis/data/6379/nodes.conf
+cluster-config-file /data/redis/6379/nodes.conf
 cluster-node-timeout 5000
 databases 1
 ```
@@ -234,7 +246,8 @@ databases 1
 #### 1.4.2 批量启动
 
 ```bash
-cd /usr/local/redis/data
+cd /data/redis/
+mkdir 6379 6380 6381 26379 26380 26381
 # 拷贝文件
 printf '%s\n' 6379 6380 6381 26379 26380 26381 | xargs -I{} -t cp /usr/local/redis/conf/redis-6379.conf {}/redis-{}.conf
 # 修改文件
@@ -242,8 +255,7 @@ printf '%s\n' 6379 6380 6381 26379 26380 26381 | xargs -I{} -t sed -i 's/6379/{}
 # 启动
 printf '%s\n' 6379 6380 6381 26379 26380 26381 | xargs -I{} -t /usr/local/redis/bin/redis-server {}/redis-{}.conf
 # 关闭
-ps aux|grep redis
-ps -ef | grep redis | awk '{print $2}' | xargs kill
+pkill -9 redis
 ```
 
 #### 1.4.3 初始化
@@ -251,7 +263,6 @@ ps -ef | grep redis | awk '{print $2}' | xargs kill
 ```bash
 cd /usr/local/redis/bin
 ./redis-cli --cluster create --cluster-replicas 1 192.168.3.201:6379 192.168.3.201:6380 192.168.3.201:6381 192.168.3.201:26379 192.168.3.201:26380 192.168.3.201:26381
-
 ./redis-cli -c -p 6379 cluster nodes
 ```
 
