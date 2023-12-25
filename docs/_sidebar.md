@@ -20,22 +20,22 @@
   - [DM](deploy/dm)
 
 - 应用
-  - [Nginx](deploy/nginx)
-  - [Keepalived](deploy/keepalived)
-  - [HAProxy](deploy/haproxy)
   - [Docker](deploy/docker)
   - [Kubernetes](deploy/kubernetes)
   - [Istio](deploy/istio)
   - [Nexus](deploy/nexus)
   - [Gitlab](deploy/gitlab)
   - [Jenkins](deploy/jenkins)
+  - [Prometheus](deploy/prometheus)
   - [Zabbix](deploy/zabbix)
   - [Simple RTMP Server](deploy/srs)
   - [TURN Server](deploy/turnserver)
   - [Nps](deploy/nps)
 
 - 中间件
-  - [Prometheus](deploy/prometheus)
+  - [Nginx](deploy/nginx)
+  - [Keepalived](deploy/keepalived)
+  - [HAProxy](deploy/haproxy)
   - [Elastic Stack](deploy/elk)
   - [Zookeeper](deploy/zookeeper)
   - [Etcd](deploy/etcd)
@@ -45,14 +45,13 @@
   - [Mycat](deploy/mycat)
   - [Debezium](deploy/debezium)
 
-- 大数据
+- 大数据、数仓
   - [Hadoop](deploy/hadoop)
+  - [FastDFS](deploy/fastdfs)
   - [Spark](deploy/spark)
   - [Flink](deploy/flink)
   - [Flume](deploy/flume)
   - [Kafka](deploy/kafka)
-
-- 数仓
   - [Hive](deploy/hive)
   - [ClickHouse](deploy/clickhouse)
   - [Kettle](deploy/kettle)
