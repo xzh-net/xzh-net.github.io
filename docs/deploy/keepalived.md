@@ -80,7 +80,7 @@ curl http://172.17.17.168
 
 ```conf
 global_defs {
-    router_id keep166;
+    router_id node166;
 }
 
 vrrp_script chk_nginx {
@@ -114,7 +114,7 @@ vrrp_instance VI_1 {
 
 ```conf
 global_defs {
-    router_id keep167
+    router_id node167
 }
 
 vrrp_script chk_nginx {
@@ -161,7 +161,7 @@ fi
 ```
 
 ```bash
-chmod 755 nginx_check.sh
+chmod 755 /etc/keepalived/nginx_check.sh
 ```
 
 ### 2.2 haproxy
