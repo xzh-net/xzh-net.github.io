@@ -71,8 +71,8 @@ useradd nginx -s /sbin/nologin -M
 
 ```bash
 cd /opt/software 
-tar zxvf nginx-1.20.2.tar.gz -C /opt
-cd /opt/nginx-1.20.2
+tar zxvf nginx-1.20.2.tar.gz
+cd nginx-1.20.2
 ./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module
 make && make install
 ```
