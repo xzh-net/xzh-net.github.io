@@ -14,8 +14,8 @@ wget https://download.redis.io/releases/redis-6.2.6.tar.gz
 
 ```bash
 yum install -y gcc tcl
-tar -zxvf redis-6.2.6.tar.gz -C /home
-mv /home/redis-6.2.6 /usr/local/redis
+tar -zxvf redis-6.2.6.tar.gz -C /opt/software
+mv /opt/software/redis-6.2.6 /usr/local/redis
 cd /usr/local/redis
 make PREFIX=/usr/local/redis install
 ```
@@ -24,31 +24,32 @@ make PREFIX=/usr/local/redis install
 
 ```bash
 cd /usr/local/redis
-mkdir -p /usr/local/redis/conf /usr/local/redis/data
+mkdir -p /usr/local/redis/conf /data/redis
 cat redis.conf | grep -v "#" | grep -v "^$" > conf/redis-6379.conf
 echo '' > conf/redis-6379.conf 
 vi conf/redis-6379.conf
+```
 
+```conf
 port 6379
 daemonize yes
 protected-mode no
 logfile "6379.log"
-dir /usr/local/redis/data
+dir /data/redis
 ```
 
 #### 1.1.4 启动服务
 
 ```bash
 cd /usr/local/redis/bin
-./redis-server ../conf/redis-6379.conf	# 指定配置启动
-./redis-server --port 6380				# 默认配置指定端口启动
+./redis-server ../conf/redis-6379.conf
 ```
 
 #### 1.1.5 客户端测试
 
 ```bash
 redis-cli -h host -p port -a password
-/usr/local/redis/bin/redis-cli -p 6380
+/usr/local/redis/bin/redis-cli -p 6379
 /usr/local/redis/bin/redis-benchmark -n 10000  -q
 ./redis-benchmark -h 127.0.0.1 -p 6379 -t set,lpush -n 10000 -q
 ```
@@ -58,6 +59,7 @@ redis-cli -h host -p port -a password
 #### 1.2.1 主配置6379
 
 ```bash
+mkdir -p /data/redis/6379
 vi /usr/local/redis/conf/redis-6379.conf
 ```
 
@@ -66,7 +68,7 @@ port 6379
 daemonize yes
 protected-mode no
 logfile "6379.log"
-dir /usr/local/redis/data/6379
+dir /data/redis/6379
 rdbcompression yes
 rdbchecksum yes
 save 3600 1
@@ -76,13 +78,14 @@ appendonly no
 appendfilename "appendonly-6379.aof"
 ```
 
-```bash
-sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
-```
 
 #### 1.2.2 从配置6380
 
 ```bash
+mkdir -p /data/redis/6380
+cd /usr/local/redis/conf
+sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
+
 vi /usr/local/redis/conf/redis-6380.conf
 ```
 
@@ -91,7 +94,7 @@ port 6380
 daemonize yes
 protected-mode no
 logfile "6380.log"
-dir /usr/local/redis/data/6380
+dir /data/redis/6380
 rdbcompression yes
 rdbchecksum yes
 save 3600 1
@@ -105,6 +108,8 @@ replicaof 192.168.3.200 6379
 #### 1.2.3 从配置6381
 
 ```bash
+mkdir -p /data/redis/6381
+sed 's/6380/6381/g' redis-6380.conf > redis-6381.conf
 vi /usr/local/redis/conf/redis-6381.conf
 ```
 
@@ -112,8 +117,8 @@ vi /usr/local/redis/conf/redis-6381.conf
 port 6381
 daemonize yes
 protected-mode no
-logfile "6381.log"
-dir /usr/local/redis/data/6381
+logfile "6380.log"
+dir /data/redis/6381
 rdbcompression yes
 rdbchecksum yes
 save 3600 1
@@ -124,7 +129,6 @@ appendfilename "appendonly-6381.aof"
 replicaof 192.168.3.200 6379
 ```
 
-
 #### 1.2.4 启动服务
 
 ```bash
@@ -133,7 +137,6 @@ cd /usr/local/redis/bin
 ./redis-server ../conf/redis-6380.conf
 ./redis-server ../conf/redis-6381.conf
 ```
-
 
 ### 1.3 哨兵
 
