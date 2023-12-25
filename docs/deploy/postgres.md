@@ -533,6 +533,7 @@ echo "backup finished" his
 
 ```bash
 cd /data/pgdata/12/data
+vi postgresql.conf 
 ```
 
 ```conf
