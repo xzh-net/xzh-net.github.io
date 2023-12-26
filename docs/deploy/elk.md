@@ -217,7 +217,7 @@ http.cors.allow-origin: "*"
 #### 1.2.5 启动服务
 
 ```bash
-su - elsearch
+su - elastic
 /home/elastic/elasticsearch-7.6.2-9201/bin/elasticsearch -d
 /home/elastic/elasticsearch-7.6.2-9202/bin/elasticsearch -d
 /home/elastic/elasticsearch-7.6.2-9203/bin/elasticsearch -d
