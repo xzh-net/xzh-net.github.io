@@ -322,7 +322,7 @@ group_count = 0
 #include http.conf
 ```
 
-4. 映射文件
+4. 复制映射文件
 
 ```bash
 cp /opt/software/fastdfs-5.11/conf/mime.types /etc/fdfs/
