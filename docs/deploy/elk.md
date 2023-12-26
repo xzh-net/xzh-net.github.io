@@ -292,8 +292,6 @@ mv kibana-7.6.2-linux-x86_64 kibana-7.6.2
 
 ### 2.2 目录授权
 
-使用root执行
-
 ```bash
 chown -R elastic:elastic /home/elastic
 ```
