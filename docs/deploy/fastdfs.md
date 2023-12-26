@@ -186,7 +186,7 @@ write_mark_file_freq=500
 store_path_count=1
 store_path0=/data/fastdfs/storage/store
 subdir_count_per_path=256
-tracker_server=127.0.0.1:22122
+tracker_server=192.168.2.3:22122
 log_level=info
 run_by_group=
 run_by_user=
@@ -320,6 +320,13 @@ flv_support = true
 flv_extension = flv
 group_count = 0
 #include http.conf
+```
+
+4. 映射文件
+
+```bash
+cp /opt/software/fastdfs-5.11/conf/mime.types /etc/fdfs/
+cp /opt/software/fastdfs-5.11/conf/http.conf /etc/fdfs/
 ```
 
 ### 1.7 安装Nginx
