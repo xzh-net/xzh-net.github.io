@@ -25,9 +25,8 @@ yum install -y gcc readline-devel zlib-devel docbook-dtds docbook-style-xsl fop 
 #### 1.1.3 解压编译
 
 ```bash
-tar -zxvf postgresql-12.4.tar.gz -C /home/
-cd /home
-cd postgresql-12.4
+tar -zxvf postgresql-12.4.tar.gz -C /home/software
+cd /home/software/postgresql-12.4
 ./configure
 make && make install
 ```
