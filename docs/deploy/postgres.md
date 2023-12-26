@@ -25,8 +25,8 @@ yum install -y gcc readline-devel zlib-devel docbook-dtds docbook-style-xsl fop 
 #### 1.1.3 解压编译
 
 ```bash
-tar -zxvf postgresql-12.4.tar.gz -C /home/software
-cd /home/software/postgresql-12.4
+tar -zxvf postgresql-12.4.tar.gz -C /opt/software
+cd /opt/software/postgresql-12.4
 ./configure
 make && make install
 ```
@@ -141,7 +141,7 @@ host    replication     all             0.0.0.0/0            md5
 
 ```bash
 su - root
-cd /home/postgresql-12.4/contrib/start-scripts
+cd /opt/postgresql-12.4/contrib/start-scripts
 vi linux
 # 找到对应位置修改内容
 prefix=/usr/local/pgsql
@@ -327,7 +327,7 @@ pg_stat_statements模块提供一种方法追踪一个服务器所执行的所�
 1. 编译插件
 
 ```bash
-cd /home/postgresql-12.4/contrib/pg_stat_statements
+cd /opt/postgresql-12.4/contrib/pg_stat_statements
 make && make install
 su - postgres
 cd $PGDATA
@@ -361,7 +361,7 @@ passwordcheck模块是在`CREATE ROLE`或者`CREATE USER`期间检查用户密�
 1. 编译插件
 
 ```bash
-cd /home/postgresql-12.4/contrib/passwordcheck
+cd /opt/postgresql-12.4/contrib/passwordcheck
 make && make install
 su - postgres
 cd $PGDATA
