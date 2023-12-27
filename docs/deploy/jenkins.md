@@ -18,16 +18,15 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 
 #### 1.2.1 下载安装
 
-https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.332-1.1.noarch.rpm
-
 ```bash
 yum install java-1.8.0-openjdk* -y  # jdk:/usr/lib/jvm
-yum  -y install epel-release
-yum -y install daemonize
+yum -y install epel-release daemonize
+wget https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.332-1.1.noarch.rpm
+rpm -ivh jenkins-2.332-1.1.noarch.rpm
 
+# 如果安装过，直接卸载
 rpm -qa |grep jenkins
 rpm -e --nodeps jenkins-2.332-1.1.noarch
-rpm -ivh jenkins-2.332-1.1.noarch.rpm
 ```
 
 #### 1.2.2 修改配置
