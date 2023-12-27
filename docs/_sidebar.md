@@ -44,10 +44,10 @@
   - [Pulsar](deploy/pulsar)
   - [Mycat](deploy/mycat)
   - [Debezium](deploy/debezium)
+  - [FastDFS](deploy/fastdfs)
 
 - 大数据、数仓
   - [Hadoop](deploy/hadoop)
-  - [FastDFS](deploy/fastdfs)
   - [Spark](deploy/spark)
   - [Flink](deploy/flink)
   - [Flume](deploy/flume)
