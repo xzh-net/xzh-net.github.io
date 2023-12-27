@@ -722,9 +722,10 @@ load_fdfs_parameters_from_tracker=true
 storage_sync_file_max_delay = 86400
 use_storage_id = false
 storage_ids_filename = storage_ids.conf
-tracker_server=192.168.2.3:22122
+tracker_server=192.168.2.10:22122
+tracker_server=192.168.2.20:22122
+group_name=group1/group2
 storage_server_port=23000
-group_name=group1
 url_have_group_name = true
 store_path_count=1
 store_path0=/data/fastdfs/storage/store
@@ -734,7 +735,27 @@ response_mode=proxy
 if_alias_prefix=
 flv_support = true
 flv_extension = flv
-group_count = 0
+group_count = 2
+[group1]
+group_name=group1
+storage_server_port=23000
+store_path_count=6
+store_path0=/data/fastdfs/storage/group1/data01
+store_path1=/data/fastdfs/storage/group1/data02
+store_path2=/data/fastdfs/storage/group1/data03
+store_path3=/data/fastdfs/storage/group1/data04
+store_path4=/data/fastdfs/storage/group1/data05
+store_path5=/data/fastdfs/storage/group1/data06
+[group2]
+group_name=group2
+storage_server_port=33000
+store_path_count=6
+store_path0=/data/fastdfs/storage/group2/data01
+store_path1=/data/fastdfs/storage/group2/data02
+store_path2=/data/fastdfs/storage/group2/data03
+store_path3=/data/fastdfs/storage/group2/data04
+store_path4=/data/fastdfs/storage/group2/data05
+store_path5=/data/fastdfs/storage/group2/data06
 #include http.conf
 ```
 
@@ -1115,9 +1136,10 @@ load_fdfs_parameters_from_tracker=true
 storage_sync_file_max_delay = 86400
 use_storage_id = false
 storage_ids_filename = storage_ids.conf
-tracker_server=192.168.2.3:22122
+tracker_server=192.168.2.10:22122
+tracker_server=192.168.2.20:22122
+group_name=group1/group2
 storage_server_port=23000
-group_name=group1
 url_have_group_name = true
 store_path_count=1
 store_path0=/data/fastdfs/storage/store
@@ -1127,7 +1149,27 @@ response_mode=proxy
 if_alias_prefix=
 flv_support = true
 flv_extension = flv
-group_count = 0
+group_count = 2
+[group1]
+group_name=group1
+storage_server_port=23000
+store_path_count=6
+store_path0=/data/fastdfs/storage/group1/data01
+store_path1=/data/fastdfs/storage/group1/data02
+store_path2=/data/fastdfs/storage/group1/data03
+store_path3=/data/fastdfs/storage/group1/data04
+store_path4=/data/fastdfs/storage/group1/data05
+store_path5=/data/fastdfs/storage/group1/data06
+[group2]
+group_name=group2
+storage_server_port=33000
+store_path_count=6
+store_path0=/data/fastdfs/storage/group2/data01
+store_path1=/data/fastdfs/storage/group2/data02
+store_path2=/data/fastdfs/storage/group2/data03
+store_path3=/data/fastdfs/storage/group2/data04
+store_path4=/data/fastdfs/storage/group2/data05
+store_path5=/data/fastdfs/storage/group2/data06
 #include http.conf
 ```
 
