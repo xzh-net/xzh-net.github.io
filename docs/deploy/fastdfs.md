@@ -22,20 +22,19 @@ cd libfastcommon-1.0.38
 ./make.sh install
 ```
 
-安装完成后 /usr/lib64、/usr/lib 文件夹内会有 libfastcommon.so 和 libfdfsclient.so
-
 ```bash
-ll /usr/lib | grep libfastcommon.so 
-ll /usr/lib | grep libfdfsclient.so 
-```
-
-```bash
-#V5.11可忽略
 #FastDFS主程序设置的lib目录是/usr/local/lib，所以此处需要重新设置软链接
 ln -s /usr/lib64/libfastcommon.so /usr/local/lib/libfastcommon.so
 ln -s /usr/lib64/libfastcommon.so /usr/lib/libfastcommon.so
 ln -s /usr/lib64/libfdfsclient.so /usr/local/lib/libfdfsclient.so
 ln -s /usr/lib64/libfdfsclient.so /usr/lib/libfdfsclient.so
+```
+
+安装完成后 /usr/lib64、/usr/lib 文件夹内会有 libfastcommon.so 和 libfdfsclient.so
+
+```bash
+ll /usr/lib | grep libfastcommon.so 
+ll /usr/lib | grep libfdfsclient.so 
 ```
 
 ### 1.3 安装FastDFS
@@ -363,9 +362,13 @@ vi /usr/local/nginx/conf/nginx.conf
 ```
 
 ```conf
-location /group1/M00 {
-   ngx_fastdfs_module;
-}
+server {
+        listen 8888;
+        server_name localhost;
+        location ~/group[0-9]/ {
+            ngx_fastdfs_module;
+        }
+    }
 ```
 
 4. 启动nginx
@@ -379,3 +382,20 @@ location /group1/M00 {
 
 ## 2. 集群
 
+
+| **名称** | **IP地址** | **服务名称** | **端口** |
+| -------- | -------------- | ------------------------ | --------------- |
+| 10服务器  | 192.168.2.10 |  |  |
+|   |  | libfastcommon | - |
+|   |  | tracker | 22122 |
+|   |  | storage-group1 | 23000 |
+|   |  | storage-group2 | 33000 |
+|   |  | libfastcommon | - |
+|   |  | nginx | 8888 |
+| 20服务器  | 192.168.2.20 |  |  |
+|   |  | libfastcommon | - |
+|   |  | tracker | 22122 |
+|   |  | storage-group1 | 23000 |
+|   |  | storage-group2 | 33000 |
+|   |  | libfastcommon | - |
+|   |  | nginx | 8888 |
