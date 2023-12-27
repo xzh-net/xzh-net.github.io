@@ -1357,10 +1357,10 @@ scp -r /tmp/access.logs -P {port} root@20.255.122.15:/opt/code          # 远程
 sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home    # 自动输入密钥
 
 # Find查找
-ll | grep hwcq.online
-grep -n "hwcq.online" -r ./         # 当前路径下文件内容递归按关键字查找
+ll | grep hwcq.online               # 当前路径过滤显示
+grep -n "hwcq.online" -r ./         # 当前路径递归向下查找内容
+find / -name memcached              # 查找文件
 find / -type f -size +100M          # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
-find / -name memcached              # 查找应用
 find / -name 'conf' -type d         # 查找conf文件夹
 find / -iname 'SerVer.xml'          # 查找server.xml文件的位置,忽略大小写
 find / -name '*.mysql'              # 在目录下找后缀是.mysql的文件
