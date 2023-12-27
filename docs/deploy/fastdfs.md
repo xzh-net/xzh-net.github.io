@@ -187,7 +187,7 @@ write_mark_file_freq=500                # 同步完多少文件后写mark标记
 store_path_count=1                      # storage在存储文件时支持多路径，默认只设置一个
 store_path0=/data/fastdfs/storage/store
 subdir_count_per_path=256               # subdir_count * subdir_count个目录会在store_path下创建，采用两级存储
-tracker_server=192.168.2.3:22122        # 设置tracker_server
+tracker_server=192.168.2.201:22122        # 设置tracker_server
 log_level=info
 run_by_group=
 run_by_user=
@@ -246,7 +246,7 @@ vim /etc/fdfs/client.conf
 connect_timeout=30
 network_timeout=60
 base_path=/data/fastdfs/tracker
-tracker_server=192.168.2.3:22122
+tracker_server=192.168.2.201:22122
 log_level=info
 use_connection_pool = false
 connection_pool_max_idle_time = 3600
@@ -313,7 +313,7 @@ load_fdfs_parameters_from_tracker=true
 storage_sync_file_max_delay = 86400
 use_storage_id = false
 storage_ids_filename = storage_ids.conf
-tracker_server=192.168.2.3:22122
+tracker_server=192.168.2.201:22122
 storage_server_port=23000
 group_name=group1
 url_have_group_name = true
@@ -379,22 +379,24 @@ server {
 /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
 ```
 
-访问地址：http://192.168.2.3/group1/M00/00/00/rBERoWWJQ0GAUTbuAAB79bkxfWY442.jpg
+访问地址：http://192.168.2.201/group1/M00/00/00/rBERoWWJQ0GAUTbuAAB79bkxfWY442.jpg
 
 ## 2. 集群
 
 
 | **节点名称** | **IP地址** | **服务名称** | **端口** |
 | :----------: | :----------: | :----------: | :----------: |
-| node10  | node10 192.168.2.10 | libfastcommon | - |
+| node10  | node10 192.168.2.201 | libfastcommon | - |
 |   |  | tracker | 22122 |
 |   |  | storage-group1 | 23000 |
 |   |  | storage-group2 | 33000 |
-| node20  | node20 192.168.2.20 | libfastcommon | - |
+|   |  | fastdfs-nginx-module | - |
+|   |  | nginx | 8888 |
+| node20  | node20 192.168.2.202 | libfastcommon | - |
 |   |  | tracker | 22122 |
 |   |  | storage-group1 | 23000 |
 |   |  | storage-group2 | 33000 |
-| node30  | node30 192.168.2.30 | fastdfs-nginx-module | - |
+|   |  | fastdfs-nginx-module | - |
 |   |  | nginx | 8888 |
 
 
@@ -537,8 +539,8 @@ store_path3=/data/fastdfs/storage/group1/data04
 store_path4=/data/fastdfs/storage/group1/data05
 store_path5=/data/fastdfs/storage/group1/data06
 subdir_count_per_path=256
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 log_level=info
 run_by_group=
 run_by_user=
@@ -608,8 +610,8 @@ store_path3=/data/fastdfs/storage/group2/data04
 store_path4=/data/fastdfs/storage/group2/data05
 store_path5=/data/fastdfs/storage/group2/data06
 subdir_count_per_path=256
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 log_level=info
 run_by_group=
 run_by_user=
@@ -666,8 +668,8 @@ vim /etc/fdfs/client.conf
 connect_timeout=30
 network_timeout=60
 base_path=/data/fastdfs/tracker
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 log_level=info
 use_connection_pool = false
 connection_pool_max_idle_time = 3600
@@ -722,8 +724,8 @@ load_fdfs_parameters_from_tracker=true
 storage_sync_file_max_delay = 86400
 use_storage_id = false
 storage_ids_filename = storage_ids.conf
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 group_name=group1/group2
 storage_server_port=23000
 url_have_group_name = true
@@ -809,7 +811,7 @@ server {
 /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
 ```
 
-访问地址：http://192.168.2.10/group1/M00/00/00/rBERoWWJQ0GAUTbuAAB79bkxfWY442.jpg
+访问地址：http://192.168.2.201/group1/M00/00/00/rBERoWWJQ0GAUTbuAAB79bkxfWY442.jpg
 
 
 ### 2.2 节点2
@@ -951,8 +953,8 @@ store_path3=/data/fastdfs/storage/group1/data04
 store_path4=/data/fastdfs/storage/group1/data05
 store_path5=/data/fastdfs/storage/group1/data06
 subdir_count_per_path=256
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 log_level=info
 run_by_group=
 run_by_user=
@@ -1022,8 +1024,8 @@ store_path3=/data/fastdfs/storage/group2/data04
 store_path4=/data/fastdfs/storage/group2/data05
 store_path5=/data/fastdfs/storage/group2/data06
 subdir_count_per_path=256
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 log_level=info
 run_by_group=
 run_by_user=
@@ -1080,8 +1082,8 @@ vim /etc/fdfs/client.conf
 connect_timeout=30
 network_timeout=60
 base_path=/data/fastdfs/tracker
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 log_level=info
 use_connection_pool = false
 connection_pool_max_idle_time = 3600
@@ -1136,8 +1138,8 @@ load_fdfs_parameters_from_tracker=true
 storage_sync_file_max_delay = 86400
 use_storage_id = false
 storage_ids_filename = storage_ids.conf
-tracker_server=192.168.2.10:22122
-tracker_server=192.168.2.20:22122
+tracker_server=192.168.2.201:22122
+tracker_server=192.168.2.202:22122
 group_name=group1/group2
 storage_server_port=23000
 url_have_group_name = true
@@ -1223,4 +1225,4 @@ server {
 /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
 ```
 
-访问地址：http://192.168.2.20/group1/M00/00/00/rBERoWWJQ0GAUTbuAAB79bkxfWY442.jpg
+访问地址：http://192.168.2.202/group1/M00/00/00/rBERoWWJQ0GAUTbuAAB79bkxfWY442.jpg
