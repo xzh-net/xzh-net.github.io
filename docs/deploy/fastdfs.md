@@ -546,13 +546,13 @@ mkdir -p /data/fastdfs/storage/group1/data04
 mkdir -p /data/fastdfs/storage/group1/data05
 mkdir -p /data/fastdfs/storage/group1/data06
 
-mkdir -p /data/fastdfs/storage/group1/base
-mkdir -p /data/fastdfs/storage/group1/data01
-mkdir -p /data/fastdfs/storage/group1/data02
-mkdir -p /data/fastdfs/storage/group1/data03
-mkdir -p /data/fastdfs/storage/group1/data04
-mkdir -p /data/fastdfs/storage/group1/data05
-mkdir -p /data/fastdfs/storage/group1/data06
+mkdir -p /data/fastdfs/storage/group2/base
+mkdir -p /data/fastdfs/storage/group2/data01
+mkdir -p /data/fastdfs/storage/group2/data02
+mkdir -p /data/fastdfs/storage/group2/data03
+mkdir -p /data/fastdfs/storage/group2/data04
+mkdir -p /data/fastdfs/storage/group2/data05
+mkdir -p /data/fastdfs/storage/group2/data06
 ```
 
 2. 新建配置group1
@@ -701,10 +701,10 @@ http.server_port=8888
 
 ```bash
 /usr/bin/fdfs_storaged /etc/fdfs/storage-group1.conf
-tail -f /data/fastdfs/tracker/group1/base/logs/trackerd.log
+tail -f /data/fastdfs/storage/group1/base/logs/storaged.log
 
 /usr/bin/fdfs_storaged /etc/fdfs/storage-group2.conf
-tail -f /data/fastdfs/tracker/group2/base/logs/trackerd.log
+tail -f /data/fastdfs/storage/group2/base/logs/storaged.log
 ps aux | grep fdfs
 ```
 
@@ -960,13 +960,13 @@ mkdir -p /data/fastdfs/storage/group1/data04
 mkdir -p /data/fastdfs/storage/group1/data05
 mkdir -p /data/fastdfs/storage/group1/data06
 
-mkdir -p /data/fastdfs/storage/group1/base
-mkdir -p /data/fastdfs/storage/group1/data01
-mkdir -p /data/fastdfs/storage/group1/data02
-mkdir -p /data/fastdfs/storage/group1/data03
-mkdir -p /data/fastdfs/storage/group1/data04
-mkdir -p /data/fastdfs/storage/group1/data05
-mkdir -p /data/fastdfs/storage/group1/data06
+mkdir -p /data/fastdfs/storage/group2/base
+mkdir -p /data/fastdfs/storage/group2/data01
+mkdir -p /data/fastdfs/storage/group2/data02
+mkdir -p /data/fastdfs/storage/group2/data03
+mkdir -p /data/fastdfs/storage/group2/data04
+mkdir -p /data/fastdfs/storage/group2/data05
+mkdir -p /data/fastdfs/storage/group2/data06
 ```
 
 2. 新建配置group1
@@ -1115,10 +1115,10 @@ http.server_port=8888
 
 ```bash
 /usr/bin/fdfs_storaged /etc/fdfs/storage-group1.conf
-tail -f /data/fastdfs/tracker/group1/base/logs/trackerd.log
+tail -f /data/fastdfs/storage/group1/base/logs/storaged.log
 
 /usr/bin/fdfs_storaged /etc/fdfs/storage-group2.conf
-tail -f /data/fastdfs/tracker/group2/base/logs/trackerd.log
+tail -f /data/fastdfs/storage/group2/base/logs/storaged.log
 ps aux | grep fdfs
 ```
 
