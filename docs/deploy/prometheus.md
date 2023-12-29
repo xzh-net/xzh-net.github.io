@@ -15,15 +15,20 @@ Prometheus是由SoundCloud开发的开源监控报警系统和时序列数据库
 ```bash
 cd /opt/software
 wget https://github.com/prometheus/prometheus/releases/download/v2.27.0/prometheus-2.27.0.linux-amd64.tar.gz
-tar zxvf prometheus-2.27.0.linux-amd64.tar.gz -C /opt
-mv /opt/prometheus-2.27.0.linux-amd64/ /opt/prometheus
-/opt/prometheus/prometheus --version  # 查看版本号
+tar zxvf prometheus-2.27.0.linux-amd64.tar.gz -C /opt/software
+mv /opt/software/prometheus-2.27.0.linux-amd64/ /opt/software/prometheus
+```
+
+查看版本号
+
+```bash
+/opt/software/prometheus/prometheus --version
 ```
 
 ### 1.2 修改配置
 
 ```bash
-vi /opt/prometheus/prometheus.yml
+vi /opt/software/prometheus/prometheus.yml
 ```
 
 ```conf
@@ -84,13 +89,15 @@ scrape_configs:
 ```bash
 cd /usr/lib/systemd/system
 vim prometheus.service
-# 添加内容
+```
+
+```bash
 [Unit]
 Description=https://prometheus.io
 
 [Service]
 Restart=on-failure
-ExecStart=/opt/prometheus/prometheus --config.file=/opt/prometheus/prometheus.yml --web.listen-address=:9090
+ExecStart=/opt/software/prometheus/prometheus --config.file=/opt/software/prometheus/prometheus.yml --web.listen-address=:9090
 
 [Install]
 WantedBy=multi-user.target
@@ -109,12 +116,10 @@ systemctl start prometheus
 systemctl enable prometheus
 
 # 也可使用脚本启动
-cd /opt/prometheus
-./prometheus --config.file="/opt/prometheus/prometheus.yml" &
+cd /opt/software/prometheus
+./prometheus --config.file="/opt/software/prometheus/prometheus.yml" &
 ./prometheus --help       # 启动参数帮助文档
 ```
-
-### 1.5 客户端
 
 访问地址：http://ip:9090/targets
 
@@ -139,7 +144,9 @@ mv /usr/local/node_exporter-1.1.2.linux-amd64/ /usr/local/node_exporter
 
 ```bash
 vim /usr/lib/systemd/system/node_exporter.service
-# 添加内容
+```
+
+```bash
 [Unit]
 Description=node_exporter
 After=network.target
@@ -176,8 +183,15 @@ cd /opt/software
 wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.14.0/mysqld_exporter-0.14.0.linux-amd64.tar.gz
 tar zxvf mysqld_exporter-0.14.0.linux-amd64.tar.gz -C /usr/local/
 mv /usr/local/mysqld_exporter-0.14.0.linux-amd64 /usr/local/mysqld_exporter
+```
+
+修改配置
+
+```bash
 vim /usr/local/mysqld_exporter/.my.cnf
-# 编辑
+```
+
+```
 [client]
 host=172.17.17.137
 port=3306
@@ -237,8 +251,6 @@ docker run -d \
   google/cadvisor:latest
 ```
 
-2. 访问地址
-
 http://ip:8090/containers/
 
 ### 2.4 redis监控
@@ -290,34 +302,25 @@ lsof -i:9121
 
 ## 3. Grafana
 
-### 3.1 下载
+### 3.1 下载安装
 
 ```bash
 wget https://dl.grafana.com/oss/release/grafana-7.3.7-1.x86_64.rpm
-```
-
-### 3.2 安装
-
-```bash
 yum localinstall grafana-7.3.7-1.x86_64.rpm -y
 ```
 
-### 3.3 启动服务
+### 3.2 启动服务
 
 ```bash
 systemctl start grafana-server
 systemctl enable grafana-server
 ```
 
-### 3.4 客户端
-
-访问地址：http://ip:3000/  首次进入重置admin账号密码admin
+访问地址：http://ip:3000/  admin/admin
 
 #### 3.4.1 linux监控
 
 1. 添加Prometheus数据源
-
-> Configuration -> Data Sources ->add data source -> Prometheus
 
 ![](../../assets/_images/deploy/prometheus/grafana1.png)
 ![](../../assets/_images/deploy/prometheus/grafana2.png)
