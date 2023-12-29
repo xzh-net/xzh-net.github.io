@@ -2,8 +2,8 @@
 
 Elastic Stack是由ELK演化而来，分别是Elasticsearch、logstash、kibana
 
-- https://www.elastic.co/downloads/elasticsearch
-- https://elasticsearch.cn/download/
+- 官网地址：https://www.elastic.co/downloads/
+
 
 ## 1. Elasticsearch
 
@@ -262,12 +262,10 @@ docker restart elasticsearch-head
 
 1. 下载解压
 
-https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.6.2/elasticsearch-analysis-ik-7.6.2.zip
-
 ```bash
 mkdir -p /home/elastic/elasticsearch-7.6.2/plugins/analysis-ik
 cd /home/elastic/elasticsearch-7.6.2/plugins/analysis-ik
-# 上传
+wget https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.6.2/elasticsearch-analysis-ik-7.6.2.zip
 unzip elasticsearch-analysis-ik-7.6.2.zip 
 ```
 
@@ -407,8 +405,6 @@ tar -zxvf logstash-7.6.2.tar.gz -C /home/elastic/
 
 ### 3.2 目录授权
 
-使用root执行
-
 ```bash
 chown -R elastic:elastic /home/elastic
 ```
@@ -419,9 +415,13 @@ chown -R elastic:elastic /home/elastic
 su - elastic
 cd /home/elastic/logstash-7.6.2/config
 cp -p logstash-sample.conf logstash.conf
-vi logstash.conf
+```
 
-# 编辑
+```bash
+vi logstash.conf
+```
+
+```conf
 input {
   tcp {
     mode => "server"
@@ -473,27 +473,29 @@ output {
 }
 ```
 
-### 3.4 安装插件
-
-#### 3.4.1 json_lines
+### 3.4 安装json_lines插件
 
 ```bash
-cd /home/elastic/logstash-7.6.2/bin
-./logstash-plugin install logstash-codec-json_lines
+cd /home/elastic/logstash-7.6.2/
+vim Gemfile
+# 修改source属性为国内的源
+source "http://mirrors.tuna.tsinghua.edu.cn/rubygems/"
+```
+
+```bash
+./bin/logstash-plugin install --no-verify logstash-codec-json_lines
 ```
 
 ### 3.5 启动服务
 
 ```bash
 cd /home/elastic/logstash-7.6.2/bin
-./logstash -f ../config/logstash.conf
+nohup ./logstash -f ../config/logstash.conf &
+tail -f ../logs/logstash-plain.log
 lsof -i:4560,4561,4562,4563
 ```
 
-### 3.6 客户端测试
-
-访问地址：http://localhost:5601
-
+至此，服务端配置完毕，验证应用：https://github.com/xzh-net/spring-boot/tree/main/spring-boot-elk
 
 ## 4. Filebeat
 
@@ -508,28 +510,28 @@ mv filebeat-7.6.2-linux-x86_64 filebeat-7.6.2
 
 ### 4.2 目录授权
 
-使用root执行
-
 ```bash
 chown -R elastic:elastic /home/elastic
 ```
 
 ### 4.3 修改配置
 
-#### 4.3.1 filebeat
-
 ```bash
 su - elastic
 cd /home/elastic/filebeat-7.6.2
 cp -p filebeat.yml filebeat.yml.bak
+```
 
+```bash
 vi filebeat.yml
-    ##
+```
+
+```conf
 filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /home/elastic/logs/application/*/*.log
+    - /data/app/logs/application/*/*.log
   exclude_lines: ['\sDEBUG\s\d']
   exclude_files: ['sc-admin.*.log$']
   fields:
@@ -542,22 +544,31 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /home/elastic/logs/point/*.log
+    - /data/app/logs/point/*.log
   fields:
     docType: point-log
     project: microservices-platform
-    ##
-hosts: ["172.17.17.194:5044"]
-bulk_max_size: 2048
+output.logstash:
+  hosts: ["172.17.17.194:5044"]
+  bulk_max_size: 2048
 ```
 
-#### 4.3.2 logstash规则文件
+### 4.4 启动服务
 
 ```bash
+cd /home/elastic/filebeat-7.6.2
+./filebeat -c filebeat.yml -e
+```
 
-mkdir /opt/software/logstash-7.6.1/patterns
+
+### 4.5 配置规则文件
+
+```bash
+mkdir /home/elastic/logstash-7.6.1/patterns
 vi my_patterns
-# 内容如下
+```
+
+```conf
 # user-center
 MYAPPNAME [0-9a-zA-Z._-]*
 # RMI TCP Connection(2)-127.0.0.1
@@ -565,9 +576,15 @@ MYTHREADNAME ([0-9a-zA-Z._-]|\(|\)|\s)*
 ```
 
 
-#### 4.3.3 logstash
+### 4.6 修改logstash
 
 ```bash
+su - elastic
+cd /home/elastic/logstash-7.6.2/config
+vi logstash.conf
+```
+
+```conf
 input {
   beats {
     port => 5044
@@ -599,7 +616,7 @@ filter {
   }
   if [fields][docType] == "point-log" {
     grok {
-      patterns_dir => ["/opt/software/logstash-7.6.1/patterns"]
+      patterns_dir => ["/home/elastic/logstash-7.6.1/patterns"]
       match => {
         "message" => "%{TIMESTAMP_ISO8601:logTime}\|%{MYAPPNAME:appName}\|%{WORD:resouceid}\|%{MYAPPNAME:type}\|%{GREEDYDATA:object}"
       }
@@ -683,9 +700,4 @@ output {
 }
 ```
 
-### 4.4 启动服务
 
-```bash
-cd /home/elastic/filebeat-7.6.2
-./filebeat -c filebeat.yml -e
-```
