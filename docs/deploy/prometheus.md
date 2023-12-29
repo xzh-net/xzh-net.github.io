@@ -318,7 +318,7 @@ systemctl enable grafana-server
 
 访问地址：http://ip:3000/  admin/admin
 
-#### 3.4.1 linux监控
+#### 3.2.1 linux监控
 
 1. 添加Prometheus数据源
 
@@ -335,15 +335,15 @@ systemctl enable grafana-server
 ![](../../assets/_images/deploy/prometheus/grafana5.png)
 
 
-#### 3.4.2 mysql监控
+#### 3.2.2 mysql监控
 
 https://grafana.com/grafana/dashboards/7362
 
-#### 3.4.3 容器监控
+#### 3.2.3 容器监控
 
 https://grafana.com/grafana/dashboards/893
 
-#### 3.4.4 redis监控
+#### 3.2.4 redis监控
 
 https://grafana.com/grafana/dashboards/763
 
