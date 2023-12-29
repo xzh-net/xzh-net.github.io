@@ -561,23 +561,9 @@ cd /home/elastic/filebeat-7.6.2
 ```
 
 
-### 4.5 配置规则文件
+### 4.5 修改Logstash
 
-```bash
-mkdir /home/elastic/logstash-7.6.2/patterns
-cd /home/elastic/logstash-7.6.2/patterns
-vi my_patterns
-```
-
-```conf
-# user-center
-MYAPPNAME [0-9a-zA-Z._-]*
-# RMI TCP Connection(2)-127.0.0.1
-MYTHREADNAME ([0-9a-zA-Z._-]|\(|\)|\s)*
-```
-
-
-### 4.6 修改logstash
+1. 修改配置
 
 ```bash
 su - elastic
@@ -701,4 +687,17 @@ output {
 }
 ```
 
+2. 创建规则文件
 
+```bash
+mkdir /home/elastic/logstash-7.6.2/patterns
+cd /home/elastic/logstash-7.6.2/patterns
+vi my_patterns
+```
+
+```conf
+# user-center
+MYAPPNAME [0-9a-zA-Z._-]*
+# RMI TCP Connection(2)-127.0.0.1
+MYTHREADNAME ([0-9a-zA-Z._-]|\(|\)|\s)*
+```
