@@ -555,7 +555,7 @@ bulk_max_size: 2048
 
 ```bash
 
-mkdir /opt/elk/logstash/patterns
+mkdir /opt/software/logstash-7.6.1/patterns
 vi my_patterns
 # 内容如下
 # user-center
@@ -599,7 +599,7 @@ filter {
   }
   if [fields][docType] == "point-log" {
     grok {
-      patterns_dir => ["/opt/logstash-7.6.1/patterns"]
+      patterns_dir => ["/opt/software/logstash-7.6.1/patterns"]
       match => {
         "message" => "%{TIMESTAMP_ISO8601:logTime}\|%{MYAPPNAME:appName}\|%{WORD:resouceid}\|%{MYAPPNAME:type}\|%{GREEDYDATA:object}"
       }
