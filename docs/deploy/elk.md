@@ -564,7 +564,8 @@ cd /home/elastic/filebeat-7.6.2
 ### 4.5 配置规则文件
 
 ```bash
-mkdir /home/elastic/logstash-7.6.1/patterns
+mkdir /home/elastic/logstash-7.6.2/patterns
+cd /home/elastic/logstash-7.6.2/patterns
 vi my_patterns
 ```
 
@@ -616,7 +617,7 @@ filter {
   }
   if [fields][docType] == "point-log" {
     grok {
-      patterns_dir => ["/home/elastic/logstash-7.6.1/patterns"]
+      patterns_dir => ["/home/elastic/logstash-7.6.2/patterns"]
       match => {
         "message" => "%{TIMESTAMP_ISO8601:logTime}\|%{MYAPPNAME:appName}\|%{WORD:resouceid}\|%{MYAPPNAME:type}\|%{GREEDYDATA:object}"
       }
