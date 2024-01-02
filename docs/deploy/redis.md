@@ -219,8 +219,8 @@ cd /usr/local/redis/bin
 #### 1.3.5 验证
 
 ```bash
-/usr/local/redis/bin/redis-cli -p 6379
-info replication
+./redis-cli -p 26379
+info sentinel 
 ```
 
 ### 1.4 集群
@@ -274,27 +274,27 @@ cd /usr/local/redis/bin
 String可实现：缓存，限流，计数器，分布式锁，session共享
 
 ```bash
-SETEX key seconds value          # 将值 value 关联到 key ，并将 key 的过期时间设为 seconds (以秒为单位)。
-MSETNX key value [key value ...] # 同时设置一个或多个 key-value 对，当且仅当所有给定 key 都不存在。
+SETEX key seconds value             # 将值 value 关联到 key ，并将 key 的过期时间设为 seconds (以秒为单位)。
+MSETNX key value [key value ...]    # 同时设置一个或多个 key-value 对，当且仅当所有给定 key 都不存在。
 # 非原子
-SETNX key value                 # 只有在 key 不存在时设置 key 的值。
-GETRANGE key start end          # 返回 key 中字符串值的子字符
-MSET key value [key value ...]  # 同时设置一个或多个 key-value 对。
-SET key value [EX] [PX] [NX|XX] # 设置指定 key 的值
-Get key                         # 获取指定 key 的值。
-GETBIT key offset               # 对 key 所储存的字符串值，获取指定偏移量上的位(bit)。
-SETBIT key offset value         # 对 key 所储存的字符串值，设置或清除指定偏移量上的位(bit)。
-DECR key                        # 将 key 中储存的数字值减一。
-DECRBY key decrement            # key 所储存的值减去给定的减量值（decrement） 。
-Strlen key                      # 返回 key 所储存的字符串值的长度。
-INCR key                        # 将 key 中储存的数字值增一。
-INCRBY key increment            # 将 key 所储存的值加上给定的增量值（increment） 。
-INCRBYFLOAT key increment       # 将 key 所储存的值加上给定的浮点增量值（increment） 。
-SETRANGE key offset value       # 用 value 参数覆写给定 key 所储存的字符串值，从偏移量 offset 开始。
-PSETEX key milliseconds value   # 这个命令和 SETEX 命令相似，但它以毫秒为单位设置 key 的生存时间，而不是像 SETEX 命令那样，以秒为单位。
-APPEND key value                # 如果 key 已经存在并且是一个字符串， APPEND 命令将 value 追加到 key 原来的值的末尾。
-GETSET key value                # 将给定 key 的值设为 value ，并返回 key 的旧值(old value)。
-MGET key [key ...]              # 获取所有(一个或多个)给定 key 的值。
+SETNX key value                     # 只有在 key 不存在时设置 key 的值。
+GETRANGE key start end              # 返回 key 中字符串值的子字符
+MSET key value [key value ...]      # 同时设置一个或多个 key-value 对。
+SET key value [EX] [PX] [NX|XX]     # 设置指定 key 的值
+Get key                             # 获取指定 key 的值。
+GETBIT key offset                   # 对 key 所储存的字符串值，获取指定偏移量上的位(bit)。
+SETBIT key offset value             # 对 key 所储存的字符串值，设置或清除指定偏移量上的位(bit)。
+DECR key                            # 将 key 中储存的数字值减一。
+DECRBY key decrement                # key 所储存的值减去给定的减量值（decrement） 。
+Strlen key                          # 返回 key 所储存的字符串值的长度。
+INCR key                            # 将 key 中储存的数字值增一。
+INCRBY key increment                # 将 key 所储存的值加上给定的增量值（increment） 。
+INCRBYFLOAT key increment           # 将 key 所储存的值加上给定的浮点增量值（increment） 。
+SETRANGE key offset value           # 用 value 参数覆写给定 key 所储存的字符串值，从偏移量 offset 开始。
+PSETEX key milliseconds value       # 这个命令和 SETEX 命令相似，但它以毫秒为单位设置 key 的生存时间，而不是像 SETEX 命令那样，以秒为单位。
+APPEND key value                    # 如果 key 已经存在并且是一个字符串， APPEND 命令将 value 追加到 key 原来的值的末尾。
+GETSET key value                    # 将给定 key 的值设为 value ，并返回 key 的旧值(old value)。
+MGET key [key ...]                  # 获取所有(一个或多个)给定 key 的值。
 ```
 
 ### 2.2 Hash
@@ -302,19 +302,19 @@ MGET key [key ...]              # 获取所有(一个或多个)给定 key 的值
 Hash可实现：用户信息存储，访问量等组合查询
 
 ```bash
-HMSET key field value [field value ...] # 同时将多个 field-value (域-值)对设置到哈希表 key 中。
-HMGET key field [field ...]             # 获取所有给定字段的值
-HSET key field value                    # 将哈希表 key 中的字段 field 的值设为 value 。
-HGETALL key                             # 获取在哈希表中指定 key 的所有字段和值
-HGET key field                          # 获取存储在哈希表中指定字段的值/td>
-HEXISTS key field                       # 查看哈希表 key 中，指定的字段是否存在。
-HINCRBY key field increment             # 为哈希表 key 中的指定字段的整数值加上增量 increment 。
-HINCRBYFLOAT key field increment        # 为哈希表 key 中的指定字段的浮点数值加上增量 increment 。
-HLEN key                        # 获取哈希表中字段的数量
-HDEL key field [field ...]      # 删除一个或多个哈希表字段
-HVALS key                       # 获取哈希表中所有值
-HKEYS key                       # 获取所有哈希表中的字段
-HSETNX key field value          # 只有在字段 field 不存在时，设置哈希表字段的值。
+HMSET key field value [field value ...]     # 同时将多个 field-value (域-值)对设置到哈希表 key 中。
+HMGET key field [field ...]                 # 获取所有给定字段的值
+HSET key field value                        # 将哈希表 key 中的字段 field 的值设为 value 。
+HGETALL key                                 # 获取在哈希表中指定 key 的所有字段和值
+HGET key field                              # 获取存储在哈希表中指定字段的值/td>
+HEXISTS key field                           # 查看哈希表 key 中，指定的字段是否存在。
+HINCRBY key field increment                 # 为哈希表 key 中的指定字段的整数值加上增量 increment 。
+HINCRBYFLOAT key field increment            # 为哈希表 key 中的指定字段的浮点数值加上增量 increment 。
+HLEN key                            # 获取哈希表中字段的数量
+HDEL key field [field ...]          # 删除一个或多个哈希表字段
+HVALS key                           # 获取哈希表中所有值
+HKEYS key                           # 获取所有哈希表中的字段
+HSETNX key field value              # 只有在字段 field 不存在时，设置哈希表字段的值。
 ```
 
 ### 2.3 List
@@ -330,16 +330,16 @@ LRANGE key start stop                   # 获取列表指定范围内的元素
 BLPOP key [key ...] timeout             # 移出并获取列表的第一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
 BRPOP key [key ...] timeout             # 移出并获取列表的最后一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
 BRPOPLPUSH source destination timeout   # 阻塞 从列表中弹出一个值，将弹出的元素插入到另外一个列表中并返回它； 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
-LREM key count value                # 移除列表元素
-LLEN key                            # 获取列表长度
-LTRIM key start stop                # 对一个列表进行修剪(trim)，就是说，让列表只保留指定区间内的元素，不在指定区间之内的元素都将被删除。
-LPOP key                            # 移出并获取列表的第一个元素
-LPUSHX key value                    # 将一个或多个值插入到已存在的列表头部
-RPOP key                            # 移除并获取列表最后一个元素
-LSET key index value                # 通过索引设置列表元素的值
-LPUSH key value [value ...]         # 将一个或多个值插入到列表头部
-RPUSHX key value                    # 为已存在的列表添加值
-LINSERT key BEFORE|AFTER pivot value # 在列表的元素前或者后插入元素
+LREM key count value                    # 移除列表元素
+LLEN key                                # 获取列表长度
+LTRIM key start stop                    # 对一个列表进行修剪(trim)，就是说，让列表只保留指定区间内的元素，不在指定区间之内的元素都将被删除。
+LPOP key                                # 移出并获取列表的第一个元素
+LPUSHX key value                        # 将一个或多个值插入到已存在的列表头部
+RPOP key                                # 移除并获取列表最后一个元素
+LSET key index value                    # 通过索引设置列表元素的值
+LPUSH key value [value ...]             # 将一个或多个值插入到列表头部
+RPUSHX key value                        # 为已存在的列表添加值
+LINSERT key BEFORE|AFTER pivot value    # 在列表的元素前或者后插入元素
 ```
 
 ### 2.4 Set
@@ -393,56 +393,54 @@ ZADD key score member [[score member] [score member] ...]       # 向有序集�
 #### 2.6.1 键命令
 
 ```bash
-DEL key [key ...]       # 该命令用于在 key 存在是删除 key。
-DUMP key                # 序列化给定 key ，并返回被序列化的值。
-EXISTS key              # 检查给定 key 是否存在。
-EXPIRE key seconds      # seconds 为给定 key 设置过期时间。
-KEYS pattern            # 查找所有符合给定模式( pattern)的 key 。
-MOVE key db             # 将当前数据库的 key 移动到给定的数据库 db 当中。
-PERSIST key             # 移除 key 的过期时间，key 将持久保持。
-RENAME key newkey       # 修改 key 的名称
-RENAMENX key newkey     # 仅当 newkey 不存在时，将 key 改名为 newkey 。
-RANDOMKEY               # 从当前数据库中随机返回一个 key 。
-Type key                # 返回 key 所储存的值的类型。
-EXPIREAT key timestamp  # 设置 key 过期时间的时间戳(unix timestamp)
-TTL key                 # 以秒为单位，返回给定 key 的剩余生存时间(TTL, time to live)。
-Pttl key                # 以毫秒为单位返回 key 的剩余的过期时间。
+DEL key [key ...]           # 该命令用于在 key 存在是删除 key。
+DUMP key                    # 序列化给定 key ，并返回被序列化的值。
+EXISTS key                  # 检查给定 key 是否存在。
+EXPIRE key seconds          # seconds 为给定 key 设置过期时间。
+KEYS pattern                # 查找所有符合给定模式( pattern)的 key 。
+MOVE key db                 # 将当前数据库的 key 移动到给定的数据库 db 当中。
+PERSIST key                 # 移除 key 的过期时间，key 将持久保持。
+RENAME key newkey           # 修改 key 的名称
+RENAMENX key newkey         # 仅当 newkey 不存在时，将 key 改名为 newkey 。
+RANDOMKEY                   # 从当前数据库中随机返回一个 key 。
+Type key                    # 返回 key 所储存的值的类型。
+EXPIREAT key timestamp      # 设置 key 过期时间的时间戳(unix timestamp)
+TTL key                     # 以秒为单位，返回给定 key 的剩余生存时间(TTL, time to live)。
+Pttl key                    # 以毫秒为单位返回 key 的剩余的过期时间。
 PEXPIREAT key milliseconds-timestamp # 设置 key 的过期时间亿以毫秒计。
 ```
 
 #### 2.6.2 服务器命令
 
 ```bash
-redis-server --version
-redis-server /opt/redis/redis.conf
-CLIENT PAUSE timeout        # 在指定时间内终止运行来自客户端的命令
-DEBUG OBJECT key            # 获取 key 的调试信息
-FLUSHDB                     # 删除当前数据库的所有key
-SAVE                        # 同步以RDB文件的形式保存到硬盘
-BGSAVE                      # 在后台异步保存当前数据库的数据到磁盘
-BGREWRITEAOF                # 异步执行一个 AOF（AppendOnly File） 文件重写操作
-Flushall                    # 删除所有数据库的所有key
-Dbsize                      # 返回当前数据库的 key 的数量
-Cluster Slots               # 获取集群节点的映射数组
-Config Set                  # 修改 配置参数，无需重启
-LASTSAVE                    # 返回最近一次 成功将数据保存到磁盘上的时间，以 UNIX 时间戳格式表示
-CONFIG GET parameter        # 获取指定配置参数的值
-COMMAND                     # 获取 命令详情数组
-SLAVEOF host port           # 将当前服务器转变为指定服务器的从属服务器(slave server)
-Debug Segfault              # 执行一个非法的内存访问从而让 Redis 崩溃，仅在开发时用于 BUG 调试
-SHUTDOWN [NOSAVE] [SAVE]    # 异步保存数据到硬盘，并关闭服务器
-SYNC                        # 用于复制功能(replication)的内部命令
-CLIENT KILL ip:port         # 关闭客户端连接
-ROLE                        # 返回主从实例所属的角色
-MONITOR                     # 实时打印出 服务器接收到的命令，调试用
-COMMAND GETKEYS             # 获取给定命令的所有键
-CLIENT GETNAME              # 获取连接的名称
-CONFIG RESETSTAT            # 重置 INFO 命令中的某些统计数据
-COMMAND COUNT               # 获取 命令总数
-TIME                        # 返回当前服务器时间
-INFO                        # 获取 服务器的各种信息和统计数值
-CONFIG REWRITE parameter    # 对启动服务器时所指定的 redis.conf 配置文件进行改写
-CLIENT LIST                 # 获取连接到服务器的客户端连接列表
+CLIENT PAUSE timeout            # 在指定时间内终止运行来自客户端的命令
+DEBUG OBJECT key                # 获取 key 的调试信息
+FLUSHDB                         # 删除当前数据库的所有key
+SAVE                            # 同步以RDB文件的形式保存到硬盘
+BGSAVE                          # 在后台异步保存当前数据库的数据到磁盘
+BGREWRITEAOF                    # 异步执行一个 AOF（AppendOnly File） 文件重写操作
+Flushall                        # 删除所有数据库的所有key
+Dbsize                          # 返回当前数据库的 key 的数量
+Cluster Slots                   # 获取集群节点的映射数组
+Config Set                      # 修改配置参数，无需重启
+LASTSAVE                        # 返回最近一次 成功将数据保存到磁盘上的时间，以 UNIX 时间戳格式表示
+CONFIG GET parameter            # 获取指定配置参数的值
+COMMAND                         # 获取命令详情数组
+SLAVEOF host port               # 将当前服务器转变为指定服务器的从属服务器(slave server)
+Debug Segfault                  # 执行一个非法的内存访问从而让 Redis 崩溃，仅在开发时用于 BUG 调试
+SHUTDOWN [NOSAVE] [SAVE]        # 异步保存数据到硬盘，并关闭服务器
+SYNC                            # 用于复制功能(replication)的内部命令
+CLIENT KILL ip:port             # 关闭客户端连接
+ROLE                            # 返回主从实例所属的角色
+MONITOR                         # 实时打印出 服务器接收到的命令，调试用
+COMMAND GETKEYS                 # 获取给定命令的所有键
+CLIENT GETNAME                  # 获取连接的名称
+CONFIG RESETSTAT                # 重置INFO命令中的某些统计数据
+COMMAND COUNT                   # 获取命令总数
+TIME                            # 返回当前服务器时间
+INFO                            # 获取服务器的各种信息和统计数值
+CONFIG REWRITE parameter        # 对启动服务器时所指定的 redis.conf 配置文件进行改写
+CLIENT LIST                     # 获取连接到服务器的客户端连接列表
 CLIENT SETNAME connection-name  # 设置当前连接的名称
 SLOWLOG subcommand [argument]   # 管理的慢日志
 COMMAND INFO command-name [command-name ...]  # 获取指定 命令描述的数组
@@ -451,11 +449,11 @@ COMMAND INFO command-name [command-name ...]  # 获取指定 命令描述的数�
 #### 2.6.3 连接命令
 
 ```bash
-Ping # 查看服务是否运行
-Quit # 关闭当前连接
-ECHO message  # 打印字符串
-SELECT index  # 切换到指定的数据库
-AUTH password # 验证密码是否正确
+Ping                # 查看服务是否运行
+Quit                # 关闭当前连接
+ECHO message        # 打印字符串
+SELECT index        # 切换到指定的数据库
+AUTH password       # 验证密码是否正确
 ```
 
 #### 2.6.4 脚本命令
@@ -472,40 +470,40 @@ SCRIPT EXISTS script [script ...]                   # 查看指定的脚本是�
 #### 2.6.5 事务命令
 
 ```bash
-Exec                # 执行所有事务块内的命令。
-Unwatch             # 取消 WATCH 命令对所有 key 的监视。
-WATCH key [key ...] # 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。
-Discard             # 取消事务，放弃执行事务块内的所有命令。
-Multi               # 标记一个事务块的开始。
+Exec                    # 执行所有事务块内的命令。
+Unwatch                 # 取消 WATCH 命令对所有 key 的监视。
+WATCH key [key ...]     # 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。
+Discard                 # 取消事务，放弃执行事务块内的所有命令。
+Multi                   # 标记一个事务块的开始。
 ```
 
 #### 2.6.6 HyperLogLog命令
 
 ```bash
-PFMERGE destkey sourcekey [sourcekey ...] # 将多个 HyperLogLog 合并为一个 HyperLogLog
-PFADD key element [element ...] # 添加指定元素到 HyperLogLog 中。
-PFCOUNT key [key ...] # 返回给定 HyperLogLog 的基数估算值。
+PFMERGE destkey sourcekey [sourcekey ...]       # 将多个 HyperLogLog 合并为一个 HyperLogLog
+PFADD key element [element ...]                 # 添加指定元素到 HyperLogLog 中。
+PFCOUNT key [key ...]                           # 返回给定 HyperLogLog 的基数估算值。
 ```
 
 #### 2.6.7 发布订阅命令
 
 ```bash
-UNSUBSCRIBE [channel [channel ...]] # 指退订给定的频道。
-SUBSCRIBE channel [channel ...] # 订阅给定的一个或多个频道的信息。
-PUBSUB <subcommand> [argument [argument ...]] # 查看订阅与发布系统状态。
-PUNSUBSCRIBE [pattern [pattern ...]] # 退订所有给定模式的频道。
-PUBLISH channel message # 将信息发送到指定的频道。
-PSUBSCRIBE pattern [pattern ...] # 订阅一个或多个符合给定模式的频道。
+UNSUBSCRIBE [channel [channel ...]]             # 指退订给定的频道。
+SUBSCRIBE channel [channel ...]                 # 订阅给定的一个或多个频道的信息。
+PUBSUB <subcommand> [argument [argument ...]]   # 查看订阅与发布系统状态。
+PUNSUBSCRIBE [pattern [pattern ...]]            # 退订所有给定模式的频道。
+PUBLISH channel message                         # 将信息发送到指定的频道。
+PSUBSCRIBE pattern [pattern ...]                # 订阅一个或多个符合给定模式的频道。
 ```
 
 #### 2.6.8 地理位置(geo)命令
 
 ```bash
-GEOHASH # 返回一个或多个位置元素的 Geohash 表示
-GEOPOS # 从key里返回所有给定位置元素的位置（经度和纬度）
-GEODIST # 返回两个给定位置之间的距离
-GEORADIUS # 以给定的经纬度为中心， 找出某一半径内的元素
-GEOADD # 将指定的地理空间位置（纬度、经度、名称）添加到指定的key中
+GEOHASH     # 返回一个或多个位置元素的 Geohash 表示
+GEOPOS      # 从key里返回所有给定位置元素的位置（经度和纬度）
+GEODIST     # 返回两个给定位置之间的距离
+GEORADIUS   # 以给定的经纬度为中心， 找出某一半径内的元素
+GEOADD      # 将指定的地理空间位置（纬度、经度、名称）添加到指定的key中
 GEORADIUSBYMEMBER # 找出位于指定范围内的元素，中心点是由给定的位置元素决定
 ```
 
