@@ -1076,26 +1076,13 @@ ORDER BY
 压测
 
 ```bash
-createdb bench    # 建压测库
-pgbench -i -s 50 bench  # 初始化数据：-s 数量因子倍数，默认10万条
-```
-
-```sql
-INSERT INTO testmem1 SELECT
-generate_series ( 1, 999999 ),
-'xzh' || generate_series ( 1, 999999 ) :: TEXT || random( ) :: TEXT,
-generate_series ( 1, 999999 ) :: TEXT || 'sure',
-generate_series ( 1, 999999 ),
-random( ) :: TEXT,
-random( ) :: TEXT,
-random( ) :: TEXT,
-'hwcq', generate_series ( 1, 999999 );
-
-select pg_database_size('bench')/1024/1024||'M'; # 查看压测库大小
+createdb bench              # 建压测库
+pgbench -i -s 50 bench      # 初始化数据：-s 数量因子倍数，默认10万条
+select pg_database_size('bench')/1024/1024||'M';        # 查看压测库大小
 ```
 
 ```bash
-nohup pgbench -c 100 -T 20 -r bench > file.out  2>&1  # 100个session执行20s
+nohup pgbench -c 100 -T 20 -r bench > file.out  2>&1    # 100个session执行20s
 more file.out
 ```
 
