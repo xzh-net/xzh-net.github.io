@@ -1353,8 +1353,9 @@ cp -f xxx.log                       # 复制并强制覆盖同名文件
 mkdir -p /home/docker/data          # 级联创建目录
 mkdir -p src/{test,main}/{java,resources}                               # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
 ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java                    # 创建软连接
-scp -r /tmp/access.logs -P {port} root@20.255.122.15:/opt/code          # 远程复制
-sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home    # 自动输入密钥
+scp -r code -P {port} root@192.168.3.201:/data/                                 # 远程复制
+scp -r /usr/local/jdk1.8.0_202 root@192.168.3.201:/usr/local/jdk1.8.0_202       # 如果是全路径拷贝，源和目标路径需要一致
+sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home            # 自动输入密钥
 
 # Find查找
 ll | grep hwcq.online               # 当前路径过滤显示
