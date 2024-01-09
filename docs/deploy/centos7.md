@@ -1631,25 +1631,24 @@ vi run_tomcat_web.sh
 
 ```bash
 #!/bin/bash
-AppName=tomcat_web
-PIDS=$(ps -ef|grep ${AppName} | grep -v grep | awk '{print $2}')
+appname=tomcat_webapp_18080
+PIDS=$(ps -ef|grep ${appname} | grep -v grep | awk '{print $2}')
 
-start(){
-	/opt/code/${AppName}/bin/startup.sh
-	echo "${AppName} started"
-}
+ start(){
+    /opt/${appname}/bin/startup.sh
+    echo "${appname} started"
+ }
 
-echo " $PIDS "
+ echo " $PIDS "
 
-for PID in $PIDS
-	do kill -9 $PID
-	echo " $PID has been killed"
-done
+ for PID in $PIDS
+ do kill -9 $PID
+ echo " $PID has been killed"
+ done
 
-start
+ start
 
-ps -aux |grep ${AppName}
-
+ ps -aux |grep ${appname}
 ```
 
 替换复制脚本
@@ -1740,13 +1739,13 @@ vi /etc/hosts
 
 ```bash
 #!/bin/bash
-AppName=user-center.jar
-PIDS=$(ps -ef|grep ${AppName} | grep -v grep | awk '{print $2}')
+appname=user-center.jar
+PIDS=$(ps -ef|grep ${appname} | grep -v grep | awk '{print $2}')
 
 start(){
     JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -Xmn2g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
-    nohup java ${JAVA_OPT} -jar ${AppName} > nohup.out 2>&1 &
-    echo "${AppName} started"
+    nohup java ${JAVA_OPT} -jar ${appname} > nohup.out 2>&1 &
+    echo "${appname} started"
 }
 
 echo "$PIDS"
@@ -1758,7 +1757,7 @@ done
 
 start
 
-ps -aux |grep ${AppName}
+ps -aux |grep ${appname}
 ```
 
 #### 2.6.3 RocketMQ
