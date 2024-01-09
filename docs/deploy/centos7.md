@@ -1630,7 +1630,7 @@ vi run_tomcat_web.sh
 ```
 
 ```bash
-#！/bin/bash
+#!/bin/bash
 AppName=tomcat_web
 PIDS=$(ps -ef|grep ${AppName} | grep -v grep | awk '{print $2}')
 
@@ -1739,13 +1739,14 @@ vi /etc/hosts
 #### 2.6.2 Java
 
 ```bash
+#!/bin/bash
 AppName=user-center.jar
 PIDS=$(ps -ef|grep ${AppName} | grep -v grep | awk '{print $2}')
 
 start(){
     JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -Xmn2g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
     nohup java ${JAVA_OPT} -jar ${AppName} > nohup.out 2>&1 &
-    echo "started"
+    echo "${AppName} started"
 }
 
 echo "$PIDS"
