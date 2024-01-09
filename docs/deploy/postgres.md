@@ -1065,12 +1065,13 @@ SELECT
     total_time AS 执行总时间,
     total_time / calls AS 执行平均时间 ,
     ROWS AS 影响的总行数 ,
-    100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS hit_percent 
+    ROWS / calls AS 影响单次行数,
+    100.0 * shared_blks_hit / NULLIF ( shared_blks_hit + shared_blks_read, 0 ) AS 缓存命中率 
 FROM
     pg_stat_statements 
 ORDER BY
     total_time / calls DESC 
-    LIMIT 50
+    LIMIT 100
 ```
 
 压测
