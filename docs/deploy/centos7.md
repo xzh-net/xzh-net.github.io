@@ -1355,6 +1355,7 @@ mkdir -p src/{test,main}/{java,resources}                               # 批量
 ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java                    # 创建软连接
 scp -r code -P {port} root@192.168.3.201:/data/                                 # 远程复制
 scp -r /usr/local/jdk1.8.0_202 root@192.168.3.201:/usr/local/jdk1.8.0_202       # 如果是全路径拷贝，源和目标路径需要一致
+for i in {2..3}; do scp -r flink node$i:$PWD; done                              # 批量复制
 sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home            # 自动输入密钥
 
 # Find查找
@@ -1372,6 +1373,9 @@ find . -type f | xargs rm -rf;                     # 当前路径下文件类全
 find . -type f -delete;                            # 当前路径下文件类全部删除
 find . -inum 2891596 -exec rm -rf {} \;            # 通过inode号交互式删除文件
 find . -inum 2891596 -delete
+
+# 文件同步
+yum install -y rsync
 ```
 
 ### 2.3 磁盘
@@ -1615,46 +1619,46 @@ which gcc
 gcc --version
 ```
 
-### 2.6 脚本
+### 2.6 shell
 
-#### 2.6.1 常用命令
+#### 2.6.1 Tomcat
+
+1. 一键启动
 
 ```bash
-nohup java -Djetty.port=8080 -jar /opt/solr-4.7.2/example/start.jar &               # solr后台运行,并且有nohup.out输出
-nohup /opt/openfire/bin/openfire.sh >/dev/null &                                    # openfire后台运行, 不输出任何日志
-nohup java -Dserver.port=9000 -jar sentinel-dashboard-1.7.2.jar >out.log 2>&1 &     # sentinel后台运行, 并将错误信息做标准输出到日志中
+vi run_tomcat_web.sh
 ```
 
 ```bash
-for i in {2..3}; do scp -r flink node$i:$PWD; done
+#！/bin/bash
+AppName=tomcat_web
+PIDS=$(ps -ef|grep ${AppName} | grep -v grep | awk '{print $2}')
+
+start(){
+	/opt/code/${AppName}/bin/startup.sh
+	echo "${AppName} started"
+}
+
+echo " $PIDS "
+
+for PID in $PIDS
+	do kill -9 $PID
+	echo " $PID has been killed"
+done
+
+start
+
+ps -aux |grep ${AppName}
+
 ```
 
-
-#### 2.6.2 Tomcat
-
-1. 启动
+替换复制脚本
 
 ```bash
-sh /opt/apache-tomcat-8.5.66/bin/shutdown.sh
-sleep 2s
-ps -ef | grep apache-tomcat-8.5.66 | grep -v grep | awk '{print $2}'| xargs kill -9
-sleep 1s
-sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
+sed 's/tomcat_web/tomcat_mobile/g' run_tomcat_web.sh > run_tomcat_mobile.sh
 ```
 
-2. war部署
-
-```bash
-sh /opt/apache-tomcat-8.5.66/bin/shutdown.sh
-sleep 2s
-ps -ef | grep /opt/apache-tomcat-8.5.66/ | grep -v grep | awk '{print $2}'| xargs kill -9
-sleep 1s
-rm -rf /opt/apache-tomcat-8.5.66/webapps/servlet*
-cp -r /opt/apache-tomcat-8.5.66/code/servlet-2.war /opt/apache-tomcat-8.5.66/webapps/servlet.war
-sh /opt/apache-tomcat-8.5.66/bin/startup.sh;tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
-```
-
-3. 配置多个虚拟主机
+2. 虚拟主机
 
 ```conf
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1730,6 +1734,30 @@ server {
 ```bash
 vi /etc/hosts
 192.168.2.200 www.xzh.com
+```
+
+#### 2.6.2 Java
+
+```bash
+AppName=user-center.jar
+PIDS=$(ps -ef|grep ${AppName} | grep -v grep | awk '{print $2}')
+
+start(){
+    JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -Xmn2g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
+    nohup java ${JAVA_OPT} -jar ${AppName} > nohup.out 2>&1 &
+    echo "started"
+}
+
+echo "$PIDS"
+
+for PID in $PIDS
+	do kill -9 $PID
+	echo "$PID has been killed"
+done
+
+start
+
+ps -aux |grep ${AppName}
 ```
 
 #### 2.6.3 RocketMQ
@@ -1830,47 +1858,6 @@ JAVA_OPT="${JAVA_OPT} ${JAVA_OPT_EXT}"
 JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
 
 $JAVA ${JAVA_OPT} $@
-```
-
-#### 2.6.4 Java（reset.sh）
-
-```bash
-PIDS=$(ps -ef|grep worker-center | grep -v grep | awk '{print $2}')
-
-start(){
-    nohup java -jar -Xms128M -Xmx128M -XX:MetaspaceSize=128M -XX:MaxMetaspaceSize=128M worker-center-4.5.1.jar  &> nohup.out -p -i &
-    echo "started"
-}
-echo "$PIDS"
-
-for PID in $PIDS
-    do kill -9 $PID 
-    echo " $PID has been killed"
-done
-
-start
-ps -aux |grep worker-center
-```
-
-#### 2.6.5 xsync
-
-```bash
-yum install -y rsync
-```
-
-### 2.7 快捷键
-
-```bash
-Ctrl + z / fg                       # 挂起
-Ctrl + s / q                        # 锁屏
-
-gg # 跳到文件头
-dd # 删除光标所在的整行	
-d0 # 删除从光标前一个字符开始到行首的内容
-d$ # 删除从光标所在处开始到行尾的内容
-0  # 光标移到行首(数字0)
-$  # 光标移至行尾
-shift + g # 跳到文件最后
 ```
 
 ## 3. 虚拟机设置
