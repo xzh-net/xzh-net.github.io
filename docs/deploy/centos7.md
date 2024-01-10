@@ -1631,24 +1631,24 @@ vi run_tomcat_web.sh
 
 ```bash
 #!/bin/bash
-appname=tomcat_webapp_18080
+appname=tomcat_web_8080
 PIDS=$(ps -ef|grep ${appname} | grep -v grep | awk '{print $2}')
 
- start(){
-    /opt/${appname}/bin/startup.sh
+start(){
+    /home/${appname}/bin/startup.sh
     echo "${appname} started"
- }
+}
 
- echo " $PIDS "
+echo " $PIDS "
 
- for PID in $PIDS
- do kill -9 $PID
- echo " $PID has been killed"
- done
+for PID in $PIDS
+    do kill -9 $PID
+    echo " $PID has been killed"
+done
 
- start
+start
 
- ps -aux |grep ${appname}
+ps -aux |grep ${appname}
 ```
 
 替换复制脚本
@@ -1751,8 +1751,8 @@ start(){
 echo "$PIDS"
 
 for PID in $PIDS
-	do kill -9 $PID
-	echo "$PID has been killed"
+    do kill -9 $PID
+    echo "$PID has been killed"
 done
 
 start
