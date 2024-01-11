@@ -382,7 +382,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 
 ## 3. 库操作
 
-### 3.1 用户授权
+### 3.1 用户管理
 
 ```bash
 create user "sonar" with password '123456';
@@ -402,131 +402,8 @@ UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
 ```
 
-### 3.2 备份恢复
 
-#### 3.2.1 逻辑备份
-
-
-1. 文本
-
-```bash
-pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_client_details --column-inserts -f oauth_client_details.sql    # 导出多表使用-t tb1 -t tb2
-psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql   # 恢复
-# pg_dumpall不支持导出SQL文件以外的其他格式
-pg_dumpall -h localhost -U postgres -p 5432 -v -f all.sql
-psql -h localhost -U postgres -p 5432 -f all.sql
-```
-
-2. tar格式
-
-```bash
-pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Ft -f oauth_center.tar    # 备份
-pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar     # 恢复
-```
-
-3. 自定义格式
-
-```bash
-pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup # 备份
-pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup  # 恢复
-```
-
-#### 3.2.2 物理备份
-
-1. 备份base和pg_wal
-
-```bash
-pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R
-```
-
-2. 清空数据
-
-```bash
-rm -rf /data/pgdata/12/data/*      # 清空数据库
-rm -rf /data/pgdata/12/archive/*   # 清空wal 
-```
-
-3. 还原数据
-
-```bash
-cd /data/pg_backup/
-tar xf base.tar -C $PGDATA
-tar xf pg_wal.tar -C /data/pgdata/12/archive/
-```
-
-4. 修改配置
-
-```bash
-# vi postgresql.auto.conf 
-primary_conninfo = 'user=postgres password=postgres host=localhost port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
-restore_command = 'cp /data/pgdata/12/archive/%f %p'
-recovery_target = 'immediate'
-```
-
-```bash
-touch /data/pgdata/12/data/recovery.signal
-```
-
-5. 启动数据库
-
-```bash
-pg_ctl -D /data/pgdata/12/data -l logfile start
-select pg_wal_replay_resume();  # 停止恢复
-```
-
-#### 3.2.3 PITR数据恢复
-
-```sql
-select pg_create_restore_point('point-20231206');  -- 创建还原点
-```
-
-
-1. 修改配置
-
-```bash
-# 恢复到指定事务id
-pg_waldump  0000000100000084000000EC
-# vi postgresql.auto.conf
-restore_command = 'cp /data/pgdata/12/archive/%f %p'
-recovery_target_xid='501'
-# 恢复到指定时间
-recovery_target_time = '2019-04-02 13:16:49.007657+08'
-# 恢复到指定还原点
-recovery_target_name = 'point-20231206'
-```
-
-2. 启动数据库
-
-```bash
-pg_ctl -D /data/pgdata/12/data -l logfile start
-select pg_wal_replay_resume();  # 停止恢复
-```
-
-#### 3.2.4 定时备份
-
-```bash
-crontab -e
-30 1 * * * sh /data/shell/bakup.sh  # 每天凌晨1点半执行
-```
-
-```bash
-#!/bin/bash
-cur_time=$(date '+%Y-%m-%d')
-find /data/pg_backup -mtime +30 -type f -name '*.tgz' -exec rm {} \;
-## 备份
-/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /data/pg_backup/user_center.$cur_time.dmp user_center
-/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /data/pg_backup/oauth_center.$cur_time.dmp oauth_center
-## 打包
-tar zcvf pgsql-backup.$cur_time.tgz *.dmp
-## 传输（2选1）
-scp pgsql-backup.$cur_time.tgz postgres@192.168.2.100:/data/pg_backup
-sshpass -p "123456" scp -o StrictHostKeyChecking=no pgsql-backup.$cur_time.tgz postgres@192.168.2.100:/data/pg_backup
-## 删除备份
-rm -rf /data/pg_backup/*.dmp
-echo "backup finished" his
-```
-
-### 3.3 审计日志
+### 3.2 审计日志
 
 1. 开启审计
 
@@ -555,7 +432,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 ```
 
 
-### 3.4 归档日志
+### 3.3 归档日志
 
 1. 开启归档
 
@@ -599,7 +476,132 @@ select pg_walfile_name(pg_current_wal_insert_lsn());        -- 查看当前日�
 select * from pg_ls_waldir() order by modification desc;    -- 查看日志最后修改时间
 ```
 
-### 3.5 表空间
+
+### 3.4 备份恢复
+
+#### 3.4.1 逻辑备份
+
+
+1. 文本
+
+```bash
+pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_client_details --column-inserts -f oauth_client_details.sql    # 导出多表使用-t tb1 -t tb2
+psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql   # 恢复
+# pg_dumpall不支持导出SQL文件以外的其他格式
+pg_dumpall -h localhost -U postgres -p 5432 -v -f all.sql
+psql -h localhost -U postgres -p 5432 -f all.sql
+```
+
+2. tar格式
+
+```bash
+pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Ft -f oauth_center.tar    # 备份
+pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar     # 恢复
+```
+
+3. 自定义格式
+
+```bash
+pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup # 备份
+pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup  # 恢复
+```
+
+#### 3.4.2 物理备份
+
+1. 备份base和pg_wal
+
+```bash
+pg_basebackup -D /data/pg_backup/ -Ft -Pv -U postgres -h localhost -p 5432 -R
+```
+
+2. 清空数据
+
+```bash
+rm -rf /data/pgdata/12/data/*      # 清空数据库
+rm -rf /data/pgdata/12/archive/*   # 清空wal 
+```
+
+3. 还原数据
+
+```bash
+cd /data/pg_backup/
+tar xf base.tar -C $PGDATA
+tar xf pg_wal.tar -C /data/pgdata/12/archive/
+```
+
+4. 修改配置
+
+```bash
+# vi postgresql.auto.conf 
+primary_conninfo = 'user=postgres password=postgres host=localhost port=5432 sslmode=disable sslcompression=0 gssencmode=disable krbsrvname=postgres target_session_attrs=any'
+restore_command = 'cp /data/pgdata/12/archive/%f %p'
+recovery_target = 'immediate'
+```
+
+```bash
+touch /data/pgdata/12/data/recovery.signal
+```
+
+5. 启动数据库
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile start
+select pg_wal_replay_resume();  # 停止恢复
+```
+
+#### 3.4.3 PITR数据恢复
+
+```sql
+select pg_create_restore_point('point-20231206');  -- 创建还原点
+```
+
+
+1. 修改配置
+
+```bash
+# 恢复到指定事务id
+pg_waldump  0000000100000084000000EC
+# vi postgresql.auto.conf
+restore_command = 'cp /data/pgdata/12/archive/%f %p'
+recovery_target_xid='501'
+# 恢复到指定时间
+recovery_target_time = '2019-04-02 13:16:49.007657+08'
+# 恢复到指定还原点
+recovery_target_name = 'point-20231206'
+```
+
+2. 启动数据库
+
+```bash
+pg_ctl -D /data/pgdata/12/data -l logfile start
+select pg_wal_replay_resume();  # 停止恢复
+```
+
+#### 3.4.4 定时备份
+
+```bash
+crontab -e
+30 1 * * * sh /data/shell/bakup.sh  # 每天凌晨1点半执行
+```
+
+```bash
+#!/bin/bash
+cur_time=$(date '+%Y-%m-%d')
+find /data/pg_backup -mtime +30 -type f -name '*.tgz' -exec rm {} \;
+## 备份
+/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /data/pg_backup/user_center.$cur_time.dmp user_center
+/usr/local/pgsql/12.4/bin/pg_dump -h localhost -U postgres -F c -f /data/pg_backup/oauth_center.$cur_time.dmp oauth_center
+## 打包
+tar zcvf pgsql-backup.$cur_time.tgz *.dmp
+## 传输（2选1）
+scp pgsql-backup.$cur_time.tgz postgres@192.168.2.100:/data/pg_backup
+sshpass -p "123456" scp -o StrictHostKeyChecking=no pgsql-backup.$cur_time.tgz postgres@192.168.2.100:/data/pg_backup
+## 删除备份
+rm -rf /data/pg_backup/*.dmp
+echo "backup finished" his
+```
+
+### 3.5 表空间管理
 
 ```sql
 -- 查询单个表空间大小
@@ -609,7 +611,6 @@ select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
 select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
 -- 或
 select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
-
 ```
 
 ## 4. 表操作
