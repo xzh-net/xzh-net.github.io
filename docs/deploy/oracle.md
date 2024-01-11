@@ -628,6 +628,8 @@ alter user zhangsan account unlock;
 
 ### 2.3 审计日志
 
+1. 关闭审计
+
 ```bash
 sqlplus /nolog
 connect / as sysdba
@@ -635,15 +637,86 @@ show parameter audit_trail;                         # VALUE值为DB，表示审�
 alter system set audit_trail=none scope=spfile;     # 关闭审计功能
 shutdown immediate;                                 # 重启数据库
 startup;
-# VALUE值为NONE，表示审计功能已关闭
+show parameter audit_trail;                         # VALUE值为NONE，表示审计功能已关闭
 truncate table SYS.AUD$;                            # 删除审计日志
+```
+
+2. 开启审计
+
+11g默认是开始审计的，有审计记录，所以不需要安装,如果查询发现表不存在,则需要安装。
+
+```bash
+SQL> @/u01/app/oracle/product/11.2.0/dbhome_1/rdbms/admin/cataudit.sql;
+```
+
+```bash
+alter system set audit_sys_operations=true scope=spfile;                    # 设置审计系统级操作
+alter system set audit_trail=db,extended scope=spfile;                      # 设置审计日志记录到数据库表中，并包含扩展信息
+alter system set audit_file_dest='/u01/app/oracle/audit_logs' cope=spfile;  # 设置审计日志文件的存储路径
+shutdown immediate;         # 重启数据库
+startup;
+show parameter audit;       # 查看数据库审计配置信息
+select * FROM SYS.AUD$;
+```
+
+3. 审计迁移
+
+审计表默认安装在SYSTEM表空间,在生产环境一般都建议迁移到其他表空间里面，步骤如下
+
+```bash
+create tablespace shenji logging datafile '/u01/app/oracle/oradata/ORDB/shenji.dbf' size 200m autoextend off extent management local segment space management auto;
+
+alter table aud$ move tablespace shenji;
+alter table audit$ move tablespace shenji;
+alter index i_audit rebuild online tablespace shenji;
+alter table audit_actions move tablespace shenji;
+alter index i_audit_actions rebuild online tablespace shenji;
+
+select bytes/1024/1024 MB from dba_segments where segment_name='AUD$';          # 查看审计日志大小
+select table_name,tablespace_name from dba_tables where table_name like '%AUD%';
+select index_name,tablespace_name from dba_indexes where index_name like '%AUDIT%';
 ```
 
 
 ### 2.4 归档日志
 
+1. 查看是否开启归档模式
 
+```bash
+SQL> archive log list       # 查看是否开启，下文显示未开启
+Database log mode No Archive Mode
+Automatic archival Disabled
+Archive destination USE_DB_RECOVERY_FILE_DEST
+Oldest online log sequence 8
+Current log sequence 10
+```
 
+2. 开启归档模式
+
+```bash
+shutdown immediate;             # 关闭实例
+startup mount;                  # 启动到mount
+alter database noarchivelog;      # 开启归档模式
+
+SQL> archive log list;          # 再次查看是否开启归档，下文显示已归档
+Database log mode Archive Mode
+Automatic archival Enabled
+Archive destination USE_DB_RECOVERY_FILE_DEST
+Oldest online log sequence 8
+Next log sequence to archive 10
+Current log sequence 10
+```
+
+```bash
+alter database open;            # 打开数据库
+show parameter db_recovery;     # 查看参数db_recovery_file_dest归档日志目录(默认闪回恢复区)、db_recovery_file_dest_size大小
+```
+
+默认情况下，归档日志会存放到USE_DB_RECOVERY_FILE_DEST(闪回恢复区flash_recovery_area)内，如果闪回恢复区已满，归档日志就有可能无法继续归档，通常的解决方法是增大闪回恢复区，可以用以下SQL实现：
+
+```bash
+alter system set db_recovery_file_dest_size=3G;
+```
 
 ### 2.5 表空间管理
 
