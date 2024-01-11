@@ -2,11 +2,11 @@
 
 ## 1. 安装
 
-### 1.1 安装前准备
+### 1.1 准备工作
 
 环境CentOS7_x86_64架构，数据库版本dm8_rh7_64_ent_8.1.1.87
 
-安装前必须创建 dmdba 用户，禁止使用 root 用户安装数据库。
+安装前必须创建dmdba用户，禁止使用root用户安装数据库。
 
 #### 1.1.1 创建用户
 
@@ -171,7 +171,17 @@ SYSDBA/SYSDBA
 
 ## 2. 库操作
 
-### 2.1 表空间
+### 2.1 用户管理
+
+```bash
+create user xzh identified by 123456789 limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
+drop user xzh cascade;
+create user xzh identified by "123456789" default tablespace tbs1 temporary tablespace temp_tbs1;
+grant resource,public,soi,svi,vti to xzh;
+```
+
+
+### 2.2 表空间管理
 
 ```bash
 create tablespace tbs1 datafile '/opt/dmdbms/data/prod/tbs1_01.dbf' size 128 autoextend on next 4 maxsize 2048; # 初始大小128m，每次自动扩充4m，最大尺寸2g
@@ -180,15 +190,6 @@ alter tablespace tbs1 offline|online; # 表空间脱机
 select tablespace_name from dba_tablespaces;
 select tablespace_name,file_name from dba_data_files;
 ```    
-
-### 2.2 用户授权
-
-```bash
-create user xzh identified by 123456789 limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
-drop user xzh cascade;
-create user xzh identified by "123456789" default tablespace tbs1 temporary tablespace temp_tbs1;
-grant resource,public,soi,svi,vti to xzh;
-```
 
 ### 2.3 备份恢复
 
