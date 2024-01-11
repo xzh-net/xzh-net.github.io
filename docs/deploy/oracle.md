@@ -243,7 +243,7 @@ SID = "orcl"
 DATAFILEDESTINATION =/u01/app/oracle/oradata
 RECOVERYAREADESTINATION=/u01/app/oracle/fast_recovery_area
 CHARACTERSET = "AL32UTF8"
-TOTALMEMORY = "4096"
+TOTALMEMORY = "4096"    # 物理内存的80%
 ```
 
 静默配置
@@ -269,6 +269,49 @@ startup
 shutdown immediate
 select status from v$instance;
 exit
+```
+
+#### 1.1.17 开机启动
+
+1. 编辑dbstart和dbstut，有的版本dbstut找不到，可以忽略
+
+```bash
+su - oracle
+vim $ORACLE_HOME/bin/dbstart
+# 将
+ORACLE_HOME_LISTNER =$1
+# 改成
+ORACLE_HOME_LISTNER=$ORACLE_HOME
+```
+
+2. 编辑/etc/oratab文件
+
+```bash
+vi /etc/oratab
+# 将
+orcl:/u01/app/oracle/product/11.2.0/dbhome_1:N
+# 改成
+orcl:/u01/app/oracle/product/11.2.0/dbhome_1:Y
+```
+
+3. 编辑/etc/rc.d/rc.local文件
+
+切换为root用户，在/etc/rc.d/rc.local文件结尾添加以下内容
+
+```bash
+su - root
+vim /etc/rc.d/rc.local 
+```
+
+```bash
+su - oracle -lc "/u01/app/oracle/product/11.2.0/dbhome_1/bin/lsnrctl start"
+su - oracle -lc "/u01/app/oracle/product/11.2.0/dbhome_1/bin/dbstart"
+```
+
+增加文件执行权限
+
+```bash
+chmod +x /etc/rc.d/rc.local
 ```
 
 
@@ -549,50 +592,60 @@ rm -rf /u01/app
 
 ## 2. 库操作
 
-### 2.1 重启
-
-#### 2.1.1 命令重启
+### 2.1 用户管理
 
 ```sql
-su – oracle
+create user xzh0610 identified by 123456
+  default tablespace xzh
+  temporary tablespace xzh_temp
+  profile DEFAULT
+  password  expire;
+
+grant connect,resource to xzh0610;
+grant read,write ON DIRECTORY oradmp to xzh0610; 
+grant dba to xzh0610;
+drop user xzh0610 cascade;
+```
+
+### 2.2 修改密码
+
+```bash
+# 直接修改
+password zhangsan
+# 使用SQL语句查找密码过期用户所属的profile
+select username,profile from dba_users;  
+# 查看对应的概要文件(如default)的密码有效期设置（一般默认为180天）
+SELECT * FROM dba_profiles s WHERE s.profile='DEFAULT' AND resource_name='PASSWORD_LIFE_TIME';
+# 然后使用SQL语句将该用户所属的profile修改为永不过期
+alter profile default limit PASSWORD_LIFE_TIME unlimited;
+# 将密码过期用户的密码更新，使用如下SQL
+alter user zhangsan identified by "密码" account unlock;
+# 解锁用户
+alter user zhangsan account unlock;
+```
+
+### 2.3 审计日志
+
+```bash
 sqlplus /nolog
 connect / as sysdba
-shutdown immediate
-startup
+show parameter audit_trail;                         # VALUE值为DB，表示审计功能为开启的状态
+alter system set audit_trail=none scope=spfile;     # 关闭审计功能
+shutdown immediate;                                 # 重启数据库
+startup;
+# VALUE值为NONE，表示审计功能已关闭
+truncate table SYS.AUD$;                            # 删除审计日志
 ```
 
-#### 2.1.2 脚本重启
 
-vi /data/oracle_restart.sh
-```sh
-su - oracle -c "sqlplus /nolog<< EOF
-conn /as sysdba
-shutdown immediate
-startup
-quit
-EOF"
-```
+### 2.4 归档日志
 
-```bash
-sh /data/oracle_restart.sh
-nohup sh /data/oracle_restart.sh &     # 后台执行
-```
 
-#### 2.1.3 关闭监听
 
-```bash
-lsnrctl status
-lsnrctl
-set log_status off
-save_config
-show log_status
-stop
-start
-```
 
-### 2.2 表空间
+### 2.5 表空间管理
 
-#### 2.2.1 临时表空间
+#### 2.5.1 临时表空间
   
 表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
 
@@ -615,7 +668,7 @@ alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;            
 drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
 ```
 
-#### 2.2.2 数据表空间
+#### 2.5.2 数据表空间
 
 ```bash
 create tablespace xzh
@@ -654,23 +707,7 @@ select username,default_tablespace from dba_users where username='xzh';
 alter tablespace xzh_data ADD datafile '/u01/app/oracle/xzh/xzh.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
 ```
 
-### 2.3 用户授权
-
-```sql
-create user xzh0610 identified by 123456
-  default tablespace xzh
-  temporary tablespace xzh_temp
-  profile DEFAULT
-  password  expire;
-
-grant connect,resource to xzh0610;
-grant read,write ON DIRECTORY oradmp to xzh0610; 
-grant dba to xzh0610;
-drop user xzh0610 cascade;
-```
-
-
-### 2.4 目录管理
+### 2.6 目录管理
 
 ```sql
 SELECT * FROM DBA_DIRECTORIES;                          -- 查看目录
@@ -679,16 +716,17 @@ DROP DIRECTORY oradmp;                                  -- 删除目录
 GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        -- 将oradmp目录的赋给用户
 ```
 
-### 2.5 备份恢复
 
-#### 2.5.1 按表名备份、还原
+### 2.7 备份恢复
+
+#### 2.7.1 按表名备份、还原
 
 ```bash
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=sys_menu,sys_role,sys_user  
 impdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=xzh0610.sys_menu,xzh0610.sys_user REMAP_SCHEMA=xzh0610:xzh0610 table_exists_action=replace
 ```
 
-#### 2.5.2 全量备份、还原
+#### 2.7.2 全量备份、还原
 
 ```bash
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp SCHEMAS=xzh0610 logfile=xzh0610_$(date +%Y%m%d-%H%M).log
@@ -698,7 +736,7 @@ impdp xzh0611/123456 directory=oradmp dumpfile=xzh0610.dmp  schemas=xzh0610 REMA
 execute dbms_stats.delete_schema_stats('xzh0610');
 ```
 
-#### 2.5.3 定时备份
+#### 2.7.3 定时备份
 
 ```bash
 crontab -e
@@ -817,7 +855,7 @@ find /opt/DB/ -mtime +5 -type f -name '*.dmp.gz' -exec rm {} \;
 find /opt/DB/ -mtime +5 -type f -name '*.log' -exec rm {} \;
 ```
 
-### 2.6 AWR报告
+### 2.8 AWR报告
 
 ```bash
 su - oracle
@@ -831,34 +869,49 @@ conn /as sysdba
 # 输入报告名称
 ```
 
-### 2.7 审计日志
 
-```bash
+### 2.9 常用命令
+
+1. 服务重启
+
+```sql
+su – oracle
 sqlplus /nolog
 connect / as sysdba
-show parameter audit_trail;
-alter system set audit_trail=none scope=spfile;
-shutdown immediate;
-startup;
-truncate table SYS.AUD$;
+shutdown immediate
+startup
 ```
 
-### 2.8 修改密码
+2. 脚本重启
+
+vi /data/oracle_restart.sh
+```sh
+su - oracle -c "sqlplus /nolog<< EOF
+conn /as sysdba
+shutdown immediate
+startup
+quit
+EOF"
+```
 
 ```bash
-# 直接修改
-password zhangsan
-# 使用SQL语句查找密码过期用户所属的profile
-select username,profile from dba_users;  
-# 查看对应的概要文件(如default)的密码有效期设置（一般默认为180天）
-SELECT * FROM dba_profiles s WHERE s.profile='DEFAULT' AND resource_name='PASSWORD_LIFE_TIME';
-# 然后使用SQL语句将该用户所属的profile修改为永不过期
-alter profile default limit PASSWORD_LIFE_TIME unlimited;
-# 将密码过期用户的密码更新，使用如下SQL
-alter user zhangsan identified by "密码" account unlock;
-# 解锁用户
-alter user zhangsan account unlock;
+sh /data/oracle_restart.sh
+nohup sh /data/oracle_restart.sh &     # 后台执行
 ```
+
+3. 关闭监听
+
+```bash
+lsnrctl status
+lsnrctl
+set log_status off
+save_config
+show log_status
+stop
+start
+```
+
+
 
 ## 3. 表操作
 
