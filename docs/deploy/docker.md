@@ -157,15 +157,14 @@ docker run -it -v /[local_path]|pgdata:/[container_path] [imageid] /bin/bash   #
 ```bash
 docker images                   # 查看镜像
 docker history                  # 查看构建历史
-docker rmi [imageid]            # 删除镜像
-docker rmi $(docker images -q)  # 删除本地所有镜像
-docker rmi $(docker images | grep "none" | awk '{print $3}')    # 删除none的镜像
+docker rmi [imageid]                                                        # 删除镜像
+docker rmi -f $(docker images -qa)                                          # 强制删除所有镜像
+docker rmi $(docker images | grep "none" | awk '{print $3}')                # 删除none的镜像
 docker images | grep -v CONTAINER | awk '{print $3}' | xargs docker rmi     # 删除所有镜像
 docker save -o logstash_7.6.2.tar logstash:7.6.2                # 镜像备份
 docker load -i logstash_7.6.2.tar                               # 镜像导入
 docker tag  serv:1.0 192.168.3.200/xzh/serv:1.1                 # 镜像标记
 docker image inspect minio/minio:latest|grep  -i version        # 查看已下载镜像版本
-
 # 镜像分析
 docker stats [containerid]                              # 监控指定容器
 docker stats $(docker ps -a -q)                         # 监控所有容器
@@ -187,22 +186,20 @@ docker exec -it [containerid] /bin/bash
 
 docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]  # 查看容器ip地址
 docker inspect nodered | grep Mounts -A 20                                # 查看容器映射目录
-docker rmi -f $(docker images -qa)                                        # 删除所有镜像
 docker rm [containerid]                                                   # 删除指定容器
 docker rm `docker ps -a -q`                                               # 删除所有容器
 docker rm $(docker ps -a | awk '/[imageid]/ {print $1}')        # 删除相同imageid的容器
 docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm    # 删除所有关闭的容器
 docker volume rm $(docker volume ls -qf dangling=true)          # 删除所有dangling数据卷(即无用的volume)
-
-docker update --restart=always [container_id]           # 修改指定容器自动启动
-docker update --restart=always $(docker ps -q -a)       # 更新所有容器启动时自动启动
-docker run --net=host                                   # host模式执行容器，容器端口全部映射给主机
-docker run -p 80:80 --name nginx -e TZ="Asia/Shanghai" -d nginx:1.17.0    # 指定容器时区
+docker update --restart=always [container_id]                   # 修改指定容器自动启动
+docker update --restart=always $(docker ps -q -a)               # 更新所有容器启动时自动启动
+docker run --net=host                                           # host模式执行容器，容器端口全部映射给主机
+docker run -p 80:80 --name nginx -e TZ="Asia/Shanghai" -d nginx:1.17.0      # 指定容器时区
 
 # 日志
-docker logs -t --since="2018-02-08T13:23:37" [containerid]          # 查看某时间之后的日志
-docker logs -f -t --since="2018-02-08" --tail=100 [containerid]     # 查看指定时间后的日志，只显示最后100行
-docker logs --since 30m [containerid]                               # 查看最近30分钟的日志
+docker logs -t --since="2018-02-08T13:23:37" [containerid]                  # 查看某时间之后的日志
+docker logs -f -t --since="2018-02-08" --tail=100 [containerid]             # 查看指定时间后的日志，只显示最后100行
+docker logs --since 30m [containerid]                                       # 查看最近30分钟的日志
 docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" [containerid]  # 查看某时间段日志
 
 # 数据拷贝
