@@ -572,9 +572,9 @@ exit
 | :----------: | ---------- | ---------- |
 | 主机名  | oracle11g | oracle11gstandby |
 | 操作系统  | CentOS release 7.9 | CentOS release 7.9 |
-| IP地址  | 172.17.17.160 | 172.17.17.161 |
-| ORACLE_BASE  | /data/oracle/app/oracle | /data/oracle/app/oracle |
-| ORACLE_HOME  | /data/oracle/app/oracle/product/11.2.0/db_1 | /data/oracle/app/oracle/product/11.2.0/db_1 |
+| IP地址  | 192.168.2.201 | 192.168.2.202 |
+| ORACLE_BASE  | /u01/app/oracle | /u01/app/oracle |
+| ORACLE_HOME  | /u01/app/oracle/product/11.2.0/dbhome_1 | /u01/app/oracle/product/11.2.0/dbhome_1 |
 | ORACLE_SID  | orcl | orcl |
 | 归档模式  | 是 | 否 |
 | 数据库安装  | 安装数据库软件，创建监听，建库 | 安装数据库软件，创建监听，不建库 |
