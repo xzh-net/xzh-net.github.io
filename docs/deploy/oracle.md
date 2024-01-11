@@ -566,16 +566,18 @@ select status from v$instance;
 exit
 ```
 
-### 1.3 RAC
+### 1.3 DataGuard主备
 
-1. 网络配置
-2. 主机及host配置
-3. 生成共享磁盘
-4. RAC_ASM磁盘挂载
-5. 用户变量及互信
-6. 集群安装
-7. 安装数据库
-8. 建库
+| **名称** | **主库** | **备库** |
+| :----------: | ---------- | ---------- |
+| 主机名  | oracle11g | oracle11gstandby |
+| 操作系统  | CentOS release 7.9 | CentOS release 7.9 |
+| IP地址  | 172.17.17.160 | 172.17.17.161 |
+| ORACLE_BASE  | /data/oracle/app/oracle | /data/oracle/app/oracle |
+| ORACLE_HOME  | /data/oracle/app/oracle/product/11.2.0/db_1 | /data/oracle/app/oracle/product/11.2.0/db_1 |
+| ORACLE_SID  | orcl | orcl |
+| 归档模式  | 是 | 否 |
+| 数据库安装  | 安装数据库软件，创建监听，建库 | 安装数据库软件，创建监听，不建库 |
 
 ### 1.4 卸载
 
