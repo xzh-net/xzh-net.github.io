@@ -569,7 +569,7 @@ exit
 ### 1.3 DataGuard主备
 
 | **名称** | **主库** | **备库** |
-| :----------: | ---------- | ---------- |
+| ---------- | ---------- | ---------- |
 | 主机名  | oracle11g | oracle11gstandby |
 | 操作系统  | CentOS release 7.9 | CentOS release 7.9 |
 | IP地址  | 192.168.2.201 | 192.168.2.202 |
@@ -628,7 +628,7 @@ alter user zhangsan account unlock;
 
 ### 2.3 审计日志
 
-1. 关闭审计
+#### 2.3.1 关闭审计
 
 ```bash
 sqlplus /nolog
@@ -641,7 +641,7 @@ show parameter audit_trail;                         # VALUE值为NONE，表示�
 truncate table SYS.AUD$;                            # 删除审计日志
 ```
 
-2. 开启审计
+#### 2.3.2 开启审计
 
 11g默认是开始审计的，有审计记录，所以不需要安装,如果查询发现表不存在,则需要安装。
 
@@ -659,7 +659,7 @@ show parameter audit;       # 查看数据库审计配置信息
 select * FROM SYS.AUD$;
 ```
 
-3. 审计迁移
+#### 2.3.3 审计迁移
 
 审计表默认安装在SYSTEM表空间,在生产环境一般都建议迁移到其他表空间里面，步骤如下
 
@@ -680,10 +680,16 @@ select index_name,tablespace_name from dba_indexes where index_name like '%AUDIT
 
 ### 2.4 归档日志
 
-1. 查看是否开启归档模式
+#### 2.4.1 查看归档模式
 
 ```bash
-SQL> archive log list       # 查看是否开启，下文显示未开启
+sqlplus / as sysdba
+archive log list
+```
+
+下文显示未开启
+
+```lua
 Database log mode No Archive Mode
 Automatic archival Disabled
 Archive destination USE_DB_RECOVERY_FILE_DEST
@@ -691,14 +697,18 @@ Oldest online log sequence 8
 Current log sequence 10
 ```
 
-2. 开启归档模式
+#### 2.4.2 开启归档模式
 
 ```bash
 shutdown immediate;             # 关闭实例
 startup mount;                  # 启动到mount
-alter database noarchivelog;      # 开启归档模式
+alter database archivelog;      # 开启归档模式
+archive log list; 
+```
 
-SQL> archive log list;          # 再次查看是否开启归档，下文显示已归档
+再次查看是否开启归档，下文显示已归档
+
+```lua
 Database log mode Archive Mode
 Automatic archival Enabled
 Archive destination USE_DB_RECOVERY_FILE_DEST
@@ -717,6 +727,78 @@ show parameter db_recovery;     # 查看参数db_recovery_file_dest归档日志�
 ```bash
 alter system set db_recovery_file_dest_size=3G;
 ```
+
+从10g开始，可以设置多个归档路径，生成多份一样的日志
+
+```bash
+su - oracle 
+mkdir /u01/app/oracle/archivelog
+sqlplus / as sysdba
+alter system set log_archive_dest_1 = 'location=/u01/app/oracle/archivelog';
+show parameter log_archive_dest
+archive log list;
+select created, log_mode from v$database;       # 查看归档方式
+```
+
+```bash
+# 查看归档日志位置
+show parameter log_archive_dest;
+# 查看归档日志格式
+show parameter log_archive_format;
+# 修改归档日志格式
+alter system set log_archive_format ="archive_%t_%s_%r.log" scope=spfile;
+shutdown immediate;
+startup;
+# 查看归档日志进程数
+show parameter log_archive_max_process;
+# 归档当前重做日志
+alter system archive log current;       # 是归档当前的重做日志文件，不管自动归档有没有打都归档。
+select name from v$archived_log;
+```
+
+#### 2.4.3 删除归档日志
+
+先手动删除物理文件
+
+```bash
+find /u01/app/oracle/flash_recovery_area/ORCL/archivelog -xdev -mtime +7 -name "*.dbf" -exec rm -f {} ; 
+# 或
+find /u01/app/oracle/archivelog -type f -mtime +7 -exec rm {} ;
+```
+
+再执行以下命令
+
+```bash
+su - oracle
+rman target /
+list archivelog all;        # 列出日志目录
+delete archivelog all completed before 'sysdate-7';     # 删除所有日志使用：sysdate
+```
+
+最后会在RMAN里留下未管理的归档文件，要在RMAN里执行下面2条命令
+
+```bash
+crosscheck archivelog all;      # 检查归档日志
+delete expired archivelog all;  # 删除失效日志及
+crosscheck archivelog all;      # 检查归档日志
+```
+
+如果因为日志磁盘满载不能执行命令，可以强制删除所有日志
+```bash
+delete noprompt force archivelog all;
+```
+
+#### 2.4.4 关闭归档模式
+
+```bash
+sqlplus / as sysdba
+shutdown immediate;
+startup mount;
+alter database noarchivelog;
+alter database open;
+archive log list;
+```
+
 
 ### 2.5 表空间管理
 
@@ -986,15 +1068,8 @@ stop
 start
 ```
 
-
-
-## 3. 表操作
-
-### 3.1 系统参数
-
 ```sql
 SELECT version FROM product_component_version WHERE substr(product, 1, 6) = 'Oracle';         -- 查看版本
-SELECT created, log_mode, log_mode FROM v$database;                                           -- 查看归档方式
 select username,count(username) from v$session where username is not null group by username;  -- 查看不同用户的连接数
 select count(*) from v$session where status='ACTIVE';                                         -- 查询oracle的并发连接数
 select a.*,round(a.bytes/1024/1024,2) M from v$sgastat a where a.NAME = 'free memory';        -- 查询share pool的空闲内存
@@ -1005,7 +1080,10 @@ alter system set processes = value scope = spfile;       -- 修改连接数需�
 ```
 
 
-### 3.3 建表
+
+## 3. 表操作
+
+### 3.1 建表
 
 ```sql
 create table ATEST
@@ -1072,7 +1150,7 @@ SELECT 'ALTER SYSTEM KILL SESSION ''' || SID || ',' || SERIAL# || '''' || ';'
 select spid, osuser, s.program from v$session s, v$process p where s.paddr = p.addr and s.sid = {sid};
 ```
 
-### 3.4 等待事件
+### 3.3 等待事件
 
 ```sql
 -- 查看当前等待事件及数量，如果是库问题 优化参数或调整业务逻辑等，如果是sql问题 继续
