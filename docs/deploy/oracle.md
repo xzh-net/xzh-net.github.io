@@ -568,6 +568,10 @@ exit
 
 ### 1.3 DataGuard主备
 
+Data Gurad 通过冗余数据来提供数据保护，Data Gurad 通过日志同步机制保证冗余数据和主数之前的同步，这种同步可以是实时，延时，同步，异步多种形式。Data Gurad 常用于异地容灾和小企业的高可用性方案，虽然可以在Standby 机器上执行只读查询，从而分散Primary 数据库的性能压力，但是Data Gurad 决不是性能解决方案
+
+#### 1.3.1 搭建环境
+
 | **名称** | **主库** | **备库** |
 | ---------- | ---------- | ---------- |
 | 主机名  | oracle11g | oracle11gstandby |
@@ -578,6 +582,652 @@ exit
 | ORACLE_SID  | orcl | orcl |
 | 归档模式  | 是 | 否 |
 | 数据库安装  | 安装数据库软件，创建监听，建库 | 安装数据库软件，创建监听，不建库 |
+
+
+#### 1.3.2 主库配置
+
+1. 开启归档模式
+
+[参考：oracle开启关闭归档以及归档空间满的处理方法总结](deploy/oracle?id=_24-归档日志)
+
+2. 开启强日志模式
+
+```bash
+su - oracle
+sqlplus / as sysdba
+alter database force logging;
+```
+
+查看
+
+```bash
+select name,log_mode,force_logging from v$database;
+```
+
+3. 创建standby redolog日志组
+
+```lua
+1：standby redo log的文件大小与primary 数据库online redo log 文件大小相同
+2：standby redo log日志文件组的个数依照下面的原则进行计算：
+Standby redo log组数公式>=(每个instance日志组个数+1)*instance个数
+假如只有一个节点，这个节点有三组redolog，
+所以Standby redo log组数>=(3+1)*1 == 4
+所以至少需要创建4组Standby redo log
+```
+
+查看当前线程与日志组的对应关系及日志组的大小：
+
+```lua
+SQL> select thread#,group#,bytes/1024/1024 from v$log;
+   THREAD#     GROUP# BYTES/1024/1024
+---------- ---------- ---------------
+    1       1           50
+    1       2           50
+    1       3           50
+
+```
+
+如上，这里有三组redo log，所以至少需要创建4组Standby redo log，大小均为50M：
+
+```sql
+alter database add standby logfile group 4 ('/u01/app/oracle/oradata/orcl/redo_dg_04.log') size 50M;
+alter database add standby logfile group 5 ('/u01/app/oracle/oradata/orcl/redo_dg_05.log') size 50M;
+alter database add standby logfile group 6 ('/u01/app/oracle/oradata/orcl/redo_dg_06.log') size 50M;
+alter database add standby logfile group 7 ('/u01/app/oracle/oradata/orcl/redo_dg_07.log') size 50M;
+```
+
+若删除组：
+
+```bash
+alter database drop standby logfile group x;
+```
+
+查看standy日志组的信息：
+
+```lua
+SQL> select group#,sequence#,status, bytes/1024/1024 from v$standby_log;
+    GROUP#  SEQUENCE# STATUS	 BYTES/1024/1024
+---------- ---------- ---------- ---------------
+	 4	    0 UNASSIGNED	      50
+	 5	    0 UNASSIGNED	      50
+	 6	    0 UNASSIGNED	      50
+	 7	    0 UNASSIGNED	      50
+```
+
+4. 创建主库密码文件
+
+```bash
+su - oracle
+orapwd file=$ORACLE_HOME/dbs/orapw$ORACLE_SID password=oracle force=y
+```
+
+5. 配置spfile文件
+
+```lua
+SQL> show parameter spfile;
+NAME    TYPE    VALUE
+------------------------------------ ----------- ------------------------------
+spfile string   /u01/app/oracle/product/11.2.0/dbhome_1/dbs/spfileorcl.ora
+```
+
+读入数据代码示例
+
+```bash
+data = pd.read_csv(
+    'https://labfile.oss.aliyuncs.com/courses/1283/adult.data.csv')
+print(data.head())
+```
+
+用spfile创建一个pfile,用于修改：
+
+```bash
+sqlplus / as sysdba
+create pfile='/tmp/initorcl.ora' from spfile;
+```
+
+修改pfile文件
+
+```bash
+vim /tmp/initorcl.ora
+```
+
+```conf
+orcl.__db_cache_size=654311424
+orcl.__java_pool_size=16777216
+orcl.__large_pool_size=16777216
+orcl.__oracle_base='/u01/app/oracle'#ORACLE_BASE set from environment
+orcl.__pga_aggregate_target=637534208
+orcl.__sga_target=956301312
+orcl.__shared_io_pool_size=0
+orcl.__shared_pool_size=251658240
+orcl.__streams_pool_size=0
+*.audit_file_dest='/u01/app/oracle/admin/orcl/adump'
+*.audit_trail='NONE'
+*.compatible='11.2.0.0.0'
+*.control_files='/u01/app/oracle/oradata/orcl/control01.ctl','/u01/app/oracle/flash_recovery_area/orcl/control02.ctl'
+*.db_block_size=8192
+*.db_domain=''
+*.db_name='orcl'
+*.db_recovery_file_dest='/u01/app/oracle/flash_recovery_area'
+*.db_recovery_file_dest_size=4070572032
+*.diagnostic_dest='/u01/app/oracle'
+*.dispatchers='(PROTOCOL=TCP) (SERVICE=orclXDB)'
+*.log_archive_format='archive_%t_%s_%r.log'
+*.memory_target=1588592640
+*.open_cursors=300
+*.processes=150
+*.remote_login_passwordfile='EXCLUSIVE'
+*.undo_tablespace='UNDOTBS1'
+*.db_unique_name='orclpr'
+*.fal_client='orclpr'
+*.fal_server='orcldg'
+*.standby_file_management='AUTO'
+*.log_archive_config='DG_CONFIG=(orclpr,orcldg)'
+*.log_archive_dest_1='location=/u01/app/oracle/oradata/orcl/archivelog'
+*.log_archive_dest_2='SERVICE=orcldg LGWR ASYNC VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE) DB_UNIQUE_NAME=orcldg'
+*.log_archive_dest_state_1='ENABLE'
+*.log_archive_dest_state_2='ENABLE'
+```
+
+复制pfile文件到spfile:
+```bash
+shutdown immediate;
+create spfile from pfile='/tmp/initorcl.ora';
+startup;
+```
+
+6. 修改监听文件，添加静态监听
+
+```bash
+vi $ORACLE_HOME/network/admin/listener.ora
+```
+
+```conf
+LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.201)(PORT = 1521))
+    )
+  )
+
+SID_LIST_LISTENER =
+  (SID_LIST =
+    (SID_DESC =
+      (GLOBAL_DBNAME = orcl)
+      (ORACLE_HOME = /u01/app/oracle/product/11.2.0/dbhome_1)
+      (SID_NAME = orcl)
+    )
+  )
+
+
+ADR_BASE_LISTENER = /u01/app/oracle
+SAVE_CONFIG_ON_STOP_LISTENER = ON
+```
+
+重启监听服务
+
+```bash
+lsnrctl stop
+lsnrctl start  
+#或
+lsnrctl reload
+```
+
+7. 编辑网络服务名配置
+
+```bash
+vi $ORACLE_HOME/network/admin/tnsnames.ora
+```
+
+添加配置
+
+```conf
+orclpr =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.201)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = orcl)
+    )
+  )
+orcldg =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.202)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = orcl)
+    )
+  )
+```
+
+tnsping测试：
+
+```lua
+[oracle@oracledb dbs]$ lsnrctl reload
+
+LSNRCTL for Linux: Version 11.2.0.1.0 - Production on 16-JAN-2024 23:12:50
+
+Copyright (c) 1991, 2009, Oracle.  All rights reserved.
+
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))
+The command completed successfully
+[oracle@oracledb dbs]$ vi $ORACLE_HOME/network/admin/tnsnames.ora
+[oracle@oracledb dbs]$ tnsping orclpr
+
+TNS Ping Utility for Linux: Version 11.2.0.1.0 - Production on 16-JAN-2024 23:15:57
+
+Copyright (c) 1997, 2009, Oracle.  All rights reserved.
+
+Used parameter files:
+/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/sqlnet.ora
+
+
+Used TNSNAMES adapter to resolve the alias
+Attempting to contact (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521)) (CONNECT_DATA = (SERVER = DEDICATED) (SERVICE_NAME = orcl)))
+OK (0 msec)
+[oracle@oracledb dbs]$
+```
+
+#### 1.3.3 备库配置
+
+1、将主库中的密码文件、pfile文件、监听文件复制到备库中：
+
+进入主库`192.168.2.201`
+
+```bash
+su - oracle
+cd /u01/app/oracle/product/11.2.0/dbhome_1/dbs
+scp orapworcl 192.168.2.202:/u01/app/oracle/product/11.2.0/dbhome_1/dbs/
+scp /tmp/initorcl.ora 192.168.2.202:/tmp/
+cd /u01/app/oracle/product/11.2.0/dbhome_1/network/admin
+scp listener.ora 192.168.2.202:/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/
+scp tnsnames.ora 192.168.2.202:/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/
+```
+
+2. 配置spfile文件
+
+进入从库`192.168.2.202`
+
+```bash
+su - oracle
+vim /tmp/initorcl.ora
+```
+
+```conf
+orcl.__db_cache_size=654311424
+orcl.__java_pool_size=16777216
+orcl.__large_pool_size=16777216
+orcl.__oracle_base='/u01/app/oracle'#ORACLE_BASE set from environment
+orcl.__pga_aggregate_target=637534208
+orcl.__sga_target=956301312
+orcl.__shared_io_pool_size=0
+orcl.__shared_pool_size=251658240
+orcl.__streams_pool_size=0
+*.audit_file_dest='/u01/app/oracle/admin/orcl/adump'
+*.audit_trail='NONE'
+*.compatible='11.2.0.0.0'
+*.control_files='/u01/app/oracle/oradata/orcl/control01.ctl','/u01/app/oracle/flash_recovery_area/orcl/control02.ctl'
+*.db_block_size=8192
+*.db_domain=''
+*.db_name='orcl'
+*.db_recovery_file_dest='/u01/app/oracle/flash_recovery_area'
+*.db_recovery_file_dest_size=4070572032
+*.diagnostic_dest='/u01/app/oracle'
+*.dispatchers='(PROTOCOL=TCP) (SERVICE=orclXDB)'
+*.log_archive_format='archive_%t_%s_%r.log'
+*.memory_target=1588592640
+*.open_cursors=300
+*.processes=150
+*.remote_login_passwordfile='EXCLUSIVE'
+*.undo_tablespace='UNDOTBS1'
+*.db_unique_name='orcldg'
+*.fal_client='orcldg'
+*.fal_server='orclpr'
+*.standby_file_management='AUTO'
+*.log_archive_config='DG_CONFIG=(orclpr,orcldg)'
+*.log_archive_dest_1='location=/u01/app/oracle/oradata/orcl/archivelog'
+*.log_archive_dest_2='SERVICE=orclpr LGWR ASYNC VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE) DB_UNIQUE_NAME=orclpr'
+*.log_archive_dest_state_1='ENABLE'
+*.log_archive_dest_state_2='ENABLE'
+```
+
+复制pfile文件到spfile：
+
+```bash
+sqlplus / as sysdba
+shutdown immediate;
+create spfile from pfile='/tmp/initorcl.ora';
+startup nomount;
+```
+
+3. 修改监听文件
+
+```bash
+vi $ORACLE_HOME/network/admin/listener.ora
+```
+
+```conf
+LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.202)(PORT = 1521))
+    )
+  )
+
+SID_LIST_LISTENER =
+  (SID_LIST =
+    (SID_DESC =
+      (GLOBAL_DBNAME = orcl)
+      (ORACLE_HOME = /u01/app/oracle/product/11.2.0/dbhome_1)
+      (SID_NAME = orcl)
+    )
+  )
+
+
+ADR_BASE_LISTENER = /u01/app/oracle
+```
+
+重启监听服务
+
+```bash
+lsnrctl stop
+lsnrctl start  
+#或
+lsnrctl reload
+```
+
+4. tnsping测试
+
+```lua
+[oracle@oracledb ~]$ tnsping orclpr
+
+TNS Ping Utility for Linux: Version 11.2.0.1.0 - Production on 16-JAN-2024 23:44:32
+
+Copyright (c) 1997, 2009, Oracle.  All rights reserved.
+
+Used parameter files:
+/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/sqlnet.ora
+
+
+Used TNSNAMES adapter to resolve the alias
+Attempting to contact (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.201)(PORT = 1521)) (CONNECT_DATA = (SERVER = DEDICATED) (SERVICE_NAME = orcl)))
+OK (0 msec)
+[oracle@oracledb ~]$ tnsping orcldg
+
+TNS Ping Utility for Linux: Version 11.2.0.1.0 - Production on 16-JAN-2024 23:44:33
+
+Copyright (c) 1997, 2009, Oracle.  All rights reserved.
+
+Used parameter files:
+/u01/app/oracle/product/11.2.0/dbhome_1/network/admin/sqlnet.ora
+
+
+Used TNSNAMES adapter to resolve the alias
+Attempting to contact (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.2.202)(PORT = 1521)) (CONNECT_DATA = (SERVER = DEDICATED) (SERVICE_NAME = orcl)))
+OK (0 msec)
+[oracle@oracledb ~]$ 
+```
+
+5. 创建所需的目录
+
+```bash
+su - oracle
+mkdir -p /u01/app/oracle/admin/orcl/adump
+mkdir -p /u01/app/oracle/admin/orcl/dbdump
+mkdir -p /u01/app/oracle/admin/orcl/pfile
+mkdir -p /u01/app/oracle/oradata/orcl
+mkdir -p /u01/app/oracle/fast_recovery_area/orcl
+mkdir -p /u01/app/oracle/oradata/orcl/archivelog
+```
+
+6. 启动备库到nomount
+
+```bash
+shutdown immediate;
+startup nomount;
+```
+
+7. 利用RMAN在备库上恢复主库
+
+```
+rman target sys/password@orclpr auxiliary sys/password@orcldg
+
+duplicate target database for standby from active database nofilenamecheck;
+```
+
+
+> 此处必须是主库打开，备库挂载。如果主库是挂载状态，使用下面命令打开
+
+```bash
+alter database mount;
+alter database open;
+```
+
+> 如果安装后忘记管理员密码，主备库分别使用以下命令重置管理员密码
+
+```bash
+ALTER USER SYS IDENTIFIED BY "password";
+ALTER USER SYSTEM IDENTIFIED BY "password";
+```
+
+还原过程如下：
+
+```lua
+[oracle@oracledb ~]$ rman target sys/password@orclpr auxiliary sys/password@orcldg
+
+Recovery Manager: Release 11.2.0.1.0 - Production on Wed Jan 17 00:11:50 2024
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+connected to target database: ORCL (DBID=1685790589)
+connected to auxiliary database: ORCL (not mounted)
+
+RMAN> duplicate target database for standby from active database nofilenamecheck;
+
+Starting Duplicate Db at 17-JAN-24
+using target database control file instead of recovery catalog
+allocated channel: ORA_AUX_DISK_1
+channel ORA_AUX_DISK_1: SID=19 device type=DISK
+
+contents of Memory Script:
+{
+   backup as copy reuse
+   targetfile  '/u01/app/oracle/product/11.2.0/dbhome_1/dbs/orapworcl' auxiliary format 
+ '/u01/app/oracle/product/11.2.0/dbhome_1/dbs/orapworcl'   ;
+}
+executing Memory Script
+
+Starting backup at 17-JAN-24
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: SID=35 device type=DISK
+Finished backup at 17-JAN-24
+
+contents of Memory Script:
+{
+   backup as copy current controlfile for standby auxiliary format  '/u01/app/oracle/oradata/orcl/control01.ctl';
+   restore clone controlfile to  '/u01/app/oracle/flash_recovery_area/orcl/control02.ctl' from 
+ '/u01/app/oracle/oradata/orcl/control01.ctl';
+}
+executing Memory Script
+
+Starting backup at 17-JAN-24
+using channel ORA_DISK_1
+channel ORA_DISK_1: starting datafile copy
+copying standby control file
+output file name=/u01/app/oracle/product/11.2.0/dbhome_1/dbs/snapcf_orcl.f tag=TAG20240117T001310 RECID=1 STAMP=1158451990
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:01
+Finished backup at 17-JAN-24
+
+Starting restore at 17-JAN-24
+using channel ORA_AUX_DISK_1
+
+channel ORA_AUX_DISK_1: copied control file copy
+Finished restore at 17-JAN-24
+
+contents of Memory Script:
+{
+   sql clone 'alter database mount standby database';
+}
+executing Memory Script
+
+sql statement: alter database mount standby database
+
+contents of Memory Script:
+{
+   set newname for tempfile  1 to 
+ "/u01/app/oracle/oradata/orcl/temp01.dbf";
+   switch clone tempfile all;
+   set newname for datafile  1 to 
+ "/u01/app/oracle/oradata/orcl/system01.dbf";
+   set newname for datafile  2 to 
+ "/u01/app/oracle/oradata/orcl/sysaux01.dbf";
+   set newname for datafile  3 to 
+ "/u01/app/oracle/oradata/orcl/undotbs01.dbf";
+   set newname for datafile  4 to 
+ "/u01/app/oracle/oradata/orcl/users01.dbf";
+   backup as copy reuse
+   datafile  1 auxiliary format 
+ "/u01/app/oracle/oradata/orcl/system01.dbf"   datafile 
+ 2 auxiliary format 
+ "/u01/app/oracle/oradata/orcl/sysaux01.dbf"   datafile 
+ 3 auxiliary format 
+ "/u01/app/oracle/oradata/orcl/undotbs01.dbf"   datafile 
+ 4 auxiliary format 
+ "/u01/app/oracle/oradata/orcl/users01.dbf"   ;
+   sql 'alter system archive log current';
+}
+executing Memory Script
+
+executing command: SET NEWNAME
+
+renamed tempfile 1 to /u01/app/oracle/oradata/orcl/temp01.dbf in control file
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+Starting backup at 17-JAN-24
+using channel ORA_DISK_1
+channel ORA_DISK_1: starting datafile copy
+input datafile file number=00001 name=/u01/app/oracle/oradata/orcl/system01.dbf
+output file name=/u01/app/oracle/oradata/orcl/system01.dbf tag=TAG20240117T001317
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:15
+channel ORA_DISK_1: starting datafile copy
+input datafile file number=00002 name=/u01/app/oracle/oradata/orcl/sysaux01.dbf
+output file name=/u01/app/oracle/oradata/orcl/sysaux01.dbf tag=TAG20240117T001317
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:07
+channel ORA_DISK_1: starting datafile copy
+input datafile file number=00003 name=/u01/app/oracle/oradata/orcl/undotbs01.dbf
+output file name=/u01/app/oracle/oradata/orcl/undotbs01.dbf tag=TAG20240117T001317
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:01
+channel ORA_DISK_1: starting datafile copy
+input datafile file number=00004 name=/u01/app/oracle/oradata/orcl/users01.dbf
+output file name=/u01/app/oracle/oradata/orcl/users01.dbf tag=TAG20240117T001317
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:01
+Finished backup at 17-JAN-24
+
+sql statement: alter system archive log current
+
+contents of Memory Script:
+{
+   switch clone datafile all;
+}
+executing Memory Script
+
+datafile 1 switched to datafile copy
+input datafile copy RECID=1 STAMP=1158452021 file name=/u01/app/oracle/oradata/orcl/system01.dbf
+datafile 2 switched to datafile copy
+input datafile copy RECID=2 STAMP=1158452021 file name=/u01/app/oracle/oradata/orcl/sysaux01.dbf
+datafile 3 switched to datafile copy
+input datafile copy RECID=3 STAMP=1158452021 file name=/u01/app/oracle/oradata/orcl/undotbs01.dbf
+datafile 4 switched to datafile copy
+input datafile copy RECID=4 STAMP=1158452021 file name=/u01/app/oracle/oradata/orcl/users01.dbf
+Finished Duplicate Db at 17-JAN-24
+```
+
+8. 登陆备库并查看数据库当前状态
+
+```bash
+sqlplus / as sysdba
+
+SQL> select status from v$instance;
+
+STATUS
+------------
+MOUNTED
+```
+
+RMAN恢复完直接就是mount状态
+
+9. 备库启动日志应用
+
+```bash
+alter database recover managed standby database disconnect from session;
+
+SQL> select sequence#,applied from v$archived_log order by 1;
+
+ SEQUENCE# APPLIED
+---------- ---------
+    11 YES
+    12 YES
+    13 YES
+```
+
+10. 分别查看主库和备库的归档序列号是否一致
+
+先在主库手动切换一下日志再查看：
+
+```bash
+SQL> alter system switch logfile;
+
+System altered.
+
+SQL> archive log list;
+Database log mode	       Archive Mode
+Automatic archival	       Enabled
+Archive destination	       /u01/app/oracle/oradata/orcl/archivelog
+Oldest online log sequence     13
+Next log sequence to archive   15
+Current log sequence	       15
+SQL> 
+```
+
+再在备库上查看：
+
+```bash
+SQL> archive log list;
+Database log mode	       Archive Mode
+Automatic archival	       Enabled
+Archive destination	       /u01/app/oracle/oradata/orcl/archivelog
+Oldest online log sequence     13
+Next log sequence to archive   0
+Current log sequence	       15
+```
+
+11. 查看备库中各文件如下
+
+```bash
+cd /u01/app/oracle/oradata/orcl
+```
+
+至此，dataguard已部署完成，可以测试是否成功！
+
+> 如果从库出现无法登录的情况，提示`ORA-10456:cannot open standby database;media recovery session may be in progress`
+
+```bash
+alter database recover managed standby database cancel;     # 先在从库停止standby
+alter database open;
+alter database recover managed standby database using current logfile disconnect;   # 再启动日志应用
+```
+
+#### 1.3.4 主备切换
+
 
 ### 1.4 卸载
 
@@ -732,9 +1382,9 @@ alter system set db_recovery_file_dest_size=3G;
 
 ```bash
 su - oracle 
-mkdir /u01/app/oracle/archivelog
+mkdir /u01/app/oracle/oradata/orcl/archivelog
 sqlplus / as sysdba
-alter system set log_archive_dest_1 = 'location=/u01/app/oracle/archivelog';
+alter system set log_archive_dest_1 = 'location=/u01/app/oracle/oradata/orcl/archivelog';
 show parameter log_archive_dest
 archive log list;
 select created, log_mode from v$database;       # 查看归档方式
@@ -763,7 +1413,7 @@ select name from v$archived_log;
 ```bash
 find /u01/app/oracle/flash_recovery_area/ORCL/archivelog -xdev -mtime +7 -name "*.dbf" -exec rm -f {} ; 
 # 或
-find /u01/app/oracle/archivelog -type f -mtime +7 -exec rm {} ;
+find /u01/app/oracle/oradata/orcl/archivelog -type f -mtime +7 -exec rm {} ;
 ```
 
 再执行以下命令
