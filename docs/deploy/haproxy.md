@@ -38,13 +38,13 @@ make INSTALL_TOP=/usr/local/lua-5.4.3 linux install
 ```bash
 cd /opt/software
 curl -R -O https://www.openssl.org/source/openssl-1.1.1k.tar.gz 
-tar -xvzf openssl-1.1.1k.tar.gz -C /opt
+tar -xvzf openssl-1.1.1k.tar.gz -C /opt/software
 ```
 
 #### 1.5.2 编译安装
 
 ```bash
-cd /opt/openssl-1.1.1k 
+cd /opt/software/openssl-1.1.1k 
 ./config --prefix=/usr/local/openssl
 make && make install
 ```
