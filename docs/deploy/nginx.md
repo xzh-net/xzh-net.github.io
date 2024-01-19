@@ -4,80 +4,38 @@
 
 ## 1. 安装
 
-### 1.1 yum安装
+### 1.1 编译安装
 
-#### 1.1.1 安装依赖
-
-```bash
-sudo yum install yum-utils
-```
-
-#### 1.1.2 编辑yum源文件
-
-```bash
-vim /etc/yum.repos.d/nginx.repo
-# 添加内容
-[nginx-stable]
-name=nginx stable repo
-baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-gpgcheck=1
-enabled=1
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
-
-[nginx-mainline]
-name=nginx mainline repo
-baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-gpgcheck=1
-enabled=0
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
-```
-默认情况使用稳定包，如果使用主线包执行下面命令，`第2位版本号`是偶数表示稳定包，基数表示开发包
-```bash
-sudo yum-config-manager --enable nginx-mainline
-```
-
-#### 1.1.3 进行安装
-
-```bash
-yum install -y nginx
-```
-
-### 1.2 源码安装
-
-#### 1.2.1 下载
-
-http://nginx.org/download/
+#### 1.1.1 下载
 
 ```bash
 cd /opt/software
 wget http://nginx.org/download/nginx-1.20.2.tar.gz
 ```
 
-#### 1.2.2 安装依赖
+#### 1.1.2 安装依赖
 
 ```bash
 yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
 ```
 
-#### 1.2.3 添加用户
+#### 1.1.3 添加用户
 
 ```bash
 useradd nginx -s /sbin/nologin -M
 ```
 
-#### 1.2.3 解压编译
+#### 1.1.4 解压编译
 
 ```bash
 cd /opt/software 
 tar zxvf nginx-1.20.2.tar.gz
 cd nginx-1.20.2
-./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module
 make && make install
 ```
 
-#### 1.2.4 设置环境变量
+#### 1.1.5 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -88,7 +46,7 @@ export PATH
 source /etc/profile
 ```
 
-#### 1.2.5 配置开机启动
+#### 1.1.6 配置开机启动
 
 在`/usr/lib/systemd/system`目录下添加nginx.service
 
@@ -118,97 +76,26 @@ WantedBy=default.target
 
 ```bash
 chmod 755 /usr/lib/systemd/system/nginx.service
+systemctl daemon-reload
 ```
 
-#### 1.2.6 启动服务
+#### 1.1.7 启动服务
 
 ```bash
-systemctl start nginx     # 启动
-systemctl enable nginx    # 开机启动
 nginx -V	# 查看版本
-
+systemctl enable nginx    # 开机启动
+systemctl start nginx     # 启动
 systemctl stop nginx      # 停止
 systemctl restart nginx   # 重启
 systemctl reload nginx    # 重新加载配置文件
-systemctl status nginx    # 查看nginx状态
+systemctl status nginx    # 查看状态
 ```
 
-### 1.3 一键安装
-
 ```bash
-#!/bin/bash
-
-#关闭firewalld防火墙
-systemctl stop firewalld
-systemctl disable firewalld
-systemctl mask firewalld
-
-#关闭selinux
-setenforce 0   #临时关闭
-sed -i  '/^SELINUX/ s/enforcing/disabled/' /etc/selinux/config #永久关闭
-
-#新建用户，用来启动nginx
-useradd  -s /sbin/nologin nginx
-#解决依赖关系，以及安装常用工具
-yum install -y zlib zlib-devel openssl openssl-devel pcre pcre-devel gcc gcc-c++ automake autoconf make
-yum install -y psmisc lsof net-tools vim wget
-
-#下载nginx压缩包
-mkdir -p /nginx
-cd /nginx
-curl  -O http://nginx.org/download/nginx-1.20.2.tar.gz
-
-#解压文件
-tar -zxvf  nginx-1.20.2.tar.gz 
-cd nginx-1.20.2
-
-#编译前的配置工作，根据实际需要选择常用模块
-./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=scweb_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module
-
-#编译安装
-make install
-
-#添加到系统服务，设置开机自启
-echo '[Unit]
-Description=nginx web service
-Documentation=http://nginx.org/en/docs/
-After=network.target
-
-[Service]
-Type=forking
-PIDFile=/usr/local/nginx/logs/nginx.pid
-ExecStartPre=/usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf
-ExecStart=/usr/local/nginx/sbin/nginx
-ExecReload=/usr/local/nginx/sbin/nginx -s reload
-ExecStop=/usr/local/nginx/sbin/nginx -s stop
-PrivateTmp=true
-
-[Install]
-WantedBy=default.target' > /usr/lib/systemd/system/nginx.service
-
-chmod 755 /usr/lib/systemd/system/nginx.service
-
-#延迟读取pid文件，避免提前读取pid文件（nginx启动需要时间）报错
-mkdir -p /etc/systemd/system/nginx.service.d
-printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-
-#添加软链接和设置环境变量选其一
-#ln -s /usr/local/nginx/sbin/nginx /usr/local/sbin/nginx
-#将nginx配置到系统环境变量中
-echo 'export PATH=$PATH:/usr/local/nginx/sbin' >> /etc/profile
-
-#nginx配置文件高亮显示
-echo 'syntax on' > ~/.vimrc
-mkdir -p  ~/.vim/syntax
-cd ~/.vim/syntax
-wget -O nginx.vim http://www.vim.org/scripts/download_script.php?src_id=19394
-echo "au BufRead,BufNewFile /usr/local/nginx/*,/usr/local/nginx/conf/* if &ft == '' | setfiletype nginx | endif " >> ~/.vim/filetype.vim
-
-#日志轮转
 echo '/usr/local/nginx/logs/*.log {
-    create 0640 nginx root
+    su root root
     daily
-    rotate 10
+    rotate 5
     missingok
     notifempty
     compress
@@ -221,413 +108,60 @@ echo '/usr/local/nginx/logs/*.log {
 ' > /etc/logrotate.d/nginx
 
 systemctl daemon-reload
-systemctl enable nginx  #开机自启
-systemctl status nginx
-```
-
-```bash
-sed -i 's/\r$//' run.sh  
-```
-
-### 1.4 卸载
-
-```bash
-yum remove -y nginx                 # yum卸载
-find / -name nginx | xargs rm -rf   # 编译删除
+logrotate -d /etc/logrotate.d/nginx
+logrotate -f /etc/logrotate.d/nginx
 ```
 
 
-## 2. 命令
+## 2. 模块
 
-### 2.1 信号控制
-
-| **信号**     | **作用**                                            |
-| -------- | ---------------------------------------------------------- |
-| TERM/INT | 立即关闭整个服务                                           |
-| QUIT     | "优雅"地关闭整个服务                                       |
-| HUP      | 重读配置文件并使用服务对新配置项生效                       |
-| USR1     | 重新打开日志文件，可以用来进行日志切割                     |
-| USR2     | 平滑升级到最新版的nginx                                    |
-| WINCH    | 所有子进程不在接收处理新连接，相当于给work进程发送QUIT指令 |
-
-### 2.2 命令行控制
-
-```lua
--?和-h:显示帮助信息
--v:打印版本号信息并退出
--V:打印版本号信息和配置信息并退出
--t:测试nginx的配置文件语法是否正确并退出
--T:测试nginx的配置文件语法是否正确并列出用到的配置文件信息然后退出
--q:在配置测试期间禁止显示非错误消息
--s:signal信号，后面可以跟 ：
-    stop[快速关闭，类似于TERM/INT信号的作用]
-    quit[优雅的关闭，类似于QUIT信号的作用] 
-    reopen[重新打开日志文件类似于USR1信号的作用] 
-    reload[类似于HUP信号的作用]
--p:prefix，指定Nginx的prefix路径，(默认为: /usr/local/nginx/)
--c:filename,指定Nginx的配置文件路径,(默认为: conf/nginx.conf)
--g:用来补充Nginx配置文件，向Nginx服务指定启动时应用全局的配置
-```
-
-### 2.2 不停机升级
-
-#### 2.2.1 使用信号
-
-1. 备份
-
-```bash
-cd /usr/local/nginx/sbin
-mv nginx nginxold
-```
-
-2. 新程序拷贝到原安装路径下
-
-```bash
-cd ~/nginx/core/nginx-1.16.1/objs
-cp nginx /usr/local/nginx/sbin
-```
-
-3. 发送USR2信号给master进程，告诉master进程要平滑升级，这个时候，会重新开启对应的master进程和work进程，整个系统中将会有两个master进程，并且新的master进程的PID会被记录在`/usr/local/nginx/logs/nginx.pid`而之前的旧的master进程PID会被记录
-
-```bash
-kill -USR2 PID / kill -USR2 `cat /usr/local/nginx/logs/nginx.pid`
-```
-
-4. 发送信号QUIT给旧版本退出
-
-```
-kill -QUIT `more /usr/local/logs/nginx.pid.oldbin`
-```
-
-#### 2.2.2 使用makefile命令
-
-1. 备份
-
-```bash
-cd /usr/local/nginx/sbin
-mv nginx nginxold
-```
-
-2. 新程序拷贝到原安装路径下
-
-```bash
-cd ~/nginx/core/nginx-1.16.1/objs
-cp nginx /usr/local/nginx/sbin
-```
-
-3. 升级
-
-```bash
-cd ~/nginx/core/nginx-1.16.1
-make upgrade
-```
-
-
-## 3. 高级
-
-### 3.1 配置文件
-
-#### 3.1.1 nginx.conf
-
-```bash
-./configure --prefix=/usr/local/nginx --with-stream --with-http_stub_status_module --with-http_ssl_module
-```
-
-```conf
-user nginx;
-worker_processes 32;
-error_log /var/log/nginx/nginx_error.log crit;
-pid /var/run/nginx.pid;
-worker_rlimit_nofile 102400;
-events {
-    use epoll;
-    worker_connections 102400;
-}
-
-http {
-    include mime.types;
-    default_type application/octet-stream;
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
-    access_log  /var/log/nginx/access.log  main;
-    # 其他参数
-    server_tokens   off;                    # 关闭错误页面中版本号
-    sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
-    tcp_nopush on;                          # 提升网络传输效率，在一个数据包里发送所有头文件
-    tcp_nodelay on;                         # 禁用Nagle算法，取消合并，即数据包立即发送出去
-    server_names_hash_bucket_size 128;      # 服务器名字的哈希表大小
-    keepalive_timeout 60s;                  # 长连接超时时间,设置为0，则表示禁用长连接
-    send_timeout 30s;                       # 设置发送响应到客户端的超时时间，默认为60s
-    # 请求头处理
-    client_header_buffer_size 32k;          # 请求头缓冲区大小
-    large_client_header_buffers 4 32k;      # 请求头最大缓冲区空间
-    client_header_timeout 60s;              # 设置读取客户端请求头超时时间，默认为60s,响应408
-    # 请求体处理
-    client_max_body_size 1m;                # 请求主体最大限制，上传文件大小，默认值为1m（1024kb）
-    client_body_buffer_size 16k;            # 请求主体缓冲区大小，如果主体大于缓冲区并且小于主体最大限制，则将文件存储到临时文件中（client_body_temp）
-    client_body_timeout 60s;                # 设置读取客户端主体内容体超时时间，默认为60s,响应408
-    client_body_temp_path /data/temp/;      # 请求主体临时保存路径
-    client_body_in_file_only off;           # 将请求体存储在临时文件中，默认关闭。clean：请求后删除,on：请求后不删除
-    client_body_in_single_buffer off;       # 默认关闭，开启优化读取$request_body变量时涉及的I/O操作
-    # 代理区处理-响应缓冲区
-    proxy_buffering on;                     # 开启响应缓冲区
-    proxy_buffers 8 8k;                     # 代理缓冲区空间，每个worker进程可以使用8个大小为8k的缓冲区
-    proxy_buffer_size 8k;                   # 单个代理缓冲区空间
-    proxy_busy_buffers_size 8k;             # 设置标注“client-ready”缓冲区的最大尺寸
-    proxy_max_temp_file_size 1024k          # 当proxy_buffers放不下后端服务器的响应内容时,写入临时文件
-    proxy_temp_file_write_size 64k;         # 当缓存被代理的服务器响应到临时文件时文件写入速度
-    proxy_headers_hash_max_size 51200;      # 存放http报文头的哈希表容量上限，默认为512个字符。
-    proxy_headers_hash_bucket_size 6400;    # nginx服务器申请存放http报文头的哈希表容量大小。默认为64个字符。
-    # 代理区处理-超时时间
-    proxy_connect_timeout 60s;              # 与后端/上游服务器建立连接的超时时间，默认为60s，此时间不超过75s
-    proxy_read_timeout 60s;                 # 设置从后端/上游服务器读取响应的超时时间，默认为60s
-    proxy_send_timeout 60s;                 # 设置往后端/上游服务器发送请求的超时时间，默认为60s
-    # 采用gzip压缩的形式发送数据，减少发送数据量，但会增加请求处理时间及CPU处理时间
-    gzip on;
-    gzip_types text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml text/javascript application/javascript application/x-javascript text/x-json application/json application/x-web-app-manifest+json text/css text/plain text/x-component font/opentype application/x-font-ttf application/vnd.ms-fontobject image/x-icon;         # 压缩文件类型
-    gzip_vary on;                           # 根据请求头来判断是否需要压缩
-    gzip_buffers 16 8k;                     # 缓存空间大小
-    gzip_disable "MSIE [1-6]\.";            # 为指定的客户端禁用gzip功能
-    gzip_http_version 1.1;                  # 使用Gzip的HTTP最低版本
-    gzip_min_length 1k;                     # 小于1k字节则不压缩
-    gzip_comp_level 3;                      # 压缩等级，1-9，9最慢压缩比最大
-    # 文件描述符缓存
-    open_file_cache max=10000 inactive=30s;    # 开启缓存的同时也指定了缓存文件的最大数量，30s如果文件没有请求则删除缓存
-    open_file_cache_valid 60s;              # 60s检查一次缓存的有效信息
-    open_file_cache_min_uses 5;             # 件缓存最小的访问次数，只有访问超过5次的才会被缓存
-    # 日志规则
-    map $time_iso8601 $logdate {
-        '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
-        default    'date-not-found';
-    }
-
-    include /usr/local/nginx/conf/blob.xuzhihao.net.conf;             # Http代理
-    include /usr/local/nginx/conf/blob.xuzhihao.net_upstream.conf;    # 负载均衡
-    include /usr/local/nginx/conf/openfire.xuzhihao.net.conf;         # Tcp代理
-}
-```
-
-#### 3.1.2 blob.xuzhihao.net_upstream.conf
-
-```conf
-upstream blob.xuzhihao.net {
-    ip_hash;
-    server 192.168.3.200:7535;
-    server 192.168.3.201:7535;
-}
-```
-
-#### 3.1.3 blob.xuzhihao.net.conf
-
-```conf
-server {
-    listen 80;
-    server_name blob.xuzhihao.net;
-    rewrite ^(.*)$ https://$host$1 permanent;
-}
-server {
-    listen 443 ssl;
-    server_name blob.xuzhihao.net;
-    charset utf-8;
-    ssl_certificate /usr/local/nginx/conf/cert/blob.xuzhihao.net_chain.crt;
-    ssl_certificate_key /usr/local/nginx/conf/cert/blob.xuzhihao.net_key.key;
-    ssl_session_cache shared:SSL:20m;
-    ssl_session_timeout 5m;
-    ssl_buffer_size 256k;
-    ssl_session_tickets on;
-    ssl_stapling on;
-    ssl_stapling_verify on;
-    # 在线查询证书吊销状态，每个机构是否验证信任链要求不一，没有则不添加，开启后如产生DNS污染问题通过resolver添加IP解决
-    ssl_trusted_certificate /www/cert/fullchain.pem;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
-    ssl_prefer_server_ciphers on;
-    resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
-    resolver_timeout 10s;
-    index index.html index.htm index.jsp index.do index.action;
-    access_log logs/blob.xuzhihao.net/access_${logdate}.log;
-    location / {
-        proxy_pass http://blob.xuzhihao.net;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        add_header Access-Control-Allow-Origin *;
-        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-        add_header Access-Control-Allow-Credentials 'true';
-        add_header Access-Control-Allow-Headers 'Authorization,Content-Type,X-Requested-With';
-    }
-}
-```
-
-#### 3.1.4 openfire.xuzhihao.net.tcp
-
-```conf
-tcp {
-    timeout 1d;
-    proxy_read_timeout 10d;
-    proxy_send_timeout 10d;
-    proxy_connect_timeout 30;
-    upstream op5222 {
-        ip_hash;
-        server 172.17.16.51:5222;
-        server 172.17.16.52:5222;
-        server 172.17.16.53:5222;
-        check interval=3000 rise=2 fall=5 timeout=1000;
-    }
-    upstream op7070 {
-        ip_hash;
-        server 172.17.16.51:7070;
-        server 172.17.16.52:7070;
-        server 172.17.16.53:7070;
-        check interval=3000 rise=2 fall=5 timeout=1000;
-    }
-    server {
-        listen 5223 ssl;
-        ssl_certificate      /cnf/cert/vjsp.cn.pem;
-        ssl_certificate_key  /cnf/cert/vjsp.cn.key;
-        ssl_session_cache    shared:SSL:1m;
-        ssl_session_timeout  5m;
-        ssl_ciphers  HIGH:!aNULL:!MD5;
-        ssl_prefer_server_ciphers  on;
-        proxy_connect_timeout 15s;
-        proxy_pass op5222;
-        so_keepalive on;
-        tcp_nodelay on;
-        access_log /nglog/tcp.5223.log;
-    }
-    server {
-        listen 7443 ssl;
-        ssl_certificate      /cnf/cert/vjsp.cn.pem;
-        ssl_certificate_key  /cnf/cert/vjsp.cn.key;
-        ssl_session_cache    shared:SSL:1m;
-        ssl_session_timeout  5m;
-        ssl_ciphers  HIGH:!aNULL:!MD5;
-        ssl_prefer_server_ciphers  on;
-        proxy_pass op7070;
-        so_keepalive on;
-        tcp_nodelay on;
-        access_log /nglog/tcp.7443.log;
-    }
-}
-```
-
-### 3.2 负载均衡
-
-#### 3.2.1 upstream七层负载
+### 2.1 http健康检查
 
 
 下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
 
 https://github.com/xzh-net/other/tree/main/nginx/nginx_upstream_check_module
 
+
 ```bash
-cd /opt/nginx-1.20.2
-patch -p1 < /opt/nginx-1.20.2/modules/nginx_upstream_check_module/check_1.20.1+.patch
+yum -y install patch
+mv /opt/software/nginx_upstream_check_module /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module
+cd /opt/software/nginx-1.22.1
 
-./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=./modules/ngx_http_proxy_connect_module --add-module=./modules/nginx_upstream_check_module
-
+patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module/check_1.20.1+.patch
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --add-module=./modules/nginx_upstream_check_module
 make && make install
 ```
 
-
 ```conf
-upstream backend {
-    server 192.168.3.200:9001 down;
-    server 192.168.3.201:9002 backup;
-    server 192.168.3.202:9003 max_fails=3 fail_timeout=30s;
+location /nstatus {
+    #状态页配置
+    check_status;
+    access_log off;
+    allow   172.17.17.165;
+    #允许可以连接的远端ip地址
+    deny    all;
+    #限制所有远端ip的连接
 }
 ```
 
-1. weight
-
-```conf
-upstream backend {
-    server 192.168.200.146:9001 weight=10;
-    server 192.168.200.146:9002 weight=5;
-    server 192.168.200.146:9003 weight=3;
-}
-```
-
-2. ip_hash
-
-```conf
-upstream blob.xuzhihao.net {
-    ip_hash;
-    server 192.168.3.200:7535;
-    server 192.168.3.201:7535;
-}
-```
-
-3. least_conn
-
-```conf
-upstream backend {
-    least_conn;
-    server 192.168.200.146:9001;
-    server 192.168.200.146:9002;
-    server 192.168.200.146:9003;
-}
-```
-
-4. url_hash
-
-```conf
-upstream backend {
-    hash &request_uri;
-    server 192.168.200.146:9001;
-    server 192.168.200.146:9002;
-    server 192.168.200.146:9003;
-}
-```
-
-5. fair
-
-```conf
-upstream backend {
-    fair;
-    server 192.168.200.146:9001;
-    server 192.168.200.146:9002;
-    server 192.168.200.146:9003;
-}
-```
-
-
-#### 3.2.3 stream四层负载
-
-```bash
-./configure --prefix=/usr/local/nginx --with-stream
-```
-
-```conf
-stream {
-    upstream back {
-        server 192.168.3.200:3306 up;
-        server 192.168.3.201:3306 up;
-    }
-    server {
-        listen 3301;
-        proxy_connect_timeout 5s;
-        proxy_timeout 300s;
-        proxy_pass back;
-    }
-}
-```
-
-### 3.3 正向代理
+### 2.2 正向代理
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
 https://github.com/xzh-net/other/tree/main/nginx/ngx_http_proxy_connect_module
 
 ```bash
-cd /opt/nginx-1.20.2
-patch -p1 < /opt/nginx-1.20.2/modules/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_1018.patch
-./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=./modules/ngx_http_proxy_connect_module
+mv /opt/software/ngx_http_proxy_connect_module /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module
+cd /opt/software/nginx-1.22.1
+
+patch -p1 < /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_102101.patch
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --add-module=./modules/nginx_upstream_check_module --add-module=./modules/ngx_http_proxy_connect_module
 make && make install
 ```
 
-配置代理
+正向代理在http模块内
+
 ```conf
 server {
     listen 3182;
@@ -665,6 +199,436 @@ linux客户端验证
 curl -i https://openapi.alipay.com/gateway.do
 #如果未加环境变量代理设置，则可以通过临时代理访问
 curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
+```
+
+### 2.3 目录索引
+
+#### 2.3.1 下载插件
+
+```bash
+cd /opt/software
+wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
+```
+
+#### 2.3.2 解压编译
+
+```bash
+unzip ngx-fancyindex-master.zip
+mv ngx-fancyindex-master /opt
+cd nginx-1.20.2
+./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=../ngx-fancyindex-master
+make  # 不要 make install
+cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
+```
+
+#### 2.3.3 配置模板
+
+
+1. 下载模板
+
+```bash
+wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
+cd /home/www
+unzip nginx-fancyindex.zip	
+mv nginx-fancyindex fancyindex
+```
+
+2. 配置fancyindex路径
+
+> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
+
+```conf
+vi /usr/local/nginx/conf/nginx.conf
+
+# 修改内容
+server {
+    listen 80;
+    server_name www.xuzhihao.net;
+    charset utf-8; 
+    location / {
+        root /home/www/; 
+        fancyindex on;                                 # 开启nginx目录浏览功能 
+        fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
+        fancyindex_exact_size off;                     # 文件大小从KB开始显示 
+        fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
+        fancyindex_footer "/fancyindex/footer.html";   # 设置footer为当前目录下的footer.html
+        fancyindex_ignore "fancyindex";                # 忽略
+        fancyindex_ignore "cgi";                       # 忽略
+        fancyindex_ignore ".php";                      # 忽略
+        fancyindex_time_format "%Y-%m-%d %H:%M:%S";
+        fancyindex_name_length 200;
+    }
+}
+```
+
+#### 2.3.4 md在线预览
+
+> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
+
+1. nginx配置
+
+```conf
+http {  
+    include mime.types;
+    default_type application/octet-stream;
+
+    client_max_body_size 100M;
+    charset utf-8;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    '$status $body_bytes_sent "$http_referer" '
+    '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log off;
+
+    server_tokens   off;
+    sendfile        on; 
+
+    keepalive_timeout  65;
+
+    gzip on;
+    gzip_disable "msie6";
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+    client_header_buffer_size 64k;
+    large_client_header_buffers 4 64k;
+    client_body_buffer_size 20m;
+
+    index index.html;
+
+    include /usr/local/nginx/sites-enabled/*;
+}
+```
+
+2. 站点配置
+
+```bash
+mkdir -p /usr/local/nginx/sites-enabled
+cd /usr/local/nginx/sites-enabled
+vi default
+```
+
+```conf
+server {
+    listen   80; ## listen for ipv4; this line is default and implied
+    listen   [::]:80 ipv6only=on; ## listen for ipv6
+
+    listen   443 ssl;
+    listen   [::]:443 default ipv6only=on ssl;
+
+    # Enable SSL
+    ssl_certificate /home/www/ssl/ssl.crt;
+    ssl_certificate_key /home/www/ssl/ssl.key;
+    ssl_session_timeout 10m;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_protocols TLSv1.1 TLSv1.2;
+    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+    ssl_prefer_server_ciphers on;
+
+    root /home/www/public;
+    index index.html index.htm;
+
+    location / {
+        auth_basic "off";
+        include /home/www/fancyindex/fancyindex.conf;
+    }
+
+    location ~ \.(?:md|markdown)$$ {
+        auth_basic "off";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
+    }
+
+    location =/assets/gfm.css {
+        auth_basic "off";
+        proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
+    }
+    #fixup fancyindex subrequest
+    location ^~ /fancyindex/ {
+        auth_basic "off";
+        alias /home/www/fancyindex/;
+    }
+    #fixup favicon.ico
+    location /favicon.ico {
+        alias /home/www/fancyindex/meta/favicon.ico;
+    }
+    location =/fancyindex/fancyindex.conf {
+        deny  all;
+    }
+    location =/fancyindex/README.md {
+        deny  all;
+    }
+    location =passwd {
+        deny  all;
+    }
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+    location = /favicon.ico { 
+        access_log off; 
+        log_not_found off; 
+    }
+    location = /robots.txt  { 
+        access_log off; 
+        log_not_found off; 
+    }
+    location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|ttf|ttc|otf|eot|woff)$ {
+        auth_basic "off";
+        expires max;
+        access_log off;
+        add_header Pragma public;
+        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    }
+    location ~* \.(?:css|js)$ {
+        auth_basic "off";
+        expires 1y;
+        add_header Cache-Control "public";
+    }
+    # deny access to . files, for security
+    location ~ /\.(?!well-known).* {
+        access_log off;
+        log_not_found off;
+        deny all;
+    }
+    location ~* (?:\.(?:bak|config|db|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+```
+
+#### 2.3.5 启动服务
+
+```
+/usr/local/bin/markdown-renderer -mode local -root /home/www/public/
+```
+
+## 3. 高级
+
+### 3.1 配置文件
+
+#### 3.1.1 nginx.conf
+
+```conf
+user nginx;
+worker_processes 32;
+error_log logs/error.log info;
+pid logs/nginx.pid;
+worker_rlimit_nofile 102400;
+events {
+    use epoll;
+    worker_connections 102400;
+}
+
+http {
+    include mime.types;
+    default_type application/octet-stream;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    # 日志规则
+    map $time_iso8601 $logdate {
+        '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
+        default    'date-not-found';
+    }
+    access_log logs/access_$logdate.log main;
+    # 其他参数
+    server_tokens   off;                    # 关闭错误页面中版本号
+    sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
+    tcp_nopush on;                          # 提升网络传输效率，在一个数据包里发送所有头文件
+    tcp_nodelay on;                         # 禁用Nagle算法，取消合并，即数据包立即发送出去
+    server_names_hash_bucket_size 128;      # 服务器名字的哈希表大小
+    keepalive_timeout 60s;                  # 长连接超时时间,设置为0，则表示禁用长连接
+    send_timeout 30s;                       # 设置发送响应到客户端的超时时间，默认为60s
+    # 请求头处理
+    client_header_buffer_size 32k;          # 请求头缓冲区大小
+    large_client_header_buffers 4 32k;      # 请求头最大缓冲区空间
+    client_header_timeout 60s;              # 设置读取客户端请求头超时时间，默认为60s,响应408
+    # 请求体处理
+    client_max_body_size 1m;                # 请求主体最大限制，上传文件大小，默认值为1m（1024kb）
+    client_body_buffer_size 16k;            # 请求主体缓冲区大小，如果主体大于缓冲区并且小于主体最大限制，则将文件存储到临时文件中（client_body_temp）
+    client_body_timeout 60s;                # 设置读取客户端主体内容体超时时间，默认为60s,响应408
+    client_body_temp_path /data/temp/;      # 请求主体临时保存路径
+    client_body_in_file_only off;           # 将请求体存储在临时文件中，默认关闭。clean：请求后删除,on：请求后不删除
+    client_body_in_single_buffer off;       # 默认关闭，开启优化读取$request_body变量时涉及的I/O操作
+    # 代理区处理-响应缓冲区
+    proxy_buffering on;                     # 开启响应缓冲区
+    proxy_buffers 8 8k;                     # 代理缓冲区空间，每个worker进程可以使用8个大小为8k的缓冲区
+    proxy_buffer_size 8k;                   # 单个代理缓冲区空间
+    proxy_busy_buffers_size 8k;             # 设置标注“client-ready”缓冲区的最大尺寸
+    proxy_max_temp_file_size 1024k;         # 当proxy_buffers放不下后端服务器的响应内容时,写入临时文件
+    proxy_temp_file_write_size 64k;         # 当缓存被代理的服务器响应到临时文件时文件写入速度
+    proxy_headers_hash_max_size 51200;      # 存放http报文头的哈希表容量上限，默认为512个字符。
+    proxy_headers_hash_bucket_size 6400;    # nginx服务器申请存放http报文头的哈希表容量大小。默认为64个字符。
+    # 代理区处理-超时时间
+    proxy_connect_timeout 60s;              # 与后端/上游服务器建立连接的超时时间，默认为60s，此时间不超过75s
+    proxy_read_timeout 60s;                 # 设置从后端/上游服务器读取响应的超时时间，默认为60s
+    proxy_send_timeout 60s;                 # 设置往后端/上游服务器发送请求的超时时间，默认为60s
+    # 采用gzip压缩的形式发送数据，减少发送数据量，但会增加请求处理时间及CPU处理时间
+    gzip on;
+    gzip_types text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml text/javascript application/javascript application/x-javascript text/x-json application/json application/x-web-app-manifest+json text/css text/plain text/x-component font/opentype application/x-font-ttf application/vnd.ms-fontobject image/x-icon;         # 压缩文件类型
+    gzip_vary on;                           # 根据请求头来判断是否需要压缩
+    gzip_buffers 16 8k;                     # 缓存空间大小
+    gzip_disable "MSIE [1-6]\.";            # 为指定的客户端禁用gzip功能
+    gzip_http_version 1.1;                  # 使用Gzip的HTTP最低版本
+    gzip_min_length 1k;                     # 小于1k字节则不压缩
+    gzip_comp_level 3;                      # 压缩等级，1-9，9最慢压缩比最大
+    # 文件描述符缓存
+    open_file_cache max=10000 inactive=30s;    # 开启缓存的同时也指定了缓存文件的最大数量，30s如果文件没有请求则删除缓存
+    open_file_cache_valid 60s;              # 60s检查一次缓存的有效信息
+    open_file_cache_min_uses 5;             # 件缓存最小的访问次数，只有访问超过5次的才会被缓存
+    
+    include /usr/local/nginx/conf/front.conf;
+    include /usr/local/nginx/conf/front_upstream.conf;
+}
+
+stream {
+    log_format proxy '$remote_addr [$time_local] '
+                 '$protocol $status $bytes_sent $bytes_received '
+                 '$session_time -> $upstream_addr '
+                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
+
+    access_log logs/tcp_access.log proxy;
+    include /usr/local/nginx/conf/ssh.conf;
+    include /usr/local/nginx/conf/mysql.conf;
+    include /usr/local/nginx/conf/openfire.conf;
+}
+
+include /usr/local/nginx/conf/openfire.conf;
+```
+
+#### 3.1.2 front.conf
+
+```conf
+server {
+    listen 80;
+    server_name www.xuzhihao.net;
+    rewrite ^(.*)$ https://$host$1 permanent;
+}
+server {
+    listen 443 ssl;
+    server_name www.xuzhihao.net;
+    charset utf-8;
+    ssl_certificate /usr/local/nginx/cert/www.xuzhihao.net_chain.crt;
+    ssl_certificate_key /usr/local/nginx/cert/www.xuzhihao.net_key.key;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 5m;
+    ssl_buffer_size 256k;
+    ssl_session_tickets on;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    # 在线查询证书吊销状态，每个机构是否验证信任链要求不一，没有则不添加，开启后如产生DNS污染问题通过resolver添加IP解决
+    # ssl_trusted_certificate /usr/local/nginx/cert/fullchain.pem;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
+    ssl_prefer_server_ciphers on;
+    resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
+    resolver_timeout 10s;
+    index index.html index.htm index.jsp index.do index.action;
+    access_log logs/www.xuzhihao.net/access_${logdate}.log;
+    location / {
+        proxy_pass http://front;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Credentials 'true';
+        add_header Access-Control-Allow-Headers 'Authorization,Content-Type,X-Requested-With';
+    }
+}
+```
+
+#### 3.1.3 front_upstream.conf
+
+```conf
+upstream front {
+    server 172.17.17.165:5501 weight=1 max_fails=3 fail_timeout=3s;
+    server 172.17.17.165:5502 weight=1 max_fails=3 fail_timeout=3s;
+    check interval=2000 rise=3 fall=2 timeout=1000 type=http;
+    #对front这个负载均衡池中的所有节点，每个2秒检测一次，
+    #请求3次正常则标记realserver状态为up，如果检测2次都失败，则标记realserver的状态为down，后端健康请求的超时时间为1s，健
+    #康检查包的类型为http请求。
+    check_http_send "HEAD / HTTP/1.0\r\n\r\n";
+    #通过http HEAD消息头检测realserver的健康
+    check_http_expect_alive http_2xx http_3xx;
+    #该指令指定HTTP回复的成功状态，默认为2XX和3XX的状态是健康的
+}
+```
+
+#### 3.1.4 openfire.conf
+
+```conf
+upstream op5222 {
+    server 172.17.16.51:5222 weight=5 max_fails=3 fail_timeout=30s;
+    server 172.17.16.52:5222 weight=5 max_fails=3 fail_timeout=30s;
+    server 172.17.16.53:5222 weight=5 max_fails=3 fail_timeout=30s;
+}
+upstream op7070 {
+    server 172.17.16.51:7070 weight=5 max_fails=3 fail_timeout=30s;
+    server 172.17.16.52:7070 weight=5 max_fails=3 fail_timeout=30s;
+    server 172.17.16.53:7070 weight=5 max_fails=3 fail_timeout=30s;
+}
+server {
+    listen 5223 ssl;
+    proxy_connect_timeout 5s;
+    proxy_timeout 300s;
+    access_log logs/tcp.5223.log tcp;
+    ssl_certificate      /usr/local/nginx/cert/vjsp.cn.pem;
+    ssl_certificate_key  /usr/local/nginx/cert/vjsp.cn.key;
+    ssl_session_cache    shared:SSL:10m;
+    ssl_session_timeout  10m;
+    ssl_ciphers  HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers  on;
+    proxy_pass op5222;    
+}
+server {
+    listen 7443 ssl;
+    proxy_connect_timeout 5s;
+    proxy_timeout 300s;
+    access_log logs/tcp.7443.log tcp;
+    ssl_certificate      /usr/local/nginx/cert/vjsp.cn.pem;
+    ssl_certificate_key  /usr/local/nginx/cert/vjsp.cn.key;
+    ssl_session_cache    shared:SSL:10m;
+    ssl_session_timeout  10m;
+    ssl_ciphers  HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers  on;
+    proxy_pass op7070;
+}
+```
+
+#### 3.1.5 mysql.conf
+
+```conf
+upstream myback {
+    server 192.168.3.200:3306;
+    server 192.168.3.201:3306;
+}
+server {
+    listen 3301;
+    proxy_connect_timeout 5s;
+    proxy_timeout 300s;
+    proxy_pass myback;
+}
+```
+
+#### 3.1.6 ssh.conf
+
+```conf
+upstream back {
+    server 172.17.17.161:22;
+}
+server {
+    listen 2000;
+    proxy_connect_timeout 5s;
+    proxy_timeout 300s;
+    proxy_pass back;
+}
 ```
 
 
@@ -726,7 +690,7 @@ server {
 
 ### 3.6 错误页
 
-#### 3.6.1 指定具体跳转地址
+1. 指定具体跳转地址
 
 ```conf
 server {
@@ -734,7 +698,7 @@ server {
 }
 ```
 
-#### 3.6.2 指定重定向地址
+2. 指定重定向地址
 
 ```conf
 server {
@@ -746,7 +710,7 @@ server {
 }
 ```
 
-#### 3.6.3 使用location的@符号
+3. 使用location的@符号
 
 ```conf
 server {
@@ -758,7 +722,7 @@ server {
 }
 ```
 
-#### 3.6.4 修改指定状态码
+4. 修改指定状态码
 
 ```conf
 server {
@@ -936,212 +900,7 @@ server {
 }
 ```
 
-### 3.11 目录索引
 
-#### 3.11.1 下载插件
-
-```bash
-cd /opt/software
-wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
-```
-
-#### 3.11.2 解压编译
-
-```bash
-unzip ngx-fancyindex-master.zip
-mv ngx-fancyindex-master /opt
-cd nginx-1.20.2
-./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=../ngx-fancyindex-master
-make  # 不要 make install
-cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
-```
-
-#### 3.11.3 配置模板
-
-
-1. 下载模板
-
-```bash
-wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
-cd /home/www
-unzip nginx-fancyindex.zip	
-mv nginx-fancyindex fancyindex
-```
-
-2. 配置fancyindex路径
-
-> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
-
-```conf
-vi /usr/local/nginx/conf/nginx.conf
-
-# 修改内容
-server {
-    listen 80;
-    server_name www.xuzhihao.net;
-    charset utf-8; 
-    location / {
-        root /home/www/; 
-        fancyindex on;                                 # 开启nginx目录浏览功能 
-        fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
-        fancyindex_exact_size off;                     # 文件大小从KB开始显示 
-        fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
-        fancyindex_footer "/fancyindex/footer.html";   # 设置footer为当前目录下的footer.html
-        fancyindex_ignore "fancyindex";                # 忽略
-        fancyindex_ignore "cgi";                       # 忽略
-        fancyindex_ignore ".php";                      # 忽略
-        fancyindex_time_format "%Y-%m-%d %H:%M:%S";
-        fancyindex_name_length 200;
-    }
-}
-```
-
-#### 3.11.4 md在线预览
-
-> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
-
-1. nginx配置
-
-```conf
-http {  
-    include mime.types;
-    default_type application/octet-stream;
-
-    client_max_body_size 100M;
-    charset utf-8;
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-    '$status $body_bytes_sent "$http_referer" '
-    '"$http_user_agent" "$http_x_forwarded_for"';
-    access_log off;
-
-    server_tokens   off;
-    sendfile        on; 
-
-    keepalive_timeout  65;
-
-    gzip on;
-    gzip_disable "msie6";
-    gzip_vary on;
-    gzip_proxied any;
-    gzip_comp_level 6;
-    gzip_buffers 16 8k;
-    gzip_http_version 1.1;
-    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
-
-    client_header_buffer_size 64k;
-    large_client_header_buffers 4 64k;
-    client_body_buffer_size 20m;
-
-    index index.html;
-
-    include /usr/local/nginx/sites-enabled/*;
-}
-```
-
-2. 站点配置
-
-```bash
-mkdir -p /usr/local/nginx/sites-enabled
-cd /usr/local/nginx/sites-enabled
-vi default
-```
-
-```conf
-server {
-    listen   80; ## listen for ipv4; this line is default and implied
-    listen   [::]:80 ipv6only=on; ## listen for ipv6
-
-    listen   443 ssl;
-    listen   [::]:443 default ipv6only=on ssl;
-
-    # Enable SSL
-    ssl_certificate /home/www/ssl/ssl.crt;
-    ssl_certificate_key /home/www/ssl/ssl.key;
-    ssl_session_timeout 10m;
-    ssl_session_cache   shared:SSL:10m;
-    ssl_protocols TLSv1.1 TLSv1.2;
-    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
-    ssl_prefer_server_ciphers on;
-
-    root /home/www/public;
-    index index.html index.htm;
-
-    location / {
-        auth_basic "off";
-        include /home/www/fancyindex/fancyindex.conf;
-    }
-
-    location ~ \.(?:md|markdown)$$ {
-        auth_basic "off";
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
-    }
-
-    location =/assets/gfm.css {
-        auth_basic "off";
-        proxy_pass http://127.0.0.1:8002; # Markdown Renderer server.
-    }
-    #fixup fancyindex subrequest
-    location ^~ /fancyindex/ {
-        auth_basic "off";
-        alias /home/www/fancyindex/;
-    }
-    #fixup favicon.ico
-    location /favicon.ico {
-        alias /home/www/fancyindex/meta/favicon.ico;
-    }
-    location =/fancyindex/fancyindex.conf {
-        deny  all;
-    }
-    location =/fancyindex/README.md {
-        deny  all;
-    }
-    location =passwd {
-        deny  all;
-    }
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-XSS-Protection "1; mode=block";
-    add_header X-Content-Type-Options "nosniff";
-    location = /favicon.ico { 
-        access_log off; 
-        log_not_found off; 
-    }
-    location = /robots.txt  { 
-        access_log off; 
-        log_not_found off; 
-    }
-    location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|ttf|ttc|otf|eot|woff)$ {
-        auth_basic "off";
-        expires max;
-        access_log off;
-        add_header Pragma public;
-        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-    }
-    location ~* \.(?:css|js)$ {
-        auth_basic "off";
-        expires 1y;
-        add_header Cache-Control "public";
-    }
-    # deny access to . files, for security
-    location ~ /\.(?!well-known).* {
-        access_log off;
-        log_not_found off;
-        deny all;
-    }
-    location ~* (?:\.(?:bak|config|db|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
-        deny all;
-        access_log off;
-        log_not_found off;
-    }
-}
-```
-
-#### 3.11.5 启动预览服务器
-
-```
-/usr/local/bin/markdown-renderer -mode local -root /home/www/public/
-```
 
 ### 3.12 IP过滤
 
@@ -1155,7 +914,9 @@ include blockip.conf;
 allow  180.164.67.212;
 allow  59.46.186.253;
 deny all;
+```
 
+```conf
 http {
     # include blockip.conf;
     server {
@@ -1208,7 +969,7 @@ location /console {
 }
 ```
 
-## 4. SSL证书
+## 4. 证书
 
 ### 4.1 openssl自签名
 
