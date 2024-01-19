@@ -1,4 +1,4 @@
-# Nginx 1.20.2
+# Nginx 1.22.1
 
 - 官方网站：http://nginx.org
 
@@ -10,7 +10,7 @@
 
 ```bash
 cd /opt/software
-wget http://nginx.org/download/nginx-1.20.2.tar.gz
+wget http://nginx.org/download/nginx-1.22.1.tar.gz
 ```
 
 #### 1.1.2 安装依赖
@@ -29,8 +29,8 @@ useradd nginx -s /sbin/nologin -M
 
 ```bash
 cd /opt/software 
-tar zxvf nginx-1.20.2.tar.gz
-cd nginx-1.20.2
+tar zxvf nginx-1.22.1.tar.gz
+cd nginx-1.22.1
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module
 make && make install
 ```
@@ -52,8 +52,10 @@ source /etc/profile
 
 ```bash
 vim /usr/lib/systemd/system/nginx.service
+```
 
-#添加内容
+添加内容
+```conf
 [Unit]
 Description=nginx web service
 Documentation=http://nginx.org/en/docs/
@@ -91,27 +93,32 @@ systemctl reload nginx    # 重新加载配置文件
 systemctl status nginx    # 查看状态
 ```
 
+#### 1.1.8 日志切割
+
 ```bash
-echo '/usr/local/nginx/logs/*.log {
-    su root root
-    daily
-    rotate 5
-    missingok
-    notifempty
-    compress
-    delaycompress
-    sharedscripts
+echo '/usr/local/nginx/logs/*.log {   # 可以指定多个路径
+    daily                      # 日志轮询周期，weekly,monthly,yearly
+    rotate 30                  # 保存30天数据，超过的则删除
+    size +100M                 # 超过100M时分割，单位K,M,G，优先级高于daily
+    compress                   # 切割后压缩，也可以为nocompress
+    delaycompress              # 切割时对上次的日志文件进行压缩
+    dateext                    # 日志文件切割时添加日期后缀
+    missingok                  # 如果没有日志文件也不报错
+    notifempty                 # 日志为空时不进行切换，默认为ifempty
+    create 640 nginx nginx     # 使用该模式创建日志文件
+    sharedscripts              # 所有的文件切割之后只执行一次下面脚本
     postrotate
         /bin/kill -USR1 `cat /usr/local/nginx/logs/nginx.pid 2>/dev/null` 2>/dev/null || true
     endscript
 }
 ' > /etc/logrotate.d/nginx
-
-systemctl daemon-reload
-logrotate -d /etc/logrotate.d/nginx
-logrotate -f /etc/logrotate.d/nginx
 ```
 
+```bash
+crontab -e
+# 每天 23点59分进行日志切割
+59 23 * * * /usr/sbin/logrotate -f /etc/logrotate.d/nginx
+```
 
 ## 2. 模块
 
@@ -215,7 +222,7 @@ wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancy
 ```bash
 unzip ngx-fancyindex-master.zip
 mv ngx-fancyindex-master /opt
-cd nginx-1.20.2
+cd nginx-1.22.1
 ./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=../ngx-fancyindex-master
 make  # 不要 make install
 cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
@@ -417,12 +424,23 @@ server {
 ```conf
 user nginx;
 worker_processes 32;
-error_log logs/error.log info;
+error_log logs/error.log error;
 pid logs/nginx.pid;
 worker_rlimit_nofile 102400;
 events {
     use epoll;
     worker_connections 102400;
+}
+
+stream {
+    log_format proxy '$remote_addr [$time_local] '
+                 '$protocol $status $bytes_sent $bytes_received '
+                 '$session_time -> $upstream_addr '
+                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
+    access_log logs/stream_access.log proxy;
+    include /usr/local/nginx/conf/ssh.conf;
+    include /usr/local/nginx/conf/mysql.conf;
+    include /usr/local/nginx/conf/openfire.conf;
 }
 
 http {
@@ -431,12 +449,7 @@ http {
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
-    # 日志规则
-    map $time_iso8601 $logdate {
-        '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
-        default    'date-not-found';
-    }
-    access_log logs/access_$logdate.log main;
+    access_log logs/access.log main;
     # 其他参数
     server_tokens   off;                    # 关闭错误页面中版本号
     sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
@@ -486,20 +499,6 @@ http {
     include /usr/local/nginx/conf/front.conf;
     include /usr/local/nginx/conf/front_upstream.conf;
 }
-
-stream {
-    log_format proxy '$remote_addr [$time_local] '
-                 '$protocol $status $bytes_sent $bytes_received '
-                 '$session_time -> $upstream_addr '
-                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
-
-    access_log logs/tcp_access.log proxy;
-    include /usr/local/nginx/conf/ssh.conf;
-    include /usr/local/nginx/conf/mysql.conf;
-    include /usr/local/nginx/conf/openfire.conf;
-}
-
-include /usr/local/nginx/conf/openfire.conf;
 ```
 
 #### 3.1.2 front.conf
@@ -520,9 +519,9 @@ server {
     ssl_session_timeout 5m;
     ssl_buffer_size 256k;
     ssl_session_tickets on;
-    ssl_stapling on;
-    ssl_stapling_verify on;
     # 在线查询证书吊销状态，每个机构是否验证信任链要求不一，没有则不添加，开启后如产生DNS污染问题通过resolver添加IP解决
+    # ssl_stapling on;
+    # ssl_stapling_verify on;
     # ssl_trusted_certificate /usr/local/nginx/cert/fullchain.pem;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
@@ -530,7 +529,7 @@ server {
     resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
     resolver_timeout 10s;
     index index.html index.htm index.jsp index.do index.action;
-    access_log logs/www.xuzhihao.net/access_${logdate}.log;
+    access_log logs/www.xuzhihao.net/access.log;
     location / {
         proxy_pass http://front;
         proxy_set_header Host $host;
@@ -578,7 +577,7 @@ server {
     listen 5223 ssl;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
-    access_log logs/tcp.5223.log tcp;
+    access_log logs/stream/5223.log proxy;
     ssl_certificate      /usr/local/nginx/cert/vjsp.cn.pem;
     ssl_certificate_key  /usr/local/nginx/cert/vjsp.cn.key;
     ssl_session_cache    shared:SSL:10m;
@@ -591,7 +590,7 @@ server {
     listen 7443 ssl;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
-    access_log logs/tcp.7443.log tcp;
+    access_log logs/stream/7443.log proxy;
     ssl_certificate      /usr/local/nginx/cert/vjsp.cn.pem;
     ssl_certificate_key  /usr/local/nginx/cert/vjsp.cn.key;
     ssl_session_cache    shared:SSL:10m;
@@ -647,7 +646,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
-    access_log logs/web.log;
+    access_log logs/domain.log;
 }
 ```
 
