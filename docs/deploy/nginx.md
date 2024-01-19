@@ -632,11 +632,7 @@ server {
 ```
 
 
-### 3.4 泛域名
-
-```bash
-./configure  --prefix=/usr/local/nginx --with-http_sub_module
-```
+### 3.2 泛域名
 
 ```conf
 server {
@@ -656,7 +652,7 @@ server {
 ```
 
 
-### 3.5 二级路径
+### 3.3 二级路径
 
 ```conf
 server {
@@ -688,7 +684,7 @@ server {
 
 > `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
 
-### 3.6 错误页
+### 3.4 错误页
 
 1. 指定具体跳转地址
 
@@ -733,7 +729,7 @@ server {
 }
 ```
 
-### 3.7 跨域
+### 3.5 跨域
 
 ```conf
 location /getUser {
@@ -762,7 +758,7 @@ location /postUser {
 }
 ```
 
-### 3.8 防盗链
+### 3.6 防盗链
 
 ```conf
 location ~*\.(png|jpg|gif) {
@@ -784,7 +780,7 @@ location /images {
 }
 ```
 
-### 3.9 Rewrite
+### 3.7 Rewrite
 
 常用变量
 
@@ -836,7 +832,7 @@ server {
 }
 ```
 
-### 3.10 web缓存
+### 3.8 web缓存
 
 ```conf
 http {
@@ -902,7 +898,7 @@ server {
 
 
 
-### 3.12 IP过滤
+### 3.9 IP过滤
 
 1. 屏蔽ip
 
@@ -951,7 +947,7 @@ location / {
 }
 ```
 
-### 3.13 URL美化
+### 3.10 URL美化
 
 解决VUE项目下`#`号参数被拦截的问题
 
