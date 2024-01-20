@@ -238,7 +238,7 @@ curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
 
 下载地址：https://github.com/yaoweibin/nginx_tcp_proxy_module
 
-> 只在1.20.1下编译成功
+当前最高在1.20.1下编译成功
 
 ```bash
 mv /opt/software/nginx_tcp_proxy_module /opt/software/nginx-1.20.1/modules/nginx_tcp_proxy_module
@@ -483,17 +483,6 @@ events {
     worker_connections 102400;
 }
 
-stream {
-    log_format proxy '$remote_addr [$time_local] '
-                 '$protocol $status $bytes_sent $bytes_received '
-                 '$session_time -> $upstream_addr '
-                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
-    access_log logs/stream_access.log proxy;
-    include /usr/local/nginx/conf/ssh.conf;
-    include /usr/local/nginx/conf/mysql.conf;
-    include /usr/local/nginx/conf/openfire.conf;
-}
-
 http {
     include mime.types;
     default_type application/octet-stream;
@@ -549,6 +538,24 @@ http {
     
     include /usr/local/nginx/conf/front.conf;
     include /usr/local/nginx/conf/front_upstream.conf;
+}
+
+stream {
+    log_format stream '$remote_addr [$time_local] '
+                 '$protocol $status $bytes_sent $bytes_received '
+                 '$session_time -> $upstream_addr '
+                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
+    access_log logs/stream_access.log stream;
+    include /usr/local/nginx/conf/stream_mysql.conf;
+}
+
+tcp {
+    log_format proxy '$remote_addr [$time_local] '
+                 '$protocol $status $bytes_sent $bytes_received '
+                 '$session_time -> $upstream_addr '
+                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
+    access_log logs/tcp_access.log proxy;
+    include /usr/local/nginx/conf/tcp_openfire.conf;
 }
 ```
 
@@ -611,73 +618,82 @@ upstream front {
 }
 ```
 
-#### 3.1.4 openfire.conf
+#### 3.1.4 tcp_openfire.conf
 
 ```conf
-upstream op5222 {
-    server 172.17.16.51:5222 weight=5 max_fails=3 fail_timeout=30s;
-    server 172.17.16.52:5222 weight=5 max_fails=3 fail_timeout=30s;
-    server 172.17.16.53:5222 weight=5 max_fails=3 fail_timeout=30s;
+timeout 1d;
+proxy_read_timeout 10d;
+proxy_send_timeout 10d;
+proxy_connect_timeout 30;
+upstream op5222{
+        ip_hash;
+        server 172.17.16.51:5222;
+        server 172.17.16.52:5222;
+        server 172.17.16.53:5222;
+        check interval=3000 rise=2 fall=5 timeout=1000;
 }
-upstream op7070 {
-    server 172.17.16.51:7070 weight=5 max_fails=3 fail_timeout=30s;
-    server 172.17.16.52:7070 weight=5 max_fails=3 fail_timeout=30s;
-    server 172.17.16.53:7070 weight=5 max_fails=3 fail_timeout=30s;
+upstream op7070{
+        ip_hash;
+        server 172.17.16.51:7070;
+        server 172.17.16.52:7070;
+        server 172.17.16.53:7070;
+        check interval=3000 rise=2 fall=5 timeout=1000;
 }
-server {
-    listen 5223 ssl;
-    proxy_connect_timeout 5s;
-    proxy_timeout 300s;
-    access_log logs/stream/5223.log proxy;
-    ssl_certificate      /usr/local/nginx/cert/vjsp.cn.pem;
-    ssl_certificate_key  /usr/local/nginx/cert/vjsp.cn.key;
-    ssl_session_cache    shared:SSL:10m;
-    ssl_session_timeout  10m;
-    ssl_ciphers  HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers  on;
-    proxy_pass op5222;    
+server{
+        listen 5223 ssl;
+        access_log logs/tcp/5223.log;
+        ssl_certificate      /usr/local/nginx/cert/server.pem;
+        ssl_certificate_key  /usr/local/nginx/cert/private.key;
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+        proxy_connect_timeout 15s;
+        proxy_pass op5222;
+        so_keepalive on;
+        tcp_nodelay on;
 }
-server {
-    listen 7443 ssl;
-    proxy_connect_timeout 5s;
-    proxy_timeout 300s;
-    access_log logs/stream/7443.log proxy;
-    ssl_certificate      /usr/local/nginx/cert/vjsp.cn.pem;
-    ssl_certificate_key  /usr/local/nginx/cert/vjsp.cn.key;
-    ssl_session_cache    shared:SSL:10m;
-    ssl_session_timeout  10m;
-    ssl_ciphers  HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers  on;
-    proxy_pass op7070;
+server{
+        listen 7443 ssl;
+        access_log logs/tcp/7443.log;
+        ssl_certificate      /usr/local/nginx/cert/server.pem;
+        ssl_certificate_key  /usr/local/nginx/cert/private.key;
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+        proxy_pass op7070;
+        so_keepalive on;
+        tcp_nodelay on;
 }
 ```
 
-#### 3.1.5 mysql.conf
+#### 3.1.5 stream_mysql.conf
 
 ```conf
-upstream myback {
+upstream mysql {
     server 192.168.3.200:3306;
     server 192.168.3.201:3306;
 }
 server {
-    listen 3301;
+    listen 33060;
+    access_log logs/stream/33060.log stream;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
-    proxy_pass myback;
+    proxy_pass mysql;
 }
-```
 
-#### 3.1.6 ssh.conf
-
-```conf
-upstream back {
+upstream mysh {
     server 172.17.17.161:22;
 }
 server {
-    listen 2000;
+    listen 2200 ssl;
+    ssl_certificate      /usr/local/nginx/cert/server.pem;
+    ssl_certificate_key  /usr/local/nginx/cert/private.key;
+    access_log logs/stream/2200.log stream;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
-    proxy_pass back;
+    proxy_pass mysh;
 }
 ```
 
