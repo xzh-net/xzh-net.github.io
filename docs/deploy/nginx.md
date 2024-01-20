@@ -31,7 +31,15 @@ useradd nginx -s /sbin/nologin -M
 cd /opt/software 
 tar zxvf nginx-1.22.1.tar.gz
 cd nginx-1.22.1
-./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module
+
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
+--user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
+--with-stream \
+--with-http_ssl_module --with-http_realip_module \
+--with-http_sub_module \
+--with-mail_ssl_module \
+--with-http_stub_status_module --with-http_gzip_static_module \
+
 make && make install
 ```
 
@@ -134,9 +142,18 @@ https://github.com/xzh-net/other/tree/main/nginx/nginx_upstream_check_module
 yum -y install patch
 mv /opt/software/nginx_upstream_check_module /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module
 cd /opt/software/nginx-1.22.1
-
+# 打补丁
 patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module/check_1.20.1+.patch
-./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --add-module=./modules/nginx_upstream_check_module
+# 编译
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
+--user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
+--with-stream \
+--with-http_ssl_module --with-http_realip_module \
+--with-http_sub_module \
+--with-mail_ssl_module \
+--with-http_stub_status_module --with-http_gzip_static_module \
+--add-module=./modules/nginx_upstream_check_module \
+# 安装
 make && make install
 ```
 
@@ -152,7 +169,7 @@ location /nstatus {
 }
 ```
 
-### 2.2 正向代理
+### 2.2 http代理
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
@@ -161,9 +178,18 @@ https://github.com/xzh-net/other/tree/main/nginx/ngx_http_proxy_connect_module
 ```bash
 mv /opt/software/ngx_http_proxy_connect_module /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module
 cd /opt/software/nginx-1.22.1
-
+# 打补丁
 patch -p1 < /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_102101.patch
-./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid --user=nginx --group=nginx --build=web_server --with-threads  --with-file-aio --with-http_v2_module --with-http_ssl_module --with-stream --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --add-module=./modules/nginx_upstream_check_module --add-module=./modules/ngx_http_proxy_connect_module
+# 编译
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
+--user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
+--with-stream \
+--with-http_ssl_module --with-http_realip_module \
+--with-http_sub_module \
+--with-mail_ssl_module \
+--with-http_stub_status_module --with-http_gzip_static_module \
+--add-module=./modules/ngx_http_proxy_connect_module \
+# 安装
 make && make install
 ```
 
@@ -208,16 +234,41 @@ curl -i https://openapi.alipay.com/gateway.do
 curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
 ```
 
-### 2.3 目录索引
+### 2.3 tcp代理
 
-#### 2.3.1 下载插件
+下载地址：https://github.com/yaoweibin/nginx_tcp_proxy_module
+
+> 只在1.20.1下编译成功
+
+```bash
+mv /opt/software/nginx_tcp_proxy_module /opt/software/nginx-1.20.1/modules/nginx_tcp_proxy_module
+cd /opt/software/nginx-1.20.1
+# 打补丁
+patch -p1 < /opt/software/nginx-1.20.1/modules/nginx_tcp_proxy_module/tcp.patch
+# 编译
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
+--user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
+--with-stream \
+--with-http_ssl_module --with-http_realip_module \
+--with-http_sub_module \
+--with-mail_ssl_module \
+--with-http_stub_status_module --with-http_gzip_static_module \
+--add-module=./modules/nginx_tcp_proxy_module
+# 安装
+make && make install
+```
+
+
+### 2.4 目录索引
+
+#### 2.4.1 下载插件
 
 ```bash
 cd /opt/software
 wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
 ```
 
-#### 2.3.2 解压编译
+#### 2.4.2 解压编译
 
 ```bash
 unzip ngx-fancyindex-master.zip
@@ -228,7 +279,7 @@ make  # 不要 make install
 cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
 ```
 
-#### 2.3.3 配置模板
+#### 2.4.3 配置模板
 
 
 1. 下载模板
@@ -268,7 +319,7 @@ server {
 }
 ```
 
-#### 2.3.4 md在线预览
+#### 2.4.4 md在线预览
 
 > 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
 
@@ -409,7 +460,7 @@ server {
 }
 ```
 
-#### 2.3.5 启动服务
+#### 2.4.5 启动服务
 
 ```
 /usr/local/bin/markdown-renderer -mode local -root /home/www/public/
