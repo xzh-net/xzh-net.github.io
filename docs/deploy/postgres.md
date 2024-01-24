@@ -748,42 +748,42 @@ COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：�
 ```sql
 -- 查询当前正在执行所有SQL语句
 SELECT
-	pid,
-	datname,
-	usename,
-	client_addr,
-	application_name,
-	STATE,
-	backend_start,
-	xact_start,
-	xact_stay,
-	query_start,
-	query_stay,
-	REPLACE ( query, chr( 10 ), ' ' ) AS query 
+    pid,
+    datname,
+    usename,
+    client_addr,
+    application_name,
+    STATE,
+    backend_start,
+    xact_start,
+    xact_stay,
+    query_start,
+    query_stay,
+    REPLACE ( query, chr( 10 ), ' ' ) AS query 
 FROM
-	(
-	SELECT
-		pgsa.pid AS pid,
-		pgsa.datname AS datname,
-		pgsa.usename AS usename,
-		pgsa.client_addr client_addr,
-		pgsa.application_name AS application_name,
-		pgsa.STATE AS STATE,
-		pgsa.backend_start AS backend_start,
-		pgsa.xact_start AS xact_start,
-		EXTRACT ( epoch FROM ( now( ) - pgsa.xact_start ) ) AS xact_stay,
-		pgsa.query_start AS query_start,
-		EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) AS query_stay,
-		pgsa.query AS query 
-	FROM
-		pg_stat_activity AS pgsa 
-	WHERE
-		pgsa.STATE != 'idle' 
-		AND pgsa.STATE != 'idle in transaction' 
-		AND pgsa.STATE != 'idle in transaction (aborted)' 
-	) idleconnections 
+    (
+    SELECT
+        pgsa.pid AS pid,
+        pgsa.datname AS datname,
+        pgsa.usename AS usename,
+        pgsa.client_addr client_addr,
+        pgsa.application_name AS application_name,
+        pgsa.STATE AS STATE,
+        pgsa.backend_start AS backend_start,
+        pgsa.xact_start AS xact_start,
+        EXTRACT ( epoch FROM ( now( ) - pgsa.xact_start ) ) AS xact_stay,
+        pgsa.query_start AS query_start,
+        EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) AS query_stay,
+        pgsa.query AS query 
+    FROM
+        pg_stat_activity AS pgsa 
+    WHERE
+        pgsa.STATE != 'idle' 
+        AND pgsa.STATE != 'idle in transaction' 
+        AND pgsa.STATE != 'idle in transaction (aborted)' 
+    ) idleconnections 
 ORDER BY
-	query_stay DESC
+    query_stay DESC
 
 -- PID查询sql
 SELECT
@@ -812,9 +812,9 @@ SELECT 'SELECT pg_terminate_backend(' || pid || ');'
 FROM pg_stat_activity pgsa
 WHERE  pid != pg_backend_pid()
   and pgsa.STATE != 'idle' 
-		AND pgsa.STATE != 'idle in transaction' 
-		AND pgsa.STATE != 'idle in transaction (aborted)' 
-		AND EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) > 90
+        AND pgsa.STATE != 'idle in transaction' 
+        AND pgsa.STATE != 'idle in transaction (aborted)' 
+        AND EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) > 90
 
 -- kill 进程
 SELECT pg_terminate_backend ( pid );    --彻底停止进程，导致连接关闭。事务会回滚，释放持有的锁
@@ -1154,7 +1154,7 @@ analyze verbose tableName
 
 ## 6. PG/SQL
 
-### 6.1 VIEW
+### 6.1 视图
 
 1. dual解决方案
 
@@ -1192,7 +1192,7 @@ UNION
 ALTER TABLE "view_of_user" OWNER TO "postgres";
 ```
 
-### 6.2 TRIGGER
+### 6.2 触发器
 
 1. 分数表
 
@@ -1255,7 +1255,7 @@ for each row
 execute procedure fun_stu_major()
 ```
 
-### 6.3 FUNCTION
+### 6.3 函数
 
 1. 遍历
 
@@ -1296,125 +1296,40 @@ $BODY$
 2. 执行SQL
 
 ```sql
-CREATE OR REPLACE FUNCTION "public"."Untitled"("formno" text)
-  RETURNS "pg_catalog"."varchar" AS $BODY$
-DECLARE
-  RETVAL             varchar(200);
-  V_MOUDLE_ID        varchar(200);
-  V_PREFIX           varchar(200);
-  V_CONTAIN_YEAR     bigint;
-  V_CONTAIN_MONTH    bigint;
-  V_CONTAIN_DAY      bigint;
-  V_NUMBER_LENGTH    int;
-  V_NUMBER_BEGIN     varchar(200);
-  V_MAX_MID          varchar(200);
-  V_MAX_MNUM         bigint;
-  V_MAX_MNUM_STR     varchar(200);
-  V_LOCK_SQL         varchar(4000);
-  V_FIND_MAX_NUM_SQL varchar(4000);
-  V_SQL_HEAD         varchar(4000);
-  V_SQL_BODY         varchar(4000);
-  V_YEAR             varchar(40);
-  V_MONTH            varchar(40);
-  V_DAY              varchar(40);
+CREATE OR REPLACE FUNCTION "public"."check_monitor"()
+  RETURNS "pg_catalog"."void" AS $BODY$ DECLARE
+    V_SQL VARCHAR ( 4000 );
+item record;
 BEGIN
-   RETVAL:='';
-   LOCK table VJSP_CRM_NUMBER_RULE_LOCK in SHARE mode;
-   --获取当前人员角色ID
-  SELECT MAX(A.MOUDLE_ID),
-         MAX(A.PREFIX),
-         MAX(A.CONTAIN_YEAR),
-         MAX(A.CONTAIN_MONTH),
-         MAX(A.CONTAIN_DAY),
-         MAX(A.NUMBER_LENGTH),
-         MAX(A.NUMBER_BEGIN)
-    INTO V_MOUDLE_ID,
-         V_PREFIX,
-         V_CONTAIN_YEAR,
-         V_CONTAIN_MONTH,
-         V_CONTAIN_DAY,
-         V_NUMBER_LENGTH,
-         V_NUMBER_BEGIN
-    FROM VJSP_CRM_NUMBER_RULE A
-   WHERE A.MOUDLE_ID = FORMNO;
-  IF COALESCE(V_MOUDLE_ID,'x'::text)='x' THEN
-    SELECT MAX(A.MOUDLE_ID),
-           MAX(A.PREFIX),
-           MAX(A.CONTAIN_YEAR),
-           MAX(A.CONTAIN_MONTH),
-           MAX(A.CONTAIN_DAY),
-           MAX(A.NUMBER_LENGTH),
-           MAX(A.NUMBER_BEGIN)
-      INTO V_MOUDLE_ID,
-           V_PREFIX,
-           V_CONTAIN_YEAR,
-           V_CONTAIN_MONTH,
-           V_CONTAIN_DAY,
-           V_NUMBER_LENGTH,
-           V_NUMBER_BEGIN
-      FROM VJSP_CRM_NUMBER_RULE A
-     WHERE A.IS_DEFAULT = 1;
-    IF COALESCE (V_MOUDLE_ID,'x'::text)='x' THEN
-      RETURN RETVAL;
-    END IF;
-  END IF;
-  --前缀
-  RETVAL             := RETVAL || V_PREFIX;
-  V_FIND_MAX_NUM_SQL := 'SELECT MAX(A.MOUDLE_ID), MAX(A.MOUDLE_NUMBER) FROM VJSP_CRM_NUMBER_RULE_DETAIL A WHERE A.MOUDLE_ID =''' ||
-                        V_MOUDLE_ID || '''';
-  V_SQL_HEAD         := 'INSERT INTO VJSP_CRM_NUMBER_RULE_DETAIL (MOUDLE_ID, MOUDLE_NUMBER';
-  V_SQL_BODY         := ' VALUES ($1, $2';
-  IF V_CONTAIN_YEAR = 1 THEN
-    V_YEAR             := TO_CHAR(LOCALTIMESTAMP, 'YYYY');
-    RETVAL             := RETVAL || V_YEAR;
-    V_FIND_MAX_NUM_SQL := V_FIND_MAX_NUM_SQL || ' AND A.M_YEAR=''' ||
-                          V_YEAR || '''';
-    V_SQL_HEAD         := V_SQL_HEAD || ',M_YEAR';
-    V_SQL_BODY         := V_SQL_BODY || ' ,''' || V_YEAR || '''';
-  END IF;
-  IF V_CONTAIN_MONTH = 1 THEN
-    V_MONTH            := TO_CHAR(LOCALTIMESTAMP, 'MM');
-    RETVAL             := RETVAL || V_MONTH;
-    V_FIND_MAX_NUM_SQL := V_FIND_MAX_NUM_SQL || ' AND A.M_MONTH=''' ||
-                          V_MONTH || '''';
-    V_SQL_HEAD         := V_SQL_HEAD || ',M_MONTH';
-    V_SQL_BODY         := V_SQL_BODY || ' ,''' || V_MONTH || '''';
-  END IF;
-  IF V_CONTAIN_DAY = 1 THEN
-    V_DAY              := TO_CHAR(LOCALTIMESTAMP, 'DD');
-    RETVAL             := RETVAL || V_DAY;
-    V_FIND_MAX_NUM_SQL := V_FIND_MAX_NUM_SQL || ' AND A.M_DAY=''' || V_DAY || '''';
-    V_SQL_HEAD         := V_SQL_HEAD || ',M_DAY';
-    V_SQL_BODY         := V_SQL_BODY || ' ,''' || V_DAY || '''';
-  END IF;
-  V_SQL_HEAD := V_SQL_HEAD || ')';
-  V_SQL_BODY := V_SQL_BODY || ')';
+    FOR item IN (
+        SELECT
+            pid,
+            query 
+        FROM
+            pg_stat_activity pgsa 
+        WHERE
+            pid != pg_backend_pid ( ) 
+            AND pgsa.STATE != 'idle' 
+            AND pgsa.STATE != 'idle in transaction' 
+            AND pgsa.STATE != 'idle in transaction (aborted)' 
+            AND EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) > 90 
+        )
+        LOOP
+        V_SQL := 'SELECT pg_terminate_backend(''' || ITEM.pid || ''');';
+    INSERT INTO monitor_logs ( query, cdate )
+    VALUES
+        ( item.query, CURRENT_TIMESTAMP );
+    EXECUTE V_SQL;
+    
+END LOOP;
 
-  EXECUTE V_FIND_MAX_NUM_SQL INTO V_MAX_MID, V_MAX_MNUM;
-  IF COALESCE (V_MAX_MID,'x'::text)!='x' THEN
-    V_MAX_MNUM := V_MAX_MNUM + 1;
-  ELSE
-    V_MAX_MNUM := V_NUMBER_BEGIN;
-  END IF;
-  EXECUTE V_SQL_HEAD || V_SQL_BODY
-    USING V_MOUDLE_ID, V_MAX_MNUM;
-
-  IF LENGTH(to_char(V_MAX_MNUM)) < V_NUMBER_LENGTH THEN
-    V_MAX_MNUM_STR:= lpad(V_MAX_MNUM::text, V_NUMBER_LENGTH, '0'::text);
-  ELSE
-    V_MAX_MNUM_STR := V_MAX_MNUM;
-  END IF;
-  RETVAL := RETVAL || V_MAX_MNUM_STR;
-  RETURN RETVAL;
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100;
-
-ALTER FUNCTION "public"."Untitled"("""formno""" "pg_catalog"."text") OWNER TO "postgres";
+  COST 100
 ```
 
-### 6.4 PROCEDURE
+### 6.4 过程
 
 1. 返回游标
 
