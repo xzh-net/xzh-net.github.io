@@ -711,13 +711,9 @@ ORDER BY col.table_name, col.ordinal_position;
 
 ```
 
-### 4.2 建表
+### 4.2 创建表
 
 ```sql
-set timezone = 'Etc/UTC';
-set timezone = 'Asia/Shanghai';
-show timezone;
-
 CREATE TABLE "public"."car" (
   "id" int8 NOT NULL,
   "car_no" varchar(15),
@@ -1290,140 +1286,52 @@ END;
 $$ LANGUAGE PLPGSQL;
 ```
 
-### 6.4 过程
-
-1. 返回游标
+3. 返回游标
 
 ```sql
-CREATE OR REPLACE FUNCTION "public"."proc_init_flow_cando"(IN "v_partnerid" text, IN "v_flowcid" text, IN "v_pathid" text, OUT "v_out" refcursor)
-  RETURNS "pg_catalog"."refcursor" AS $BODY$
-DECLARE
+-- ----------------------------
+-- Table structure for teacher
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."teacher";
+CREATE TABLE "public"."teacher" (
+  "id" int2 NOT NULL,
+  "teacher_name" varchar(50) COLLATE "pg_catalog"."default",
+  "teacher_age" int2,
+  "tea_salary" numeric(10,2)
+);
 
-        V_SPZT   smallint;
-        V_FLOWZT smallint;
-        V_USER   varchar(2000);
-        V_YJ     varchar(4000);s
+COMMENT ON COLUMN "public"."teacher"."id" IS '主键ID';
+COMMENT ON COLUMN "public"."teacher"."teacher_name" IS '教师名称';
+COMMENT ON COLUMN "public"."teacher"."teacher_age" IS '教师年龄';
+COMMENT ON COLUMN "public"."teacher"."tea_salary" IS '教师工资';
 
-BEGIN
-    SELECT MAX(FLOWZT)
-    INTO   V_FLOWZT
-    FROM   TS_FLOW_MAIN_MX
-    WHERE  FLOWCID = V_FLOWCID
-    AND    PARTNERID = V_PARTNERID;
-    SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
-    INTO   V_SPZT, V_USER, V_YJ
-    FROM   TS_FLOW_PATH_COM A
-    INNER  JOIN VJSP_USERS B
-    ON     A.TS_MK_USERID = B.USERID
-    WHERE  A.TS_MK_PID = V_PATHID
-    AND    A.PARTNERID = V_PARTNERID;
-    
-    IF V_SPZT != 1 THEN
-            IF V_FLOWZT = 3 THEN
-                    SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
-                    INTO   V_SPZT, V_USER, V_YJ
-                    FROM   TS_FLOW_PATH_COM A
-                    INNER  JOIN VJSP_USERS B
-                    ON     A.TS_MK_USERID = B.USERID
-                    WHERE  A.FLOWCID = V_FLOWCID
-                    AND    A.TS_MK_SQ_ZT = 3
-                    AND    A.PARTNERID = V_PARTNERID;
-            ELSIF V_FLOWZT = 2 THEN
-                    V_SPZT := 2;
-            ELSE
-                    V_SPZT := 1;
-            END IF;
-            OPEN V_OUT FOR
-                    SELECT V_SPZT AS ZT, V_USER AS VUSER, V_YJ AS YJ ;
-    ELSE
-            OPEN V_OUT FOR
-                    SELECT 1  WHERE 1 = 2;
-    END IF;
-END;
+INSERT INTO "public"."teacher" VALUES (1, '张飞', 35, 12000.00);
+INSERT INTO "public"."teacher" VALUES (2, '关羽', 12, 30000.00);
+INSERT INTO "public"."teacher" VALUES (3, '杰克', 18, 40000.00);
+INSERT INTO "public"."teacher" VALUES (4, '李逵', 20, 18000.00);
+INSERT INTO "public"."teacher" VALUES (5, '兰陵王', 13, 7800.00);
+INSERT INTO "public"."teacher" VALUES (6, '安其拉', 35, 90000.00);
+INSERT INTO "public"."teacher" VALUES (7, '李白', 7, 59000.00);
+INSERT INTO "public"."teacher" VALUES (8, '赵四', 9, 42000.00);
+INSERT INTO "public"."teacher" VALUES (9, '王五', 5, 2000.00);
+INSERT INTO "public"."teacher" VALUES (10, 'xzh', 13, 1000000.00);
 
- 
-$BODY$
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100
+ALTER TABLE "public"."teacher" ADD CONSTRAINT "teacher_pkey" PRIMARY KEY ("id");
 ```
-
-2. 执行SQL
 
 ```sql
-CREATE OR REPLACE FUNCTION "public"."vjsp_delete_crm_target"("v_year" int8=0, "v_tstype" int8=0, "v_spid" text=NULL::text, "v_sptypeid" text=NULL::text)
-  RETURNS "pg_catalog"."void" AS $BODY$
-DECLARE
-  V_SQL varchar(4000);
+CREATE OR REPLACE FUNCTION loadata ( IN pagenum int4, OUT v_total int8, OUT v_list refcursor ) 
+	RETURNS record AS $$ DECLARE
+	v_sql TEXT;
 BEGIN
-  V_SQL := 'DELETE FROM VJSP_CRM_SALE_TARGET WHERE TSYEAR=' || V_YEAR ||
-           ' AND TSTYPE=' || V_TSTYPE;
-  IF V_SPID IS NOT NULL THEN
-    V_SQL := V_SQL || ' AND SPID=''' || V_SPID || '''';
-  END IF;
-  IF V_SPTYPEID IS NOT NULL THEN
-    V_SQL := V_SQL || ' AND SPTYPEID=''' || V_SPTYPEID || '''';
-  END IF;
-  EXECUTE IMMEDIATE V_SQL;
+	OPEN v_list FOR 
+	SELECT * FROM teacher ORDER BY ID LIMIT 5 OFFSET ( pageNum - 1 ) * 5;
+		
+	SELECT COUNT
+		( * ) INTO v_total 
+	FROM
+		teacher;
 END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100
+$$ LANGUAGE plpgsql
 ```
 
-3. 遍历
-
-```sql
-CREATE OR REPLACE FUNCTION "public"."vjsp_crm_insert_seqdetail"("v_sfaid" text, "v_seqid" text, "v_execdate" timestamp)
-  RETURNS "pg_catalog"."void" AS $BODY$
-DECLARE
-  V_STARTDATE timestamp;
-  V_ENDDATE   timestamp;
-  V_LOOPCOUNT bigint;
-  ITEM record;
-BEGIN
-  FOR ITEM IN (SELECT * FROM VJSP_CRM_SFA_EVENT E WHERE E.SFA_ID = V_SFAID AND E.DEL_FLAG=0) LOOP
-    IF ITEM.EXEC_DATE_FLAG = 1 THEN
-      --无日期，直接插入
-      INSERT INTO VJSP_CRM_SFA_SEQUENCE_DETAIL
-        (ID, CUSTOMER_ID, DOC_CODE, DOC_TITLE, START_DATE, END_DATE, SFA_ID, SEQUENCE_ID, SFAEVENT_ID, STATUS, EXEC_DATE, EXEC_REMARK, CREATE_TIME, CREATER_ID, CREATER_NAME, DEPT_ID, DEPT_NAME, GSNM, EXEC_ORDER)
-        SELECT f_getnid(), S.CUSTOMER_ID, '', '', NULL, NULL, V_SFAID, V_SEQID, ITEM.ID, 0, NULL, ITEM.EVENT_REMARK, f_now(), S.CREATER_ID, S.CREATER_NAME, S.DEPT_ID, S.DEPT_NAME, S.GSNM, ITEM.EVENT_ORDER
-          FROM VJSP_CRM_SFA_SEQUENCE S
-         WHERE S.ID = V_SEQID;
-    ELSIF ITEM.EXEC_DATE_FLAG = 2 THEN
-      --绝对日期
-      INSERT INTO VJSP_CRM_SFA_SEQUENCE_DETAIL
-        (ID, CUSTOMER_ID, DOC_CODE, DOC_TITLE, START_DATE, END_DATE, SFA_ID, SEQUENCE_ID, SFAEVENT_ID, STATUS, EXEC_DATE, EXEC_REMARK, CREATE_TIME, CREATER_ID, CREATER_NAME, DEPT_ID, DEPT_NAME, GSNM, EXEC_ORDER)
-        SELECT f_getnid(), S.CUSTOMER_ID, '', '', ITEM.BEGIN_DATE, ITEM.END_DATE, V_SFAID, V_SEQID, ITEM.ID, 0, NULL, ITEM.EVENT_REMARK, f_now(), S.CREATER_ID, S.CREATER_NAME, S.DEPT_ID, S.DEPT_NAME, S.GSNM, ITEM.EVENT_ORDER
-          FROM VJSP_CRM_SFA_SEQUENCE S
-         WHERE S.ID = V_SEQID;
-    ELSIF ITEM.EXEC_DATE_FLAG = 3 THEN
-      --相对日期
-      V_STARTDATE := V_EXECDATE+((ITEM.AFTER_DATE+1)||' day')::interval;
-      V_ENDDATE   := V_EXECDATE+((ITEM.AFTER_DATE+ITEM.CONINUED_DAY)||' day')::interval;
-      INSERT INTO VJSP_CRM_SFA_SEQUENCE_DETAIL
-        (ID, CUSTOMER_ID, DOC_CODE, DOC_TITLE, START_DATE, END_DATE, SFA_ID, SEQUENCE_ID, SFAEVENT_ID, STATUS, EXEC_DATE, EXEC_REMARK, CREATE_TIME, CREATER_ID, CREATER_NAME, DEPT_ID, DEPT_NAME, GSNM, EXEC_ORDER)
-        SELECT f_getnid(), S.CUSTOMER_ID, '', '', V_STARTDATE, V_ENDDATE, V_SFAID, V_SEQID, ITEM.ID, 0, NULL, ITEM.EVENT_REMARK, f_now(), S.CREATER_ID, S.CREATER_NAME, S.DEPT_ID, S.DEPT_NAME, S.GSNM, ITEM.EVENT_ORDER
-          FROM VJSP_CRM_SFA_SEQUENCE S
-         WHERE S.ID = V_SEQID;
-    ELSIF ITEM.EXEC_DATE_FLAG = 4 THEN
-      --循环
-      V_STARTDATE := V_EXECDATE+(ITEM.AFTER_DATE||' day')::interval;
-      V_ENDDATE   := V_EXECDATE+((ITEM.AFTER_DATE+ITEM.CONINUED_DAY-1)||' day')::interval;
-      V_LOOPCOUNT := ITEM.LOOP_COUNT+1;
-      FOR I IN 1 .. V_LOOPCOUNT LOOP
-        INSERT INTO VJSP_CRM_SFA_SEQUENCE_DETAIL
-        (ID, CUSTOMER_ID, DOC_CODE, DOC_TITLE, START_DATE, END_DATE, SFA_ID, SEQUENCE_ID, SFAEVENT_ID, STATUS, EXEC_DATE, EXEC_REMARK, CREATE_TIME, CREATER_ID, CREATER_NAME, DEPT_ID, DEPT_NAME, GSNM, EXEC_ORDER)
-        SELECT f_getnid(), S.CUSTOMER_ID, '', '', V_STARTDATE, V_ENDDATE, V_SFAID, V_SEQID, ITEM.ID, 0, NULL, ITEM.EVENT_REMARK, f_now(), S.CREATER_ID, S.CREATER_NAME, S.DEPT_ID, S.DEPT_NAME, S.GSNM, ITEM.EVENT_ORDER
-          FROM VJSP_CRM_SFA_SEQUENCE S
-         WHERE S.ID = V_SEQID;
-         
-        V_STARTDATE := V_ENDDATE+((ITEM.EVERY_DAY+1)||' day')::interval;
-        V_ENDDATE   := V_STARTDATE+((ITEM.CONINUED_DAY-1)||' day')::interval;
-      END LOOP;
-    END IF;
-  END LOOP;
-END;
- $BODY$
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100
-```
