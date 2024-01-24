@@ -1994,7 +1994,7 @@ SELECT * FROM USER_SOURCE WHERE UPPER(TEXT) LIKE UPPER('%keywords%');
 
 ### 5.1 匿名块
 
-#### 5.1.1 遍历更新
+1. 遍历
 
 ```sql
 DECLARE
@@ -2015,7 +2015,7 @@ BEGIN
 END;
 ```
 
-#### 5.1.2 DLL遍历更新
+2. 遍历执行SQL
 
 ```sql
 DECLARE
@@ -2047,7 +2047,7 @@ BEGIN
 END;
 ```
 
-### 5.2 FUNCTION函数
+### 5.2 函数
 
 ```sql
 CREATE OR REPLACE FUNCTION FUN_OTO_ORDERBYSHOP(P_USERID IN CHAR)
@@ -2080,9 +2080,9 @@ BEGIN
 END;
 ```
 
-### 5.3 PROCEDURE过程
+### 5.3 存储过程
 
-#### 5.3.1 动态执行SQL
+1. 执行SQL
 
 ```sql
 CREATE OR REPLACE PROCEDURE PROC_updateSortCommon(V_GNID   NUMBER, --审批状态
