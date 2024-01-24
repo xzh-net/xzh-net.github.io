@@ -1321,16 +1321,16 @@ ALTER TABLE "public"."teacher" ADD CONSTRAINT "teacher_pkey" PRIMARY KEY ("id");
 
 ```sql
 CREATE OR REPLACE FUNCTION loadata ( IN pagenum int4, OUT v_total int8, OUT v_list refcursor ) 
-	RETURNS record AS $$ DECLARE
-	v_sql TEXT;
+    RETURNS record AS $$ DECLARE
+    v_sql TEXT;
 BEGIN
-	OPEN v_list FOR 
-	SELECT * FROM teacher ORDER BY ID LIMIT 5 OFFSET ( pageNum - 1 ) * 5;
-		
-	SELECT COUNT
-		( * ) INTO v_total 
-	FROM
-		teacher;
+    OPEN v_list FOR 
+    SELECT * FROM teacher ORDER BY ID LIMIT 5 OFFSET ( pageNum - 1 ) * 5;
+        
+    SELECT COUNT
+        ( * ) INTO v_total 
+    FROM
+        teacher;
 END;
 $$ LANGUAGE plpgsql
 ```
