@@ -1194,58 +1194,44 @@ ALTER TABLE "view_of_user" OWNER TO "postgres";
 
 ### 6.2 触发器
 
-1. 分数表
+1. 创建表
 
 ```sql
-CREATE TABLE stu_score
+-- 学生分数表
+create table stu_score
 (
-  stuno serial NOT NULL,       --学生编号
+  stuno serial not null,       --学生编号
   major character varying(16), --专业课程
   score integer                --分数
-)
-WITH (
-  OIDS=FALSE
 );
-ALTER TABLE stu_score OWNER TO postgres;
-```
 
-2. 汇总表
-
-```sql
-CREATE TABLE major_stats
+-- 汇总表
+create table major_stats
 (
   major character varying(16), --专业课程
   total_score integer,         --总分
   total_students integer       --学生总数
-)
-WITH (
-  OIDS=FALSE
 );
-ALTER TABLE major_stats OWNER TO postgres;
 ```
 
-3. 计算函数
+2. 创建计算规则函数
    
 ```sql
-create or replace function fun_stu_major()
-returns trigger as 
-    $BODY$
-    DECLARE
+CREATE OR REPLACE FUNCTION fun_stu_major() RETURNS TRIGGER AS $$ DECLARE
     rec record;
-    BEGIN
-DELETE FROM major_stats;--将统计表里面的旧数据清空
-FOR rec IN (SELECT major,sum(score) as total_score,count(*) as total_students 
-FROM stu_score GROUP BY major) LOOP
-INSERT INTO major_stats VALUES(rec.major,rec.total_score,rec.total_students);
-END LOOP;
-return NEW;
+BEGIN
+    DELETE FROM major_stats; --将统计表里面的旧数据清空
+    FOR rec IN ( SELECT major, SUM(score) AS total_score, COUNT(*) AS total_students FROM stu_score GROUP BY major ) loop    
+        INSERT INTO major_stats
+        VALUES
+            ( rec.major, rec.total_score, rec.total_students );
+    END loop;
+RETURN NEW;
 END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100;
+$$ LANGUAGE plpgsql;
 ```
 
-4. 触发规则
+3. 创建触发器
 
 ```sql
 create trigger tri_stu_major 
@@ -1257,51 +1243,30 @@ execute procedure fun_stu_major()
 
 ### 6.3 函数
 
-1. 遍历
+1. 自定义
 
 ```sql
-CREATE OR REPLACE FUNCTION "public"."f_actuser"("v_flowcid" text)
-  RETURNS "pg_catalog"."text" AS $BODY$
-DECLARE
-  v_STR   text;
-  V_INDEX bigint;
- item record;
-BEGIN
-  v_STR   := '';
-  V_INDEX := 1;
-  FOR ITEM IN (SELECT distinct B.USERNAME
-                 FROM TS_FLOW_PATH_COM A
-                INNER JOIN VJSP_USERS B
-                   ON B.USERID = A.TS_MK_USERID
-                INNER JOIN TS_FLOW_MAIN_MX C
-                   ON C.FLOWCID = A.FLOWCID
-                WHERE A.FLOWCID = v_FLOWCID
-                  AND A.TS_MK_DEL = 0
-                  AND A.TS_MK_SQ_ZT = 1
-                  AND C.FLOWZT NOT IN (-1, 2, 3)) LOOP
-    IF V_INDEX = 1 THEN
-      v_STR := ITEM.USERNAME;
-    ELSE
-      v_STR := v_STR || ',' || ITEM.USERNAME;
-    END IF;
-    V_INDEX := V_INDEX + 1;
-  END LOOP;
-  RETURN v_STR;
-END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100
+CREATE OR REPLACE FUNCTION ADDN(_a int,_b int) RETURNS integer AS $total$  
+declare  
+    total integer;  
+BEGIN  
+   total :=_a+_b;
+   RETURN total;  
+END;  
+$total$ LANGUAGE plpgsql;
 ```
+
 
 2. 执行SQL
 
+查询执行时间大于90s的SQL，执行中断操作并保存到日志表中。无返回值
+
 ```sql
-CREATE OR REPLACE FUNCTION "public"."check_monitor"()
-  RETURNS "pg_catalog"."void" AS $BODY$ DECLARE
+CREATE OR REPLACE FUNCTION check_monitor() RETURNS void AS $$ DECLARE
     V_SQL VARCHAR ( 4000 );
-item record;
+    ITEM  RECORD;
 BEGIN
-    FOR item IN (
+    FOR ITEM IN (
         SELECT
             pid,
             query 
@@ -1318,15 +1283,11 @@ BEGIN
         V_SQL := 'SELECT pg_terminate_backend(''' || ITEM.pid || ''');';
     INSERT INTO monitor_logs ( query, cdate )
     VALUES
-        ( item.query, CURRENT_TIMESTAMP );
+        ( ITEM.query, CURRENT_TIMESTAMP );
     EXECUTE V_SQL;
-    
-END LOOP;
-
+    END LOOP;
 END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
-  COST 100
+$$ LANGUAGE PLPGSQL;
 ```
 
 ### 6.4 过程
