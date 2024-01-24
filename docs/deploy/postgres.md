@@ -746,42 +746,44 @@ COMMENT ON COLUMN "public"."car"."is_deleted" IS '删除标识（0：否；1：�
 ### 4.3 锁表
 
 ```sql
--- 执行中sql
-SELECT pgsa.datname AS database_name
-    , pgsa.usename AS user_name
-    , pgsa.client_addr AS client_addr
-    , pgsa.application_name AS application_name
-    , pgsa.state AS state
- , pgsa.backend_start AS backend_start
- , pgsa.xact_start AS xact_start
- , extract(epoch FROM now() - pgsa.xact_start) AS xact_time, pgsa.query_start AS query_start
- , extract(epoch FROM now() - pgsa.query_start) AS query_time
- , pgsa.query AS query_sql
-FROM pg_stat_activity pgsa
-WHERE pgsa.state != 'idle'
- AND pgsa.state != 'idle in transaction'
- AND pgsa.state != 'idle in transaction (aborted)'
-ORDER BY query_time DESC
-LIMIT 5
-
--- 查找锁表的pid
-select pid from pg_locks l join pg_class t on l.relation = t.oid where t.relkind = 'r' and t.relname = 'lockedtable';
-
--- 查找锁表的语句
-select pid, state, usename, query, query_start from pg_stat_activity 
-where pid in ( select pid from pg_locks l join pg_class t on l.relation = t.oid and t.relkind = 'r' where t.relname =  'lockedtable');
-
--- 查找所有活动的被锁的表
-select pid, state, usename, query, query_start 
-from pg_stat_activity 
-where pid in (
-  select pid from pg_locks l 
-  join pg_class t on l.relation = t.oid 
-  and t.relkind = 'r' 
-);
-
--- 解锁
-SELECT pg_cancel_backend(pid);
+-- 查询当前正在执行所有SQL语句
+SELECT
+	pid,
+	datname,
+	usename,
+	client_addr,
+	application_name,
+	STATE,
+	backend_start,
+	xact_start,
+	xact_stay,
+	query_start,
+	query_stay,
+	REPLACE ( query, chr( 10 ), ' ' ) AS query 
+FROM
+	(
+	SELECT
+		pgsa.pid AS pid,
+		pgsa.datname AS datname,
+		pgsa.usename AS usename,
+		pgsa.client_addr client_addr,
+		pgsa.application_name AS application_name,
+		pgsa.STATE AS STATE,
+		pgsa.backend_start AS backend_start,
+		pgsa.xact_start AS xact_start,
+		EXTRACT ( epoch FROM ( now( ) - pgsa.xact_start ) ) AS xact_stay,
+		pgsa.query_start AS query_start,
+		EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) AS query_stay,
+		pgsa.query AS query 
+	FROM
+		pg_stat_activity AS pgsa 
+	WHERE
+		pgsa.STATE != 'idle' 
+		AND pgsa.STATE != 'idle in transaction' 
+		AND pgsa.STATE != 'idle in transaction (aborted)' 
+	) idleconnections 
+ORDER BY
+	query_stay DESC
 
 -- PID查询sql
 SELECT
@@ -805,8 +807,36 @@ WHERE
 ORDER BY
     lap DESC;
 
+-- kill 执行时间大于90s的sql
+SELECT 'SELECT pg_terminate_backend(' || pid || ');'
+FROM pg_stat_activity pgsa
+WHERE  pid != pg_backend_pid()
+  and pgsa.STATE != 'idle' 
+		AND pgsa.STATE != 'idle in transaction' 
+		AND pgsa.STATE != 'idle in transaction (aborted)' 
+		AND EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) > 90
+
 -- kill 进程
-SELECT pg_terminate_backend ( pid )
+SELECT pg_terminate_backend ( pid );    --彻底停止进程，导致连接关闭。事务会回滚，释放持有的锁
+-- 解锁
+SELECT pg_cancel_backend(pid);          --只是中断正在运行的查询，连接仍然存在
+
+
+-- 查找锁表的pid
+select pid from pg_locks l join pg_class t on l.relation = t.oid where t.relkind = 'r' and t.relname = 'lockedtable';
+
+-- 查找锁表的语句
+select pid, state, usename, query, query_start from pg_stat_activity 
+where pid in ( select pid from pg_locks l join pg_class t on l.relation = t.oid and t.relkind = 'r' where t.relname =  'lockedtable');
+
+-- 查找所有活动的被锁的表
+select pid, state, usename, query, query_start 
+from pg_stat_activity 
+where pid in (
+  select pid from pg_locks l 
+  join pg_class t on l.relation = t.oid 
+  and t.relkind = 'r' 
+);
 ```
 
 
