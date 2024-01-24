@@ -1257,13 +1257,12 @@ execute procedure fun_stu_major()
 
 ### 6.3 FUNCTION
 
-#### 6.3.1 循环函数
+1. 遍历
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."f_actuser"("v_flowcid" text)
   RETURNS "pg_catalog"."text" AS $BODY$
 DECLARE
-
   v_STR   text;
   V_INDEX bigint;
  item record;
@@ -1294,7 +1293,7 @@ $BODY$
   COST 100
 ```
 
-#### 6.3.2 执行sql函数
+2. 执行SQL
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."Untitled"("formno" text)
@@ -1417,7 +1416,7 @@ ALTER FUNCTION "public"."Untitled"("""formno""" "pg_catalog"."text") OWNER TO "p
 
 ### 6.4 PROCEDURE
 
-#### 6.4.1 返回游标过程
+1. 返回游标
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."proc_init_flow_cando"(IN "v_partnerid" text, IN "v_flowcid" text, IN "v_pathid" text, OUT "v_out" refcursor)
@@ -1430,40 +1429,40 @@ DECLARE
         V_YJ     varchar(4000);s
 
 BEGIN
-        SELECT MAX(FLOWZT)
-        INTO   V_FLOWZT
-        FROM   TS_FLOW_MAIN_MX
-        WHERE  FLOWCID = V_FLOWCID
-        AND    PARTNERID = V_PARTNERID;
-        SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
-        INTO   V_SPZT, V_USER, V_YJ
-        FROM   TS_FLOW_PATH_COM A
-        INNER  JOIN VJSP_USERS B
-        ON     A.TS_MK_USERID = B.USERID
-        WHERE  A.TS_MK_PID = V_PATHID
-        AND    A.PARTNERID = V_PARTNERID;
-        
-        IF V_SPZT != 1 THEN
-                IF V_FLOWZT = 3 THEN
-                        SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
-                        INTO   V_SPZT, V_USER, V_YJ
-                        FROM   TS_FLOW_PATH_COM A
-                        INNER  JOIN VJSP_USERS B
-                        ON     A.TS_MK_USERID = B.USERID
-                        WHERE  A.FLOWCID = V_FLOWCID
-                        AND    A.TS_MK_SQ_ZT = 3
-                        AND    A.PARTNERID = V_PARTNERID;
-                ELSIF V_FLOWZT = 2 THEN
-                        V_SPZT := 2;
-                ELSE
-                        V_SPZT := 1;
-                END IF;
-                OPEN V_OUT FOR
-                        SELECT V_SPZT AS ZT, V_USER AS VUSER, V_YJ AS YJ ;
-        ELSE
-                OPEN V_OUT FOR
-                        SELECT 1  WHERE 1 = 2;
-        END IF;
+    SELECT MAX(FLOWZT)
+    INTO   V_FLOWZT
+    FROM   TS_FLOW_MAIN_MX
+    WHERE  FLOWCID = V_FLOWCID
+    AND    PARTNERID = V_PARTNERID;
+    SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
+    INTO   V_SPZT, V_USER, V_YJ
+    FROM   TS_FLOW_PATH_COM A
+    INNER  JOIN VJSP_USERS B
+    ON     A.TS_MK_USERID = B.USERID
+    WHERE  A.TS_MK_PID = V_PATHID
+    AND    A.PARTNERID = V_PARTNERID;
+    
+    IF V_SPZT != 1 THEN
+            IF V_FLOWZT = 3 THEN
+                    SELECT MAX(A.TS_MK_SQ_ZT), MAX(B.USERNAME), MAX(A.TS_MK_SQ_YJ)
+                    INTO   V_SPZT, V_USER, V_YJ
+                    FROM   TS_FLOW_PATH_COM A
+                    INNER  JOIN VJSP_USERS B
+                    ON     A.TS_MK_USERID = B.USERID
+                    WHERE  A.FLOWCID = V_FLOWCID
+                    AND    A.TS_MK_SQ_ZT = 3
+                    AND    A.PARTNERID = V_PARTNERID;
+            ELSIF V_FLOWZT = 2 THEN
+                    V_SPZT := 2;
+            ELSE
+                    V_SPZT := 1;
+            END IF;
+            OPEN V_OUT FOR
+                    SELECT V_SPZT AS ZT, V_USER AS VUSER, V_YJ AS YJ ;
+    ELSE
+            OPEN V_OUT FOR
+                    SELECT 1  WHERE 1 = 2;
+    END IF;
 END;
 
  
@@ -1472,7 +1471,7 @@ $BODY$
   COST 100
 ```
 
-#### 6.4.2 执行sql过程
+2. 执行SQL
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_delete_crm_target"("v_year" int8=0, "v_tstype" int8=0, "v_spid" text=NULL::text, "v_sptypeid" text=NULL::text)
@@ -1495,7 +1494,7 @@ $BODY$
   COST 100
 ```
 
-#### 6.4.3 遍历过程
+3. 遍历
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."vjsp_crm_insert_seqdetail"("v_sfaid" text, "v_seqid" text, "v_execdate" timestamp)
