@@ -34,7 +34,7 @@ cd nginx-1.22.1
 
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
 --user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
---with-stream \
+--with-stream --with-stream_ssl_module \
 --with-http_ssl_module --with-http_realip_module \
 --with-http_sub_module \
 --with-mail_ssl_module \
@@ -135,8 +135,6 @@ crontab -e
 
 下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
 
-https://github.com/xzh-net/other/tree/main/nginx/nginx_upstream_check_module
-
 
 ```bash
 yum -y install patch
@@ -147,7 +145,7 @@ patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module/check
 # 编译
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
 --user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
---with-stream \
+--with-stream --with-stream_ssl_module \
 --with-http_ssl_module --with-http_realip_module \
 --with-http_sub_module \
 --with-mail_ssl_module \
@@ -173,8 +171,6 @@ location /nstatus {
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
-https://github.com/xzh-net/other/tree/main/nginx/ngx_http_proxy_connect_module
-
 ```bash
 mv /opt/software/ngx_http_proxy_connect_module /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module
 cd /opt/software/nginx-1.22.1
@@ -183,7 +179,7 @@ patch -p1 < /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module/pat
 # 编译
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
 --user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
---with-stream \
+--with-stream --with-stream_ssl_module \
 --with-http_ssl_module --with-http_realip_module \
 --with-http_sub_module \
 --with-mail_ssl_module \
@@ -246,7 +242,7 @@ patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_tcp_proxy_module/tcp.patch
 # 编译
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
 --user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
---with-stream \
+--with-stream --with-stream_ssl_module \
 --with-http_ssl_module --with-http_realip_module \
 --with-http_sub_module \
 --with-mail_ssl_module \
@@ -570,8 +566,8 @@ server {
     listen 443 ssl;
     server_name www.xuzhihao.net;
     charset utf-8;
-    ssl_certificate /usr/local/nginx/cert/www.xuzhihao.net_chain.crt;
-    ssl_certificate_key /usr/local/nginx/cert/www.xuzhihao.net_key.key;
+    ssl_certificate /usr/local/nginx/cert/server.crt;
+    ssl_certificate_key /usr/local/nginx/cert/private.key;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 5m;
     ssl_buffer_size 256k;
