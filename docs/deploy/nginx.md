@@ -252,135 +252,92 @@ patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_tcp_proxy_module/tcp.patch
 make && make install
 ```
 
-Nginx高于1.20.1版本编译报错，插件源码在`ngx_tcp_ssl_module.c`文件中搜`ngx_ssl_rsa512_key_callback`注释掉
+Nginx高于1.20.1版本编译报错，插件源码在`ngx_tcp_ssl_module.c`文件中搜索`ngx_ssl_rsa512_key_callback`注释掉可以解决编译报错问题
 
 ### 2.4 目录索引
 
-#### 2.4.1 下载插件
+下载地址：https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master
+
+#### 2.4.1 解压编译
 
 ```bash
 cd /opt/software
-wget https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master -O ngx-fancyindex-master.zip    # 插件
-```
-
-#### 2.4.2 解压编译
-
-```bash
 unzip ngx-fancyindex-master.zip
-mv ngx-fancyindex-master /opt
+mv /opt/software/ngx-fancyindex-master /opt/software/nginx-1.22.1/modules/ngx-fancyindex
+# 编译
 cd nginx-1.22.1
-./configure  --prefix=/usr/local/nginx --with-http_stub_status_module  --user=nginx --group=nginx --with-http_ssl_module --add-module=../ngx-fancyindex-master
-make  # 不要 make install
-cp objs/nginx  /usr/local/nginx/sbin/  # 复制重新编译的nginx文件到nginx原来安装目录下
+./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
+--user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
+--with-stream --with-stream_ssl_module \
+--with-http_ssl_module --with-http_realip_module \
+--with-http_sub_module \
+--with-mail_ssl_module \
+--with-http_stub_status_module --with-http_gzip_static_module \
+--add-module=./modules/ngx-fancyindex-master \
+# 安装
+make && make install
 ```
 
-#### 2.4.3 配置模板
-
-
-1. 下载模板
-
-```bash
-wget https://codeload.github.com/xzh-net/nginx-fancyindex/zip/refs/heads/main -O nginx-fancyindex-main.zip -P /home/www  # 模板
-cd /home/www
-unzip nginx-fancyindex.zip	
-mv nginx-fancyindex fancyindex
-```
-
-2. 配置fancyindex路径
-
-> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
+#### 2.4.2 基础配置
 
 ```conf
-vi /usr/local/nginx/conf/nginx.conf
-
-# 修改内容
 server {
     listen 80;
     server_name www.xuzhihao.net;
     charset utf-8; 
     location / {
         root /home/www/; 
-        fancyindex on;                                 # 开启nginx目录浏览功能 
-        fancyindex_localtime on;                       # 显示文件修改时间为服务器本地时间 
-        fancyindex_exact_size off;                     # 文件大小从KB开始显示 
-        fancyindex_header "/fancyindex/header.html";   # 设置footer为当前目录下的footer.html
-        fancyindex_footer "/fancyindex/footer.html";   # 设置footer为当前目录下的footer.html
-        fancyindex_ignore "fancyindex";                # 忽略
-        fancyindex_ignore "cgi";                       # 忽略
-        fancyindex_ignore ".php";                      # 忽略
-        fancyindex_time_format "%Y-%m-%d %H:%M:%S";
-        fancyindex_name_length 200;
+        fancyindex on;              # 开启nginx目录浏览功能
+        fancyindex_exact_size off;  # 不显示精确大小
+        fancyindex_localtime on;    # 显示文件修改时间为服务器本地时间
     }
 }
 ```
 
-#### 2.4.4 md在线预览
+#### 2.4.2 样式主题
 
-> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
-
-1. nginx配置
-
-```conf
-http {  
-    include mime.types;
-    default_type application/octet-stream;
-
-    client_max_body_size 100M;
-    charset utf-8;
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-    '$status $body_bytes_sent "$http_referer" '
-    '"$http_user_agent" "$http_x_forwarded_for"';
-    access_log off;
-
-    server_tokens   off;
-    sendfile        on; 
-
-    keepalive_timeout  65;
-
-    gzip on;
-    gzip_disable "msie6";
-    gzip_vary on;
-    gzip_proxied any;
-    gzip_comp_level 6;
-    gzip_buffers 16 8k;
-    gzip_http_version 1.1;
-    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
-
-    client_header_buffer_size 64k;
-    large_client_header_buffers 4 64k;
-    client_body_buffer_size 20m;
-
-    index index.html;
-
-    include /usr/local/nginx/sites-enabled/*;
-}
-```
-
-2. 站点配置
-
-```bash
-mkdir -p /usr/local/nginx/sites-enabled
-cd /usr/local/nginx/sites-enabled
-vi default
-```
+- https://github.com/TheInsomniac/Nginx-Fancyindex-Theme
+- https://github.com/Naereen/Nginx-Fancyindex-Theme
+- https://github.com/fraoustin/Nginx-Fancyindex-Theme
+- https://github.com/alehaa/nginx-fancyindex-flat-theme
 
 ```conf
 server {
-    listen   80; ## listen for ipv4; this line is default and implied
-    listen   [::]:80 ipv6only=on; ## listen for ipv6
+    listen 80;
+    server_name www.xuzhihao.net;
+    charset utf-8; 
+    location / {
+        root /home/www/; 
+        fancyindex on;
+        fancyindex_localtime on;
+        fancyindex_exact_size off;
+        fancyindex_header "/fancyindex/header.html";
+        fancyindex_footer "/fancyindex/footer.html";
+        fancyindex_ignore "fancyindex";     # 忽略这个目录不在列表中显示
+    }
+}
+```
 
+> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
+
+#### 2.4.3 md预览
+
+> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
+
+```conf
+server {
+    listen   80;
+    listen   [::]:80 ipv6only=on;
     listen   443 ssl;
     listen   [::]:443 default ipv6only=on ssl;
-
     # Enable SSL
-    ssl_certificate /home/www/ssl/ssl.crt;
-    ssl_certificate_key /home/www/ssl/ssl.key;
+    ssl_certificate /usr/local/nginx/cert/server.crt;
+    ssl_certificate_key /usr/local/nginx/cert/private.key;
     ssl_session_timeout 10m;
     ssl_session_cache   shared:SSL:10m;
     ssl_protocols TLSv1.1 TLSv1.2;
     ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
     ssl_prefer_server_ciphers on;
-
     root /home/www/public;
     index index.html index.htm;
 
@@ -455,9 +412,9 @@ server {
 }
 ```
 
-#### 2.4.5 启动服务
+启动预览服务
 
-```
+```bash
 /usr/local/bin/markdown-renderer -mode local -root /home/www/public/
 ```
 
