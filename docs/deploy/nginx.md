@@ -541,15 +541,11 @@ stream {
                  '$session_time -> $upstream_addr '
                  '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
     access_log logs/stream_access.log stream;
-    include /usr/local/nginx/conf/stream_mysql.conf;
+    include /usr/local/nginx/conf/stream_openfire.conf;
 }
 
 tcp {
-    log_format proxy '$remote_addr [$time_local] '
-                 '$protocol $status $bytes_sent $bytes_received '
-                 '$session_time -> $upstream_addr '
-                 '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
-    access_log logs/tcp_access.log proxy;
+    access_log logs/tcp_access.log;
     include /usr/local/nginx/conf/tcp_openfire.conf;
 }
 ```
@@ -616,10 +612,10 @@ upstream front {
 #### 3.1.4 tcp_openfire.conf
 
 ```conf
-timeout 1d;
-proxy_read_timeout 10d;
-proxy_send_timeout 10d;
-proxy_connect_timeout 30;
+timeout 60000;
+proxy_read_timeout 60000;
+proxy_send_timeout 60000;
+proxy_connect_timeout 60000;
 upstream op5222{
         ip_hash;
         server 172.17.16.51:5222;
@@ -663,12 +659,11 @@ server{
 }
 ```
 
-#### 3.1.5 stream_mysql.conf
+#### 3.1.5 stream_openfire.conf
 
 ```conf
 upstream mysql {
-    server 192.168.3.200:3306;
-    server 192.168.3.201:3306;
+    server 172.17.17.137:3306;
 }
 server {
     listen 33060;
@@ -678,17 +673,17 @@ server {
     proxy_pass mysql;
 }
 
-upstream mysh {
-    server 172.17.17.161:22;
+upstream openfire {
+    server 172.17.17.162:5222;
 }
 server {
-    listen 2200 ssl;
-    ssl_certificate      /usr/local/nginx/cert/server.pem;
+    listen 25223 ssl;
+    ssl_certificate      /usr/local/nginx/cert/server.crt;
     ssl_certificate_key  /usr/local/nginx/cert/private.key;
-    access_log logs/stream/2200.log stream;
+    access_log logs/stream/25223.log stream;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
-    proxy_pass mysh;
+    proxy_pass openfire;
 }
 ```
 
