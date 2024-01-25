@@ -654,7 +654,7 @@ server {
     server_name_in_redirect off; 
     location / {
         rewrite ^(.*)$ /$serno$1 break;
-        #root D:/workspace/;
+        root /home/www/;
         #proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
