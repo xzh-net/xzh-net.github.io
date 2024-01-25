@@ -1152,7 +1152,7 @@ analyze verbose tableName
 
 ### 6.1 视图
 
-1. dual解决方案
+1. dual
 
 ```sql
 CREATE VIEW "public"."dual" AS  SELECT 'X'::character varying(1) AS dummy;
@@ -1258,6 +1258,13 @@ $total$ LANGUAGE plpgsql;
 查询执行时间大于90s的SQL，执行中断操作并保存到日志表中。无返回值
 
 ```sql
+create table monitor_logs (
+  query varchar(4000),
+  cdate timestamp
+)
+```
+
+```sql
 CREATE OR REPLACE FUNCTION check_monitor() RETURNS void AS $$ DECLARE
     V_SQL VARCHAR ( 4000 );
     ITEM  RECORD;
@@ -1284,6 +1291,20 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE PLPGSQL;
+```
+
+该函数可以配合linux定时任务实现信息系统收集
+
+```bash
+*/3 * * * * sh /home/postgres/shell/check_monitor.sh
+```
+
+```bash
+#!/bin/bash
+export LD_LIBRARY_PATH=/usr/local/pgsql/lib:$LD_LIBRARY_PATH
+starttime=`date +'%Y-%m-%d %H:%M:%S'`
+/lif/bin/pg/bin/psql -p 5432 -d postgres -U postgres  -c "select check_monitor();"
+echo '执行时间：'$starttime >> /home/postgres/shell/log.log
 ```
 
 3. 返回游标
