@@ -238,13 +238,11 @@ curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
 
 下载地址：https://github.com/yaoweibin/nginx_tcp_proxy_module
 
-当前最高在1.20.1下编译成功
-
 ```bash
-mv /opt/software/nginx_tcp_proxy_module /opt/software/nginx-1.20.1/modules/nginx_tcp_proxy_module
-cd /opt/software/nginx-1.20.1
+mv /opt/software/nginx_tcp_proxy_module /opt/software/nginx-1.22.1/modules/nginx_tcp_proxy_module
+cd /opt/software/nginx-1.22.1
 # 打补丁
-patch -p1 < /opt/software/nginx-1.20.1/modules/nginx_tcp_proxy_module/tcp.patch
+patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_tcp_proxy_module/tcp.patch
 # 编译
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
 --user=nginx --group=nginx --build=web_server --with-pcre --with-compat --with-file-aio \
@@ -258,6 +256,7 @@ patch -p1 < /opt/software/nginx-1.20.1/modules/nginx_tcp_proxy_module/tcp.patch
 make && make install
 ```
 
+Nginx高于1.20.1版本编译报错，插件源码在`ngx_tcp_ssl_module.c`文件中搜`ngx_ssl_rsa512_key_callback`注释掉
 
 ### 2.4 目录索引
 
