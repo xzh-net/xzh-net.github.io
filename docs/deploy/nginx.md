@@ -294,7 +294,7 @@ server {
 }
 ```
 
-#### 2.4.2 样式主题
+#### 2.4.3 样式主题
 
 - https://github.com/TheInsomniac/Nginx-Fancyindex-Theme
 - https://github.com/Naereen/Nginx-Fancyindex-Theme
@@ -320,9 +320,7 @@ server {
 
 > 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
 
-#### 2.4.3 md预览
-
-> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
+#### 2.4.4 md预览
 
 ```conf
 server {
@@ -417,6 +415,8 @@ server {
 ```bash
 /usr/local/bin/markdown-renderer -mode local -root /home/www/public/
 ```
+
+> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
 
 ## 3. 高级
 
