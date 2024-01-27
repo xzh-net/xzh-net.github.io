@@ -393,11 +393,8 @@ flush privileges
 drop user sonar;  # 删除用户
 drop database if exists sonardb;  # 删除库
 select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 库锁释放
-```
 
-无法删除正在连接中的数据库
-
-```sql
+# 无法删除正在连接中的数据库
 UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
 ```
