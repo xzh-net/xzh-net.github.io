@@ -1871,7 +1871,7 @@ SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
 
 ### 4.1 负载指标统计
 
-#### 4.1.1 SGA/PGA使用率
+1. SGA/PGA使用率
 
 ```sql
 SELECT
@@ -1906,9 +1906,7 @@ FROM
 	);
 ```
 
-#### 4.1.2 共享池占用率
-
-占用内存大于10M的sql
+2. 共享池占用内存大于10M的sql
 
 ```sql
 SELECT substr(sql_text, 1, 100) "Stmt",
@@ -1921,9 +1919,7 @@ SELECT substr(sql_text, 1, 100) "Stmt",
 HAVING sum(sharable_mem) > 10000000;
 ```
 
-#### 4.1.3 Version Count
-
-version count过高的SQL
+3. Version Count 过高的SQL
 
 ```sql
 SELECT address,
