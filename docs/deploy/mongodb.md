@@ -67,6 +67,8 @@ rm -f /data/mongodb/data/db/*.lock      # 删除lock文件
 
 #### 1.1.4 客户端测试
 
+开启认证之前插入管理员账号
+
 ```bash
 /usr/local/mongodb/bin/mongo --port 27017
 use admin
@@ -74,7 +76,12 @@ db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin
 db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
 db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
 db.system.users.find()
-# 插入数据
+```
+
+开启认证以后插入数据
+
+```bash
+db.auth("xzh","123456")
 use articledb
 db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date()})
 db.comment.find()
