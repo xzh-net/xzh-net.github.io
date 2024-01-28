@@ -240,14 +240,14 @@ systemctl restart docker  # 重启docker
 
 ```bash
 docker run -p 80:80 --name nginx \
--v /mydata/nginx/html:/usr/share/nginx/html \
--v /mydata/nginx/logs:/var/log/nginx  \
+-v /data/nginx/html:/usr/share/nginx/html \
+-v /data/nginx/logs:/var/log/nginx  \
 -d nginx:1.20.2
 ```
 
 ```bash
-docker container cp nginx:/etc/nginx /mydata/nginx/ # 将容器内的配置文件拷贝到指定目录
-mv /mydata/nginx/nginx /mydata/nginx/conf           # 修改文件
+docker container cp nginx:/etc/nginx /data/nginx/ # 将容器内的配置文件拷贝到指定目录
+mv /data/nginx/nginx /data/nginx/conf           # 修改文件
 docker rm -f nginx
 ```
 
@@ -255,9 +255,9 @@ docker rm -f nginx
 
 ```bash
 docker run -p 80:80 -p 443:443 --name nginx \
--v /mydata/nginx/html:/usr/share/nginx/html \
--v /mydata/nginx/logs:/var/log/nginx  \
--v /mydata/nginx/conf:/etc/nginx \
+-v /data/nginx/html:/usr/share/nginx/html \
+-v /data/nginx/logs:/var/log/nginx  \
+-v /data/nginx/conf:/etc/nginx \
 -d nginx:1.20.2
 ```
 
@@ -279,12 +279,12 @@ docker run -d \
 #### 3.1.4 Rancher
 
 ```bash
-mkdir -p /mydata/rancher_home/rancher
-mkdir -p /mydata/rancher_home/auditlog
+mkdir -p /data/rancher_home/rancher
+mkdir -p /data/rancher_home/auditlog
 
 docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
-  -v /mydata/rancher_home/rancher:/var/lib/rancher \
-  -v /mydata/rancher_home/auditlog:/var/log/auditlog \
+  -v /data/rancher_home/rancher:/var/lib/rancher \
+  -v /data/rancher_home/auditlog:/var/log/auditlog \
   --name rancher rancher/rancher 
 ```
 
@@ -299,16 +299,16 @@ docker exec -it rancher reset-password
 
 
 ```bash
-mkdir -p /mydata/mysql/data /mydata/mysql/logs /mydata/mysql/conf
+mkdir -p /data/mysql/data /data/mysql/logs /data/mysql/conf
 
 docker run -p 3306:3306 --name mysql \
--v /mydata/mysql/conf:/etc/mysql/conf.d \
--v /mydata/mysql/data:/var/lib/mysql \
--v /mydata/mysql/logs:/logs \
+-v /data/mysql/conf:/etc/mysql/conf.d \
+-v /data/mysql/data:/var/lib/mysql \
+-v /data/mysql/logs:/logs \
 -e MYSQL_ROOT_PASSWORD=root \
 -d mysql:5.7
 
-docker cp /mydata/mall.sql mysql:/  # sql拷贝到容器中
+docker cp /data/mall.sql mysql:/  # sql拷贝到容器中
 docker exec -it mysql /bin/bash
 mysql -uroot -proot --default-character-set=utf8
 create database mall character set utf8
@@ -343,7 +343,7 @@ psql -Upostgres # 连接数据库
 docker pull wnameless/oracle-xe-11g
 docker pull wnameless/oracle-xe-11g-r2
 
-docker run --name oracle-xe-11g -d -v /mydata/oracle_data:/data/oracle_data -p 49160:22 -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g:14.04.4
+docker run --name oracle-xe-11g -d -v /data/oracle_data:/data/oracle_data -p 49160:22 -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g:14.04.4
 
 port: 49161
 sid: xe
@@ -432,7 +432,7 @@ service apache2 restart
 
 ```bash
 docker run -p 6379:6379 --name redis \
--v /mydata/redis/data:/data \
+-v /data/redis/data:/data \
 -d redis:5 redis-server --appendonly yes --requirepass "123456"
 ```
 
@@ -463,14 +463,14 @@ docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:
 docker pull mongo:4.4.6
 
 docker run -p 27017:27017 --name mongo \
--v /mydata/mongo/db:/data/db \
+-v /data/mongo/db:/data/db \
 -d mongo:4.4.6
 ```
 
 #### 3.3.4 CouchDB 
 
 ```bash
-docker run -p 5984:5984 --name my-couchdb -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=admin -v /home/mydata/couchdb/data:/opt/couchdb/data -d couchdb:3.2
+docker run -p 5984:5984 --name my-couchdb -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=admin -v /data/couchdb/data:/opt/couchdb/data -d couchdb:3.2
 docker run -d -p 8800:8000 --link=my-couchdb --name fauxton 3apaxicom/fauxton sh -c 'fauxton -c http://192.168.3.200:5984'  # 可视化
 ```
 
@@ -480,7 +480,7 @@ docker run -d -p 8800:8000 --link=my-couchdb --name fauxton 3apaxicom/fauxton sh
 
 ```bash
 docker run -d -p 8086:8086 \
-      -v /mydata/influxdb1:/var/lib/influxdb \
+      -v /data/influxdb1:/var/lib/influxdb \
       --name influxdb1 \
       influxdb:1.8
 ```
@@ -489,8 +489,8 @@ docker run -d -p 8086:8086 \
 
 ```bash
 docker run -d -p 8086:8086 \
-      -v /mydata/influxdb2/data:/var/lib/influxdb2 \
-      -v /mydata/influxdb2/config:/etc/influxdb2 \
+      -v /data/influxdb2/data:/var/lib/influxdb2 \
+      -v /data/influxdb2/config:/etc/influxdb2 \
       -e DOCKER_INFLUXDB_INIT_MODE=setup \
         -e DOCKER_INFLUXDB_INIT_USERNAME=my-user \
       -e DOCKER_INFLUXDB_INIT_PASSWORD=my-password \
@@ -530,9 +530,9 @@ deleteall "test", "10010"
 
 ```bash
 docker run -d -p 6041:6041 \
-    -v /mydata/taos/conf:/etc/taos \
-    -v /mydata/taos/data:/var/lib/taos \
-    -v /mydata/taos/logs:/var/log/taos \
+    -v /data/taos/conf:/etc/taos \
+    -v /data/taos/data:/var/lib/taos \
+    -v /data/taos/logs:/var/log/taos \
     --name tdengine 
     tdengine:2.0.19.1
 ```
@@ -545,8 +545,8 @@ docker run -d -p 6041:6041 \
 docker run -d --name clickhouse-server --privileged=true \
   --ulimit nofile=262144:262144 \
   -p 9000:9000 -p 8123:8123 -p 9009:9009 \
-  -v /mydata/clickhouse/log:/var/log/clickhouse \
-  -v /mydata/clickhouse/data:/var/lib/clickhouse \
+  -v /data/clickhouse/log:/var/log/clickhouse \
+  -v /data/clickhouse/data:/var/lib/clickhouse \
   yandex/clickhouse-server:21.3.20.1
 ```
 
@@ -562,13 +562,13 @@ clickhouse-client -m
 #### 3.5.1 FastDFS
 
 ```bash
-docker run -dti --network=host --name tracker -v /mydata/fdfs/tracker:/var/fdfs delron/fastdfs tracker 
+docker run -dti --network=host --name tracker -v /data/fdfs/tracker:/var/fdfs delron/fastdfs tracker 
 docker run -dti --network=host --name storage -p 8888:8888 -p 23000:23000  \
-   -e TRACKER_SERVER=172.17.17.200:22122 -v /mydata/fdfs/storage:/var/fdfs delron/fastdfs storage
+   -e TRACKER_SERVER=172.17.17.200:22122 -v /data/fdfs/storage:/var/fdfs delron/fastdfs storage
 ```
 
 ```bash
-docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /mydata/fdfs:/var/local/fdfs \
+docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /data/fdfs:/var/local/fdfs \
     -d registry.cn-beijing.aliyuncs.com/tianzuo/fastdfs
 ```
 
@@ -773,8 +773,8 @@ docker run -d -p 2181:2181 --name some-zookeeper --restart always -d zookeeper:3
 ```bash
 docker pull zookeeper:3.7.0
 
-mkdir /mydata/zookeeper/conf/ -p
-cd /mydata/zookeeper/conf/
+mkdir /data/zookeeper/conf/ -p
+cd /data/zookeeper/conf/
 touch zoo.cfg
 
 # 设置心跳时间，单位毫秒
@@ -785,7 +785,7 @@ dataDir=/tmp/zookeeper
 clientPort=2181
 
 docker run -p 2181:2181 --name zookeeper \
--v /mydata/zookeeper/conf/zoo.cfg:/conf/zoo.cfg \
+-v /data/zookeeper/conf/zoo.cfg:/conf/zoo.cfg \
 -d zookeeper:3.7.0
 ```
 
@@ -803,9 +803,9 @@ docker pull elasticsearch:7.6.2
 docker pull apache/skywalking-oap-server:6.6.0-es7
 docker pull apache/skywalking-ui:6.6.0
 
-# 安装server 因为之前elk是compose安装,默认在mydata_default的网桥中
+# 安装server 因为之前elk是compose安装,默认在data_default的网桥中
 docker run --name oap --restart always -d \
---network mydata_default \
+--network data_default \
 --restart=always \
 -e TZ=Asia/Shanghai \
 -p 12800:12800 \
@@ -817,7 +817,7 @@ apache/skywalking-oap-server:6.6.0-es7
 
 # 安装ui
 docker run -d --name skywalking-ui \
---network mydata_default \
+--network data_default \
 --restart=always \
 -e TZ=Asia/Shanghai \
 -p 8088:8080 \
@@ -830,7 +830,7 @@ Agent下载地址：https://archive.apache.org/dist/skywalking/6.6.0/apache-skyw
 
 ```bash
 java -jar skywalking_springboot.jar # 原启动方式
-java -javaagent:/home/mydata/app_skywalking/apache-skywalking-apm-bin/agent/skywalking-agent.jar -Dskywalking.agent.service_name=springboot -Dskywalking.collector.backend_service=127.0.0.1:11800 -jar /home/mydata/app_skywalking/skywalking_springboot.jar
+java -javaagent:/data/skywalking/apache-skywalking-apm-bin/agent/skywalking-agent.jar -Dskywalking.agent.service_name=springboot -Dskywalking.collector.backend_service=127.0.0.1:11800 -jar /data/skywalking/skywalking_springboot.jar
 ```
 
 ### 3.7 消息中间件
@@ -872,11 +872,11 @@ docker run -dit --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-managem
 
 ```bash
 # 创建目录
-mkdir -p /mydata/rocketmq/data/namesrv/logs /root/rocketmq/data/namesrv/store /mydata/rocketmq/conf /mydata/rocketmq/data/broker/logs /mydata/rocketmq/data/broker/stor
+mkdir -p /data/rocketmq/data/namesrv/logs /root/rocketmq/data/namesrv/store /data/rocketmq/conf /data/rocketmq/data/broker/logs /data/rocketmq/data/broker/stor
 ```
 
 ```conf
-# 进入 /mydata/rocketmq/conf 创建 broker.conf
+# 进入 /data/rocketmq/conf 创建 broker.conf
 brokerClusterName = DefaultCluster
 brokerName = broker-a
 brokerId = 0
@@ -898,13 +898,13 @@ docker pull apacherocketmq/rocketmq-dashboard:1.0.0
 启动namesrv
 
 ```bash
-docker run -d -p 9876:9876 -v /mydata/rocketmq/data/namesrv/logs:/root/logs -v /mydata/rocketmq/data/namesrv/store:/root/store --name rmqnamesrv -e "MAX_POSSIBLE_HEAP=100000000" rocketmqinc/rocketmq:4.4.0 sh mqnamesrv
+docker run -d -p 9876:9876 -v /data/rocketmq/data/namesrv/logs:/root/logs -v /data/rocketmq/data/namesrv/store:/root/store --name rmqnamesrv -e "MAX_POSSIBLE_HEAP=100000000" rocketmqinc/rocketmq:4.4.0 sh mqnamesrv
 ```
 
 启动broker
 
 ```
-docker run -d -p 10911:10911 -p 10909:10909 -v  /mydata/rocketmq/data/broker/logs:/root/logs -v  /mydata/rocketmq/data/broker/store:/root/store -v  /mydata/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf --name rmqbroker --link rmqnamesrv:namesrv -e "NAMESRV_ADDR=namesrv:9876" -e "MAX_POSSIBLE_HEAP=200000000" rocketmqinc/rocketmq:4.4.0 sh mqbroker -c /opt/rocketmq-4.4.0/conf/broker.conf
+docker run -d -p 10911:10911 -p 10909:10909 -v  /data/rocketmq/data/broker/logs:/root/logs -v  /data/rocketmq/data/broker/store:/root/store -v  /data/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf --name rmqbroker --link rmqnamesrv:namesrv -e "NAMESRV_ADDR=namesrv:9876" -e "MAX_POSSIBLE_HEAP=200000000" rocketmqinc/rocketmq:4.4.0 sh mqbroker -c /opt/rocketmq-4.4.0/conf/broker.conf
 ```
 
 启动dashboard
@@ -1294,7 +1294,7 @@ services:
     ports:
       - '9090:9090'
     volumes:
-      - /mydata/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /data/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     restart: always
 
     # node-exporter
@@ -1560,17 +1560,17 @@ http://ip:8080
 ```bash
 docker run -it -d --rm \
 -v /var/run/docker.sock:/var/run/docker.sock \
--v /mydata/che:/data \
+-v /data/che:/data \
 eclipse/che start
 ```
 
 #### 3.11.4 Theia
 
 ```bash
-chown -R 1000:1000 /mydata/
-docker run -it -d -p 3000:3000 -v "/mydata/theia:/home/project:cached" theiaide/theia
-docker run -it -d -p 3000:3000 -v "/mydata/theia-java:/home/project:cached" theiaide/theia-java
-docker run -it -d --init -p 3000:3000 -v "/mydata/theia-full:/home/project:cached" theiaide/theia-full
+chown -R 1000:1000 /data/
+docker run -it -d -p 3000:3000 -v "/data/theia:/home/project:cached" theiaide/theia
+docker run -it -d -p 3000:3000 -v "/data/theia-java:/home/project:cached" theiaide/theia-java
+docker run -it -d --init -p 3000:3000 -v "/data/theia-full:/home/project:cached" theiaide/theia-full
 ```
 
 ## 4. 镜像构建
@@ -1997,32 +1997,32 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /mydata/mysql/conf:/etc/mysql/conf.d #配置文件挂载
-      - /mydata/mysql/data:/var/lib/mysql  #数据文件挂载
-      - /mydata/mysql/logs:/logs  #日志文件挂载
+      - /data/mysql/conf:/etc/mysql/conf.d #配置文件挂载
+      - /data/mysql/data:/var/lib/mysql  #数据文件挂载
+      - /data/mysql/logs:/logs  #日志文件挂载
   redis:
     image: redis:5
     container_name: redis
     command: redis-server --appendonly yes
     volumes:
-      - /mydata/redis/data:/data #数据文件挂载
+      - /data/redis/data:/data #数据文件挂载
     ports:
       - 6379:6379
   nginx:
     image: nginx:1.10
     container_name: nginx
     volumes:
-      - /mydata/nginx/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
-      - /mydata/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
-      - /mydata/nginx/log:/var/log/nginx #日志文件挂载
+      - /data/nginx/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
+      - /data/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
+      - /data/nginx/log:/var/log/nginx #日志文件挂载
     ports:
       - 80:80
   rabbitmq:
     image: rabbitmq:3.7.15-management
     container_name: rabbitmq
     volumes:
-      - /mydata/rabbitmq/data:/var/lib/rabbitmq #数据文件挂载
-      - /mydata/rabbitmq/log:/var/log/rabbitmq #日志文件挂载
+      - /data/rabbitmq/data:/var/lib/rabbitmq #数据文件挂载
+      - /data/rabbitmq/log:/var/log/rabbitmq #日志文件挂载
     ports:
       - 5672:5672
       - 15672:15672
@@ -2030,7 +2030,7 @@ services:
     image: mongo:4.2.5
     container_name: mongo
     volumes:
-      - /mydata/mongo/db:/data/db #数据文件挂载
+      - /data/mongo/db:/data/db #数据文件挂载
     ports:
       - 27017:27017
   nacos-registry:
