@@ -210,7 +210,7 @@ public class Exam4 {
 		String str = "hello";
 		Integer num = 200;
 		int[] arr = { 1, 2, 3, 4, 5 };
-		MyData my = new MyData();
+		MyTest my = new MyTest();
 
 		change(i, str, num, arr, my);
 
@@ -221,7 +221,7 @@ public class Exam4 {
 		System.out.println("my.a= " + my.a);
 	}
 
-	private static void change(int j, String s, Integer n, int[] a, MyData m) {
+	private static void change(int j, String s, Integer n, int[] a, MyTest m) {
 		j += 1;
 		s += "world";
 		n += 1;
@@ -231,7 +231,7 @@ public class Exam4 {
 
 }
 
-class MyData {
+class MyTest {
 	int a = 10;
 }
 ```
