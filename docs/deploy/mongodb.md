@@ -47,9 +47,6 @@ net:
     bindIp: localhost,192.168.2.201
     # 绑定的端口，默认是27017
     port: 27017
-security:
-    # 开启授权认证，必须在创建管理员用户以后开启
-    authorization: enabled
 ```
 
 #### 1.1.3 启动服务
@@ -67,8 +64,6 @@ rm -f /data/mongodb/data/db/*.lock      # 删除lock文件
 
 #### 1.1.4 客户端测试
 
-开启认证之前插入管理员账号
-
 ```bash
 /usr/local/mongodb/bin/mongo --port 27017
 use admin
@@ -76,14 +71,34 @@ db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin
 db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
 db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
 db.system.users.find()
+use articledb
+db.comment.insert({"articleid":"1000","content":"我们都是好孩子","userid":"1001","nickname":"Rose","createdatetime":new Date()})
+db.comment.find()
 ```
 
-开启认证以后插入数据
+#### 1.1.5 安全认证
 
 ```bash
+vi /data/mongodb/mongod.conf
+```
+
+添加配置
+```conf
+security:
+    # 开启授权认证
+    authorization: enabled
+```
+
+重启服务
+```bash
+/usr/local/mongodb/bin/mongod -f /data/mongodb/mongod.conf
+```
+
+```bash
+/usr/local/mongodb/bin/mongo --port 27017
 db.auth("xzh","123456")
 use articledb
-db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date()})
+db.comment.insert({"articleid":"100000","content":"我们都是好孩子","userid":"1001","nickname":"Rose","createdatetime":new Date()})
 db.comment.find()
 ```
 
@@ -278,6 +293,10 @@ rs.slaveOk(false)  # 取消从节点读取操作
 use articledb
 db.comment.find()
 ```
+
+#### 1.2.6 安全认证
+
+
 
 ### 1.3 分片集群
 
@@ -791,28 +810,9 @@ use config
 db.settings.save( { _id:"chunksize", value: 1 } )
 ```
 
+#### 1.3.7 安全认证
 
 ## 2 安全认证
-
-### 2.1 单实例
-
-1. 参数方式
-
-```bash
-/usr/local/mongodb/bin/mongod -f /data/mongodb/mongod.conf --auth
-```
-
-2. 配置方式
-
-```bash
-vi /data/mongodb/mongod.conf
-```
-```conf
-security:
-    #开启授权认证
-    authorization: enabled
-```
-
 
 
 ### 2.2 副本集
@@ -886,7 +886,7 @@ db.runCommand({ rolesInfo: "<rolename>" })              # 查询当前数据库�
 db.runCommand({ rolesInfo: { role: "<rolename>", db: "<database>" } } # 查询其它数据库中指定的角色权限
 
 # 插入
-db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date(),"likenum":NumberInt(10),"state":null})
+db.comment.insert({"articleid":"100000","content":"我们都是好孩子","userid":"1001","nickname":"Rose","createdatetime":new Date(),"likenum":NumberInt(10),"state":null})
 # 批量插入
 db.comment.insertMany([
 {"_id":"1","articleid":"100001","content":"我们不应该把清晨浪费在手机上，健康很重要，一杯温水幸福你我他。","userid":"1002","nickname":"相忘于江湖","createdatetime":new Date("2019-08-
