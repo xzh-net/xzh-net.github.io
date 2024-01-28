@@ -47,6 +47,9 @@ net:
     bindIp: localhost,192.168.2.201
     # 绑定的端口，默认是27017
     port: 27017
+security:
+    # 开启授权认证，必须在创建管理员用户以后开启
+    authorization: enabled
 ```
 
 #### 1.1.3 启动服务
@@ -66,6 +69,12 @@ rm -f /data/mongodb/data/db/*.lock      # 删除lock文件
 
 ```bash
 /usr/local/mongodb/bin/mongo --port 27017
+use admin
+db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
+db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
+db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
+db.system.users.find()
+# 插入数据
 use articledb
 db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date()})
 db.comment.find()
@@ -73,13 +82,11 @@ db.comment.find()
 
 ### 1.2 副本集
 
-| **名称** | **主节点PRIMARY** | **从节点SECONDARY** | **仲裁节点ARBITER** |
-| ---------- | ---------- | ---------- | ---------- |
-| IP地址  | 192.168.2.201 | 192.168.2.201 | 192.168.2.201 |
-| 端口  | 27017 | 27018 | 27019 |
-| 日志路径  | /data/mongodb/replica_sets/myrs_27017/log | /data/mongodb/replica_sets/myrs_27018/log | /data/mongodb/replica_sets/myrs_27019/log |
-| 数据路径  | /data/mongodb/replica_sets/myrs_27017/data/db | /data/mongodb/replica_sets/myrs_27018/data/db | /data/mongodb/replica_sets/myrs_27019/data/db |
-| 配置文件  | /data/mongodb/replica_sets/myrs_27017/mongod.conf | /data/mongodb/replica_sets/myrs_27018/mongod.conf | /data/mongodb/replica_sets/myrs_27019/mongod.conf |
+| **节点名称** | **IP地址** | **服务名称** | **端口** | **配置文件** |
+| :----------: | :----------: | :----------: | :----------: | :----------: |
+| 主节点  | node201 192.168.2.201 | mongod  | 27017 | /data/mongodb/replica_sets/myrs_27017/mongod.conf	 |
+| 从节点  | node201 192.168.2.201 | mongod  | 27018 | /data/mongodb/replica_sets/myrs_27018/mongod.conf	 |
+| 仲裁节点  | node201 192.168.2.201 | mongod  | 27019 | /data/mongodb/replica_sets/myrs_27019/mongod.conf |
 
 
 #### 1.2.1 创建主节点
@@ -118,7 +125,7 @@ replication:
     replSetName: myrs
 ```
 
-2. 启动主节点
+启动主节点
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27017/mongod.conf
@@ -160,7 +167,7 @@ replication:
     replSetName: myrs
 ```
 
-2. 启动副本节点
+启动副本节点
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27018/mongod.conf
@@ -202,7 +209,7 @@ replication:
     replSetName: myrs
 ```
 
-2. 启动仲裁节点
+启动仲裁节点
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27019/mongod.conf
@@ -268,6 +275,21 @@ db.comment.find()
 ### 1.3 分片集群
 
 ![](../../assets/_images/deploy/mongodb/image1.png)
+
+| **节点名称** | **IP地址** | **服务名称** | **端口** | **配置文件** |
+| :----------: | :----------: | :----------: | :----------: | :----------: |
+| 路由节点  | node199 192.168.2.199 | mongos1 | 27017 | /data/mongodb/sharded_cluster/mymongos_27017/mongos.conf |
+|   |  | mongos2 | 27117 | /data/mongodb/sharded_cluster/mymongos_27117/mongos.conf |
+| 配置节点  | node200 192.168.2.200 | mongod1 | 27019 | /data/mongodb/sharded_cluster/myconfigrs_27019/mongod.conf |
+|   |  | mongod2 | 27119 | /data/mongodb/sharded_cluster/myconfigrs_27119/mongod.conf |
+|   |  | mongod3 | 27219 | /data/mongodb/sharded_cluster/myconfigrs_27219/mongod.conf |
+| 存储节点1  | node201 192.168.2.201 | mongod1 | 27017 | /data/mongodb/sharded_cluster/myshardrs01_27017/mongod.conf |
+|   |  | mongod3 | 27018 | /data/mongodb/sharded_cluster/myshardrs01_27018/mongod.conf |
+|   |  | mongod3 | 27019 | /data/mongodb/sharded_cluster/myshardrs01_27019/mongod.conf |
+| 存储节点2  | node202 192.168.2.202 | mongod1 | 37017 | /data/mongodb/sharded_cluster/myshardrs02_37017/mongod.conf |
+|   |  | mongod2 | 37018 | /data/mongodb/sharded_cluster/myshardrs02_37018/mongod.conf |
+|   |  | mongod3 | 37019 | /data/mongodb/sharded_cluster/myshardrs02_37019/mongod.conf |
+
 
 #### 1.3.1 存储节点副本集1
 
@@ -451,7 +473,7 @@ net:
 replication:
     replSetName: myshardrs02
 sharding:
-    clusterRole: shardsvr	
+    clusterRole: shardsvr
 ```
 
 
@@ -478,7 +500,7 @@ net:
 replication:
     replSetName: myshardrs02
 sharding:
-    clusterRole: shardsvr	
+    clusterRole: shardsvr
 ```
 
 5. 启动服务
@@ -562,7 +584,7 @@ storage:
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.2.202
+    bindIp: localhost,192.168.2.200
     port: 27119
 replication:
     replSetName: myconfigrs
@@ -679,14 +701,12 @@ sharding:
 ps -ef |grep mongos
 ```
 
-#### 1.3.5 客户端测试
 
-
-5. 分片配置
+#### 1.3.5 初始化集群分片
 
 ```bash
-# 登录客户端
-/usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017  
+# 登录路由客户端
+/usr/local/mongodb/bin/mongo --host 192.168.2.199 --port 27017  
 
 # 添加分片
 sh.addShard("myshardrs01/192.168.2.201:27017,192.168.2.201:27018,192.168.2.201:27019")    # 添加副本集1
@@ -697,23 +717,71 @@ use admin
 db.runCommand( { removeShard: "myshardrs01" } )
 # 开启分片
 sh.enableSharding("articledb") 
-sh.status()
-# 指定分片键
+# 指定分片策略
 sh.shardCollection("articledb.comment",{"nickname":"hashed"})   # 哈希策略 
-sh.status()
 sh.shardCollection("articledb.author",{"age":1})                # 范围策略
 sh.status()
+```
 
-# 测试哈希规则,从路由上插入的数据，必须包含片键，否则无法插入
+#### 1.3.6 客户端测试
+
+1. 哈希策略
+
+从路由上插入数据
+
+```bash
+# 测试哈希规则，必须包含片键，否则无法插入
+/usr/local/mongodb/bin/mongo --host 192.168.2.199 --port 27017  
 use articledb
-for(var i=1;i<=1000;i++){db.comment.insert({_id:i+"",nickname:"BoBo"+i})}
+for(var i=1;i<=1000;i++){db.comment.insert({_id:i+"",nickname:"xzh"+i})}
+```
 
-# 通过路由节点临时调整默认数据块大小，默认64M
-use config
-db.settings.save( { _id:"chunksize", value: 1 } )
-# 测试范围规则
+分别登陆两个副本集的主节点，统计文档数量
+
+```bash
+/usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017  
+use articledb
+db.comment.count()
+```
+
+```bash
+/usr/local/mongodb/bin/mongo --host 192.168.2.202 --port 37017  
+use articledb
+db.comment.count()
+```
+
+2. 范围策略
+
+从路由上插入数据
+
+```bash
+# 测试范围
+/usr/local/mongodb/bin/mongo --host 192.168.2.199 --port 27017  
 use articledb 
 for(var i=1;i<=20000;i++){db.author.save({"name":"xzhhhhhhhhh"+i,"age":NumberInt(i%120)})}
+```
+
+分别登陆两个副本集的主节点，统计文档数量
+
+```bash
+/usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017  
+use articledb
+db.author.count()
+```
+
+```bash
+/usr/local/mongodb/bin/mongo --host 192.168.2.202 --port 37017  
+use articledb
+db.author.count()
+```
+
+3. 通过路由节点临时调整默认数据块大小
+
+范围测试中，数据块（chunk）没有填满，默认的数据块尺寸（chunksize）是64M，填满后才会考虑向其他片的数据块填充数据，因此，为了测试，可以将其改小
+
+```bash
+use config
+db.settings.save( { _id:"chunksize", value: 1 } )
 ```
 
 
@@ -769,13 +837,13 @@ security:
 3. 在主节点上添加普通账号
 
 ```bash
-#先用管理员账号登录再切换到admin库
+# 先用管理员账号登录再切换到admin库
 use admin
-#管理员账号认证
+# 管理员账号认证
 db.auth("myroot","123456")
-#切换到要认证的库
+# 切换到要认证的库
 use articledb
-#添加普通用户
+# 添加普通用户
 db.createUser({user: "xzh", pwd: "123456", roles: ["readWrite"]})
 ```
 
@@ -789,20 +857,20 @@ mongo --host=127.0.0.1 --port=27017
 # 数据操作
 use test        # 选择切换数据库
 show dbs        # 查看有权限查看的所有的数据库命令
-db.dropDatabase()   # 删除数据库
-db.shutdownServer() # 关闭服务  kill关闭会导致文件损坏，使用repair修复
-db.createCollection("comment") # 创建集合
-show collections               # 查询所有集合
-db.collection.drop()           # 删除集合
+db.dropDatabase()       # 删除数据库
+db.shutdownServer()     # 关闭服务  kill关闭会导致文件损坏，使用repair修复
+db.createCollection("comment")  # 创建集合
+show collections                # 查询所有集合
+db.collection.drop()            # 删除集合
 
 # 用户角色认证
-db.createUser({user:"myroot",pwd:"123456",roles:["root"]})  # 创建超管
-db.createUser({user:"myadmin",pwd:"123456",roles:[{role:"userAdminAnyDatabase",db:"admin"}]})   # 创建管理员
-db.createUser({user: "xzh", pwd: "123456", roles: [{ role: "readWrite", db:"articledb" }]}) # 创建普通用户
+db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
+db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
+db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
 db.system.users.find()                      # 查看已经创建了的用户的情况
-db.dropUser("myadmin")                      # 删除用户
-db.changeUserPassword("myroot", "123456")   # 修改密码
-db.auth("myroot","12345")                   # 用户认证
+db.dropUser("xzh")                          # 删除用户
+db.changeUserPassword("xzh", "123456")      # 修改密码
+db.auth("xzh","12345")                      # 用户认证
 
 # 角色
 db.runCommand({ rolesInfo: 1 }) # 查询所有角色权限(仅用户自定义角色)
