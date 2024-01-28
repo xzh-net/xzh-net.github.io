@@ -868,8 +868,8 @@ db.settings.save( { _id:"chunksize", value: 1 } )
 mongo --host=127.0.0.1 --port=27017
 
 # 数据操作
-use test        # 选择切换数据库
-show dbs        # 查看有权限查看的所有的数据库命令
+use articledb           # 选择切换数据库
+show dbs                # 查看有权限查看的所有的数据库命令
 db.dropDatabase()       # 删除数据库
 db.shutdownServer()     # 关闭服务  kill关闭会导致文件损坏，使用repair修复
 db.createCollection("comment")  # 创建集合
