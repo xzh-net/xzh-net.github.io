@@ -94,8 +94,10 @@ security:
 /usr/local/mongodb/bin/mongod -f /data/mongodb/mongod.conf
 ```
 
+测试
 ```bash
 /usr/local/mongodb/bin/mongo --port 27017
+use admin
 db.auth("xzh","123456")
 use articledb
 db.comment.insert({"articleid":"100000","content":"我们都是好孩子","userid":"1001","nickname":"Rose","createdatetime":new Date()})
@@ -272,6 +274,11 @@ rs.status()
 
 ```bash
 /usr/local/mongodb/bin/mongo --host=192.168.2.201 --port=27017
+use admin
+db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
+db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
+db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
+db.system.users.find()
 use articledb
 db.comment.insert({"articleid":"100001","content":"我们都是好孩子","userid":"1002","nickname":"xzh","createdatetime":new Date()})
 ```
@@ -296,7 +303,48 @@ db.comment.find()
 
 #### 1.2.6 安全认证
 
+创建认证文件
+```bash
+openssl rand -base64 90 -out /data/mongodb/mongo.keyfile
+chmod 400 /data/mongodb/mongo.keyfile   # 修改权限
+# 伪集群可选操作，如果是跨机器，需要将认证文件拷贝到每台机器中
+scp /data/mongodb/mongo.keyfile root@192.168.2.xxx:/data/mongodb/mongo.keyfile
 
+```
+
+分别修改每个节点配置文件，开启授权认证
+
+```bash
+vim /data/mongodb/replica_sets/myrs_27017/mongod.conf
+vim /data/mongodb/replica_sets/myrs_27018/mongod.conf
+vim /data/mongodb/replica_sets/myrs_27219/mongod.conf
+```
+
+添加配置
+```conf
+security:
+    # KeyFile鉴权文件
+    keyFile: /data/mongodb/mongo.keyfile
+    # 开启认证方式运行
+    authorization: enabled
+```
+
+重启副本集
+```bash
+/usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27017/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27018/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27019/mongod.conf
+```
+
+测试
+```bash
+/usr/local/mongodb/bin/mongo --port 27017
+use admin
+db.auth("xzh","123456")
+use articledb
+db.comment.insert({"articleid":"100000","content":"我们都是好孩子","userid":"1001","nickname":"Rose","createdatetime":new Date()})
+db.comment.find()
+```
 
 ### 1.3 分片集群
 
@@ -812,51 +860,9 @@ db.settings.save( { _id:"chunksize", value: 1 } )
 
 #### 1.3.7 安全认证
 
-## 2 安全认证
+同副本集处理方式一致
 
-
-### 2.2 副本集
-
-1. 开启认证之前，创建超管用户，也可以通过localhost创建超管用户
-
-```bash
-use admin
-db.createUser({user:"myroot",pwd:"123456",roles:["root"]})
-```
-
-2. 创建认证文件
-
-```bash
-openssl rand -base64 90 -out /data/mongodb/mongo.keyfile
-scp /data/mongodb/mongo.keyfile root@192.168.2.201:/data/mongodb/mongo.keyfile
-chmod 400 /data/mongodb/mongo.keyfile   # 修改权限
-vi /data/mongodb/mongod.conf
-```
-
-```conf
-security:
-    # KeyFile鉴权文件
-    keyFile: /data/mongodb/mongo.keyfile
-    # 开启认证方式运行
-    authorization: enabled
-```
-
-3. 在主节点上添加普通账号
-
-```bash
-# 先用管理员账号登录再切换到admin库
-use admin
-# 管理员账号认证
-db.auth("myroot","123456")
-# 切换到要认证的库
-use articledb
-# 添加普通用户
-db.createUser({user: "xzh", pwd: "123456", roles: ["readWrite"]})
-```
-
-### 2.3 分片集群
-
-## 3. 命令
+## 2. 命令
 
 ```bash
 mongo --host=127.0.0.1 --port=27017
