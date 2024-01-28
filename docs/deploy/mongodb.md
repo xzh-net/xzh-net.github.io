@@ -11,18 +11,18 @@
 #### 1.1.1 上传解压
 
 ```bash
-mkdir -p /mydata/mongodb 
-tar -xvf mongodb-linux-x86_64-rhel70-4.4.6.tgz -C /mydata/
-mv /mydata/mongodb-linux-x86_64-rhel70-4.4.6 /usr/local/mongodb
+cd /opt/software/
+tar -xvf mongodb-linux-x86_64-rhel70-4.4.6.tgz
+mv /opt/software/mongodb-linux-x86_64-rhel70-4.4.6 /usr/local/mongodb
 ```
 
 #### 1.1.2 修改配置
 
 ```bash
-mkdir -p /mydata/mongodb/data/db    # 数据存储目录
-mkdir -p /mydata/mongodb/log    # 日志存储目录
+mkdir -p /data/mongodb/data/db      # 数据存储目录
+mkdir -p /data/mongodb/log          # 日志存储目录
 # 新建并修改配置文件
-vi /mydata/mongodb/mongod.conf
+vi /data/mongodb/mongod.conf
 ```
 
 ```conf
@@ -30,12 +30,12 @@ systemLog:
     # MongoDB发送所有日志输出的目标指定为文件
     destination: file
     # mongod或mongos应向其发送所有诊断日志记录信息的日志文件的路径
-    path: "/mydata/mongodb/log/mongod.log"
+    path: "/data/mongodb/log/mongod.log"
     # 当mongos或mongod实例重新启动时，mongos或mongod会将新条目附加到现有日志文件的末尾。
     logAppend: true
 storage:
     # mongod实例存储其数据的目录。storage.dbPath设置仅适用于mongod。
-    dbPath: "/mydata/mongodb/data/db"
+    dbPath: "/data/mongodb/data/db"
     journal:
         # 启用或禁用持久性日志以确保数据文件保持有效和可恢复。
         enabled: true
@@ -44,7 +44,7 @@ processManagement:
     fork: true
 net:
     # 服务实例绑定的IP，默认是localhost
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.201
     # 绑定的端口，默认是27017
     port: 27017
 ```
@@ -52,31 +52,34 @@ net:
 #### 1.1.3 启动服务
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/mongod.conf
+```
 
-# 关闭
-mongo --port 27017
-# 切换到admin库
-use admin
-# 关闭服务
-db.shutdownServer()
+如果异常关闭后无法启动，需要删除lock文件
 
-# 删除lock文件
-rm -f /mydata/mongodb/data/db/*.lock
-# 修复数据
-/usr/local/mongodb/bin/mongod --repair --dbpath=/mydata/mongodb/data/db
+```bash
+rm -f /data/mongodb/data/db/*.lock      # 删除lock文件
+/usr/local/mongodb/bin/mongod --repair --dbpath=/data/mongodb/data/db   # 修复数据
+```
+
+#### 1.1.4 客户端测试
+
+```bash
+/usr/local/mongodb/bin/mongo --port 27017
+use articledb
+db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date()})
+db.comment.find()
 ```
 
 ### 1.2 副本集
 
 #### 1.2.1 创建主节点
 
-1. 在192.168.3.200执行
-
 ```bash
-mkdir -p /mydata/mongodb/log /mydata/mongodb/data/db
+mkdir -p /data/mongodb/replica_sets/myrs_27017/log
+mkdir -p /data/mongodb/replica_sets/myrs_27017/data/db
 
-vim /mydata/mongodb/mongod.conf
+vim /data/mongodb/replica_sets/myrs_27017/mongod.conf
 ```
 
 ```conf
@@ -84,12 +87,12 @@ systemLog:
     # MongoDB发送所有日志输出的目标指定为文件
     destination: file
     # mongod或mongos应向其发送所有诊断日志记录信息的日志文件的路径
-    path: "/mydata/mongodb/log/mongod.log"
+    path: "/data/mongodb/replica_sets/myrs_27017/log/mongod.log"
     # 当mongos或mongod实例重新启动时，mongos或mongod会将新条目附加到现有日志文件的末尾。
     logAppend: true
 storage:
     # mongod实例存储其数据的目录。storage.dbPath设置仅适用于mongod。
-    dbPath: "/mydata/mongodb/data/db"
+    dbPath: "/data/mongodb/replica_sets/myrs_27017/data/db"
     journal:
         # 启用或禁用持久性日志以确保数据文件保持有效和可恢复。
         enabled: true
@@ -98,7 +101,7 @@ processManagement:
     fork: true
 net:
     # 服务实例绑定的IP，默认是localhost
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.201
     # 绑定的端口，默认是27017
     port: 27017
 replication:
@@ -109,17 +112,16 @@ replication:
 2. 启动主节点
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27017/mongod.conf
 ```
 
 #### 1.2.2 创建副本节点
 
-1. 在192.168.3.201执行
-
 ```bash
-mkdir -p /mydata/mongodb/log /mydata/mongodb/data/db
+mkdir -p /data/mongodb/replica_sets/myrs_27018/log
+mkdir -p /data/mongodb/replica_sets/myrs_27018/data/db
 
-vim /mydata/mongodb/mongod.conf
+vim /data/mongodb/replica_sets/myrs_27018/mongod.conf
 ```
 
 ```conf
@@ -127,12 +129,12 @@ systemLog:
     # MongoDB发送所有日志输出的目标指定为文件
     destination: file
     # mongod或mongos应向其发送所有诊断日志记录信息的日志文件的路径
-    path: "/mydata/mongodb/log/mongod.log"
+    path: "/data/mongodb/replica_sets/myrs_27018/log/mongod.log"
     # 当mongos或mongod实例重新启动时，mongos或mongod会将新条目附加到现有日志文件的末尾。
     logAppend: true
 storage:
     # mongod实例存储其数据的目录。storage.dbPath设置仅适用于mongod。
-    dbPath: "/mydata/mongodb/data/db"
+    dbPath: "/data/mongodb/replica_sets/myrs_27018/data/db"
     journal:
         # 启用或禁用持久性日志以确保数据文件保持有效和可恢复。
         enabled: true
@@ -141,7 +143,7 @@ processManagement:
     fork: true
 net:
     # 服务实例绑定的IP，默认是localhost
-    bindIp: localhost,192.168.3.201
+    bindIp: localhost,192.168.2.201
     # 绑定的端口，默认是27017
     port: 27018
 replication:
@@ -152,17 +154,16 @@ replication:
 2. 启动副本节点
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27018/mongod.conf
 ```
 
 #### 1.2.3 创建仲裁节点
 
-1. 在192.168.3.202执行
-
 ```bash
-mkdir -p /mydata/mongodb/log /mydata/mongodb/data/db
+mkdir -p /data/mongodb/replica_sets/myrs_27019/log
+mkdir -p /data/mongodb/replica_sets/myrs_27019/data/db
 
-vim /mydata/mongodb/mongod.conf
+vim /data/mongodb/replica_sets/myrs_27019/mongod.conf
 ```
 
 ```conf
@@ -170,12 +171,12 @@ systemLog:
     # MongoDB发送所有日志输出的目标指定为文件
     destination: file
     # mongod或mongos应向其发送所有诊断日志记录信息的日志文件的路径
-    path: "/mydata/mongodb/log/mongod.log"
+    path: "/data/mongodb/replica_sets/myrs_27019/log/mongod.log"
     # 当mongos或mongod实例重新启动时，mongos或mongod会将新条目附加到现有日志文件的末尾。
     logAppend: true
 storage:
     # mongod实例存储其数据的目录。storage.dbPath设置仅适用于mongod。
-    dbPath: "/mydata/mongodb/data/db"
+    dbPath: "/data/mongodb/replica_sets/myrs_27019/data/db"
     journal:
         # 启用或禁用持久性日志以确保数据文件保持有效和可恢复。
         enabled: true
@@ -184,7 +185,7 @@ processManagement:
     fork: true
 net:
     # 服务实例绑定的IP，默认是localhost
-    bindIp: localhost,192.168.3.202
+    bindIp: localhost,192.168.2.201
     # 绑定的端口，默认是27017
     port: 27019
 replication:
@@ -195,16 +196,16 @@ replication:
 2. 启动仲裁节点
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/replica_sets/myrs_27019/mongod.conf
 ```
 
-#### 1.2.4 初始化配置
+#### 1.2.4 初始化副本集
 
 1. 使用客户端命令连接主节点
 
 ```bash
-/usr/local/mongodb/bin/mongo --host=192.168.3.200 --port=27017
-rs.initiate()       # 备初始化新的副本集
+/usr/local/mongodb/bin/mongo --host=192.168.2.201 --port=27017
+rs.initiate()       # 初始化新的副本集
 rs.conf()           # 查看副本集配置
 rs.status()         # 查看节点运行状态
 ```
@@ -222,11 +223,9 @@ db.system.replset.find()
 在主节点添加从节点，将其他成员加入到副本集
 
 ```bash
-rs.add("192.168.3.201:27018")       # 添加副本从节点
-rs.addArb("192.168.3.202:27019")    # 添加仲裁从节点
-
+rs.add("192.168.2.201:27018")       # 添加副本从节点
+rs.addArb("192.168.2.201:27019")    # 添加仲裁从节点
 rs.status()
-rs.stepDown(600)                    # 主节点下线
 ```
 
 #### 1.2.5 客户端测试
@@ -234,26 +233,43 @@ rs.stepDown(600)                    # 主节点下线
 1. 登录主节点
 
 ```bash
-/usr/local/mongodb/bin/mongo --host=192.168.3.200 --port=27017
+/usr/local/mongodb/bin/mongo --host=192.168.2.201 --port=27017
 use articledb
-db.comment.insert({"articleid":"100000","content":"今天天气真好，阳光明媚","userid":"1001","nickname":"Rose","createdatetime":new Date()})
+db.comment.insert({"articleid":"100001","content":"我们都是好孩子","userid":"1002","nickname":"xzh","createdatetime":new Date()})
 ```
 
 2. 登录从节点
 
 ```bash
-/usr/local/mongodb/bin/mongo --host=192.168.3.201 --port=27017
-show dbs;
+/usr/local/mongodb/bin/mongo --host=192.168.2.201 --port=27018
 ```
 
-3. 从节点不能读取集合的数据。当前从节点只是一个备份，不是奴隶节点，无法读取数据，也不能写入，需要加读的权限
+从节点不能读取集合的数据，当前从节点只是一个备份，不是奴隶节点，无法读取数据，也不能写入，需要加读的权限
 
 ```bash
 rs.slaveOk()       # 允许该节点读取数据，该命令是db.getMongo().setSlaveOk()的简化命令
 rs.slaveOk(false)  # 取消从节点读取操作 
 ```
 
+```bash
+use articledb
+db.comment.find()
+```
+
 ### 1.3 分片集群
+
+![](../../assets/_images/deploy/mongodb/image1.png)
+
+| **名称** | **主库** | **备库** |
+| ---------- | ---------- | ---------- |
+| 主机名  | oracle11g | oracle11gstandby |
+| 操作系统  | CentOS release 7.9 | CentOS release 7.9 |
+| IP地址  | 192.168.2.201 | 192.168.2.202 |
+| ORACLE_BASE  | /u01/app/oracle | /u01/app/oracle |
+| ORACLE_HOME  | /u01/app/oracle/product/11.2.0/dbhome_1 | /u01/app/oracle/product/11.2.0/dbhome_1 |
+| ORACLE_SID  | orcl | orcl |
+| 归档模式  | 是 | 否 |
+| 数据库安装  | 安装数据库软件，创建监听，建库 | 安装数据库软件，创建监听，不建库 |
 
 #### 1.3.1 存储节点副本集1
 
