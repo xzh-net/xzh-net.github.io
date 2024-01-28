@@ -73,6 +73,15 @@ db.comment.find()
 
 ### 1.2 副本集
 
+| **名称** | **主节点PRIMARY** | **从节点SECONDARY** | **仲裁节点ARBITER** |
+| ---------- | ---------- | ---------- | ---------- |
+| IP地址  | 192.168.2.201 | 192.168.2.201 | 192.168.2.201 |
+| 端口  | 27017 | 27018 | 27019 |
+| 日志路径  | /data/mongodb/replica_sets/myrs_27017/log | /data/mongodb/replica_sets/myrs_27018/log | /data/mongodb/replica_sets/myrs_27019/log |
+| 数据路径  | /data/mongodb/replica_sets/myrs_27017/data/db | /data/mongodb/replica_sets/myrs_27018/data/db | /data/mongodb/replica_sets/myrs_27019/data/db |
+| 配置文件  | /data/mongodb/replica_sets/myrs_27017/mongod.conf | /data/mongodb/replica_sets/myrs_27018/mongod.conf | /data/mongodb/replica_sets/myrs_27019/mongod.conf |
+
+
 #### 1.2.1 创建主节点
 
 ```bash
@@ -260,52 +269,41 @@ db.comment.find()
 
 ![](../../assets/_images/deploy/mongodb/image1.png)
 
-| **名称** | **主库** | **备库** |
-| ---------- | ---------- | ---------- |
-| 主机名  | oracle11g | oracle11gstandby |
-| 操作系统  | CentOS release 7.9 | CentOS release 7.9 |
-| IP地址  | 192.168.2.201 | 192.168.2.202 |
-| ORACLE_BASE  | /u01/app/oracle | /u01/app/oracle |
-| ORACLE_HOME  | /u01/app/oracle/product/11.2.0/dbhome_1 | /u01/app/oracle/product/11.2.0/dbhome_1 |
-| ORACLE_SID  | orcl | orcl |
-| 归档模式  | 是 | 否 |
-| 数据库安装  | 安装数据库软件，创建监听，建库 | 安装数据库软件，创建监听，不建库 |
-
 #### 1.3.1 存储节点副本集1
 
-在192.168.3.200执行
+在192.168.2.201执行
 
 1. 创建目录
 
 ```bash
 #-----------myshardrs01
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs01_27017/data/db  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs01_27017/log      \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs01_27018/data/db  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs01_27018/log      \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs01_27019/data/db  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs01_27019/log      
+mkdir -p /data/mongodb/sharded_cluster/myshardrs01_27017/data/db  \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs01_27017/log      \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs01_27018/data/db  \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs01_27018/log      \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs01_27019/data/db  \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs01_27019/log      
 ```
 
 2. 创建主节点
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myshardrs01_27017/mongod.conf
+vim /data/mongodb/sharded_cluster/myshardrs01_27017/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myshardrs01_27017/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myshardrs01_27017/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myshardrs01_27017/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myshardrs01_27017/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.201
     port: 27017
 replication:
     replSetName: myshardrs01
@@ -317,22 +315,22 @@ sharding:
 3. 创建从节点
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myshardrs01_27018/mongod.conf
+vim /data/mongodb/sharded_cluster/myshardrs01_27018/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myshardrs01_27018/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myshardrs01_27018/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myshardrs01_27018/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myshardrs01_27018/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.201
     port: 27018
 replication:
     replSetName: myshardrs01
@@ -344,22 +342,22 @@ sharding:
 4. 仲裁节点
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myshardrs01_27019/mongod.conf
+vim /data/mongodb/sharded_cluster/myshardrs01_27019/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myshardrs01_27019/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myshardrs01_27019/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myshardrs01_27019/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myshardrs01_27019/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.201
     port: 27019
 replication:
     replSetName: myshardrs01
@@ -370,59 +368,59 @@ sharding:
 5. 启动服务
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs01_27017/mongod.conf
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs01_27018/mongod.conf
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs01_27019/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myshardrs01_27017/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myshardrs01_27018/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myshardrs01_27019/mongod.conf
 ps -ef |grep mongod
 ```
 
 6. 初始化
 
 ```bash
-/usr/local/mongodb/bin/mongo --host 192.168.3.200 --port 27017
+/usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017
 rs.initiate()
 rs.status()
 rs.conf()
-rs.add("192.168.3.200:27018")     # 添加副本节点
-rs.addArb("192.168.3.200:27019")  # 添加仲裁节点
+rs.add("192.168.2.201:27018")     # 添加副本节点
+rs.addArb("192.168.2.201:27019")  # 添加仲裁节点
 rs.conf()
 ```
 
 #### 1.3.2 存储节点副本集2
 
-在192.168.3.200执行
+在192.168.2.202执行
 
 1. 创建目录
 
 ```bash
 #-----------myshardrs02
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs02_37017/data/db  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs02_37017/log      \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs02_37018/data/db  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs02_37018/log      \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs02_37019/data/db  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myshardrs02_37019/log      
+mkdir -p /data/mongodb/sharded_cluster/myshardrs02_37017/data/db  \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs02_37017/log      \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs02_37018/data/db  \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs02_37018/log      \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs02_37019/data/db  \ &
+mkdir -p /data/mongodb/sharded_cluster/myshardrs02_37019/log      
 ```
 
 2. 创建主节点
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myshardrs02_37017/mongod.conf
+vim /data/mongodb/sharded_cluster/myshardrs02_37017/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myshardrs02_37017/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myshardrs02_37017/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myshardrs02_37017/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myshardrs02_37017/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.202
     port: 37017
 replication:
     replSetName: myshardrs02
@@ -433,22 +431,22 @@ sharding:
 3. 创建从节点
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myshardrs02_37018/mongod.conf
+vim /data/mongodb/sharded_cluster/myshardrs02_37018/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myshardrs02_37018/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myshardrs02_37018/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myshardrs02_37018/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myshardrs02_37018/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.202
     port: 37018
 replication:
     replSetName: myshardrs02
@@ -460,22 +458,22 @@ sharding:
 4. 仲裁节点
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myshardrs02_37019/mongod.conf
+vim /data/mongodb/sharded_cluster/myshardrs02_37019/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myshardrs02_37019/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myshardrs02_37019/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myshardrs02_37019/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myshardrs02_37019/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.200
+    bindIp: localhost,192.168.2.202
     port: 37019
 replication:
     replSetName: myshardrs02
@@ -486,59 +484,59 @@ sharding:
 5. 启动服务
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs02_37017/mongod.conf
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs02_37018/mongod.conf
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myshardrs02_37019/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myshardrs02_37017/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myshardrs02_37018/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myshardrs02_37019/mongod.conf
 ps -ef |grep mongod
 ```
 
 6. 初始化
 
 ```bash
-/usr/local/mongodb/bin/mongo --host 192.168.3.200 --port 37017
+/usr/local/mongodb/bin/mongo --host 192.168.2.202 --port 37017
 rs.initiate()
 rs.status()
 rs.conf()
-rs.add("192.168.3.200:37018")     # 添加副本节点
-rs.addArb("192.168.3.200:37019")  # 添加仲裁节点
+rs.add("192.168.2.202:37018")     # 添加副本节点
+rs.addArb("192.168.2.202:37019")  # 添加仲裁节点
 rs.conf()
 ```
 
 #### 1.3.3 配置节点副本集
 
-在192.168.3.201执行
+在192.168.2.200执行
 
 1. 创建目录
 
 ```bash
 #-----------configrs
-mkdir -p /mydata/mongodb/sharded_cluster/myconfigrs_27019/log \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myconfigrs_27019/data/db \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myconfigrs_27119/log \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myconfigrs_27119/data/db \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myconfigrs_27219/log \ &
-mkdir -p /mydata/mongodb/sharded_cluster/myconfigrs_27219/data/db
+mkdir -p /data/mongodb/sharded_cluster/myconfigrs_27019/log \ &
+mkdir -p /data/mongodb/sharded_cluster/myconfigrs_27019/data/db \ &
+mkdir -p /data/mongodb/sharded_cluster/myconfigrs_27119/log \ &
+mkdir -p /data/mongodb/sharded_cluster/myconfigrs_27119/data/db \ &
+mkdir -p /data/mongodb/sharded_cluster/myconfigrs_27219/log \ &
+mkdir -p /data/mongodb/sharded_cluster/myconfigrs_27219/data/db
 ```
 
 2. 创建主配置
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myconfigrs_27019/mongod.conf
+vim /data/mongodb/sharded_cluster/myconfigrs_27019/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myconfigrs_27019/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myconfigrs_27019/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myconfigrs_27019/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myconfigrs_27019/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.201
+    bindIp: localhost,192.168.2.200
     port: 27019
 replication:
     replSetName: myconfigrs
@@ -549,22 +547,22 @@ sharding:
 3. 创建从配置1
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myconfigrs_27119/mongod.conf
+vim /data/mongodb/sharded_cluster/myconfigrs_27119/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myconfigrs_27119/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myconfigrs_27119/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myconfigrs_27119/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myconfigrs_27119/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.201
+    bindIp: localhost,192.168.2.202
     port: 27119
 replication:
     replSetName: myconfigrs
@@ -576,22 +574,22 @@ sharding:
 4. 创建从配置2
 
 ```bash
-vim /mydata/mongodb/sharded_cluster/myconfigrs_27219/mongod.conf
+vim /data/mongodb/sharded_cluster/myconfigrs_27219/mongod.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/myconfigrs_27219/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/myconfigrs_27219/log/mongod.log"
     logAppend: true
 storage:
-    dbPath: "/mydata/mongodb/sharded_cluster/myconfigrs_27219/data/db"
+    dbPath: "/data/mongodb/sharded_cluster/myconfigrs_27219/data/db"
     journal:
         enabled: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.201
+    bindIp: localhost,192.168.2.200
     port: 27219
 replication:
     replSetName: myconfigrs
@@ -602,94 +600,97 @@ sharding:
 5. 启动服务
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myconfigrs_27019/mongod.conf
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myconfigrs_27119/mongod.conf
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/sharded_cluster/myconfigrs_27219/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myconfigrs_27019/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myconfigrs_27119/mongod.conf
+/usr/local/mongodb/bin/mongod -f /data/mongodb/sharded_cluster/myconfigrs_27219/mongod.conf
 ps -ef |grep mongod
 ```
 
 6. 初始化
 
 ```bash
-/usr/local/mongodb/bin/mongo --host 192.168.3.201 --port 27019
+/usr/local/mongodb/bin/mongo --host 192.168.2.200 --port 27019
 rs.initiate()
 rs.status()
 rs.conf()
-rs.add("192.168.3.201:27119")  # 添加副本节点1
-rs.add("192.168.3.201:27219")  # 添加副本节点2
+rs.add("192.168.2.200:27119")  # 添加副本节点1
+rs.add("192.168.2.200:27219")  # 添加副本节点2
 rs.conf()
 ```
 
 #### 1.3.4 路由节点
 
-在192.168.3.201执行
+在192.168.2.199执行
 
 1. 创建目录
 
 ```bash
 #-----------mongos
-mkdir -p /mydata/mongodb/sharded_cluster/mymongos_27017/log  \ &
-mkdir -p /mydata/mongodb/sharded_cluster/mymongos_27117/log
+mkdir -p /data/mongodb/sharded_cluster/mymongos_27017/log  \ &
+mkdir -p /data/mongodb/sharded_cluster/mymongos_27117/log
 ```
 
 2. 创建路由1
 
 ```bash
-vi /mydata/mongodb/sharded_cluster/mymongos_27017/mongos.conf
+vi /data/mongodb/sharded_cluster/mymongos_27017/mongos.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/mymongos_27017/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/mymongos_27017/log/mongod.log"
     logAppend: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.201
+    bindIp: localhost,192.168.2.199
     port: 27017
 sharding:
-    configDB: myconfigrs/192.168.3.201:27019,192.168.3.201:27119,192.168.3.201:27219
+    configDB: myconfigrs/192.168.2.200:27019,192.168.2.200:27119,192.168.2.200:27219
 ```
 
 
 3. 创建路由2
 
 ```bash
-vi /mydata/mongodb/sharded_cluster/mymongos_27117/mongos.conf
+vi /data/mongodb/sharded_cluster/mymongos_27117/mongos.conf
 ```
 
 ```conf
 systemLog:
     destination: file
-    path: "/mydata/mongodb/sharded_cluster/mymongos_27117/log/mongod.log"
+    path: "/data/mongodb/sharded_cluster/mymongos_27117/log/mongod.log"
     logAppend: true
 processManagement:
     fork: true
 net:
-    bindIp: localhost,192.168.3.201
+    bindIp: localhost,192.168.2.199
     port: 27117
 sharding:
-    configDB: myconfigrs/192.168.3.201:27019,192.168.3.201:27119,192.168.3.201:27219
+    configDB: myconfigrs/192.168.2.200:27019,192.168.2.200:27119,192.168.2.200:27219
 ```
 
 4. 启动服务
 
 ```bash
-/usr/local/mongodb/bin/mongos -f /mydata/mongodb/sharded_cluster/mymongos_27017/mongos.conf
-/usr/local/mongodb/bin/mongos -f /mydata/mongodb/sharded_cluster/mymongos_27117/mongos.conf
+/usr/local/mongodb/bin/mongos -f /data/mongodb/sharded_cluster/mymongos_27017/mongos.conf
+/usr/local/mongodb/bin/mongos -f /data/mongodb/sharded_cluster/mymongos_27117/mongos.conf
 ps -ef |grep mongos
 ```
+
+#### 1.3.5 客户端测试
+
 
 5. 分片配置
 
 ```bash
 # 登录客户端
-/usr/local/mongodb/bin/mongo --host 192.168.3.201 --port 27017  
+/usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017  
 
 # 添加分片
-sh.addShard("myshardrs01/192.168.3.200:27017,192.168.3.200:27018,192.168.3.200:27019")    # 添加第一套
-sh.addShard("myshardrs02/192.168.3.200:37017,192.168.3.200:37018,192.168.3.200:37019")    # 添加第二套
+sh.addShard("myshardrs01/192.168.2.201:27017,192.168.2.201:27018,192.168.2.201:27019")    # 添加副本集1
+sh.addShard("myshardrs02/192.168.2.202:37017,192.168.2.202:37018,192.168.2.202:37019")    # 添加副本集2
 sh.status()
 # 移除分片
 use admin
@@ -748,13 +749,13 @@ root 超级账号，超级权限
 #### 2.2.1 参数方式
 
 ```bash
-/usr/local/mongodb/bin/mongod -f /mydata/mongodb/mongod.conf --auth
+/usr/local/mongodb/bin/mongod -f /data/mongodb/mongod.conf --auth
 ```
 
 #### 2.2.2 配置方式
 
 ```bash
-vi /mydata/mongodb/mongod.conf
+vi /data/mongodb/mongod.conf
 ```
 
 ```conf
@@ -777,16 +778,16 @@ db.createUser({user:"myroot",pwd:"123456",roles:["root"]})
 2. 创建认证文件
 
 ```bash
-openssl rand -base64 90 -out /mydata/mongodb/mongo.keyfile
-scp /mydata/mongodb/mongo.keyfile root@192.168.3.201:/mydata/mongodb/mongo.keyfile
-chmod 400 /mydata/mongodb/mongo.keyfile   # 修改权限
-vi /mydata/mongodb/mongod.conf
+openssl rand -base64 90 -out /data/mongodb/mongo.keyfile
+scp /data/mongodb/mongo.keyfile root@192.168.2.201:/data/mongodb/mongo.keyfile
+chmod 400 /data/mongodb/mongo.keyfile   # 修改权限
+vi /data/mongodb/mongod.conf
 ```
 
 ```conf
 security:
     # KeyFile鉴权文件
-    keyFile: /mydata/mongodb/mongo.keyfile
+    keyFile: /data/mongodb/mongo.keyfile
     # 开启认证方式运行
     authorization: enabled
 ```
