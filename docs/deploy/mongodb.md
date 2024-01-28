@@ -862,6 +862,16 @@ db.settings.save( { _id:"chunksize", value: 1 } )
 
 同副本集处理方式一致
 
+> 如果在开启认证之前未创建管理员账号，可以登录任意路由节点本地登录，相当于后门，只能在admin下操作
+
+```bash
+/usr/local/mongodb/bin/mongo --host 192.168.2.199 --port 27017  
+use admin
+db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } ) 
+```
+
+通过mongos添加的账号信息，只会保存到配置节点的服务中，具体的数据节点不保存账号信息，因此，分片中的账号信息不涉及到同步问题
+
 ## 2. 命令
 
 ```bash
