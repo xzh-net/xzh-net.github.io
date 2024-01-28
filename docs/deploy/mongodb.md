@@ -309,7 +309,7 @@ replication:
     replSetName: myshardrs01
 sharding:
     #分片角色
-    clusterRole: shardsvr	
+    clusterRole: shardsvr
 ```
 
 3. 创建从节点
@@ -335,7 +335,7 @@ net:
 replication:
     replSetName: myshardrs01
 sharding:
-    clusterRole: shardsvr	
+    clusterRole: shardsvr
 ```
 
 
@@ -362,7 +362,7 @@ net:
 replication:
     replSetName: myshardrs01
 sharding:
-    clusterRole: shardsvr	
+    clusterRole: shardsvr
 ```
 
 5. 启动服务
@@ -425,7 +425,7 @@ net:
 replication:
     replSetName: myshardrs02
 sharding:
-    clusterRole: shardsvr	
+    clusterRole: shardsvr
 ```
 
 3. 创建从节点
@@ -719,45 +719,19 @@ for(var i=1;i<=20000;i++){db.author.save({"name":"xzhhhhhhhhh"+i,"age":NumberInt
 
 ## 2 安全认证
 
-### 2.1 角色
+### 2.1 单实例
 
-- 数据库用户角色：read、readWrite;
-- 所有数据库用户角色：readAnyDatabase、readWriteAnyDatabase、userAdminAnyDatabase、dbAdminAnyDatabase
-- 数据库管理角色：dbAdmin、dbOwner、userAdmin；
-- 集群管理角色：clusterAdmin、clusterManager、clusterMonitor、hostManager；
-- 备份恢复角色：backup、restore；
-- 超级用户角色：root
-- 内部角色：system
-
-```lua
-read 可以读取指定数据库中任何数据。
-readWrite 可以读写指定数据库中任何数据，包括创建、重命名、删除集合。
-readAnyDatabase 可以读取所有数据库中任何数据(除了数据库config和local之外)。
-readWriteAnyDatabase 可以读写所有数据库中任何数据(除了数据库config和local之外)。
-userAdminAnyDatabase 可以在指定数据库创建和修改用户(除了数据库config和local之外)。
-dbAdminAnyDatabase 可以读取任何数据库以及对数据库进行清理、修改、压缩、获取统计信息、执行检查等操作(除了数据库config和local之外)。
-dbAdmin 可以读取指定数据库以及对数据库进行清理、修改、压缩、获取统计信息、执行检查等操作。
-userAdmin 可以在指定数据库创建和修改用户。
-clusterAdmin 可以对整个集群或数据库系统进行管理操作。
-backup 备份MongoDB数据最小的权限。
-restore 从备份文件中还原恢复MongoDB数据(除了system.profile集合)的权限。
-root 超级账号，超级权限
-```
-
-### 2.2 单机认证
-
-#### 2.2.1 参数方式
+1. 参数方式
 
 ```bash
 /usr/local/mongodb/bin/mongod -f /data/mongodb/mongod.conf --auth
 ```
 
-#### 2.2.2 配置方式
+2. 配置方式
 
 ```bash
 vi /data/mongodb/mongod.conf
 ```
-
 ```conf
 security:
     #开启授权认证
@@ -766,7 +740,7 @@ security:
 
 
 
-### 2.3 副本集认证
+### 2.2 副本集
 
 1. 开启认证之前，创建超管用户，也可以通过localhost创建超管用户
 
@@ -805,7 +779,7 @@ use articledb
 db.createUser({user: "xzh", pwd: "123456", roles: ["readWrite"]})
 ```
 
-
+### 2.3 分片集群
 
 ## 3. 命令
 
