@@ -67,9 +67,9 @@ rm -f /data/mongodb/data/db/*.lock      # 删除lock文件
 ```bash
 /usr/local/mongodb/bin/mongo --port 27017
 use admin
-db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
-db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
-db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
+db.createUser( { user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
+db.createUser( { user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
+db.createUser( { user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
 db.system.users.find()
 use articledb
 db.comment.insert({"articleid":"1000","content":"我们都是好孩子","userid":"1001","nickname":"Rose","createdatetime":new Date()})
@@ -887,9 +887,9 @@ show collections                # 查询所有集合
 db.collection.drop()            # 删除集合
 
 # 用户角色认证
-db.createUser( {user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
-db.createUser( {user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
-db.createUser( {user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
+db.createUser( { user: "root", pwd: "123456", roles: [ { role: "root", db: "admin" } ] } )       # 创建超管
+db.createUser( { user: "admin", pwd: "123456", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } )     # 创建管理员
+db.createUser( { user: "xzh", pwd: "123456", roles: [ { role: "readWrite", db:"articledb" } ] } )               # 创建普通用户
 db.system.users.find()                      # 查看已经创建了的用户的情况
 db.dropUser("xzh")                          # 删除用户
 db.changeUserPassword("xzh", "123456")      # 修改密码
