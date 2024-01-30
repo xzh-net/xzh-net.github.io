@@ -1962,9 +1962,9 @@ vim +/sssd /etc/passwd  # 定位到sssd所在的行
 
 ## 4. 环境搭建
 
-### 4.1 Java
+### 4.1 Java Sdk
 
-#### 4.1.1 JDK
+jdk 1.8
 
 ```bash
 # Oracle最后一个商用免费版本
@@ -1981,7 +1981,7 @@ scp /etc/profile root@node02:/etc/
 scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 ```
 
-#### 4.1.2 Maven
+### 4.2 Maven
 
 1. 上传解压
 
@@ -2038,7 +2038,7 @@ vim /opt/apache-maven-3.6.3/conf/settings.xml
 ```
 
 
-### 4.2 Node
+### 4.3 Node
 
 ```bash
 yum install -y git
@@ -2089,7 +2089,7 @@ npm list                #查看当前目录下已安装的node包
 npm list parseable=true #以目录的形式来展现当前安装的所有node包
 ```
 
-### 4.3 TypeScript
+### 4.4 TypeScript
 
 ```bash
 npm init -y                     # 生成package.json配置文件
@@ -2100,31 +2100,39 @@ tsc -w                          # 手动编译
 npm install ts-node -g --force  # 配合插件Code Runner
 ```
 
-### 4.4 Golang
+### 4.5 Golang
 
-#### 4.4.1 配置环境
+1. 配置环境
 
 ```bash
-wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz          # 下载
+wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
 tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
+vi /etc/profile
+```
 
-echo 'export GOROOT=/usr/local/go'>>/etc/profile                    # go安装目录
-echo 'export GOPATH=/home/xzh/go'>>/etc/profile                     # 工作空间
-echo 'export GOBIN=$GOPATH/bin'>>/etc/profile                       # 生成可执行文件路径
-echo 'export PATH=$PATH:$GOROOT/bin'>>/etc/profile                  # 全局配置
-echo 'export GO111MODULE=on'>>/etc/profile                          # 模块支持
-echo 'export GOPROXY=https://goproxy.cn'>>/etc/profile              # 模块代理
-echo 'export http_proxy=http://172.17.17.165:7890'>>/etc/profile    # 翻墙
-echo 'export https_proxy=http://172.17.17.165:7890'>>/etc/profile
+```conf
+export GOROOT=/usr/local/go                     # Golang安装目录
+export GOPATH=/opt/gocode                       # Golang项目代码目录
+export GOBIN=$GOPATH/bin                        # go install后生成的可执行命令存放路径
+export PATH=$PATH:$GOROOT/bin                   # 全局配置
+export GO111MODULE=on                           # 模块支持
+export GOPROXY=https://goproxy.cn               # 模块代理
+export http_proxy=http://172.17.17.165:7890     # 翻墙
+export https_proxy=http://172.17.17.165:7890
+```
+
+```bash
 source /etc/profile
-
 go version
 go env
 ```
 
-#### 4.4.2 验证
+2. 创建第一个应用程序
 
 ```bash
+cd /opt/gocode
+mkdir hello && cd hello     # 创建项目文件夹
+go mod init api             # 初始项目
 vi test.go
 ```
 
@@ -2142,11 +2150,12 @@ func main() {
 ```
 
 ```bash
-go run main.go
+go run test.go
+go build
 go install
 ```
 
-### 4.5 Python
+### 4.6 Python
 
 ```bash
 #!/bin/bash
