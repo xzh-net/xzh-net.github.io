@@ -1619,7 +1619,7 @@ which gcc
 gcc --version
 ```
 
-### 2.6 shell
+### 2.6 启动脚本
 
 #### 2.6.1 Tomcat
 
@@ -2106,6 +2106,7 @@ npm install ts-node -g --force  # 配合插件Code Runner
 
 ```bash
 wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
+wget https://golang.google.cn/dl/go1.17.8.linux-amd64.tar.gz
 tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
 vi /etc/profile
 ```
