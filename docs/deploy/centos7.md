@@ -2131,9 +2131,9 @@ go env
 
 ```bash
 cd /opt/gocode
-mkdir hello && cd hello     # 创建项目文件夹
-go mod init api             # 初始项目
-vi test.go
+mkdir markdown && cd markdown       # 创建项目文件夹
+go mod init markdown-renderer       # 初始项目
+vi markdown_trest.go
 ```
 
 ```go
@@ -2142,15 +2142,15 @@ package main
 import "fmt"
 
 func init() {
-	fmt.Println("初始化")
+	fmt.Println("初始化成功")
 }
 func main() {
-	fmt.Println("hello,word")
+	fmt.Println("markdown渲染器启动成功")
 }
 ```
 
 ```bash
-go run test.go
+go run markdown_trest.go
 go build
 go install
 ```
