@@ -756,18 +756,10 @@ location /getUser {
     if ( $query_string ~* ^(.*)v=2.0$ ) {
         return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
     }
-    return 200 $time_local;
-}
-```
-
-```conf
-location /postUser {
-    default_type application/json;
-    add_header Content-Type 'text/html; charset=utf-8';
-    if ($request_method !~* POST) {
+    if ( $request_method !~* POST ) {
         return 403;
     }
-    return 200 '{"id":3,"name":"小牛心心","age":29}';
+    return 200 $time_local;
 }
 ```
 
@@ -911,26 +903,27 @@ server {
 
 
 
-### 3.9 IP过滤
+### 3.9 访问控制
 
-1. 屏蔽ip
-
-单独网站屏蔽IP的方法，把include blocksip.conf放到网址对应的在server{}语句块，所有网站屏蔽IP的方法，把include blocksip.conf放到http {}语句块。
+```bash
+vi blockip.conf
+```
 
 ```conf
-include blockip.conf; 
-# 添加内容
-allow  180.164.67.212;
-allow  59.46.186.253;
-deny all;
+allow 192.168.1.0/24;
+allow 10.1.1.0/16;
+allow 2001:0db8::/32;
+deny  all;
 ```
 
 ```conf
 http {
+    # 所有站点屏蔽规则
     # include blockip.conf;
     server {
         listen 28101;
         server_name  _;
+        # 针对具体网站屏蔽规则
         # include blockip.conf;
         location / {
             proxy_redirect off;
@@ -938,26 +931,18 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass http://127.0.0.1:18101;
+            # 按路径屏蔽
             # include blockip.conf;
         }
     }
 }
 ```
 
-统计ip访问次数
-
 ```bash
+# 统计ip访问次数
 awk '{print $1}' /var/log/nginx/access.log |sort |uniq -c|sort -n
-```
-
-2. 通过User-Agent过滤爬虫
-
-```conf
-location / {
-    if ($http_user_agent ~* "scrapy|python|curl|java|wget|httpclient|okhttp") {
-        return 503;
-    }
-}
+# 过滤指定时间内的数据
+sed -n '/31\/Jan\/2024:09/,/31\/Jan\/2024:10/p' /var/log/nginx/hc.log >20240131_9-10.log
 ```
 
 ### 3.10 URL美化
