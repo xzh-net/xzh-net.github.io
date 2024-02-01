@@ -1750,7 +1750,7 @@ create table ATEST
   is_deleted     NUMBER(1) default 0
 );
 
-alter table ATEST add constraint pk_id primary key (id);
+alter table ATEST add constraint pk_atest_id primary key (id);
 
 comment on column ATEST.start_price  is '起拍价格';
 comment on column ATEST.view_num  is '库存数量';
