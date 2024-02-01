@@ -1736,7 +1736,7 @@ alter system set processes = value scope = spfile;       -- 修改连接数需�
 ### 3.1 建表
 
 ```sql
-create table ATEST
+create table tb_order
 (
   id             NUMBER(20),
   car_no         VARCHAR2(100),
@@ -1750,16 +1750,16 @@ create table ATEST
   is_deleted     NUMBER(1) default 0
 );
 
-alter table ATEST add constraint pk_atest_id primary key (id);
+alter table tb_order add constraint pk_tb_order_id primary key (id);
 
-comment on column ATEST.start_price  is '起拍价格';
-comment on column ATEST.view_num  is '库存数量';
-comment on column ATEST.on_status  is '上架状态';
-comment on column ATEST.on_time  is '上架时间';
-comment on column ATEST.register_date  is '注册日期';
-comment on column ATEST.create_user_id  is '创建人';
-comment on column ATEST.create_time  is '创建时间';
-comment on column ATEST.is_deleted  is '是否删除';
+comment on column tb_order.start_price  is '起拍价格';
+comment on column tb_order.view_num  is '库存数量';
+comment on column tb_order.on_status  is '上架状态';
+comment on column tb_order.on_time  is '上架时间';
+comment on column tb_order.register_date  is '注册日期';
+comment on column tb_order.create_user_id  is '创建人';
+comment on column tb_order.create_time  is '创建时间';
+comment on column tb_order.is_deleted  is '是否删除';
 ```
 
 
