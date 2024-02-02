@@ -235,27 +235,9 @@ nohup /usr/local/mysqld_exporter/mysqld_exporter --config.my-cnf=/usr/local/mysq
 lsof -i:9104
 ```
 
-### 2.3 容器监控
+### 2.3 redis监控
 
-1. 安装
-
-```bash
-docker run -d \
-  --volume=/:/rootfs:ro \
-  --volume=/var/run:/var/run:rw \
-  --volume=/sys:/sys:ro \
-  --volume=/var/lib/docker/:/var/lib/docker:ro \
-  --publish=18080:8080 \
-  --detach=true \
-  --name=cadvisor \
-  google/cadvisor:latest
-```
-
-http://ip:8090/containers/
-
-### 2.4 redis监控
-
-#### 2.4.1 下载解压 
+#### 2.3.1 下载解压 
 
 ```bash
 cd /opt/software
@@ -264,7 +246,7 @@ tar zxvf redis_exporter-v1.6.1.linux-amd64.tar.gz -C /usr/local/
 mv /usr/local/redis_exporter-v1.6.1.linux-amd64 /usr/local/redis_exporter
 ```
 
-#### 2.4.2 添加系统服务
+#### 2.3.2 添加系统服务
 
 1. 创建启动文件
 
@@ -291,7 +273,7 @@ WantedBy=multi-user.target
 systemctl daemon-reload
 ```
 
-#### 2.4.3 启动服务
+#### 2.3.3 启动服务
 
 ```bash
 systemctl start redis_exporter
@@ -299,6 +281,24 @@ systemctl start redis_exporter
 nohup /usr/local/redis_exporter/redis_exporter -redis.addr 172.17.17.192:16396 -redis.password "redis16396" &   # 后台启动
 lsof -i:9121
 ```
+
+### 2.4 容器监控
+
+1. 安装
+
+```bash
+docker run -d \
+  --volume=/:/rootfs:ro \
+  --volume=/var/run:/var/run:rw \
+  --volume=/sys:/sys:ro \
+  --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --publish=18080:8080 \
+  --detach=true \
+  --name=cadvisor \
+  google/cadvisor:latest
+```
+
+http://ip:8090/containers/
 
 ## 3. Grafana
 
@@ -318,9 +318,16 @@ systemctl enable grafana-server
 
 访问地址：http://ip:3000/  admin/admin
 
-#### 3.2.1 linux监控
 
-1. 添加Prometheus数据源
+### 3.3 配置图表
+
+- linux https://grafana.com/grafana/dashboards/12377
+- mysql https://grafana.com/grafana/dashboards/7362
+- redis https://grafana.com/grafana/dashboards/763
+- docker https://grafana.com/grafana/dashboards/893
+- postgres https://grafana.com/grafana/dashboards/9628
+
+1. 添加数据源
 
 ![](../../assets/_images/deploy/prometheus/grafana1.png)
 ![](../../assets/_images/deploy/prometheus/grafana2.png)
@@ -335,15 +342,7 @@ systemctl enable grafana-server
 ![](../../assets/_images/deploy/prometheus/grafana5.png)
 
 
-#### 3.2.2 mysql监控
 
-https://grafana.com/grafana/dashboards/7362
 
-#### 3.2.3 容器监控
 
-https://grafana.com/grafana/dashboards/893
-
-#### 3.2.4 redis监控
-
-https://grafana.com/grafana/dashboards/763
 
