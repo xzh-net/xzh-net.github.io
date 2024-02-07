@@ -1452,7 +1452,7 @@ archive log list;
 
 ### 2.5 表空间管理
 
-#### 2.5.1 临时表空间
+1. 临时表空间
   
 表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
 
@@ -1475,7 +1475,7 @@ alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;            
 drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
 ```
 
-#### 2.5.2 数据表空间
+2. 数据表空间
 
 ```bash
 create tablespace xzh
@@ -1526,24 +1526,23 @@ GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        -- 将oradmp目录的赋
 
 ### 2.7 备份恢复
 
-#### 2.7.1 按表名备份、还原
+1. 按表名备份、还原
 
 ```bash
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=sys_menu,sys_role,sys_user  
 impdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=xzh0610.sys_menu,xzh0610.sys_user REMAP_SCHEMA=xzh0610:xzh0610 table_exists_action=replace
 ```
 
-#### 2.7.2 全量备份、还原
+2. 全量备份、还原
 
 ```bash
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp SCHEMAS=xzh0610 logfile=xzh0610_$(date +%Y%m%d-%H%M).log
 impdp xzh0611/123456 directory=oradmp dumpfile=xzh0610.dmp  schemas=xzh0610 REMAP_SCHEMA=xzh0610:xzh0611 REMAP_TABLESPACE=xzh:xzh
-
 # 还原后无法使用
 execute dbms_stats.delete_schema_stats('xzh0610');
 ```
 
-#### 2.7.3 定时备份
+3. 定时备份
 
 ```bash
 crontab -e
@@ -1660,6 +1659,21 @@ BAKDATE=`date +%Y%m%d%H%M`
 /usr/bin/gzip /opt/DB/SGDB$BAKDATE.dmp
 find /opt/DB/ -mtime +5 -type f -name '*.dmp.gz' -exec rm {} \;
 find /opt/DB/ -mtime +5 -type f -name '*.log' -exec rm {} \;
+```
+
+> 如何停止正在后台执行的 impdp/expdp 任务
+
+```sql
+-- 删除所有非执行中的任务
+select 'drop table ' || owner_name || '.' || job_name || ';' from dba_datapump_jobs where state = 'NOT RUNNING';
+-- 查询正在执行的任务
+select * from dba_datapump_jobs where STATE='EXECUTING';
+```
+
+```bash
+# 根据上面 job_name 进入到刚才执行的expdp下
+expdp user_center/123456 attach=SYS_EXPORT_SCHEMA_01
+# 执行 stop_job=immediate ---yes 或者 kill_job
 ```
 
 ### 2.8 AWR报告
