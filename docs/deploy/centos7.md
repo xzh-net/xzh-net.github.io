@@ -1360,12 +1360,10 @@ sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home            
 
 # Find查找
 ll | grep hwcq.online               # 当前路径过滤显示
-grep -n "hwcq.online" -r ./         # 当前路径递归向下查找内容
+grep -n -r "hwcq.online" ./         # 当前路径递归向下查找内容
 find / -name memcached              # 查找文件
-find / -type f -size +100M          # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
-find / -name 'conf' -type d         # 查找conf文件夹
-find / -iname 'SerVer.xml'          # 查找server.xml文件的位置,忽略大小写
-find / -name '*.mysql'              # 在目录下找后缀是.mysql的文件
+find / -iname 'conF' -type d        # 查找文件夹,忽略大小写
+find / -type f -size +100M -print0 | xargs -0 du -sh | sort -nr     # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
 
 # 删除
 find /doc -name '*bak' -exec rm {} \;              # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
