@@ -588,9 +588,8 @@ yum install -y nfs-utils
 #### 1.6.2 创建共享目录
 
 ```bash
-mkdir -p /share/nfs/software
-chmod o+w /share/nfs/software   # 非root用户访问时需要增加其他组的写权限
-touch {1..5}.txt    # 批量创建测试文件
+mkdir -p /opt/software
+chmod o+w /opt/software   # 非root用户访问时需要增加其他组的写权限
 ```
 
 #### 1.6.3 共享配置
@@ -598,7 +597,9 @@ touch {1..5}.txt    # 批量创建测试文件
 ```bash
 vi /etc/exports 
 # 添加
-/share/nfs/software *(rw,no_root_squash) # *代表对所有IP都开放此目录，rw是读写
+/opt/software *(rw,no_root_squash) # *代表对所有IP都开放此目录，rw是读写
+# 生效配置
+exportfs -rv 
 ```
 
 #### 1.6.4 启动服务
@@ -612,13 +613,13 @@ systemctl enable nfs-server
 
 ```bash
 yum install -y nfs-utils.x86_64
-mkdir -p /mnt/nfs/software      # 添加挂载文件夹
-showmount -e 172.17.17.171      # 查看NFS共享目录
-mount.nfs 172.17.17.171:/share/nfs/software /mnt/nfs/software   # 挂载目录
-fuser -km /mnt/nfs/software     # kill 挂载进程
-umount /mnt/nfs/software        # 取消目录
-df -h
-echo "172.17.17.171:/share/nfs/software /mnt/nfs/software nfs defaults 0 0" >> /etc/fstab    # 永久挂载
+mkdir -p /mnt                   # 创建挂载文件夹
+showmount -e 192.168.2.201      # 查看NFS共享目录
+
+mount 192.168.2.201:/opt/software /mnt  # 挂载目录
+umount -lf /mnt                         # 强制卸载
+fuser -km /mnt                          # kill 挂载进程
+echo "192.168.2.201:/opt/software /mnt nfs defaults 0 0" >> /etc/fstab    # 永久挂载
 ```
 
 ### 1.7 Samba
