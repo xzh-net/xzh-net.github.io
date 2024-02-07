@@ -321,7 +321,7 @@ systemctl enable grafana-server
 
 ### 3.3 配置图表
 
-- linux https://grafana.com/grafana/dashboards/12377
+- linux https://grafana.com/grafana/dashboards/11074
 - mysql https://grafana.com/grafana/dashboards/7362
 - redis https://grafana.com/grafana/dashboards/763
 - docker https://grafana.com/grafana/dashboards/893
