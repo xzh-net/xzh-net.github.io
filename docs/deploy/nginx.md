@@ -455,8 +455,8 @@ http {
     large_client_header_buffers 4 32k;      # 请求头最大缓冲区空间
     client_header_timeout 60s;              # 设置读取客户端请求头超时时间，默认为60s,响应408
     # 请求体处理
-    client_max_body_size 1m;                # 请求主体最大限制，上传文件大小，默认值为1m（1024kb）
-    client_body_buffer_size 16k;            # 请求主体缓冲区大小，如果主体大于缓冲区并且小于主体最大限制，则将文件存储到临时文件中（client_body_temp）
+    client_max_body_size 10m;               # 请求主体最大限制，上传文件大小，默认值为1m（1024kb）
+    client_body_buffer_size 10m;            # 请求主体缓冲区大小，如果主体大于缓冲区并且小于主体最大限制，则将文件存储到临时文件中（client_body_temp）
     client_body_timeout 60s;                # 设置读取客户端主体内容体超时时间，默认为60s,响应408
     client_body_temp_path /data/temp/;      # 请求主体临时保存路径
     client_body_in_file_only off;           # 将请求体存储在临时文件中，默认关闭。clean：请求后删除,on：请求后不删除
