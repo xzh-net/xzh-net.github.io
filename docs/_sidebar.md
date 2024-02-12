@@ -58,15 +58,17 @@
   - [DataX](deploy/datax)
 
 - 开发工具
-  - [阿里开源的诊断神器Arthas](java/tools/arthas)
-  - [使用ZeroBrane Studio调试lua脚本](java/tools/zerobrane)
+  - [Java](deploy/java)
+  - [Python](deploy/python)
+  - [Sacla](java/tools/scala)
+  - [Arthas](java/tools/arthas)
+  - [ZeroBrane Studio](java/tools/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
-  - [Sacla IDEA 配置使用教程](java/tools/scala)
 
 - 学习笔记
   - [解决方案](java/project/scheme)
   - [设计模式](java/designpattern/model)
-  - [基础算法函数](java/jvm/function)
+
   - [JVM底层原理](java/jvm/index)
   - [Map源码](java/j2se/map)
   - [List源码](java/j2se/list)
