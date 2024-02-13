@@ -2155,9 +2155,3 @@ go build
 go install
 ```
 
-### 4.6 Python
-
-```bash
-#!/bin/bash
-nohup python -m SimpleHTTPServer 8887 &
-```
