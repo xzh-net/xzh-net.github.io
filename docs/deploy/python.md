@@ -1,10 +1,10 @@
 # Ptyhon 3.12.2
 
-下载地址：https://www.python.org/downloads
-
 ## 1. Windows
 
-### 1.1 下载安装
+### 1.1 安装Ptyhon
+
+下载地址：https://www.python.org/downloads
 
 ![](../../assets/_images/deploy/python/1.png)
 
@@ -19,6 +19,39 @@
 ![](../../assets/_images/deploy/python/6.png)
 
 ### 1.2 安装PyCharm
+
+下载地址：https://www.jetbrains.com/zh-cn/pycharm/
+
+![](../../assets/_images/deploy/python/10.png)
+
+![](../../assets/_images/deploy/python/11.png)
+
+![](../../assets/_images/deploy/python/12.png)
+
+![](../../assets/_images/deploy/python/13.png)
+
+![](../../assets/_images/deploy/python/14.png)
+
+启动
+
+![](../../assets/_images/deploy/python/20.png)
+
+创建项目
+
+![](../../assets/_images/deploy/python/21.png)
+
+设置主题
+
+![](../../assets/_images/deploy/python/22.png)
+
+设置字体
+
+![](../../assets/_images/deploy/python/23.png)
+
+### 1.3 安装Anaconda3
+
+下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2021.05-Windows-x86_64.exe
+
 
 ## 2. Linux
 
