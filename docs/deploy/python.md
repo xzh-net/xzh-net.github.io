@@ -48,6 +48,16 @@
 
 ![](../../assets/_images/deploy/python/23.png)
 
+三方包管理
+
+![](../../assets/_images/deploy/python/24.png)
+
+![](../../assets/_images/deploy/python/25.png)
+
+下载三方包
+
+![](../../assets/_images/deploy/python/26.png)
+
 ### 1.3 安装Anaconda3
 
 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2021.05-Windows-x86_64.exe
@@ -148,4 +158,21 @@ virtualenv --python=python3 jmp_venv1
 source /data/python3/code/jmp_venv1/bin/activate
 # 退出环境
 deactivate
+```
+
+## 3. 脚本
+
+### 3.1 数据库操作
+
+1. 读取写入导出
+
+```bash
+pip3 install pymysql -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+### 3.2 web服务器
+
+```bash
+#!/bin/bash
+nohup python -m SimpleHTTPServer 8887 &
 ```
