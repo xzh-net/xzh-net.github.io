@@ -62,7 +62,7 @@
   - [Python](deploy/python)
   - [Sacla](java/tools/scala)
   - [Arthas](java/tools/arthas)
-  - [ZeroBrane Studio](java/tools/zerobrane)
+  - [Lua](deploy/zerobrane)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
 
 - 学习笔记
