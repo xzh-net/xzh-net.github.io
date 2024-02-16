@@ -4,14 +4,11 @@
 
 ### 1.1 安装Go
 
-下载地址：https://www.python.org/downloads
-
+下载地址：https://golang.google.cn/dl/
 
 ### 1.2 安装GoLand
 
-下载地址：https://www.jetbrains.com/zh-cn/pycharm/
-
-
+下载地址：https://www.jetbrains.com/zh-cn/go/
 
 ## 2. Linux
 
@@ -22,7 +19,6 @@
 ```bash
 cd /opt/software
 wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
-# wget https://golang.google.cn/dl/go1.17.8.linux-amd64.tar.gz
 tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
 ```
 
