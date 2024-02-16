@@ -29,8 +29,8 @@ vi /etc/profile
 ```
 
 ```conf
-export GOROOT=/usr/local/go                     # Golang安装目录
-export GOPATH=/data/gocode                      # Golang项目代码目录
+export GOROOT=/usr/local/go                     # go 安装目录
+export GOPATH=/data/gocode                      # go 项目代码目录
 export GOBIN=$GOPATH/bin                        # go install后生成的可执行命令存放路径
 export PATH=$PATH:$GOROOT/bin                   # 全局配置
 export GO111MODULE=on                           # 模块支持
