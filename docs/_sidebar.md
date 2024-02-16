@@ -60,6 +60,7 @@
 - 开发工具
   - [Java](deploy/java)
   - [Python](deploy/python)
+  - [Golang](deploy/go)
   - [Sacla](java/tools/scala)
   - [Arthas](java/tools/arthas)
   - [Lua](deploy/lua)
