@@ -4,7 +4,23 @@
 
 ### 1.1 安装Go
 
-下载地址：https://golang.google.cn/dl/
+1. 下载解压
+
+https://dl.google.com/go/go1.22.0.windows-amd64.zip
+
+2. 设置环境变量
+
+配置GOROOT
+
+![](../../assets/_images/deploy/go/1.png)
+
+配置GOPATH
+
+![](../../assets/_images/deploy/go/2.png)
+
+配置PATH
+
+![](../../assets/_images/deploy/go/3.png)
 
 ### 1.2 安装GoLand
 
