@@ -26,6 +26,30 @@ https://dl.google.com/go/go1.22.0.windows-amd64.zip
 
 下载地址：https://www.jetbrains.com/zh-cn/go/
 
+![](../../assets/_images/deploy/go/11.png)
+
+![](../../assets/_images/deploy/go/12.png)
+
+![](../../assets/_images/deploy/go/13.png)
+
+![](../../assets/_images/deploy/go/14.png)
+
+启动
+
+![](../../assets/_images/deploy/go/15.png)
+
+创建项目
+
+![](../../assets/_images/deploy/go/16.png)
+
+设置主题
+
+![](../../assets/_images/deploy/go/17.png)
+
+设置字体
+
+![](../../assets/_images/deploy/go/18.png)
+
 ## 2. Linux
 
 ### 2.1 安装Go
@@ -46,9 +70,9 @@ vi /etc/profile
 
 ```conf
 export GOROOT=/usr/local/go                     # go 安装目录
-export GOPATH=/data/gocode                      # go 项目代码目录
-export GOBIN=$GOPATH/bin                        # go install后生成的可执行命令存放路径
-export PATH=$PATH:$GOROOT/bin                   # 全局配置
+export GOPATH=/data/go                          # go 项目代码目录
+export GOBIN=$GOROOT/bin                        # go install后生成的可执行命令存放路径
+export PATH=$PATH:$GOBIN                        # 全局配置
 export GO111MODULE=on                           # 模块支持
 export GOPROXY=https://goproxy.cn               # 模块代理
 export http_proxy=http://172.17.17.165:7890     # 翻墙
