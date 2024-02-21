@@ -69,7 +69,7 @@
 - 学习笔记
   - [解决方案](java/project/scheme)
   - [设计模式](java/designpattern/model)
-
+  - [J2se](deploy/j2se)
   - [JVM底层原理](java/jvm/index)
   - [Map源码](java/j2se/map)
   - [List源码](java/j2se/list)
