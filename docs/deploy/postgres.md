@@ -131,8 +131,12 @@ vi pg_hba.conf
 ```
 
 ```conf
+# "local" is for Unix domain socket connections only
+local   all             all                                  trust
 # IPv4 local connections:
 host    all             all             0.0.0.0/0            md5
+# IPv6 local connections:
+host    all             all             ::1/128              md5
 # Allow replication connections
 host    replication     all             0.0.0.0/0            md5
 ```
