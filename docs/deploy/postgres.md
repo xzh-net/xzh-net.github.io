@@ -1304,7 +1304,7 @@ $$ LANGUAGE PLPGSQL;
 #!/bin/bash
 export LD_LIBRARY_PATH=/usr/local/pgsql/lib:$LD_LIBRARY_PATH
 starttime=`date +'%Y-%m-%d %H:%M:%S'`
-/lif/bin/pg/bin/psql -p 5432 -d postgres -U postgres  -c "select check_monitor();"
+/usr/local/pgsql/bin/psql -p 5432 -d postgres -U postgres  -c "select check_monitor();"
 echo '执行时间：'$starttime >> /home/postgres/shell/log.log
 ```
 
