@@ -1,4 +1,4 @@
-# Java 8u202
+# Java 8
 
 ## 1. Windows
 
@@ -15,6 +15,7 @@ GRADLE_HOME
 D:\java\gradle-6.8.3
 GRADLE_USER_HOME
 D:\Repositories\Maven
+
 PATH
 %JAVA_HOME%\bin
 %MAVEN_HOME%\bin
@@ -49,6 +50,32 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
 ```
 
 ### 1.3 Idea
+
+![](../../assets/_images/deploy/java/1.png)
+
+![](../../assets/_images/deploy/java/2.png)
+
+![](../../assets/_images/deploy/java/3.png)
+
+![](../../assets/_images/deploy/java/4.png)
+
+![](../../assets/_images/deploy/java/5.png)
+
+![](../../assets/_images/deploy/java/6.png)
+
+![](../../assets/_images/deploy/java/11.png)
+
+设置主题
+
+![](../../assets/_images/deploy/java/12.png)
+
+设置字体
+
+![](../../assets/_images/deploy/java/13.png)
+
+设置Maven
+
+![](../../assets/_images/deploy/java/14.png)
 
 ## 2. Linux
 
