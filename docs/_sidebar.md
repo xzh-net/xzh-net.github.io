@@ -59,9 +59,9 @@
 
 - 开发工具
   - [Java](deploy/java)
+  - [Sacla](deploy/scala)
   - [Python](deploy/python)
   - [Golang](deploy/go)
-  - [Sacla](java/tools/scala)
   - [Arthas](java/tools/arthas)
   - [Lua](deploy/lua)
   - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
