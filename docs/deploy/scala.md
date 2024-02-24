@@ -38,7 +38,8 @@ PATH
 ### 2.1 Sdk
 
 
-
+```scala
 case class Student(var name:String,var age:Int)
 var s=Student("zhangsan",29)
 println(s)
+```
