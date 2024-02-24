@@ -1859,7 +1859,7 @@ JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
 $JAVA ${JAVA_OPT} $@
 ```
 
-## 3. 虚拟机设置
+## 3. 虚拟机
 
 ### 3.1 初始化
 
