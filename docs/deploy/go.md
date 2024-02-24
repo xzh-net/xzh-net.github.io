@@ -6,23 +6,19 @@
 
 ### 1.1 安装Go
 
-1. 下载解压
+下载地址：https://dl.google.com/go/go1.22.0.windows-amd64.zip
 
-https://dl.google.com/go/go1.22.0.windows-amd64.zip
+设置环境变量
 
-2. 设置环境变量
+```lua
+GOROOT
+C:\go
+GOPATH
+D:\go
 
-配置GOROOT
-
-![](../../assets/_images/deploy/go/1.png)
-
-配置GOPATH
-
-![](../../assets/_images/deploy/go/2.png)
-
-配置PATH
-
-![](../../assets/_images/deploy/go/3.png)
+PATH
+%GOROOT%\bin
+```
 
 GO111MODULE设置
 
