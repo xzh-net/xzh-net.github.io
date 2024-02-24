@@ -62,9 +62,11 @@
   - [Sacla](deploy/scala)
   - [Python](deploy/python)
   - [Golang](deploy/go)
+  - [Node.js](deploy/node)
+  - [TypeScript](deploy/typescript)
   - [Arthas](java/tools/arthas)
   - [Lua](deploy/lua)
-  - [C/C++ IDE CLion 配置使用教程](java/tools/clion)
+  - [C](java/tools/clion)
 
 - 学习笔记
   - [解决方案](java/project/scheme)
