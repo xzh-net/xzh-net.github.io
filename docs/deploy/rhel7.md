@@ -143,7 +143,7 @@ Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Proto
 
 ![](../../assets/_images/deploy/rhel7/34.png)
 
-## 3. 虚拟机设置
+## 3. 虚拟机
 
 ### 3.1 网络配置
 

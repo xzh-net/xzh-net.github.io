@@ -63,7 +63,7 @@
 ![](../../assets/_images/deploy/neokylin/11.png)
 
 
-## 2. 虚拟机设置
+## 2. 虚拟机
 
 ### 2.1 初始化
 
