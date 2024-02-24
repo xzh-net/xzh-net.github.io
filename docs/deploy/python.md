@@ -62,18 +62,63 @@
 
 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2021.05-Windows-x86_64.exe
 
+#### 1.3.1 设置环境变量
+
+```java
+PATH
+C:\ProgramData\Anaconda3
+C:\ProgramData\Anaconda3\Scripts
+C:\ProgramData\Anaconda3\Library\bin
+C:\ProgramData\Anaconda3\Library\mingw-w64
+```
+
+#### 1.3.2 更换服务器源
+
+打开`Anaconda Prompt`程序，执行`conda config --set show_channel_urls yes`
+
+记事本打开`C:\Users\用户名\.condarc`文件, 将如下内容替换全部保存
+
+```shell
+channels:
+  - defaults
+show_channel_urls: true
+default_channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+custom_channels:
+  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+```
+
+#### 1.3.3 常用命令
+
+```bash
+conda info -e                       # 查看当前系统中创建的虚拟环境，自带一个base环境
+conda env list                      # 查看已创建的环境
+conda create -n name python=3.8     # 创建名为name、Python版本为x.x的虚拟环境
+conda activate name                 # 激活名为name的环境
+conda install package_name          # 在当前环境中安装包
+conda deactivate                    # 退出虚拟环境
+conda remove -n name --all          # 删除名为name的虚拟环境
+pip install pyhive pyspark jieba -i https://pypi.tuna.tsinghua.edu.cn/simple    # 在虚拟环境内安装包
+```
 
 ## 2. Linux
 
 ### 2.1 安装Python
 
-1. 安装依赖
+#### 2.1.1 安装依赖
 
 ```bash
 yum install wget zlib-devel bzip2-devel openssl openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make zlib zlib-devel libffi-devel -y
 ```
 
-2. 下载编译
+#### 2.1.2 下载编译
 
 [Python requires a OpenSSL 1.1.1 or newer](deploy/haproxy?id=_15-安装openssl)
 ```bash
@@ -87,7 +132,7 @@ cd Python-3.12.2
 make && make install
 ```
 
-3. 设置环境变量
+#### 2.1.3 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -103,7 +148,7 @@ export PATH=$PYTHON_HOME/bin:$PATH
 source /etc/profile
 ```
 
-4. 创建软连接
+#### 2.1.4 创建软连接
 
 ```bash
 rm -f /usr/bin/python
@@ -124,7 +169,7 @@ ln -s /usr/local/python3.12.2/bin/python3.12 /usr/bin/python
 
 ### 2.2 虚拟环境
 
-1. 配置pip3源
+#### 2.2.1 配置pip3源
 
 ```bash
 mkdir ~/.pip
@@ -141,13 +186,13 @@ index-url=http://mirrors.aliyun.com/pypi/simple
 trusted-host=mirrors.aliyun.com
 ```
 
-2. 安装虚拟环境
+#### 2.2.2 安装虚拟环境
 
 ```bash
 pip3 install virtualenv
 ```
 
-3. 创建虚拟环境
+#### 2.2.3 创建虚拟环境
 
 ```bash
 mkdir /data/python3/code -p
