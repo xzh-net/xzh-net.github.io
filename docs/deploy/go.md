@@ -63,7 +63,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 
 ### 2.1 安装Go
 
-1. 下载解压
+#### 2.1.1 下载解压
 
 ```bash
 cd /opt/software
@@ -71,7 +71,7 @@ wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
 tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
 ```
 
-2. 设置环境变量
+#### 2.1.2 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -92,7 +92,7 @@ export https_proxy=http://172.17.17.165:7890
 source /etc/profile
 ```
 
-3. 环境验证
+#### 2.1.3 环境验证
 
 ```bash
 go version
