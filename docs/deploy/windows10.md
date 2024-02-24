@@ -100,43 +100,6 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
         keystorePass="123456" /> 
 ```
 
-### 2.3 Golang
-
-- 官方网站：https://go.dev/
-- 下载地址：https://dl.google.com/go/go1.13.4.windows-386.msi
-
-#### 2.3.1 设置环境变量
-
-安装
-
-![](../../assets/_images/deploy/win10/go_1.png)
-
-设置安装路径
-
-![](../../assets/_images/deploy/win10/go_2.png)
-
-设置工程代码路径
-
-![](../../assets/_images/deploy/win10/go_3.png)
-
-在path中增加：C:\Go\bin;%GOPATH%\bin;
-
-![](../../assets/_images/deploy/win10/go_4.png)
-
-GO111MODULE设置
-
-```bash
-go env -w GO111MODULE=on
-go env -w GOPROXY=https://goproxy.cn,direct
-```
-
-验证
-
-```bash
-go version
-go env
-```
-
 ### 2.4 Python Anaconda
 
 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
