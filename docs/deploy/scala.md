@@ -2,7 +2,7 @@
 
 ## 1. Windows
 
-### 1.1 Sdk
+### 1.1 安装Sdk
 
 下载地址：https://www.scala-lang.org/download/2.12.16.html
 
@@ -16,7 +16,7 @@ PATH
 %SCALA_HOME%\bin
 ```
 
-### 1.2 Idea插件
+### 1.2 安装IDEA插件
 
 安装
 
@@ -35,7 +35,7 @@ PATH
 
 ## 2. Linux
 
-### 2.1 Sdk
+### 2.1 安装Sdk
 
 
 ```scala

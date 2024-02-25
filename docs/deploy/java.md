@@ -49,7 +49,7 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
         keystorePass="123456" /> 
 ```
 
-### 1.3 Idea
+### 1.3 安装IDEA
 
 ![](../../assets/_images/deploy/java/1.png)
 
