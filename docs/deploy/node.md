@@ -29,7 +29,9 @@
 
 ```bash
 npm -v                          # 查看npm安装的版本
+npm get global                  # 查看当前使用的安装模式
 npm set global=true             # 设定全局安装模式
+
 npm config get registry         # 查看仓库地址
 npm config set registry=https://registry.npmmirror.com     # 设定全局仓库地址
 npm cache clean --force
@@ -40,7 +42,6 @@ npm i express@4.17.1            # 安装指定版本模块
 
 npm i –save                     # 将模块写入dependencies节点（生产环境）
 npm i –save-dev/                # 将模块写入devDependencies节点（开发环境）
-npm get global                  # 查看当前使用的安装模式
 npm outdated                    # 检查包是否已经过时
 npm update express              # 更新模块
 npm uninstall express           # 卸载模块
