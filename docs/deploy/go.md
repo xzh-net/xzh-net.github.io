@@ -98,7 +98,7 @@ go env
 ### 2.2 第一个程序
 
 ```bash
-cd /data/gocode
+cd /data/go
 mkdir markdown && cd markdown       # 创建项目文件夹
 go mod init markdown-renderer       # 初始项目
 vi markdown_trest.go
