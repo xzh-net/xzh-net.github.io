@@ -65,6 +65,8 @@ vi /usr/local/redis/conf/redis-6379.conf
 
 ```bash
 port 6379
+requirepass "123456"
+masterauth "123456"
 daemonize yes
 protected-mode no
 logfile "6379.log"
@@ -91,6 +93,8 @@ vi /usr/local/redis/conf/redis-6380.conf
 
 ```bash
 port 6380
+requirepass "123456"
+masterauth "123456"
 daemonize yes
 protected-mode no
 logfile "6380.log"
@@ -115,6 +119,8 @@ vi /usr/local/redis/conf/redis-6381.conf
 
 ```bash
 port 6381
+requirepass "123456"
+masterauth "123456"
 daemonize yes
 protected-mode no
 logfile "6380.log"
