@@ -64,9 +64,9 @@
   - [Golang](deploy/go)
   - [Node.js](deploy/node)
   - [TypeScript](deploy/typescript)
-  - [Arthas](java/tools/arthas)
+  - [CLion](deploy/clion)
+  - [Arthas](deploy/arthas)
   - [Lua](deploy/lua)
-  - [C](java/tools/clion)
 
 - 学习笔记
   - [解决方案](java/project/scheme)

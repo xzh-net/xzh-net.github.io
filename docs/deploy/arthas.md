@@ -18,13 +18,13 @@ curl -L https://alibaba.github.io/arthas/install.sh | sh
 
 使用`dashboard`命令可以显示当前系统的实时数据面板，包括线程信息、JVM内存信息及JVM运行时参数。
 
-![](../../assets/_images/java/tools/arthas/arthas_start_03.png)
+![](../../assets/_images/deploy/arthas/arthas_start_03.png)
 
 ### 1.2 thread
 
 查看当前线程信息，查看线程的堆栈，可以找出当前最占CPU的线程。
 
-![](../../assets/_images/java/tools/arthas/arthas_start_04.png)
+![](../../assets/_images/deploy/arthas/arthas_start_04.png)
 
 常用命令：
 
@@ -49,7 +49,7 @@ thread -state WAITING
 
 - 我们的应用默认使用的是`INFO`级别的日志，使用`logger`命令可以查看；
 
-![](../../assets/_images/java/tools/arthas/arthas_start_06.png)
+![](../../assets/_images/deploy/arthas/arthas_start_06.png)
 
 - 使用如下命令改变日志级别为`DEBUG`，需要使用`-c`参数指定类加载器的HASH值；
 
@@ -59,11 +59,11 @@ logger -c 21b8d17c --name ROOT --level debug
 
 - 再使用`logger`命令查看，发现`ROOT`级别日志已经更改；
 
-![](../../assets/_images/java/tools/arthas/arthas_start_07.png)
+![](../../assets/_images/deploy/arthas/arthas_start_07.png)
 
 - 使用`docker logs -f shop-admin`命令查看容器日志，发现已经打印了DEBUG级别的日志；
 
-![](../../assets/_images/java/tools/arthas/arthas_start_08.png)
+![](../../assets/_images/deploy/arthas/arthas_start_08.png)
 
 - 查看完日志以后记得要把日志级别再调回`INFO`级别。
 
