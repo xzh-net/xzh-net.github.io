@@ -452,17 +452,22 @@ yum install vsftpd
 #### 1.5.2 修改配置
 
 ```bash
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config     # 关闭selinux
-cp -p /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.bak       # 备份
-cat /etc/vsftpd/vsftpd.conf.bak | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf  # 去掉注释
-
-vim /etc/vsftpd/ftpusers    # 连接黑名单，总是生效
-vim /etc/vsftpd/user_list   # 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
-
-# -s /sbin/nologin 无法登录需要修改
+# 关闭selinux
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+# 备份
+cp -p /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.bak
+# 去掉注释
+cat /etc/vsftpd/vsftpd.conf.bak | grep -v "#" | grep -v "^$" > /etc/vsftpd/vsftpd.conf  
+# 连接黑名单，总是生效
+vim /etc/vsftpd/ftpusers
+# 自定义黑名单，对应配置文件中 userlist_enable=YES 选项和 userlist_file 的值，默认：userlist_file=/etc/vsftpd/user_list
+vim /etc/vsftpd/user_list   
+# 解决 -s /sbin/nologin 无法登录
 vim /etc/shells
 /sbin/nologin
 ```
+
+完整配置文件
 
 ```conf
 #设定不允许匿名访问
