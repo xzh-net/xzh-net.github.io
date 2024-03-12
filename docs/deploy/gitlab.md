@@ -78,11 +78,11 @@ gitlab-ctl restart
 
 ## 3. 客户端
 
-### 3.1 下载git
+### 3.1 安装
 
-https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2.23.0-64-bit.exe
+下载地址：https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2.23.0-64-bit.exe
 
-### 3.2 项目Clone
+### 3.2 下载项目
 
 1. 复制项目连接
 
