@@ -1538,7 +1538,11 @@ impdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp tables=xzh0610.sys_me
 ```bash
 expdp xzh0610/123456 directory=oradmp dumpfile=xzh0610.dmp SCHEMAS=xzh0610 logfile=xzh0610_$(date +%Y%m%d-%H%M).log
 impdp xzh0611/123456 directory=oradmp dumpfile=xzh0610.dmp  schemas=xzh0610 REMAP_SCHEMA=xzh0610:xzh0611 REMAP_TABLESPACE=xzh:xzh
-# 还原后无法使用
+```
+
+> 还原成功调用报错 `ORA-00600: internal error code, arguments: [19004]` ，解决办法
+
+```bash
 execute dbms_stats.delete_schema_stats('xzh0610');
 ```
 
@@ -1705,7 +1709,10 @@ startup
 
 2. 脚本重启
 
+```bash
 vi /data/oracle_restart.sh
+```
+
 ```sh
 su - oracle -c "sqlplus /nolog<< EOF
 conn /as sysdba
