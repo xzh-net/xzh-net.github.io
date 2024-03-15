@@ -388,17 +388,29 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 
 ### 3.1 用户管理
 
-```bash
+1. 查询用户
+
+```sql
+select * from pg_user;
+select * from pg_database;
+```
+
+2. 创建用户
+
+```sql
 create user "sonar" with password '123456';
 create database "sonardb" template template1 owner "sonar";
 grant all privileges on database "sonardb" to "sonar";
-flush privileges
+```
 
-drop user sonar;  # 删除用户
-drop database if exists sonardb;  # 删除库
-select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar'; # 库锁释放
+3. 删除用户
 
-# 无法删除正在连接中的数据库
+```sql
+drop user sonar;
+drop database sonardb;    -- 删除库
+select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar';    -- 库锁释放
+
+-- 无法删除正在连接中的数据库
 UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
 ```

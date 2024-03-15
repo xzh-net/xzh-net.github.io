@@ -27,8 +27,9 @@ PATH
 1. 指定jdk版本
 
 ```bash
-# 修改catalina.sh
-set JAVA_HOME=D:\Java\jdk1.8.0_202
+# 修改setclasspath.sh
+JAVA_HOME=D:\Java\jdk1.8.0_202
+JRE_HOME=D:\Java\jdk1.8.0_202\jre
 ```
 
 2. 自签名证书
