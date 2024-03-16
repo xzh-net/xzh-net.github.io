@@ -943,14 +943,19 @@ http {
 }
 ```
 
+### 3.10 日志分析
+
 ```bash
-# 统计ip访问次数
-awk '{print $1}' /var/log/nginx/access.log |sort |uniq -c|sort -n
-# 过滤指定时间内的数据
-sed -n '/31\/Jan\/2024:09/,/31\/Jan\/2024:10/p' /var/log/nginx/hc.log >20240131_9-10.log
+# 过滤指定时间内的数据输出到文件
+sed -n '/31\/Jan\/2024:09/,/31\/Jan\/2024:10/p' access.log > new.log
+
+# 统计ip或者url访问最频繁的次数
+awk '{print $1}' access.log | sort | uniq -c | sort -n
+# 过滤指定关键词出现次数
+cat access.log | grep 'keywords' | awk '{print $1}'  | sort | uniq -c | sort -nr -k1 | head -n 10
 ```
 
-### 3.10 URL美化
+### 3.11 URL美化
 
 解决VUE项目下`#`号参数被拦截的问题
 
