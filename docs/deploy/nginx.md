@@ -200,7 +200,7 @@ server {
     proxy_connect_connect_timeout  10s;
     proxy_connect_read_timeout     10s;
     proxy_connect_send_timeout     10s;
-    access_log logs/access_proxy.log main;
+    access_log logs/access_proxy_$logdate.log access;
     location / {
         proxy_pass $scheme://$host$request_uri;
     }
@@ -438,10 +438,15 @@ events {
 http {
     include mime.types;
     default_type application/octet-stream;
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    log_format access '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
-    access_log logs/access.log main;
+    map $time_iso8601 $logdate {
+        '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
+        default    'date-not-found';
+    }
+    access_log logs/ip_access_$logdate.log access;
+
     # 其他参数
     server_tokens   off;                    # 关闭错误页面中版本号
     sendfile on;                            # 优化磁盘IO设置，下载等磁盘IO高的应用，可设为off
@@ -497,12 +502,12 @@ stream {
                  '$protocol $status $bytes_sent $bytes_received '
                  '$session_time -> $upstream_addr '
                  '$upstream_bytes_sent $upstream_bytes_received $upstream_connect_time';
-    access_log logs/stream_access.log stream;
+    access_log logs/stream_access_$logdate.log stream;
     include /usr/local/nginx/conf/stream_openfire.conf;
 }
 
 tcp {
-    access_log logs/tcp_access.log;
+    access_log logs/tcp_access_$logdate.log;
     include /usr/local/nginx/conf/tcp_openfire.conf;
 }
 ```
@@ -535,7 +540,7 @@ server {
     resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
     resolver_timeout 10s;
     index index.html index.htm index.jsp index.do index.action;
-    access_log logs/www.xuzhihao.net/access.log;
+    access_log logs/www.xuzhihao.net/access_$logdate.log;
     location / {
         proxy_pass http://front;
         proxy_set_header Host $host;
@@ -589,7 +594,7 @@ upstream op7070{
 }
 server{
         listen 5223 ssl;
-        access_log logs/tcp/5223.log;
+        access_log logs/tcp/5223_$logdate.log;
         ssl_certificate      /usr/local/nginx/cert/server.pem;
         ssl_certificate_key  /usr/local/nginx/cert/private.key;
         ssl_session_cache    shared:SSL:1m;
@@ -603,7 +608,7 @@ server{
 }
 server{
         listen 7443 ssl;
-        access_log logs/tcp/7443.log;
+        access_log logs/tcp/7443_$logdate.log;
         ssl_certificate      /usr/local/nginx/cert/server.pem;
         ssl_certificate_key  /usr/local/nginx/cert/private.key;
         ssl_session_cache    shared:SSL:1m;
@@ -624,7 +629,7 @@ upstream mysql {
 }
 server {
     listen 33060;
-    access_log logs/stream/33060.log stream;
+    access_log logs/stream/33060_$logdate.log stream;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
     proxy_pass mysql;
@@ -637,7 +642,7 @@ server {
     listen 25223 ssl;
     ssl_certificate      /usr/local/nginx/cert/server.crt;
     ssl_certificate_key  /usr/local/nginx/cert/private.key;
-    access_log logs/stream/25223.log stream;
+    access_log logs/stream/25223_$logdate.log stream;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
     proxy_pass openfire;
@@ -660,7 +665,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
-    access_log logs/domain.log;
+    access_log logs/access_$logdate.log;
 }
 ```
 
