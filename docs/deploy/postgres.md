@@ -388,14 +388,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 
 ### 3.1 用户管理
 
-1. 查询用户
-
-```sql
-select * from pg_user;
-select * from pg_database;
-```
-
-2. 创建用户
+1. 创建用户
 
 ```sql
 create user "sonar" with password '123456';
@@ -403,7 +396,7 @@ create database "sonardb" template template1 owner "sonar";
 grant all privileges on database "sonardb" to "sonar";
 ```
 
-3. 删除用户
+2. 删除用户
 
 ```sql
 drop user sonar;
@@ -413,6 +406,13 @@ select pg_terminate_backend(pid) from pg_stat_activity where DATNAME='sonar';   
 -- 无法删除正在连接中的数据库
 UPDATE pg_database SET datallowconn = 'true' WHERE datname = 'ec_user';
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'ec_user';
+```
+
+3. 查询用户
+
+```sql
+select * from pg_user;
+select * from pg_database;
 ```
 
 
