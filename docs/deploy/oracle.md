@@ -1295,7 +1295,7 @@ alter user zhangsan account unlock;
   
 表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
 
-```bash
+```sql
 create temporary tablespace xzh_temp
 tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' 
 size 50m
@@ -1304,19 +1304,19 @@ next 50m maxsize 20480m
 extent management local;
 ```
 
-```bash
-select tablespace_name,file_name,bytes/1024/1024 file_size,autoextensible from dba_temp_files;        # 查询临时表空间
-create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;        # 创建临时表空间
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                           # 调整临时表空间大小
-alter tablespace xzh_temp add tempfile '/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;              # 向临时表空间中添加数据文件： 
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited; # 将临时数据文件设为自动扩展
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                                    # 删除临时表空间的一个数据文件
-drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
+```sql
+select tablespace_name,file_name,bytes/1024/1024 file_size,autoextensible from dba_temp_files;          -- 查询临时表空间
+create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;          -- 创建临时表空间
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                             -- 调整临时表空间大小
+alter tablespace xzh_temp add tempfile '/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;                  -- 向临时表空间中添加数据文件： 
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited;     -- 将临时数据文件设为自动扩展
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                                        -- 删除临时表空间的一个数据文件
+drop tablespace xzh_temp including contents and datafiles cascade constraints;                              -- 删除临时表空间(彻底删除)
 ```
 
 2. 数据表空间
 
-```bash
+```sql
 create tablespace xzh
 logging 
 datafile '/u01/app/oracle/oradata/xzh.dbf' 
@@ -1326,14 +1326,14 @@ next 50m maxsize 20480m
 extent management local;
 ```
 
-```bash
-select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;            # 查询表空间
-create tablespace xzh datafile '/u01/app/oracle/xzh/xzh.dbf' size 100M;                               # 创建表空间
-alter tablespace xzh add datafile '/u01/app/oracle/xzh/xzh.dbf' size 5m;                              # 增加表空间数据文件
-drop tablespace xzh including contents;                                                           # 删除表空间
-drop tablespace xzh including contents and datafiles;                                             # 删除表空间和数据文件
-alter database datafile '/u01/app/oracle/xzh/xzh.dbf' resize 50m;                                 # 扩展表空间
-alter database datafile '/u01/app/oracle/xzh/xzh.dbf' autoextend on next 50m maxsize 500m;        # 表空间自动增长
+```sql
+select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;            --  查询表空间
+create tablespace xzh datafile '/u01/app/oracle/xzh/xzh.dbf' size 100M;                               --  创建表空间
+alter tablespace xzh add datafile '/u01/app/oracle/xzh/xzh.dbf' size 5m;                              --  增加表空间数据文件
+drop tablespace xzh including contents;                                                           -- 删除表空间
+drop tablespace xzh including contents and datafiles;                                             -- 删除表空间和数据文件
+alter database datafile '/u01/app/oracle/xzh/xzh.dbf' resize 50m;                                 -- 扩展表空间
+alter database datafile '/u01/app/oracle/xzh/xzh.dbf' autoextend on next 50m maxsize 500m;        -- 表空间自动增长
 ```
 
 ```sql
