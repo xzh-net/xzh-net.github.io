@@ -1246,6 +1246,8 @@ rm -rf /u01/app
 
 ### 2.1 用户管理
 
+1. 创建用户
+
 ```sql
 create user xzh0610 identified by 123456
   default tablespace xzh
@@ -1256,10 +1258,21 @@ create user xzh0610 identified by 123456
 grant connect,resource to xzh0610;
 grant read,write ON DIRECTORY oradmp to xzh0610; 
 grant dba to xzh0610;
+```
+
+2. 删除用户
+
+```sql
 drop user xzh0610 cascade;
 ```
 
-### 2.2 修改密码
+3. 查询用户
+
+```sql
+select * from sys.all_users order by user_id;
+```
+
+4. 修改密码
 
 ```bash
 # 直接修改
@@ -1275,6 +1288,71 @@ alter user zhangsan identified by "密码" account unlock;
 # 解锁用户
 alter user zhangsan account unlock;
 ```
+
+### 2.2 表空间管理
+
+1. 临时表空间
+  
+表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
+
+```bash
+create temporary tablespace xzh_temp
+tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' 
+size 50m
+autoextend on 
+next 50m maxsize 20480m 
+extent management local;
+```
+
+```bash
+select tablespace_name,file_name,bytes/1024/1024 file_size,autoextensible from dba_temp_files;        # 查询临时表空间
+create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;        # 创建临时表空间
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                           # 调整临时表空间大小
+alter tablespace xzh_temp add tempfile '/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;              # 向临时表空间中添加数据文件： 
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited; # 将临时数据文件设为自动扩展
+alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                                    # 删除临时表空间的一个数据文件
+drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
+```
+
+2. 数据表空间
+
+```bash
+create tablespace xzh
+logging 
+datafile '/u01/app/oracle/oradata/xzh.dbf' 
+size 50m 
+autoextend on 
+next 50m maxsize 20480m 
+extent management local;
+```
+
+```bash
+select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;            # 查询表空间
+create tablespace xzh datafile '/u01/app/oracle/xzh/xzh.dbf' size 100M;                               # 创建表空间
+alter tablespace xzh add datafile '/u01/app/oracle/xzh/xzh.dbf' size 5m;                              # 增加表空间数据文件
+drop tablespace xzh including contents;                                                           # 删除表空间
+drop tablespace xzh including contents and datafiles;                                             # 删除表空间和数据文件
+alter database datafile '/u01/app/oracle/xzh/xzh.dbf' resize 50m;                                 # 扩展表空间
+alter database datafile '/u01/app/oracle/xzh/xzh.dbf' autoextend on next 50m maxsize 500m;        # 表空间自动增长
+```
+
+```sql
+-- 查询表空间利用率
+select b.file_name 物理文件名,
+       b.tablespace_name 表空间,
+       b.bytes / 1024 / 1024 大小M,
+       (b.bytes - sum(nvl(a.bytes, 0))) / 1024 / 1024 已使用M,
+       substr((b.bytes - sum(nvl(a.bytes, 0))) / (b.bytes) * 100, 1, 5) 利用率
+  from dba_free_space a, dba_data_files b
+ where a.file_id = b.file_id
+ group by b.tablespace_name, b.file_name, b.bytes
+ order by b.tablespace_name;
+-- 查询用户隶属表空间
+select username,default_tablespace from dba_users where username='xzh';
+-- 增加表空间文件
+alter tablespace xzh_data ADD datafile '/u01/app/oracle/xzh/xzh.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
+```
+
 
 ### 2.3 审计日志
 
@@ -1450,71 +1528,7 @@ archive log list;
 ```
 
 
-### 2.5 表空间管理
-
-1. 临时表空间
-  
-表空间名字不能重复，即便存储的位置不一致, 但是dbf文件可以一致，50m为表空间的大小，对大数据量建议32G
-
-```bash
-create temporary tablespace xzh_temp
-tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' 
-size 50m
-autoextend on 
-next 50m maxsize 20480m 
-extent management local;
-```
-
-```bash
-select tablespace_name,file_name,bytes/1024/1024 file_size,autoextensible from dba_temp_files;        # 查询临时表空间
-create temporary tablespace xzh_temp tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' size 10M;        # 创建临时表空间
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' resize 100M;                           # 调整临时表空间大小
-alter tablespace xzh_temp add tempfile '/u01/app/oracle/oradata/xzh_temp_2.dbf' size 100m;              # 向临时表空间中添加数据文件： 
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' autoextend on next 5m maxsize unlimited; # 将临时数据文件设为自动扩展
-alter database tempfile '/u01/app/oracle/oradata/xzh_temp.dbf' drop;                                    # 删除临时表空间的一个数据文件
-drop tablespace xzh_temp including contents and datafiles cascade constraints;                          # 删除临时表空间(彻底删除)
-```
-
-2. 数据表空间
-
-```bash
-create tablespace xzh
-logging 
-datafile '/u01/app/oracle/oradata/xzh.dbf' 
-size 50m 
-autoextend on 
-next 50m maxsize 20480m 
-extent management local;
-```
-
-```bash
-select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;            # 查询表空间
-create tablespace xzh datafile '/u01/app/oracle/xzh/xzh.dbf' size 100M;                               # 创建表空间
-alter tablespace xzh add datafile '/u01/app/oracle/xzh/xzh.dbf' size 5m;                              # 增加表空间数据文件
-drop tablespace xzh including contents;                                                           # 删除表空间
-drop tablespace xzh including contents and datafiles;                                             # 删除表空间和数据文件
-alter database datafile '/u01/app/oracle/xzh/xzh.dbf' resize 50m;                                 # 扩展表空间
-alter database datafile '/u01/app/oracle/xzh/xzh.dbf' autoextend on next 50m maxsize 500m;        # 表空间自动增长
-```
-
-```sql
--- 查询表空间利用率
-select b.file_name 物理文件名,
-       b.tablespace_name 表空间,
-       b.bytes / 1024 / 1024 大小M,
-       (b.bytes - sum(nvl(a.bytes, 0))) / 1024 / 1024 已使用M,
-       substr((b.bytes - sum(nvl(a.bytes, 0))) / (b.bytes) * 100, 1, 5) 利用率
-  from dba_free_space a, dba_data_files b
- where a.file_id = b.file_id
- group by b.tablespace_name, b.file_name, b.bytes
- order by b.tablespace_name;
--- 查询用户隶属表空间
-select username,default_tablespace from dba_users where username='xzh';
--- 增加表空间文件
-alter tablespace xzh_data ADD datafile '/u01/app/oracle/xzh/xzh.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
-```
-
-### 2.6 目录管理
+### 2.5 目录管理
 
 ```sql
 SELECT * FROM DBA_DIRECTORIES;                          -- 查看目录
@@ -1524,7 +1538,7 @@ GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        -- 将oradmp目录的赋
 ```
 
 
-### 2.7 备份恢复
+### 2.6 备份恢复
 
 1. 按表名备份、还原
 
@@ -1680,7 +1694,9 @@ expdp user_center/123456 attach=SYS_EXPORT_SCHEMA_01
 # 执行 stop_job=immediate ---yes 或者 kill_job
 ```
 
-### 2.8 AWR报告
+### 2.7 性能分析
+
+1. AWR报告
 
 ```bash
 su - oracle
@@ -1694,8 +1710,16 @@ conn /as sysdba
 # 输入报告名称
 ```
 
+2. SQL执行计划
 
-### 2.9 常用命令
+```sql
+explain plan for 
+select  * from dual;
+---------------------
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+```
+
+### 2.8 常用命令
 
 1. 服务重启
 
