@@ -1694,9 +1694,26 @@ expdp user_center/123456 attach=SYS_EXPORT_SCHEMA_01
 # 执行 stop_job=immediate ---yes 或者 kill_job
 ```
 
-### 2.7 性能分析
+### 2.7 执行计划
 
-1. AWR报告
+1. 手动执行
+
+```sql
+explain plan for 
+select * from dual;
+---------------------
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+```
+
+2. AWR报告
+
+手工创建快照
+
+```sql
+select dbms_workload_repository.create_snapshot() from dual;
+```
+
+导出报告
 
 ```bash
 su - oracle
@@ -1710,14 +1727,33 @@ conn /as sysdba
 # 输入报告名称
 ```
 
-2. SQL执行计划
+3. 相关视图
 
 ```sql
-explain plan for 
-select  * from dual;
----------------------
-SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+-- 查看已执行sql的执行计划
+select * from v$sql where LOWER(sql_text) LIKE '% from userinf2%' order by last_active_time DESC;
+select * from table(dbms_xplan.display_cursor('2vd4wsytmnhvs'));
+
+-- 执行最糟糕的SQL
+select s.snap_id,
+       s.module,
+       s.sql_id,
+       s.disk_reads_delta,
+       s.executions_delta,
+       s.disk_reads_delta /
+       decode(s.executions_delta, 0, 1, s.executions_delta)
+  from dba_hist_sqlstat s
+ where s.disk_reads_delta > 10000
+ order by s.disk_reads_delta desc;
+
+select * from dba_hist_snapshot where snap_id = 45774;
+
+select ds.sql_text
+  from dba_hist_sqltext ds
+ where ds.sql_id = '08u0dzcav6n8n';
 ```
+
+
 
 ### 2.8 常用命令
 
@@ -1918,6 +1954,17 @@ SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
 
 ### 4.1 负载指标统计
 
+#### 4.1.1 索引
+
+```sql
+-- 索引信息
+select index_name, status from user_indexes where table_name = 'TABLENAME';
+select index_name, status from all_indexes where table_name='DBNAME' and table_name = 'TABLENAME';
+-- 索引对应字段信息
+select * from user_ind_columns where table_name = 'TABLENAME';
+select * from all_ind_columns where table_name='DBNAME' and table_name = 'TABLENAME';
+```
+
 1. SGA/PGA使用率
 
 ```sql
@@ -1981,7 +2028,6 @@ SELECT address,
 ```
 
 ### 4.2 数据分布统计
-
 
 #### 4.2.1 空间
 
