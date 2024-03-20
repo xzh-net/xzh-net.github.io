@@ -1746,8 +1746,12 @@ select s.snap_id,
  where s.disk_reads_delta > 10000
  order by s.disk_reads_delta desc;
 -- 快照历史表
-select * from dba_hist_snapshot where snap_id = 45774;
--- 超过阀值的sql语句会在awr中保存一段时间(默认是7天)，可以通过dba_hist_sqlstat视图查询。
+select t.snap_id,t.dbid,instance_number
+      ,to_char(t.startup_time,'yyyy-mm-dd hh24:mi:ss') AS startup_time
+      ,to_char(t.begin_interval_time,'yyyy-mm-dd hh24:mi:ss') AS begin_interval_time
+      ,to_char(t.end_interval_time,'yyyy-mm-dd hh24:mi:ss') AS end_interval_time
+  from dba_hist_snapshot t order by snap_id desc;
+-- SQL文本内容历史表
 select ds.sql_text
   from dba_hist_sqltext ds
  where ds.sql_id = '08u0dzcav6n8n';
