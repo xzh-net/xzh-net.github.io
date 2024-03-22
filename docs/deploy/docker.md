@@ -2,8 +2,7 @@
 
 ## 1. 安装
 
-
-### 1.1 yum安装
+### 1.1 在线安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -18,7 +17,7 @@ chkconfig docker on # 开机启动
 
 ### 1.2 离线安装
 
-- 下载地址：https://download.docker.com/linux/static/stable/x86_64/
+下载地址：https://download.docker.com/linux/static/stable/x86_64/
 
 ```bash
 tar zxf docker-18.06.1-ce.tgz # 上传解压
@@ -72,16 +71,7 @@ cd /data/rpm
 yum localinstall *.rpm
 ```
 
-### 1.4 Compose安装
-
-```bash
-curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-cp /usr/local/bin/docker-compose /usr/bin/docker-compose
-docker-compose -v
-```
-
-### 1.5 修改镜像仓库
+### 1.4 修改配置
 
 - 网易：http://hub-mirror.c.163.com
 - Docker官方中国区：https://registry.docker-cn.com
@@ -107,6 +97,209 @@ mv /var/lib/docker /data  # 非初始化环境迁移镜像
 ```bash
 sudo systemctl daemon-reload 
 sudo systemctl restart docker 
+```
+
+### 1.5 docker-compose
+
+```bash
+curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+cp /usr/local/bin/docker-compose /usr/bin/docker-compose
+docker-compose -v
+```
+
+1. mall-env.yml
+
+```bash
+vi docker-compose-env.yml
+```
+
+```yml
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root #设置root帐号密码
+    ports:
+      - 3306:3306
+    volumes:
+      - /data/mysql/conf:/etc/mysql/conf.d #配置文件挂载
+      - /data/mysql/data:/var/lib/mysql  #数据文件挂载
+      - /data/mysql/logs:/logs  #日志文件挂载
+  redis:
+    image: redis:5
+    container_name: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - /data/redis/data:/data #数据文件挂载
+    ports:
+      - 6379:6379
+  nginx:
+    image: nginx:1.10
+    container_name: nginx
+    volumes:
+      - /data/nginx/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
+      - /data/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
+      - /data/nginx/log:/var/log/nginx #日志文件挂载
+    ports:
+      - 80:80
+  rabbitmq:
+    image: rabbitmq:3.7.15-management
+    container_name: rabbitmq
+    volumes:
+      - /data/rabbitmq/data:/var/lib/rabbitmq #数据文件挂载
+      - /data/rabbitmq/log:/var/log/rabbitmq #日志文件挂载
+    ports:
+      - 5672:5672
+      - 15672:15672
+  mongo:
+    image: mongo:4.2.5
+    container_name: mongo
+    volumes:
+      - /data/mongo/db:/data/db #数据文件挂载
+    ports:
+      - 27017:27017
+  nacos-registry:
+    image: nacos/nacos-server:2.0.1
+    container_name: nacos-registry
+    environment:
+      - "MODE=standalone"
+    ports:
+      - 8848:8848
+```
+
+```
+docker-compose -f docker-compose-env.yml up -d  
+docker-compose -f docker-compose-env.yml down
+```
+
+
+2. elk-762.yml
+
+```bash
+vi docker-compose-elk.yml
+```
+
+```yml
+version: '3'
+networks:
+  es:
+services:
+  elasticsearch:
+    image: elasticsearch:7.6.2
+    container_name: elasticsearch
+    user: root
+    environment:
+      - "cluster.name=elasticsearch"      # 设置集群名称为elasticsearch
+      - "discovery.type=single-node"      # 以单一节点模式启动
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 设置使用jvm内存大小
+    volumes:
+      - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins  # 插件文件挂载
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data        # 数据文件挂载
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - es  
+  kibana:
+    image: kibana:7.6.2
+    container_name: kibana
+    links:
+      - elasticsearch:es  # 可以用es这个域名访问elasticsearch服务
+    depends_on:
+      - elasticsearch     # kibana在elasticsearch启动之后再启动
+    environment:
+      - "elasticsearch.hosts=http://es:9200"  # 设置访问elasticsearch的地址
+    ports:
+      - 5601:5601
+    networks:
+      - es  
+  logstash:
+    image: logstash:7.6.2
+    container_name: logstash
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf #挂载logstash的配置文件
+    depends_on:
+      - elasticsearch #kibana在elasticsearch启动之后再启动
+    links:
+      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
+    ports:
+      - 4560:4560
+      - 4561:4561
+      - 4562:4562
+      - 4563:4563
+    networks:
+      - es  
+```
+
+3. spark.yml
+
+```bash
+vi spark.yml
+```
+
+```yml
+version: '3.8'
+
+services:
+  spark-master:
+    image: bde2020/spark-master:3.2.0-hadoop3.2
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - /home/data/spark:/data
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+  spark-worker-1:
+    image: bde2020/spark-worker:3.2.0-hadoop3.2
+    container_name: spark-worker-1
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    volumes:
+      - /home/data/spark:/data
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+  spark-worker-2:
+    image: bde2020/spark-worker:3.2.0-hadoop3.2
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081"
+    volumes:
+      - /home/data/spark:/data
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+```
+
+启动
+
+```bash
+docker-compose -f spark.yml up -d
+docker exec -it [容器的id] /bin/bash
+ls /spark/bin
+/spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
+```
+
+访问地址：http://127.0.0.1:8080
+
+```bash
+val rdd=sc.parallelize(Array(1,2,3,4,5,6,7,8))  # 创建一个RDD
+rdd.collect()                                   # 打印rdd内容
+rdd.partitions.size                             # 查询分区数
+val rddFilter=rdd.filter(_ > 5)                 # 选出大于5的数值
+rddFilter.collect()                             # 打印rddFilter内容
+:quit                                           # 退出spark-shell
 ```
 
 ### 1.6 卸载
@@ -209,7 +402,7 @@ docker cp [local_path] rabbitmq:/[container_path]/  # 将主机文件copy至rabb
 docker cp [local_path] rabbitmq:/[container_path]   # 将主机文件copy至rabbitmq容器，目录重命名为[container_path]（注意与非重命名copy的区别）
 ```
 
-## 3. 镜像仓库
+## 3. 仓库
 
 官网地址：https://hub.docker.com/
 
@@ -1573,7 +1766,7 @@ docker run -it -d -p 3000:3000 -v "/data/theia-java:/home/project:cached" theiai
 docker run -it -d --init -p 3000:3000 -v "/data/theia-full:/home/project:cached" theiaide/theia-full
 ```
 
-## 4. 镜像构建
+## 4. 构建
 
 ### 4.1 Dockerfile
 
@@ -1975,201 +2168,3 @@ pom.xml
     <finalName>${project.artifactId}</finalName>
 </build>
 ```
-
-## 5. docker-compose
-
-### 5.1 mall-env.yml
-
-```bash
-vi docker-compose-env.yml
-```
-
-```yml
-version: '3'
-services:
-  mysql:
-    image: mysql:5.7
-    container_name: mysql
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root #设置root帐号密码
-    ports:
-      - 3306:3306
-    volumes:
-      - /data/mysql/conf:/etc/mysql/conf.d #配置文件挂载
-      - /data/mysql/data:/var/lib/mysql  #数据文件挂载
-      - /data/mysql/logs:/logs  #日志文件挂载
-  redis:
-    image: redis:5
-    container_name: redis
-    command: redis-server --appendonly yes
-    volumes:
-      - /data/redis/data:/data #数据文件挂载
-    ports:
-      - 6379:6379
-  nginx:
-    image: nginx:1.10
-    container_name: nginx
-    volumes:
-      - /data/nginx/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
-      - /data/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
-      - /data/nginx/log:/var/log/nginx #日志文件挂载
-    ports:
-      - 80:80
-  rabbitmq:
-    image: rabbitmq:3.7.15-management
-    container_name: rabbitmq
-    volumes:
-      - /data/rabbitmq/data:/var/lib/rabbitmq #数据文件挂载
-      - /data/rabbitmq/log:/var/log/rabbitmq #日志文件挂载
-    ports:
-      - 5672:5672
-      - 15672:15672
-  mongo:
-    image: mongo:4.2.5
-    container_name: mongo
-    volumes:
-      - /data/mongo/db:/data/db #数据文件挂载
-    ports:
-      - 27017:27017
-  nacos-registry:
-    image: nacos/nacos-server:2.0.1
-    container_name: nacos-registry
-    environment:
-      - "MODE=standalone"
-    ports:
-      - 8848:8848
-```
-
-```
-docker-compose -f docker-compose-env.yml up -d  
-docker-compose -f docker-compose-env.yml down
-```
-
-
-### 5.2 elk-762.yml
-
-```bash
-vi docker-compose-elk.yml
-```
-
-```yml
-version: '3'
-networks:
-  es:
-services:
-  elasticsearch:
-    image: elasticsearch:7.6.2
-    container_name: elasticsearch
-    user: root
-    environment:
-      - "cluster.name=elasticsearch"      # 设置集群名称为elasticsearch
-      - "discovery.type=single-node"      # 以单一节点模式启动
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 设置使用jvm内存大小
-    volumes:
-      - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins  # 插件文件挂载
-      - /data/elasticsearch/data:/usr/share/elasticsearch/data        # 数据文件挂载
-    ports:
-      - 9200:9200
-      - 9300:9300
-    networks:
-      - es  
-  kibana:
-    image: kibana:7.6.2
-    container_name: kibana
-    links:
-      - elasticsearch:es  # 可以用es这个域名访问elasticsearch服务
-    depends_on:
-      - elasticsearch     # kibana在elasticsearch启动之后再启动
-    environment:
-      - "elasticsearch.hosts=http://es:9200"  # 设置访问elasticsearch的地址
-    ports:
-      - 5601:5601
-    networks:
-      - es  
-  logstash:
-    image: logstash:7.6.2
-    container_name: logstash
-    environment:
-      - TZ=Asia/Shanghai
-    volumes:
-      - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf #挂载logstash的配置文件
-    depends_on:
-      - elasticsearch #kibana在elasticsearch启动之后再启动
-    links:
-      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
-    ports:
-      - 4560:4560
-      - 4561:4561
-      - 4562:4562
-      - 4563:4563
-    networks:
-      - es  
-```
-
-### 5.3 spark.yml
-
-```bash
-vi spark.yml
-```
-
-```yml
-version: '3.8'
-
-services:
-  spark-master:
-    image: bde2020/spark-master:3.2.0-hadoop3.2
-    container_name: spark-master
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-    volumes:
-      - /home/data/spark:/data
-    environment:
-      - INIT_DAEMON_STEP=setup_spark
-  spark-worker-1:
-    image: bde2020/spark-worker:3.2.0-hadoop3.2
-    container_name: spark-worker-1
-    depends_on:
-      - spark-master
-    ports:
-      - "8081:8081"
-    volumes:
-      - /home/data/spark:/data
-    environment:
-      - "SPARK_MASTER=spark://spark-master:7077"
-  spark-worker-2:
-    image: bde2020/spark-worker:3.2.0-hadoop3.2
-    container_name: spark-worker-2
-    depends_on:
-      - spark-master
-    ports:
-      - "8082:8081"
-    volumes:
-      - /home/data/spark:/data
-    environment:
-      - "SPARK_MASTER=spark://spark-master:7077"
-```
-
-启动
-
-```bash
-docker-compose -f spark.yml up -d
-docker exec -it [容器的id] /bin/bash
-ls /spark/bin
-/spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
-```
-
-访问地址：http://127.0.0.1:8080
-
-```bash
-val rdd=sc.parallelize(Array(1,2,3,4,5,6,7,8))  # 创建一个RDD
-rdd.collect()                                   # 打印rdd内容
-rdd.partitions.size                             # 查询分区数
-val rddFilter=rdd.filter(_ > 5)                 # 选出大于5的数值
-rddFilter.collect()                             # 打印rddFilter内容
-:quit                                           # 退出spark-shell
-```
-
-
