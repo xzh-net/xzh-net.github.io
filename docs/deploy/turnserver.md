@@ -67,10 +67,11 @@ cp /opt/software/turnserver-4.5.0.8/examples/etc/turnserver.conf /etc/turnserver
 # 修改配置文件
 vi /etc/turnserver.conf 
 //***********************************************************************//
-listening-ip=172.20.92.126  # 内网ip，阿里云服务器注释此行
-listening-port=3478
-tls-listening-port=5349
-external-ip=39.105.58.136   # 公网ip
+listening-port=3478         # turnserver监听UDP/TCP端口,默认为3478
+tls-listening-port=5349     # turnserver监听TLS/DTLS端口,默认为5349
+listening-ip=172.20.92.126  # 中继服务器的监听IP地址,可以配置多个。内部ip，阿里云服务器注释此行
+relay-ip=172.20.92.126      # 中继服务器的IP地址
+external-ip=39.105.58.136   # 外部IP,当中继服务器在NAT网络内部时指定,此处可以不添加
 relay-threads=50
 lt-cred-mech
 user=xzh:123456
