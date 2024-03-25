@@ -108,7 +108,7 @@ npm -v
 
 #### 2.1.4 第一个程序
 
-1. 安装express
+1. 安装
 
 ```bash
 npm init -y
@@ -139,12 +139,7 @@ app.listen(80, () => {
 })
 ```
 
-3. 运行
-
-```bash
-node app.js
-```
-
+然后运行 `node app.js` ，并在浏览器输入 `http://localhost/` 即可看到页面效果。
 
 ## 2.3 koa2
 
@@ -157,7 +152,7 @@ npm i koa2 --registry=https://registry.npmmirror.com
 
 ### 2.3.2 入口文件
 
-package.json里配置：
+`package.json`里配置：
 
 ```js
 {
