@@ -95,14 +95,19 @@ go version
 go env
 ```
 
-### 2.2 第一个程序
+#### 2.1.4 第一个程序
+
+1. 初始化
 
 ```bash
 cd /data/go
 mkdir markdown && cd markdown       # 创建项目文件夹
 go mod init markdown-renderer       # 初始项目
-vi markdown_trest.go
 ```
+
+2. 入口文件
+
+编写`app.go`
 
 ```go
 package main
@@ -117,9 +122,10 @@ func main() {
 }
 ```
 
-运行、编译、安装
+3. 运行
+
 ```bash
-go run markdown_trest.go
-go build
-go install
+go run app.go
+go build    # 编译
+go install  # 安装
 ```
