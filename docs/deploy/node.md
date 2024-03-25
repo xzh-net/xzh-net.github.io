@@ -6,7 +6,7 @@
 
 ## 1. Windows
 
-### 1.1 安装Node
+### 1.1 安装
 
 ![](../../assets/_images/deploy/node/1.png)
 
@@ -41,7 +41,7 @@ npm i erpress                   # 安装erpress模块
 npm i express@4.17.1            # 安装指定版本模块
 
 npm i –save                     # 将模块写入dependencies节点（生产环境）
-npm i –save-dev/                # 将模块写入devDependencies节点（开发环境）
+npm i –save-dev                 # 将模块写入devDependencies节点（开发环境）
 npm outdated                    # 检查包是否已经过时
 npm update express              # 更新模块
 npm uninstall express           # 卸载模块
@@ -75,7 +75,7 @@ forever start -l forever.log -o out.log -e err.log app.js   # 日志输出
 
 ## 2. Linux
 
-### 2.1 安装Node
+### 2.1 安装
 
 #### 2.1.1 下载解压
 
@@ -106,11 +106,18 @@ node -v
 npm -v
 ```
 
-### 2.2 第一个程序
+#### 2.1.4 第一个程序
+
+1. 安装express
 
 ```bash
+npm init -y
 npm i express@4.17.1 --registry=https://registry.npmmirror.com
 ```
+
+2. 入口文件
+
+编写`app.js`
 
 ```js
 const express = require('express')
@@ -132,8 +139,57 @@ app.listen(80, () => {
 })
 ```
 
-运行
+3. 运行
 
 ```bash
 node app.js
+```
+
+
+## 2.3 koa2
+
+### 2.3.1 安装
+
+```bash
+npm init -y
+npm i koa2 --registry=https://registry.npmmirror.com
+```
+
+### 2.3.2 入口文件
+
+package.json里配置：
+
+```js
+{
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+}
+```
+
+编写`app.js`
+
+```js
+const Koa = require('koa2');
+const app = new Koa();
+const port = 9000;
+
+app.use(async (ctx)=>{
+    ctx.body = "Hello, Koa";
+  	// ctx.body是ctx.response.body的简写
+})
+
+app.listen(port, ()=>{
+    console.log('Server is running at http://localhost:'+port);
+})
+```
+
+然后运行 `npm start` ，并在浏览器输入 `http://localhost:9000/` 即可看到页面效果。
+
+
+### 2.3.3 安装路由
+
+```bash
+npm i koa-router --registry=https://registry.npmmirror.com
 ```
