@@ -1918,7 +1918,7 @@ select name,total,round(total-free,2) used,round(free,2) free,round((total-free)
 -- 获取shared pool 使用情况
 select name ,round(total,2) total,round((total-free),2) used,round(free,2) free,round((total-free)/total*100,2) pctused from(select 'Shared pool' name,(select sum(bytes/1024/1024) from v$sgastat where pool='shared pool') total, (select bytes/1024/1024 from v$sgastat where name='free memory' and pool='shared pool')free from dual)
 
--- 查询使用频率最高的5个查询sql
+-- 查询使用频率最高的5个sql
 select sql_text,executions from (select sql_text,executions,rank() over (order by executions desc) exec_rank from v$sql) where exec_rank <=5;
 -- 查看cpu使用率最高的sql
 select * from  (select sql_text,sql_id,cpu_time from v$sql order by cpu_time desc) where rownum<=10 order by rownum asc;
@@ -1928,6 +1928,23 @@ select disk_reads,sql_text from (select sql_text,disk_reads,dense_rank() over (o
 select buffer_gets,sql_text from (select sql_text,buffer_gets,dense_rank() over (order by buffer_gets desc) buffer_gets_rank from v$sql) where buffer_gets_rank<=5;
 -- 查询数据字典缓存的命中率和缺失率
 select round(((1-sum(getmisses)/(sum(gets)+sum(getmisses))))*100,3) "HR" ,round(sum(getmisses)/sum(gets)*100,3) "MR" from v$rowcache where gets+getmisses>0;
+-- 查询执行最慢的sql
+select *
+ from (select sa.SQL_TEXT,
+        sa.SQL_FULLTEXT,
+        sa.EXECUTIONS "执行次数",
+        round(sa.ELAPSED_TIME / 1000000, 2) "总执行时间",
+        round(sa.ELAPSED_TIME / 1000000 / sa.EXECUTIONS, 2) "平均执行时间",
+        sa.COMMAND_TYPE,
+        sa.PARSING_USER_ID "用户ID",
+        u.username "用户名",
+        sa.HASH_VALUE
+     from v$sqlarea sa
+     left join all_users u
+      on sa.PARSING_USER_ID = u.user_id
+     where sa.EXECUTIONS > 0
+     order by (sa.ELAPSED_TIME / sa.EXECUTIONS) desc)
+ where rownum <= 50;
 ```
 
 #### 4.1.3 等待事件
