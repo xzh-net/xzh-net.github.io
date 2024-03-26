@@ -188,3 +188,26 @@ app.listen(port, ()=>{
 ```bash
 npm i koa-router --registry=https://registry.npmmirror.com
 ```
+
+```js
+const Koa = require('koa2');
+const Router = require('koa-router');
+const app = new Koa();
+const router = new Router();
+const port = 9000;
+
+router.get('/', async (ctx)=>{
+    ctx.body = "首页";
+})
+
+router.get('/list', async (ctx)=>{
+    ctx.body = "列表页";
+})
+
+
+app.use(router.routes(), router.allowedMethods());
+
+app.listen(port, ()=>{
+    console.log('Server is running at http://localhost:'+port);
+})
+```
