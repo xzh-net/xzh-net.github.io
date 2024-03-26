@@ -830,7 +830,6 @@ SELECT pg_terminate_backend ( pid );    --彻底停止进程，导致连接关�
 -- 解锁
 SELECT pg_cancel_backend(pid);          --只是中断正在运行的查询，连接仍然存在
 
-
 -- 查找锁表的pid
 select pid from pg_locks l join pg_class t on l.relation = t.oid where t.relkind = 'r' and t.relname = 'lockedtable';
 
