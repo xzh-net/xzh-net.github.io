@@ -211,3 +211,108 @@ app.listen(port, ()=>{
     console.log('Server is running at http://localhost:'+port);
 })
 ```
+
+### 2.3.4 路由拆分
+
+#### 2.3.4.1 创建router文件夹
+
+创建router文件夹，并在其中创建：`index.js` （路由总入口文件）、`home.js` （首页总路由文件）、`list.js` （列表页总路由文件）：
+
+index.js
+
+```js
+const Router = require('koa-router');
+const router = new Router();
+const home = require('./home')
+const list = require('./list')
+
+router.use('/home', home.routes(), home.allowedMethods());
+router.use('/list', list.routes(), list.allowedMethods());
+
+module.exports = router;
+```
+
+home.js
+
+```js
+const Router = require('koa-router');
+const home = new Router();
+
+// 这里的 '/' 就是指向 index.js 中的 /home
+home.get('/', async (ctx) => {
+        ctx.body = "首页";
+    })
+
+module.exports = home;
+```
+
+list.js
+
+```js
+const Router = require('koa-router');
+const list = new Router();
+
+list.get('/', async (ctx)=>{
+    ctx.body = "列表页";
+})
+
+module.exports = list;
+```
+
+
+app.js
+
+```js
+const Koa = require('koa2');
+const app = new Koa();
+const port = 9000;
+
+const router = require('./router/index')
+app.use(router.routes(), router.allowedMethods());
+
+app.listen(port, ()=>{
+    console.log('Server is running at http://localhost:'+port);
+})
+```
+
+到浏览器刷新 `localhost:9000/home` 与 `localhost:9000/list` 即可得到首页与列表页。
+
+#### 2.3.4.2 路由重定向
+
+在`router/index.js` 中做如下配置：
+
+```js
+router.use('/home', home.routes(), home.allowedMethods());
+...
+router.redirect('/', '/home');
+```
+
+#### 2.3.4.3 404无效路由
+
+在`router`下创建`errorPage.js` :
+
+```js
+const Router = require('koa-router');
+const errorPage = new Router();
+
+errorPage.get('/', async (ctx) => {
+    ctx.body = "访问页面不存在";
+})
+
+module.exports = errorPage;
+```
+
+在`app.js`中引用
+
+```js
+// 匹配不到页面的全部跳转去404
+app.use(async (ctx, next) => {
+    await next();
+    if (parseInt(ctx.status) === 404) {
+        ctx.response.redirect("/404")
+    }
+})
+app.use(router.routes(), router.allowedMethods());
+```
+
+### 2.3.5 统一异常处理
