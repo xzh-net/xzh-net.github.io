@@ -1887,7 +1887,50 @@ SELECT 'ALTER SYSTEM KILL SESSION ''' || SID || ',' || SERIAL# || '''' || ';'
 select spid, osuser, s.program from v$session s, v$process p where s.paddr = p.addr and s.sid = {sid};
 ```
 
-### 3.3 等待事件
+## 4. 统计信息
+
+### 4.1 负载指标统计
+
+#### 4.1.1 索引
+
+```sql
+-- 索引信息
+select index_name, status from user_indexes where table_name = 'TABLENAME';
+select index_name, status from all_indexes where table_name='DBNAME' and table_name = 'TABLENAME';
+-- 索引对应字段信息
+select * from user_ind_columns where table_name = 'TABLENAME';
+select * from all_ind_columns where table_name='DBNAME' and table_name = 'TABLENAME';
+```
+
+#### 4.1.2 AWR
+
+```sql
+-- 清空共享内存
+alter system flush shared_pool
+-- 查询占用share pool 内存大于10m的sql
+select substr(sql_text,1,100) "stmt",count(*) ,sum(sharable_mem),sum(users_opening),sum(executions) from v$sql group by substr(sql_text,1,100) having sum(sharable_mem)>10000000;
+-- share pool的空闲内存
+select a.* ,round(a.bytes/1024/1024,2) M from v$sgastat a where a.name='free memory';
+-- version count过高的语句
+select address,sql_id,hash_value,version_count,users_opening,users_executing,sql_text from v$sqlarea where version_count>10;
+-- 获取PGA，SGA使用情况
+select name,total,round(total-free,2) used,round(free,2) free,round((total-free)/total*100,2) pctused from (select 'SGA' name,(select sum(value/1024/1024) from v$sga) total,(select sum(bytes/1024/1024) from v$sgastat where name='free memory')free from dual) union select name,total,round(used,2) used,round(total-used,2) free,round(used/total*100,2)pctused from(select 'PGA' name,(select value/1024/1024 total from v$pgastat where name='aggregate PGA target parameter')total,(select value/1024/1024 used from v$pgastat where name='total PGA allocated')used from dual);
+-- 获取shared pool 使用情况
+select name ,round(total,2) total,round((total-free),2) used,round(free,2) free,round((total-free)/total*100,2) pctused from(select 'Shared pool' name,(select sum(bytes/1024/1024) from v$sgastat where pool='shared pool') total, (select bytes/1024/1024 from v$sgastat where name='free memory' and pool='shared pool')free from dual)
+
+-- 查询使用频率最高的5个查询sql
+select sql_text,executions from (select sql_text,executions,rank() over (order by executions desc) exec_rank from v$sql) where exec_rank <=5;
+-- 查看cpu使用率最高的sql
+select * from  (select sql_text,sql_id,cpu_time from v$sql order by cpu_time desc) where rownum<=10 order by rownum asc;
+-- 消耗磁盘最多的5个sql
+select disk_reads,sql_text from (select sql_text,disk_reads,dense_rank() over (order by disk_reads desc) disk_reads_rank from v$sql) where disk_reads_rank<=5;
+-- 找出需要大量缓冲读取操作的查询
+select buffer_gets,sql_text from (select sql_text,buffer_gets,dense_rank() over (order by buffer_gets desc) buffer_gets_rank from v$sql) where buffer_gets_rank<=5;
+-- 查询数据字典缓存的命中率和缺失率
+select round(((1-sum(getmisses)/(sum(gets)+sum(getmisses))))*100,3) "HR" ,round(sum(getmisses)/sum(gets)*100,3) "MR" from v$rowcache where gets+getmisses>0;
+```
+
+#### 4.1.3 等待事件
 
 ```sql
 -- 查看当前等待事件及数量，如果是库问题 优化参数或调整业务逻辑等，如果是sql问题 继续
@@ -1947,54 +1990,9 @@ SELECT b.inst_id,
    and b.inst_id = 1
    and c.inst_id = 1
 
--- iotop
-SELECT s.sql_text FROM v$sql s, v$session t,v$process v WHERE s.sql_id = t.SQL_ID AND t.PADDR = v.ADDR AND v.SPID = '44196';
-
-SELECT S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  FROM V$SESSION S
- WHERE PADDR IN (SELECT ADDR FROM V$PROCESS WHERE SPID IN (55751,15842));
-```
-
-## 4. 统计信息
-
-### 4.1 负载指标统计
-
-#### 4.1.1 索引
-
-```sql
--- 索引信息
-select index_name, status from user_indexes where table_name = 'TABLENAME';
-select index_name, status from all_indexes where table_name='DBNAME' and table_name = 'TABLENAME';
--- 索引对应字段信息
-select * from user_ind_columns where table_name = 'TABLENAME';
-select * from all_ind_columns where table_name='DBNAME' and table_name = 'TABLENAME';
-```
-
-#### 4.1.2 awr
-
-```sql
--- 清空共享内存
-alter system flush shared_pool
--- 查询占用share pool 内存大于10m的sql
-select substr(sql_text,1,100) "stmt",count(*) ,sum(sharable_mem),sum(users_opening),sum(executions) from v$sql group by substr(sql_text,1,100) having sum(sharable_mem)>10000000;
--- share pool的空闲内存
-select a.* ,round(a.bytes/1024/1024,2) M from v$sgastat a where a.name='free memory';
--- version count过高的语句
-select address,sql_id,hash_value,version_count,users_opening,users_executing,sql_text from v$sqlarea where version_count>10;
--- 获取PGA，SGA使用情况
-select name,total,round(total-free,2) used,round(free,2) free,round((total-free)/total*100,2) pctused from (select 'SGA' name,(select sum(value/1024/1024) from v$sga) total,(select sum(bytes/1024/1024) from v$sgastat where name='free memory')free from dual) union select name,total,round(used,2) used,round(total-used,2) free,round(used/total*100,2)pctused from(select 'PGA' name,(select value/1024/1024 total from v$pgastat where name='aggregate PGA target parameter')total,(select value/1024/1024 used from v$pgastat where name='total PGA allocated')used from dual);
--- 获取shared pool 使用情况
-select name ,round(total,2) total,round((total-free),2) used,round(free,2) free,round((total-free)/total*100,2) pctused from(select 'Shared pool' name,(select sum(bytes/1024/1024) from v$sgastat where pool='shared pool') total, (select bytes/1024/1024 from v$sgastat where name='free memory' and pool='shared pool')free from dual)
-
--- 查询使用频率最高的5个查询sql
-select sql_text,executions from (select sql_text,executions,rank() over (order by executions desc) exec_rank from v$sql) where exec_rank <=5;
--- 查看cpu使用率最高的sql
-select * from  (select sql_text,sql_id,cpu_time from v$sql order by cpu_time desc) where rownum<=10 order by rownum asc;
--- 消耗磁盘最多的5个sql
-select disk_reads,sql_text from (select sql_text,disk_reads,dense_rank() over (order by disk_reads desc) disk_reads_rank from v$sql) where disk_reads_rank<=5;
--- 找出需要大量缓冲读取操作的查询
-select buffer_gets,sql_text from (select sql_text,buffer_gets,dense_rank() over (order by buffer_gets desc) buffer_gets_rank from v$sql) where buffer_gets_rank<=5;
--- 查询数据字典缓存的命中率和缺失率
-select round(((1-sum(getmisses)/(sum(gets)+sum(getmisses))))*100,3) "HR" ,round(sum(getmisses)/sum(gets)*100,3) "MR" from v$rowcache where gets+getmisses>0;
+--iotop
+select s.sql_text from v$sql s, v$session t,v$process v where s.sql_id = t.SQL_ID AND t.PADDR = v.ADDR AND v.SPID = '44196';
+select S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  from V$SESSION S where PADDR IN (select ADDR from V$PROCESS where SPID IN (55751,15842));
 ```
 
 ### 4.2 数据分布统计
