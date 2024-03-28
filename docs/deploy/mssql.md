@@ -2,7 +2,7 @@
 
 ## 1. 安装
 
-### 1.1 RPM安装
+### 1.1 单机
 
 #### 1.1.1 更新yum
 
@@ -76,14 +76,9 @@ select * from pms_product
 go
 ```
 
-#### 1.1.6 服务端卸载
+#### 1.1.6 卸载
 
 ```bash
 yum remove mssql-server
 rm -rf /var/opt/mssql/
 ```
-
-## 2. 库操作
-
-## 3. 表操作
-
