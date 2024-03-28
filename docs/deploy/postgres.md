@@ -924,19 +924,6 @@ analyze_count       | 0                                 //analyze的次数
 autoanalyze_count   | 1                                 //自动analyze的次数
 ```
 
-其他查询信息
-```sql
--- 查询所有表大小
-select relname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_tables order by pg_relation_size(relid) DESC;
--- 查询所有表的总大小，包括其索引大小
-select relname, pg_size_pretty(pg_total_relation_size(relid)) as size from pg_stat_user_tables order by pg_relation_size(relid) desc
-
--- 查询所有表的行数
-SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
-vacuum tablename     -- 更新某个表
-vacuum               -- 在某个数据库中执行直接更新该数据库所有表
-```
-
 #### 5.1.3 pg_stat_user_indexes
 
 通过pg_stat_user_indexes我们可以查看对应索引的使用情况，可以协助我们判断哪些索引当前基本不使用，对这些无效的冗余索引，可进行索引删除
@@ -956,13 +943,13 @@ idx_tup_read  | 154             //通过任意索引方法返回的索引行数
 idx_tup_fetch | 140             //通过索引方法返回的数据行数
 ```
 
-其他查询信息
+
 ```sql
--- 查询单个索引大小
+-- 查询单个索引
 select pg_size_pretty(pg_relation_size('index')) as size;
--- 查询所有索引大小倒序
+-- 查询所有索引
 select indexrelname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_indexes where schemaname='public' order by pg_relation_size(relid) desc;
--- 查询索引ddl
+-- 查询索引DDL
 select * from pg_indexes where tablename='t1'; 
 ```
 
@@ -988,7 +975,6 @@ tidx_blks_read  | 0             //从page cache或者磁盘中读入toast表索�
 tidx_blks_hit   | 0             //指在shared_buffer中命中toast表索引的块数
 ```
 
-
 #### 5.1.5 pg_stat_bgwriter
 
 ```sql
@@ -1008,7 +994,6 @@ buffers_backend_fsync | 0               //指backend需要fsync的次数
 buffers_alloc         | 54296           //被分配的缓冲区数量
 stats_reset           | 2020-09-23 15:14:57.052247+08
 ```
-
 
 #### 5.1.6 pg_stat_replication
 
@@ -1080,12 +1065,10 @@ blk_write_time      | 0                         //从磁盘写入花费的时
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time)/calls DESC LIMIT 5;
 -- 查询总最耗 IO SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY (blk_read_time+blk_write_time) DESC LIMIT 5;
-
 -- 查询单次调用最耗时 SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 5;
 -- 查询总最耗时 SQL TOP 5
 SELECT userid::regrole, dbid, query FROM pg_stat_statements ORDER BY total_time DESC LIMIT 5;
-
 -- 响应时间抖动最严重 SQL
 select userid::regrole, dbid, query from pg_stat_statements order by stddev_time desc limit 5;  
 -- 最耗共享内存 SQL
@@ -1153,11 +1136,26 @@ most_common_elem_freqs |                //最常见元素值的频率列表，�
 elem_count_histogram   |                //该字段中值的不同非空元素值的统计直方图，跟着不同非空元素的平均值。（标量类型为空。）
 ```
 
-### 5.3 统计信息更新
+#### 5.2.2 空间
+
+1. 表占用空间
 
 ```sql
-show autovacuum
-analyze verbose tableName
+select relname, pg_size_pretty(pg_relation_size(relid)) as size from pg_stat_user_tables order by pg_relation_size(relid) DESC;
+-- 表占用空间，包括索引
+select relname, pg_size_pretty(pg_total_relation_size(relid)) as size from pg_stat_user_tables order by pg_relation_size(relid) desc
+```
+
+#### 5.2.3 数据
+
+1. 所有表记录行数查询
+
+```sql
+SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
+-- 更新某个表
+vacuum tablename
+-- 更新该数据库所有表
+vacuum               
 ```
 
 ## 6. PG/SQL
