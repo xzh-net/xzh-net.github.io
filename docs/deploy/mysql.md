@@ -94,9 +94,9 @@ rm -rf /var/log/mysqld.log
 
 ## 2. 库操作
 
-### 2.1 用户授权
+### 2.1 用户管理
 
-1. 创建
+1. 创建用户
 
 ```sql
 mysql -uroot -p123456
@@ -119,7 +119,7 @@ update  mysql.user set  password=password('1234')  where user='test'
 flush privileges;
 ```
 
-3. 删除
+3. 删除用户
 
 ```sql
 drop user sonar;
@@ -223,7 +223,7 @@ select column_name columnName, data_type dataType, column_comment columnComment,
 
 #### 4.2.1 空间
 
-1. 表占用空间查询
+1. 表占用空间
 
 ```sql
 SELECT 
@@ -234,6 +234,12 @@ FROM
 WHERE
     table_schema = 'database_name'
 order by ROUND(((data_length + index_length) / 1024 / 1024), 2)
+```
+
+2. 所有表占用空间
+
+```sql
+select table_schema as 'database', SUM(ROUND((data_length + index_length) / 1024 / 1024, 2)) AS 'Size(MB)' FROM information_schema.tables where table_schema = 'database_name'
 ```
 
 #### 4.2.2 数据
