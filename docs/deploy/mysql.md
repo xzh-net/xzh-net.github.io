@@ -103,6 +103,7 @@ mysql -uroot -p123456
 CREATE DATABASE IF NOT EXISTS sonar DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 GRANT ALL ON sonar.* TO 'sonar'@'%' IDENTIFIED BY '123456';
 GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY '123456';
+GRANT PROCESS ON *.* TO 'sonar'@'%';
 flush privileges;
 ```
 
