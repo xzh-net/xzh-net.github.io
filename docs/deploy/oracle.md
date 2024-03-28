@@ -2016,8 +2016,9 @@ select S.SADDR, S.SID, S.SERIAL#, S.MACHINE, S.LOGON_TIME  from V$SESSION S wher
 
 #### 4.2.1 空间
 
+1. 表空间使用情况
+
 ```sql
--- 查看当前用户下所有表空间的使用情况
 SELECT A.TABLESPACE_NAME "表空间名",
        TOTAL / (1024 * 1024) "表空间大小(M)",
        FREE / (1024 * 1024) "表空间剩余大小(M)",
@@ -2030,19 +2031,23 @@ SELECT A.TABLESPACE_NAME "表空间名",
           FROM DBA_DATA_FILES
          GROUP BY TABLESPACE_NAME) B
  WHERE A.TABLESPACE_NAME = B.TABLESPACE_NAME;
+```
 
+2. 表占用空间
 
--- 单表占用物理空间
+```sql
 SELECT SEGMENT_NAME              TABLE_NAME
       ,SUM(BLOCKS)               BLOCKS
       ,SUM(BYTES)/(1024*1024)    "TABLE_SIZE[MB]"
 FROM USER_SEGMENTS
-WHERE  SEGMENT_TYPE='TABLE'
-   AND SEGMENT_NAME='JG_GY_XP'
+WHERE  SEGMENT_TYPE='tb_name'
+   AND SEGMENT_NAME='database_name'
 GROUP BY SEGMENT_NAME;
+```
 
+3. 所有表占用空间
 
--- 所有表占用物理空间
+```sql
 SELECT OWNER AS "用户名", SUM(BYTES) / 1024 / 1024 AS "所有表的大小(MB)"
 FROM DBA_SEGMENTS
 WHERE SEGMENT_NAME IN (SELECT T2.OBJECT_NAME
