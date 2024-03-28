@@ -189,13 +189,5 @@ drop tablespace tbs1;
 alter tablespace tbs1 offline|online; # 表空间脱机
 select tablespace_name from dba_tablespaces;
 select tablespace_name,file_name from dba_data_files;
-```    
-
-### 2.3 备份恢复
-
-### 2.4 数据迁移
-
-## 3. 表操作
-
-## 4. PLSQL
+```
 
