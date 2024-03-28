@@ -2036,13 +2036,13 @@ SELECT A.TABLESPACE_NAME "表空间名",
 2. 表占用空间
 
 ```sql
-SELECT SEGMENT_NAME              TABLE_NAME
-      ,SUM(BLOCKS)               BLOCKS
-      ,SUM(BYTES)/(1024*1024)    "TABLE_SIZE[MB]"
-FROM USER_SEGMENTS
-WHERE  SEGMENT_TYPE='tb_name'
-   AND SEGMENT_NAME='database_name'
-GROUP BY SEGMENT_NAME;
+SELECT SEGMENT_NAME TABLE_NAME,
+       SUM(BLOCKS) BLOCKS,
+       SUM(BYTES) / (1024 * 1024) "TABLE_SIZE[MB]"
+  FROM USER_SEGMENTS
+ WHERE SEGMENT_TYPE = 'TABLE'
+   AND SEGMENT_NAME = 'tb_name'
+ GROUP BY SEGMENT_NAME;
 ```
 
 3. 所有表占用空间
@@ -2058,14 +2058,27 @@ GROUP BY OWNER ORDER BY 2 DESC;
 
 #### 4.2.2 数据
 
+1. 每个表记录行数查询
+
 ```sql
--- 查询某用户下所有表的记录总数
-SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'SHJG0814';
--- 查看户下所有表的各自的记录条数
 SELECT T.TABLE_NAME "表名",T.NUM_ROWS "记录条数" FROM USER_TABLES T;
--- 查看户下所有存储过程
-SELECT * FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'PROCEDURE' AND OWNER='SHJG0814'
--- 按关键字查找出现的位置
+```
+
+2. 所有表记录行数查询
+
+```sql
+SELECT SUM(NUM_ROWS) "记录总条数" FROM SYS.ALL_TABLES T WHERE T.OWNER = 'database_name';
+```
+
+3. 查询所有存储过程
+
+```sql
+SELECT * FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'PROCEDURE' AND OWNER='database_name'
+```
+
+4. 按关键字查找出现的位置
+
+```sql
 SELECT * FROM USER_SOURCE WHERE UPPER(TEXT) LIKE UPPER('%keywords%');
 ```
 
