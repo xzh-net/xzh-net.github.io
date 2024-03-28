@@ -552,7 +552,7 @@ final boolean nonfairTryAcquire(int acquires) {
         }
 ```
 
->  Sync的子类NonfairSync和FairSync都重写了tryAcquire方法,其中NonfairSync的tryAcquire调用父类的nonfairTryAcquire方法, FairSync则自己重写tryAcquire的逻辑。其中调用hasQueuedPredecessors()判断是否有排队Node，存在则返回false（false会导致当前线程排队等待锁）
+> Sync的子类NonfairSync和FairSync都重写了tryAcquire方法,其中NonfairSync的tryAcquire调用父类的nonfairTryAcquire方法, FairSync则自己重写tryAcquire的逻辑。其中调用hasQueuedPredecessors()判断是否有排队Node，存在则返回false（false会导致当前线程排队等待锁）
 
 ```java
 protected final boolean tryAcquire(int acquires) {
