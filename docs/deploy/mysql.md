@@ -219,6 +219,31 @@ select column_name columnName, data_type dataType, column_comment columnComment,
 
 ### 4.1 负载指标统计
 
+### 4.2 数据分布统计
+
+#### 4.2.1 空间
+
+1. 表占用空间查询
+
+```sql
+SELECT 
+    table_name,
+    ROUND(((data_length + index_length) / 1024 / 1024), 2) AS total_size_mb
+FROM
+    information_schema.tables
+WHERE
+    table_schema = 'database_name'
+order by ROUND(((data_length + index_length) / 1024 / 1024), 2)
+```
+
+#### 4.2.2 数据
+
+1. 每个表记录行数查询
+
+```sql
+select table_name,table_rows from information_schema.tables where TABLE_SCHEMA = 'database_name' order by table_rows desc;
+```
+
 ## 5. SQL
 
 ### 5.1 FUNCTION
