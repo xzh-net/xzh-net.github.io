@@ -96,6 +96,8 @@ rm -rf /var/log/mysqld.log
 
 ### 2.1 用户授权
 
+1. 创建
+
 ```sql
 mysql -uroot -p123456
 CREATE DATABASE IF NOT EXISTS sonar DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
@@ -104,7 +106,10 @@ GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY '123456';
 flush privileges;
 ```
 
-修改密码
+> 使用root给其他用户授权必须进到服务器执行
+
+2. 设置密码
+
 ```sql
 --方法1，密码实时更新；修改用户“test”的密码为“1122”
 set password for test =password('1122');
@@ -113,6 +118,14 @@ update  mysql.user set  password=password('1234')  where user='test'
 --刷新
 flush privileges;
 ```
+
+3. 删除
+
+```sql
+drop user sonar;
+drop database sonar;
+```
+
 
 ### 2.2 表名敏感配置
 
@@ -202,9 +215,13 @@ select column_name columnName, data_type dataType, column_comment columnComment,
     where table_name ='tableName' and table_schema = (select database()) order by ordinal_position
 ```
 
-## 4. SQL
+## 4. 统计信息
 
-### 4.1 FUNCTION
+### 4.1 负载指标统计
+
+## 5. SQL
+
+### 5.1 FUNCTION
 
 ```sql
 CREATE FUNCTION `F_ACTUSER`(v_FLOWCID varchar(40)) RETURNS longtext CHARSET utf8
@@ -239,7 +256,7 @@ BEGIN
 END
 ```
 
-### 4.2 PROCEDURE
+### 5.2 PROCEDURE
 
 ```sql
 CREATE PROCEDURE `PROC_INIT_FLOW_SINGLE`(IN V_PARTNERID VARCHAR(40),
