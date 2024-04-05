@@ -2,7 +2,7 @@
 
 ## 1. Windows
 
-### 1.1 Jdk
+### 1.1 安装Jdk
 
 设置环境变量
 
@@ -22,7 +22,7 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
-### 1.2 Tomcat
+### 1.2 安装Tomcat
 
 1. 指定jdk版本
 
@@ -80,7 +80,7 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
 
 ## 2. Linux
 
-### 2.1 Jdk
+### 2.1 安装Jdk
 
 Oracle最后一个商用免费版本
 
@@ -98,7 +98,7 @@ scp /etc/profile root@node02:/etc/
 scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 ```
 
-### 2.2 Maven
+### 2.2 安装Maven
 
 1. 上传解压
 
