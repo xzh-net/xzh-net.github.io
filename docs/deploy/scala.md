@@ -18,7 +18,7 @@ PATH
 
 ### 1.2 安装IDEA插件
 
-安装
+下载
 
 ![](../../assets/_images/deploy/scala/1.png)
 
