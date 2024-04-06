@@ -14,7 +14,7 @@ wget https://openresty.org/download/openresty-1.25.3.1.tar.gz
 ### 1.2 安装依赖
 
 ```bash
-yum install pcre-devel openssl-devel gcc curl zlib-devel
+yum install pcre-devel openssl-devel gcc curl zlib-devel readline-devel
 ```
 
 ### 1.3 解压编译
@@ -155,7 +155,7 @@ if not ok then
 end
 ```
 
-## 2. 模块指令
+## 2. 模块
 
 1. `init_by_lua*`
 
@@ -265,3 +265,132 @@ location / {
 11. `ssl_certificate_by_*`
 
 该指令作用在Nginx和下游服务开始一个SSL握手操作时将允许本配置项的Lua代码。
+
+
+## 3. Twemproxy
+
+- 官方网站：https://github.com/twitter/twemproxy/
+
+### 3.1 安装autoconf
+
+```bash
+cd /opt/software
+wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+tar zxvf autoconf-2.69.tar.gz
+cd autoconf-2.69
+./configure --prefix=/usr/local
+make && make install
+autoconf --version
+```
+
+> 编译过程提示报错 `checking for GNU M4 that supports accurate traces... configure: error: no acceptable m4 could be found in $PATH.` 需要安装m4
+
+```bash
+cd /opt/software
+wget http://mirrors.kernel.org/gnu/m4/m4-1.4.18.tar.gz
+tar -xvf m4-1.4.18.tar.gz
+cd m4-1.4.18
+./configure
+make && make install
+m4 --version
+```
+
+> 编译过程提示报错 `BEGIN failed--compilation aborted at ../lib/Autom4te/C4che.pm line 33` 需要安装perl的依赖包 `perl-Data-Dumper`
+
+包地址：http://rpmfind.net/linux/rpm2html/search.php?query=perl-Data-Dumper(x86-64)
+
+```bash
+cd /opt/software
+wget http://rpmfind.net/linux/centos/7.9.2009/os/x86_64/Packages/perl-Data-Dumper-2.145-3.el7.x86_64.rpm
+rpm -ivh perl-Data-Dumper-2.145-3.el7.x86_64.rpm
+```
+
+### 3.2 安装automake
+
+```bash
+cd /opt/software
+wget http://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz
+tar -zvxf automake-1.15.tar.gz
+cd automake-1.15
+./configure
+make && make install
+aclocal --version
+```
+
+> 编译过程提示报错 `Try --no-discard-stderr' if option outputs to stderr` 修改源码 `automake-1.15/Makefile.in`
+
+```bash
+# 添加--no-discard-stderr选项
+doc/automake-$(APIVERSION).1: $(automake_script) lib/Automake/Config.pm
+	$(update_mans) automake-$(APIVERSION) --no-discard-stderr
+```
+
+### 3.3 安装libtool
+
+```bash
+cd /opt/software
+wget https://ftp.gnu.org/gnu/libtool/libtool-2.4.6.tar.gz
+tar -zvxf libtool-2.4.6.tar.gz
+cd libtool-2.4.6
+./configure
+make && make install
+libtool --version
+```
+
+### 3.4 编译Twemproxy
+
+```bash
+cd 
+yum install perl-Thread-Queue
+wget https://github.com/twitter/twemproxy/releases/download/0.5.0/twemproxy-0.5.0.tar.gz
+tar -zvxf twemproxy-0.5.0.tar.gz
+cd twemproxy-0.5.0
+autoreconf -fvi 
+./configure --prefix=/usr/local/twemproxy/
+make && make install
+```
+
+### 3.5 配置Twemproxy
+
+```bash
+cd /opt/software/twemproxy-0.5.0
+cp -r ./conf /usr/local/twemproxy/
+cd /usr/local/twemproxy/conf
+vi nutcracker.yml
+```
+
+```yml
+alpha:
+  listen: 127.0.0.1:22121
+  hash: fnv1a_64
+  distribution: ketama
+  auto_eject_hosts: true
+  redis: true
+  redis_auth: 123456
+  server_retry_timeout: 2000
+  server_failure_limit: 1
+  servers:
+   - 192.168.2.201:6379:1
+```
+
+### 3.6 启动服务
+
+设置环境变量
+
+```bash
+echo "PATH=$PATH:/usr/local/twemproxy/sbin/" >> /etc/profile
+source /etc/profile
+```
+
+启动服务
+
+```bash
+nutcracker
+```
+
+### 3.7 客户端测试
+
+```bash
+redis-cli -h 192.168.2.201 -p 22121
+```
+
