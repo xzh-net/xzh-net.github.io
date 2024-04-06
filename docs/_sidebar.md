@@ -19,7 +19,11 @@
   - [HBase](deploy/hbase)
   - [DM](deploy/dm)
 
-- 应用
+- 应用中间件
+  - [Nginx](deploy/nginx)
+  - [OpenResty](deploy/openresty)
+  - [Keepalived](deploy/keepalived)
+  - [HAProxy](deploy/haproxy)
   - [Docker](deploy/docker)
   - [Kubernetes](deploy/kubernetes)
   - [Istio](deploy/istio)
@@ -31,11 +35,6 @@
   - [Simple RTMP Server](deploy/srs)
   - [TURN Server](deploy/turnserver)
   - [Nps](deploy/nps)
-
-- 中间件
-  - [Nginx](deploy/nginx)
-  - [Keepalived](deploy/keepalived)
-  - [HAProxy](deploy/haproxy)
   - [Elastic Stack](deploy/elk)
   - [Zookeeper](deploy/zookeeper)
   - [Etcd](deploy/etcd)
@@ -45,8 +44,6 @@
   - [Mycat](deploy/mycat)
   - [Debezium](deploy/debezium)
   - [FastDFS](deploy/fastdfs)
-
-- 大数据、数仓
   - [Hadoop](deploy/hadoop)
   - [Spark](deploy/spark)
   - [Flink](deploy/flink)
