@@ -340,7 +340,7 @@ libtool --version
 ### 3.4 编译Twemproxy
 
 ```bash
-cd 
+cd /opt/software
 yum install perl-Thread-Queue
 wget https://github.com/twitter/twemproxy/releases/download/0.5.0/twemproxy-0.5.0.tar.gz
 tar -zvxf twemproxy-0.5.0.tar.gz
