@@ -11,14 +11,14 @@
 - `私有项目的管理`：企业内部资源，如封装的类库，框架等更新直接上传到私服即可
 - `三方未上传到中央仓库的类库`：如：oracle.jar，paoding-analysis等，直接通过本地环境直接上传到私服，项目组所有成员可共享
 
-2. 默认仓库
+默认仓库
    
 - `maven-central`：maven中央库，默认`https://repo1.maven.org/maven2`
 - `maven-releases`：私库发行版，首次安装请将Deployment policy设置为Allow redeploy
 - `maven-snapshots`：私库快照版本
 - `maven-public`：仓库组
 
-3. Nexus仓库类型
+Nexus仓库类型
 
 - `hosted`：本地仓库，通常我们会部署自己的构件到这一类型的仓库。比如公司的第二方库。
 - `proxy`：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
