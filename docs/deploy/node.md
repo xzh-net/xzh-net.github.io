@@ -25,7 +25,7 @@
 ![](../../assets/_images/deploy/node/8.png)
 
 
-### 1.2 Npm命令
+### 1.2 Npm
 
 ```bash
 npm -v                          # 查看npm安装的版本
@@ -52,7 +52,7 @@ npm list                # 查看当前目录下已安装的node包
 npm list parseable=true # 以目录的形式来展现当前安装的所有node包
 ```
 
-### 1.3 模块命令
+### 1.3 模块
 
 #### 1.3.1 nodemon
 
