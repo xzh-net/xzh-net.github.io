@@ -12,7 +12,7 @@ yum list docker-ce --showduplicates | sort -r
 yum install docker-ce
 yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 systemctl start docker  
-chkconfig docker on # 开机启动
+chkconfig docker on     # 设置开机启动
 ```
 
 ### 1.2 离线安装
@@ -20,9 +20,9 @@ chkconfig docker on # 开机启动
 下载地址：https://download.docker.com/linux/static/stable/x86_64/
 
 ```bash
-tar zxf docker-18.06.1-ce.tgz # 上传解压
-sudo cp docker/* /usr/bin/    # 拷贝到全局命令中
-sudo dockerd &                # 启动
+tar zxf docker-18.06.1-ce.tgz   # 上传解压
+sudo cp docker/* /usr/bin/      # 拷贝到全局命令中
+sudo dockerd &                  # 启动
 ```
 
 注册服务
@@ -89,7 +89,7 @@ vi /etc/docker/daemon.json
 ```
 
 ```bash
-mv /var/lib/docker /data  # 非初始化环境迁移镜像
+mv /var/lib/docker /data    # 非初始化环境迁移镜像
 ```
 
 重启服务
@@ -123,36 +123,36 @@ services:
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root #设置root帐号密码
+      MYSQL_ROOT_PASSWORD: root     # 设置root帐号密码
     ports:
       - 3306:3306
     volumes:
-      - /data/mysql/conf:/etc/mysql/conf.d #配置文件挂载
-      - /data/mysql/data:/var/lib/mysql  #数据文件挂载
-      - /data/mysql/logs:/logs  #日志文件挂载
+      - /data/mysql/conf:/etc/mysql/conf.d  # 配置文件挂载
+      - /data/mysql/data:/var/lib/mysql     # 数据文件挂载
+      - /data/mysql/logs:/logs              # 日志文件挂载
   redis:
     image: redis:5
     container_name: redis
     command: redis-server --appendonly yes
     volumes:
-      - /data/redis/data:/data #数据文件挂载
+      - /data/redis/data:/data      # 数据文件挂载
     ports:
       - 6379:6379
   nginx:
     image: nginx:1.10
     container_name: nginx
     volumes:
-      - /data/nginx/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
-      - /data/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
-      - /data/nginx/log:/var/log/nginx #日志文件挂载
+      - /data/nginx/nginx.conf:/etc/nginx/nginx.conf    # 配置文件挂载
+      - /data/nginx/html:/usr/share/nginx/html          # 静态资源根目录挂载
+      - /data/nginx/log:/var/log/nginx                  # 日志文件挂载
     ports:
       - 80:80
   rabbitmq:
     image: rabbitmq:3.7.15-management
     container_name: rabbitmq
     volumes:
-      - /data/rabbitmq/data:/var/lib/rabbitmq #数据文件挂载
-      - /data/rabbitmq/log:/var/log/rabbitmq #日志文件挂载
+      - /data/rabbitmq/data:/var/lib/rabbitmq   # 数据文件挂载
+      - /data/rabbitmq/log:/var/log/rabbitmq    # 日志文件挂载
     ports:
       - 5672:5672
       - 15672:15672
@@ -160,7 +160,7 @@ services:
     image: mongo:4.2.5
     container_name: mongo
     volumes:
-      - /data/mongo/db:/data/db #数据文件挂载
+      - /data/mongo/db:/data/db     # 数据文件挂载
     ports:
       - 27017:27017
   nacos-registry:
@@ -224,11 +224,11 @@ services:
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf #挂载logstash的配置文件
+      - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf     # 挂载logstash的配置文件
     depends_on:
-      - elasticsearch #kibana在elasticsearch启动之后再启动
+      - elasticsearch       # kibana在elasticsearch启动之后再启动
     links:
-      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
+      - elasticsearch:es    # 可以用es这个域名访问elasticsearch服务
     ports:
       - 4560:4560
       - 4561:4561
@@ -538,6 +538,7 @@ docker pull wnameless/oracle-xe-11g-r2
 
 docker run --name oracle-xe-11g -d -v /data/oracle_data:/data/oracle_data -p 49160:22 -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g:14.04.4
 
+# 连接参数
 port: 49161
 sid: xe
 username: system
@@ -545,6 +546,7 @@ password: oracle
 system: oracle
 sys: oracle
 
+# 进入容器
 docker exec -it oracle-xe-11g /bin/bash
 
 cd /u01/app/oracle
@@ -554,6 +556,7 @@ su oracle
 cd $ORACLE_HOME
 bin/sqlplus / as sysdba
 
+# 创建表空间
 create tablespace xzh datafile '/u01/app/oracle/oradata/xzh.dbf' size 100M;
 create user xzh0610 identified by 123456 default tablespace xzh;
 grant connect,resource to xzh0610;
