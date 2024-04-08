@@ -24,6 +24,7 @@
   - [OpenResty](deploy/openresty)
   - [Keepalived](deploy/keepalived)
   - [HAProxy](deploy/haproxy)
+  - [Twemproxy](deploy/twemproxy)
   - [Docker](deploy/docker)
   - [Kubernetes](deploy/kubernetes)
   - [Istio](deploy/istio)
