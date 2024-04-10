@@ -73,7 +73,7 @@ ngx.say("hello World");
 -- 获取get请求参数
 local arg = ngx.req.get_uri_args()
 for k,v in pairs(arg) do
-    ngx.say("[GET] key:", k, " v:", v)
+    ngx.say("[get] key:", k, " v:", v)
     ngx.say("<br>")
 end
 
@@ -81,7 +81,7 @@ end
 ngx.req.read_body()
 local arg = ngx.req.get_post_args()
 for k,v in pairs(arg) do
-    ngx.say("[POST] key:", k, " v:", v)
+    ngx.say("[post] key:", k, " v:", v)
     ngx.say("<br>")
 end
 
@@ -282,14 +282,13 @@ location / {
 
 ### 3.1 模板渲染
 
-
-#### 3.8.1 导入模板
-
-将template.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
+#### 3.1.1 导入模板引擎
 
 下载地址：http://luarocks.org/modules/bungle/lua-resty-template
 
-#### 3.8.2 配置nginx
+将template.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
+
+#### 3.1.2 配置openresty
 
 ```conf
 server {
@@ -304,10 +303,25 @@ server {
 }
 ```
 
-#### 3.8.3 设置解析模板
+#### 3.1.3 设置模板
+
+```bash
+vi /usr/local/openresty/nginx/html/templates/demo.html
+```
+
+```html
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>{{title}}</h1>
+  <h2>{{num}}</h2>
+</body>
+</html>
+```
+
+#### 3.1.4 设置解析类库
 
 将redis_iresty.lua文件复制到`/usr/local/openresty/lualib/resty`目录下，修改连接地址
-
 
 ```lua
 -- file name: resty/redis_iresty.lua
@@ -507,7 +521,7 @@ end
 return _M
 ```
 
-#### 3.8.4 配置解析规则
+#### 3.1.5 配置解析规则
 
 ```bash
 vi /usr/local/openresty/nginx/conf/stock.lua
@@ -530,21 +544,7 @@ local request_uri = ngx.var.request_uri
 template.render(string.sub(request_uri,2),context);
 ```
 
-#### 3.8.5 新建页面
 
-```bash
-vi /usr/local/openresty/nginx/html/templates/demo.html
-```
-
-```html
-<!DOCTYPE html>
-<html>
-<body>
-  <h1>{{num}}</h1>
-</body>
-</html>
-```
-
-#### 3.8.6 访问地址
+#### 3.1.6 访问地址
 
 http://192.168.2.201/demo.html
