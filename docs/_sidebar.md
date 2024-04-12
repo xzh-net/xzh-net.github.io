@@ -36,6 +36,7 @@
   - [Simple RTMP Server](deploy/srs)
   - [TURN Server](deploy/turnserver)
   - [Nps](deploy/nps)
+  - [Skywalking](deploy/skywalking)
   - [Elastic Stack](deploy/elk)
   - [Zookeeper](deploy/zookeeper)
   - [Etcd](deploy/etcd)
