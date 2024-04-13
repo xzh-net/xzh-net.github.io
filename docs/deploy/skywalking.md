@@ -1,9 +1,10 @@
-# Apache Skywalking
+# Apache Skywalking 8.9.1
 
 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM（Application Performance Monitor）系统。Apache Skywalking(Incubator)通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。SkyWalking的Agent端使用推送模式，OAP服务器端使用拉取模式。
 
 - 官网地址：http://skywalking.apache.org/downloads/
-- 历史版本：https://archive.apache.org/dist/skywalking/
+- APM地址：https://archive.apache.org/dist/skywalking/
+- 代理地址：https://archive.apache.org/dist/skywalking/java-agent
 
 
 ## 1. 安装
@@ -12,6 +13,7 @@
 
 ```bash
 cd /opt/software
+wget https://archive.apache.org/dist/skywalking/8.9.1/apache-skywalking-apm-8.9.1.tar.gz
 tar -zxvf apache-skywalking-apm-9.2.0.tar.gz -C /opt
 ```
 
