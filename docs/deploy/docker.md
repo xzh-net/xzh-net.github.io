@@ -1409,8 +1409,8 @@ docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 2. 创建目录赋予权限
 
 ```bash
-mkdir /data/elasticsearch/{data，logs} -p
-chmod 775 /data/elasticsearch
+mkdir /tmp/elasticsearch/{data,logs} -p
+chmod 775 /data/elasticsearchcd
 ```
 
 3. 准备docker-compose.yml文件
@@ -1432,6 +1432,7 @@ services:
     volumes:
       - /data/elasticsearch/logs:/usr/share/elasticsearch/logs
       - /data/elasticsearch/data:/usr/share/elasticsearch/data
+     #- /data/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ulimits:
       memlock:
         soft: -1
@@ -1452,7 +1453,7 @@ services:
       SW_STORAGE_ES_CLUSTER_NODES: elasticsearch:9200
       TZ: Asia/Shanghai
     #volumes:
-     #- ./oap/conf/alarm-settings.yml:/skywalking/config/alarm-settings.yml
+     #- /data/oap/conf/alarm-settings.yml:/skywalking/config/alarm-settings.yml
   skywalking-ui:
     image: apache/skywalking-ui:8.9.1
     container_name: skywalking-ui
@@ -1468,12 +1469,19 @@ services:
       TZ: Asia/Shanghai
 ```
 
-Agent下载地址：https://archive.apache.org/dist/skywalking/6.6.0/apache-skywalking-apm-6.6.0.tar.gz
+4. 执行启动服务命令
 
 ```bash
-java -jar skywalking_springboot.jar # 原启动方式
-java -javaagent:/data/skywalking/apache-skywalking-apm-bin/agent/skywalking-agent.jar -Dskywalking.agent.service_name=springboot -Dskywalking.collector.backend_service=127.0.0.1:11800 -jar /data/skywalking/skywalking_springboot.jar
+docker-compose up -d
 ```
+
+5. 下载代理
+
+https://archive.apache.org/dist/skywalking/java-agent/8.16.0/apache-skywalking-java-agent-8.16.0.tgz
+
+6. 访问地址
+
+http://192.168.2.201:8080
 
 ### 4.7 消息中间件
 
@@ -1680,19 +1688,6 @@ elasticsearch.yml，在文件末尾加入以下配置开启跨域
 ```yml
 http.cors.enabled: true
 http.cors.allow-origin: "*"
-```
-
-7. 其他版本8.6.2v
-
-```bash
-docker run -p 9201:9200 -p 9303:9300 --name elasticsearch8 \
--e "discovery.type=single-node" \
--e "cluster.name=elasticsearch8" \
--e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
--e "xpack.security.enabled=false" \
--v /data/elasticsearch862/plugins:/usr/share/elasticsearch/plugins \
--v /data/elasticsearch862/data:/usr/share/elasticsearch/data \
--d elasticsearch:8.6.2
 ```
 
 #### 4.8.2 Logstash
