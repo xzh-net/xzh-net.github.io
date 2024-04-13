@@ -4,7 +4,6 @@
 
 - 官网地址：http://skywalking.apache.org/downloads/
 - APM地址：https://archive.apache.org/dist/skywalking/
-- 代理地址：https://archive.apache.org/dist/skywalking/java-agent
 
 
 ## 1. 安装
@@ -13,7 +12,7 @@
 
 ```bash
 cd /opt/software
-wget https://archive.apache.org/dist/skywalking/8.9.1/apache-skywalking-apm-8.9.1.tar.gz
+wget https://archive.apache.org/dist/skywalking/6.6.0/apache-skywalking-apm-es7-6.6.0.tar.gz
 tar -zxvf apache-skywalking-apm-9.2.0.tar.gz -C /opt
 ```
 
