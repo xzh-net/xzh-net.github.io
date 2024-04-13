@@ -1,5 +1,7 @@
 # Docker 18.06.3
 
+仓库地址：https://hub.docker.com/
+
 ## 1. 安装
 
 ### 1.1 在线安装
@@ -807,8 +809,6 @@ pom.xml
 
 ## 4. 仓库
 
-官网地址：https://hub.docker.com/
-
 ### 4.1 容器
 
 #### 4.1.1 portainer-ce
@@ -1252,7 +1252,7 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 #### 4.6.1 Nacos
 
 ```bash
-docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone nacos/nacos-server:2.0.1
+docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
 
 docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone \
 -e JVM_XMS=256m -e JVM_XMX=256m \
