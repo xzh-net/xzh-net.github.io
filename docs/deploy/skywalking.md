@@ -17,56 +17,53 @@ tar -zxvf apache-skywalking-apm-8.9.1.tar.gz -C /usr/local/
 mv /usr/local/apache-skywalking-apm-bin /usr/local/skywalking
 ```
 
-### 1.1.2 集群配置
+### 1.1.2 修改OAP配置
 
 ```bash
 cd /usr/local/skywalking/
 vi config/application.yml
 ```
 
+> 使用nacos作为配置中心，需要将core配置中的restHost与gRPCHost修改为本地的ip，默认配置的ip为 0.0.0.0，但如果不修改该ip的话，会导致多个skywalking注册到nacos上时，从nacos管理台界面查看只出现一个skywalking注册成功
+
 ```yml
+# 集群配置
 cluster:
   selector: ${SW_CLUSTER:nacos}
   standalone:
-  # Please check your ZooKeeper is 3.5+, However, it is also compatible with ZooKeeper 3.4.x. Replace the ZooKeeper 3.5+
-  # library the oap-libs folder with your ZooKeeper 3.4.x library.
   nacos:
     serviceName: ${SW_SERVICE_NAME:"SkyWalking_OAP_Cluster"}
-    hostPort: ${SW_CLUSTER_NACOS_HOST_PORT:localhost:8848}
-    # Nacos Configuration namespace
+    hostPort: ${SW_CLUSTER_NACOS_HOST_PORT:192.168.2.201:8848}
     namespace: ${SW_CLUSTER_NACOS_NAMESPACE:"public"}
-    # Nacos auth username
-    username: ${SW_CLUSTER_NACOS_USERNAME:""}
-    password: ${SW_CLUSTER_NACOS_PASSWORD:""}
-    # Nacos auth accessKey
+    username: ${SW_CLUSTER_NACOS_USERNAME:"nacos"}
+    password: ${SW_CLUSTER_NACOS_PASSWORD:"nacos"}
     accessKey: ${SW_CLUSTER_NACOS_ACCESSKEY:""}
     secretKey: ${SW_CLUSTER_NACOS_SECRETKEY:""}
-```
-
-```bash
-docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
-```
-
-### 1.1.3 存储配置
-
-```bash
-cd /usr/local/skywalking/
-vi config/application.yml
-```
-
-```yml
+# 核心配置
+core:
+  selector: ${SW_CORE:default}
+  default:
+    role: ${SW_CORE_ROLE:Mixed}
+    restHost: ${SW_CORE_REST_HOST:192.168.2.201}
+    restPort: ${SW_CORE_REST_PORT:12800}
+    gRPCHost: ${SW_CORE_GRPC_HOST:192.168.2.201}
+    gRPCPort: ${SW_CORE_GRPC_PORT:11800}
+# 存储配置
 storage:
   selector: ${SW_STORAGE:elasticsearch}
   elasticsearch:
     namespace: ${SW_NAMESPACE:""}
-    clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:localhost:9200}
+    clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:192.168.2.201:9200}
 ```
 
+临时创建镜像，生产环境需手动安装
+
 ```bash
+docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
 docker run -d -p 9200:9200 -p 9300:9300 --name es -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms128m -Xmx256m" elasticsearch:7.17.6
 ```
 
-### 1.1.3 UI配置
+### 1.1.3 修改UI配置
 
 ```bash
 cd /usr/local/skywalking/
@@ -111,8 +108,9 @@ management:
 
 ```bash
 cd /usr/local/skywalking/bin
-./startup.sh
+./oapService.bat
 ./webappService.sh
+# 或者使用startup.sh启动所有
 ```
 
 ### 1.1.5 客户端
@@ -120,5 +118,5 @@ cd /usr/local/skywalking/bin
 下载探针：https://archive.apache.org/dist/skywalking/java-agent/8.15.0/apache-skywalking-java-agent-8.15.0.tgz
 
 ```bash
-java -javaagent:skywalking-agent.jar -Dskywalking.agent.service_name=user-center -Dskywalking.collector.backend_service=192.168.2.201:11800 -jar user-center.jar
+java -javaagent:skywalking-agent.jar -Dskywalking.agent.service_name=user-center -Dskywalking.collector.backend_service=192.168.2.201:11800,192.168.2.202:11800 -jar user-center.jar
 ```
