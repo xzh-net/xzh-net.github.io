@@ -809,9 +809,9 @@ pom.xml
 
 官网地址：https://hub.docker.com/
 
-### 3.1 容器
+### 4.1 容器
 
-#### 3.1.1 portainer-ce
+#### 4.1.1 portainer-ce
 
 ```bash
 docker volume create portainer_data
@@ -832,7 +832,7 @@ systemctl daemon-reload   # 加载docker守护线程
 systemctl restart docker  # 重启docker
 ```
 
-#### 3.1.2 Nginx
+#### 4.1.2 Nginx
 
 ```bash
 docker run -p 80:80 --name nginx \
@@ -857,7 +857,7 @@ docker run -p 80:80 -p 443:443 --name nginx \
 -d nginx:1.20.2
 ```
 
-#### 3.1.3 Nginx-fancyindex
+#### 4.1.3 Nginx-fancyindex
 
 ```bash
 docker run -d \
@@ -872,7 +872,7 @@ docker run -d \
   80x86/nginx-fancyindex
 ```
 
-#### 3.1.4 Rancher
+#### 4.1.4 Rancher
 
 ```bash
 mkdir -p /data/rancher_home/rancher
@@ -889,9 +889,9 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 docker exec -it rancher reset-password
 ```
 
-### 3.2 关系型数据库
+### 4.2 关系型数据库
 
-#### 3.2.1 MySQL
+#### 4.2.1 MySQL
 
 
 ```bash
@@ -913,7 +913,7 @@ source /mall.sql;
 grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
 
-#### 3.2.2 PostgreSQL
+#### 4.2.2 PostgreSQL
 
 ```bash
 docker volume create pgdata  # 创建本地卷，数据卷可以在容器之间共享和重用，默认会一直存在，即使容器被删除
@@ -933,7 +933,7 @@ docker exec -it postgres2 /bin/bash
 psql -Upostgres # 连接数据库
 ```
 
-#### 3.2.3 Oracle
+#### 4.2.3 Oracle
 
 ```bash
 docker pull wnameless/oracle-xe-11g
@@ -966,7 +966,7 @@ grant connect,resource to xzh0610;
 grant dba to xzh0610;  #  授予dba权限后，这个用户能操作所有用户的表
 ```
 
-#### 3.2.4 SQL Server
+#### 4.2.4 SQL Server
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@w0rd" \
@@ -993,7 +993,7 @@ select * from pms_product
 go
 ```
 
-#### 3.2.5 DM
+#### 4.2.5 DM
 
 请在达梦数据库官网下载 [Docker](https://eco.dameng.com/download/) 安装包，拷贝安装包到 `/opt` 目录下，执行以下命令导入安装包：
 
@@ -1006,9 +1006,9 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 > 1.如果使用 docker 容器里面的 disql，进入容器后，先执行 source /etc/profile 防止中文乱码。  
 > 2.新版本 Docker 镜像中数据库默认用户名/密码为 SYSDBA/SYSDBA001  
 
-### 3.3 非关系型数据库
+### 4.3 非关系型数据库
 
-#### 3.3.1 Memcached
+#### 4.3.1 Memcached
 
 ```bash
 docker pull memcached:1.6.12
@@ -1025,7 +1025,7 @@ ServerName localhost:80
 service apache2 restart
 ```
 
-#### 3.3.2 Redis
+#### 4.3.2 Redis
 
 - 单机
 
@@ -1056,7 +1056,7 @@ docker pull oliver006/redis_exporter:v1.28.0
 docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:v1.28.0 --redis.addr redis://172.17.17.191:16379 --redis.password 'redis16379'
 ```
 
-#### 3.3.3 MongoDB
+#### 4.3.3 MongoDB
 
 ```bash
 docker pull mongo:4.4.6
@@ -1066,14 +1066,14 @@ docker run -p 27017:27017 --name mongo \
 -d mongo:4.4.6
 ```
 
-#### 3.3.4 CouchDB 
+#### 4.3.4 CouchDB 
 
 ```bash
 docker run -p 5984:5984 --name my-couchdb -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=admin -v /data/couchdb/data:/opt/couchdb/data -d couchdb:3.2
 docker run -d -p 8800:8000 --link=my-couchdb --name fauxton 3apaxicom/fauxton sh -c 'fauxton -c http://192.168.3.200:5984'  # 可视化
 ```
 
-#### 3.3.5 InfluxDB
+#### 4.3.5 InfluxDB
 
 - 1.8
 
@@ -1099,7 +1099,7 @@ docker run -d -p 8086:8086 \
       influxdb:2.0.6
 ```
 
-#### 3.3.6 HBase 2.x
+#### 4.3.6 HBase 2.x
 
 ```bash
 docker run -dti --name hbase2 -h hbase2 \
@@ -1125,7 +1125,7 @@ delete "test", "10010", "c1:sex"
 deleteall "test", "10010"
 ```
 
-#### 3.3.7 TDengine
+#### 4.3.7 TDengine
 
 ```bash
 docker run -d -p 6041:6041 \
@@ -1136,9 +1136,9 @@ docker run -d -p 6041:6041 \
     tdengine:2.0.19.1
 ```
 
-### 3.4 数仓工具
+### 4.4 数仓工具
 
-#### 3.4.1 ClickHouse
+#### 4.4.1 ClickHouse
 
 ```bash
 docker run -d --name clickhouse-server --privileged=true \
@@ -1156,9 +1156,9 @@ docker exec -it clickhouse-server /bin/bash
 clickhouse-client -m
 ```
 
-### 3.5 分布式文件系统
+### 4.5 分布式文件系统
 
-#### 3.5.1 FastDFS
+#### 4.5.1 FastDFS
 
 ```bash
 docker run -dti --network=host --name tracker -v /data/fdfs/tracker:/var/fdfs delron/fastdfs tracker 
@@ -1171,7 +1171,7 @@ docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /data
     -d registry.cn-beijing.aliyuncs.com/tianzuo/fastdfs
 ```
 
-#### 3.5.2 MinIO
+#### 4.5.2 MinIO
 
 minioadmin/minioadmin
 
@@ -1184,7 +1184,7 @@ docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   minio/minio:RELEASE.2022-01-04T07-41-07Z server /data --console-address ":9001"
 ```
 
-#### 3.5.3 Hadoop 2.x
+#### 4.5.3 Hadoop 2.x
 
 ```bash
 docker run -dit --name hadoop2 -h hadoop2 \
@@ -1247,9 +1247,9 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 ```
 
 
-### 3.6 分布式中间件
+### 4.6 分布式中间件
 
-#### 3.6.1 Nacos
+#### 4.6.1 Nacos
 
 ```bash
 docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone nacos/nacos-server:2.0.1
@@ -1266,14 +1266,14 @@ docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone \
 --restart=always nacos/nacos-server:2.0.1
 ```
 
-#### 3.6.2 Consul
+#### 4.6.2 Consul
 
 ```
 docker run -d -p 8500:8500 --restart=always --name=consul consul:1.12.1 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
 ```
 
 
-#### 3.6.3 Seata
+#### 4.6.3 Seata
 
 ```bash
 mkdir -p /opt/seata/config/
@@ -1348,13 +1348,13 @@ SEATA_CONFIG_NAME   # 可选, 指定配置文件位置, 如 file:/root/registry,
 # 如果需要同时指定 file.conf文件，需要将registry.conf的config.file.name的值改为类似file:/root/file.conf：
 ```
 
-#### 3.6.4 Sentinel
+#### 4.6.4 Sentinel
 
 ```bash
 docker run --name sentinel -d -p 8858:8858 -d bladex/sentinel-dashboard:1.7.2
 ```
 
-#### 3.6.5 Dubbo Admin
+#### 4.6.5 Dubbo Admin
 
 ```bash
 docker run -d -p 7001:7001 -e dubbo.registry.address=zookeeper://172.17.17.200:2181 \
@@ -1363,7 +1363,7 @@ docker run -d -p 7001:7001 -e dubbo.registry.address=zookeeper://172.17.17.200:2
 chenchuxin/dubbo-admin
 ```
 
-#### 3.6.6 Zookeeper
+#### 4.6.6 Zookeeper
 
 ```bash
 docker run -d -p 2181:2181 --name some-zookeeper --restart always -d zookeeper:3.7.0
@@ -1389,13 +1389,13 @@ docker run -p 2181:2181 --name zookeeper \
 ```
 
 
-#### 3.6.7 Zipkin 
+#### 4.6.7 Zipkin 
 
 ```bash
 docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 ```
 
-#### 3.6.8 SkyWalking
+#### 4.6.8 SkyWalking
 
 1. 相关组件版本
 
@@ -1475,16 +1475,16 @@ java -jar skywalking_springboot.jar # 原启动方式
 java -javaagent:/data/skywalking/apache-skywalking-apm-bin/agent/skywalking-agent.jar -Dskywalking.agent.service_name=springboot -Dskywalking.collector.backend_service=127.0.0.1:11800 -jar /data/skywalking/skywalking_springboot.jar
 ```
 
-### 3.7 消息中间件
+### 4.7 消息中间件
 
-#### 3.7.1 ActiveMQ 
+#### 4.7.1 ActiveMQ 
 
 admin/admin
 ```bash
 docker run -d --name activemq -p 61616:61616 -p 8161:8161 webcenter/activemq:5.14.3
 ```
 
-#### 3.7.2 RabbitMQ
+#### 4.7.2 RabbitMQ
 
 - 3.7.15
 
@@ -1510,7 +1510,7 @@ rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 docker run -dit --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
 ```
 
-#### 3.7.3 RocketMQ
+#### 4.7.3 RocketMQ
 
 ```bash
 # 创建目录
@@ -1555,7 +1555,7 @@ docker run -d -p 10911:10911 -p 10909:10909 -v  /data/rocketmq/data/broker/logs:
 docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=172.17.17.200:9876" -p 9080:8080 -t apacherocketmq/rocketmq-dashboard:1.0.0
 ```
 
-#### 3.7.4 Kafka
+#### 4.7.4 Kafka
 
 ```
 docker pull wurstmeister/kafka:2.13-2.8.1
@@ -1575,7 +1575,7 @@ docker run -itd --name kafka -p 9092:9092 \
 docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.200:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
 ```
 
-#### 3.7.5 Pulsar
+#### 4.7.5 Pulsar
 
 
 ```bash
@@ -1617,7 +1617,7 @@ curl \
 添加Environment连接集群：http://192.168.2.201:8080
 
 
-#### 3.7.6 EMQ
+#### 4.7.6 EMQ
 
 ```bash
 docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx:4.3.10        # 开源版
@@ -1626,9 +1626,9 @@ docker run -d --name emqx-ee -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084
 
 
 
-### 3.8 Elastic Stack
+### 4.8 Elastic Stack
 
-#### 3.8.1 Elasticsearch
+#### 4.8.1 Elasticsearch
 
 1. 拉取镜像
 
@@ -1695,7 +1695,7 @@ docker run -p 9201:9200 -p 9303:9300 --name elasticsearch8 \
 -d elasticsearch:8.6.2
 ```
 
-#### 3.8.2 Logstash
+#### 4.8.2 Logstash
 
 1. 拉取镜像
 
@@ -1780,7 +1780,7 @@ cd /usr/share/logstash/bin
 logstash-plugin install logstash-codec-json_lines
 ```
 
-#### 3.8.3 Kibana
+#### 4.8.3 Kibana
 
 访问地址：http://192.168.3.200:5601
 
@@ -1793,9 +1793,9 @@ docker run --name kibana -p 5601:5601 \
 -d kibana:7.6.2
 ```
 
-### 3.9 持续集成
+### 4.9 持续集成
 
-#### 3.9.1 GitLab
+#### 4.9.1 GitLab
 
 ```bash
 docker pull gitlab/gitlab-ce:12.4.2-ce.0
@@ -1822,7 +1822,7 @@ docker restart gitlab
 ```
 
 
-#### 3.9.2 Nexus3
+#### 4.9.2 Nexus3
 
 ```bash
 docker pull sonatype/nexus3:3.36.0
@@ -1830,7 +1830,7 @@ mkdir -p /home/mvn/nexus-data  && chown -R 200 /home/mvn/nexus-data
 docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sonatype/nexus3:3.36.0
 ```
 
-#### 3.9.3 Harbor
+#### 4.9.3 Harbor
 
 > wget https://github.com/goharbor/harbor/releases/download/v2.0.1/harbor-offline-installer-v2.0.1.tgz
 
@@ -1881,7 +1881,7 @@ docker-compose restart #重新启动
 默认账户密码：admin/Harbor12345
 
 
-#### 3.9.4 SonarQube
+#### 4.9.4 SonarQube
 
 ```bash
 docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:8.6-community #H2默认存储
@@ -1899,7 +1899,7 @@ docker run -d --name sonarqube \
     sonarqube:8.6-community
 ```
 
-#### 3.9.5 Jenkins
+#### 4.9.5 Jenkins
 
 ```bash
 docker pull jenkins/jenkins:lts
@@ -1916,7 +1916,7 @@ vi hudson.model.UpdateCenter.xml
 
 ```
 
-#### 3.9.6 Prometheus
+#### 4.9.6 Prometheus
 
 ```bash
 docker pull prom/prometheus
@@ -1981,7 +1981,7 @@ scrape_configs:
 docker-compose -f docker-compose-prometheus.yml up -d  
 ```
 
-#### 3.9.7 Grafana
+#### 4.9.7 Grafana
 
 ```bash
 docker run -d -p 3000:3000 --name grafana grafana/grafana
@@ -1990,9 +1990,9 @@ docker run -d -p 3000:3000 --name grafana grafana/grafana
 admin:admin
 
 
-### 3.10 即时通讯
+### 4.10 即时通讯
 
-#### 3.10.1 SRS
+#### 4.10.1 SRS
 
 ```bash
 docker pull ossrs/srs:v4.0.187
@@ -2162,7 +2162,7 @@ vhost __defaultVhost__ {
 ./objs/srs -c conf/srs.woniu.conf
 ```
 
-#### 3.10.2 Openfire
+#### 4.10.2 Openfire
 
 -  4.4.4
 ```bash
@@ -2172,9 +2172,9 @@ docker run --name openfire -d --restart=always \
   gizmotronic/openfire:4.4.4
 ```
 
-### 3.11 其他
+### 4.11 其他
 
-#### 3.11.1 Zentao
+#### 4.11.1 Zentao
 
 ```bash
 mkdir -p /data/zbox
@@ -2188,14 +2188,14 @@ docker run -d -p 8080:80 -p 3316:3306 -e USER="admin" -e PASSWD="admin" -e BIND_
 - BIND_ADDRESS 设置为false
 
 
-#### 3.11.2 Node-RED
+#### 4.11.2 Node-RED
 
 ```bash
 sudo docker run -it -p 1880:1880 --name=nodered --restart=always --user=root --net=host -v /data/nodered:/data -e TZ=Asia/Shanghai nodered/node-red
 ```
 
 
-#### 3.11.3 Eclipse Che
+#### 4.11.3 Eclipse Che
 
 http://ip:8080
 
@@ -2206,7 +2206,7 @@ docker run -it -d --rm \
 eclipse/che start
 ```
 
-#### 3.11.4 Theia
+#### 4.11.4 Theia
 
 ```bash
 chown -R 1000:1000 /data/
@@ -2214,4 +2214,3 @@ docker run -it -d -p 3000:3000 -v "/data/theia:/home/project:cached" theiaide/th
 docker run -it -d -p 3000:3000 -v "/data/theia-java:/home/project:cached" theiaide/theia-java
 docker run -it -d --init -p 3000:3000 -v "/data/theia-full:/home/project:cached" theiaide/theia-full
 ```
-
