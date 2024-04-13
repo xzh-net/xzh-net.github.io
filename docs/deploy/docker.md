@@ -1908,7 +1908,6 @@ docker run -d --name jenkins -p 8888:8080 -p 50000:50000 -v /data/jenkins_home:/
 cd /data/jenkins_home
 vi hudson.model.UpdateCenter.xml
 # http://mirror.xmission.com/jenkins/updates/update-center.json
-
 ```
 
 #### 4.9.6 Prometheus
