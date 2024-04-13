@@ -8,16 +8,14 @@
 
 ## 1. 安装
 
-### 1.1 单机
-
-#### 1.1.1 上传解压
+### 1.1.1 上传解压
 
 ```bash
 cd /opt/software
 tar -zxvf apache-skywalking-apm-9.2.0.tar.gz -C /opt
 ```
 
-#### 1.1.2 修改配置
+### 1.1.2 修改配置
 
 ```bash
 mkdir -p /home/elastic/elasticsearch-7.6.2/data /home/elastic/elasticsearch-7.6.2/logs
@@ -36,7 +34,7 @@ http.cors.enabled: true                   # head插件跨域
 http.cors.allow-origin: "*"
 ```
 
-#### 1.1.3 系统设置
+### 1.1.3 系统设置
 
 1. 修改文件资源限制
 
@@ -68,7 +66,7 @@ vm.max_map_count=655360
 sysctl -p
 ```
 
-#### 1.1.4 创建用户
+### 1.1.4 创建用户
 
 1. 新增elastic用户
 
@@ -83,7 +81,7 @@ passwd elastic   # 为elastic用户设置密码
 chown -R elastic:elastic /home/elastic
 ```
 
-#### 1.1.5 启动服务
+### 1.1.5 启动服务
 
 ```bash
 su - elastic
@@ -91,7 +89,7 @@ cd /home/elastic/elasticsearch-7.6.2/bin
 ./elasticsearch -d  # 后台启动
 ```
 
-#### 1.1.6 验证
+### 1.1.6 验证
 
 ```bash
 ps aux|grep elasticsearch
@@ -99,9 +97,9 @@ curl http://127.0.0.1:9200
 ```
 
 
-### 1.2 集群
+## 1.2 集群
 
-#### 1.2.1 拷贝副本
+### 1.2.1 拷贝副本
 
 ```bash
 su - elastic
@@ -110,7 +108,7 @@ cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9202
 cp -r elasticsearch-7.6.2   elasticsearch-7.6.2-9203
 ```
 
-#### 1.2.2 节点1
+### 1.2.2 节点1
 
 1. 清理数据
 
@@ -145,7 +143,7 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-#### 1.2.3 节点2
+### 1.2.3 节点2
 
 1. 清理数据
 
@@ -180,7 +178,7 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-#### 1.2.4 节点3
+### 1.2.4 节点3
 
 1. 清理数据
 
@@ -215,7 +213,7 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-#### 1.2.5 启动服务
+### 1.2.5 启动服务
 
 ```bash
 su - elastic
@@ -224,7 +222,7 @@ su - elastic
 /home/elastic/elasticsearch-7.6.2-9203/bin/elasticsearch -d
 ```
 
-#### 1.2.6 验证集群
+### 1.2.6 验证集群
 
 http://172.17.17.194:9201/_cat/nodes
 
