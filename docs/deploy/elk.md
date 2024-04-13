@@ -3,7 +3,7 @@
 Elastic Stack是由ELK演化而来，分别是Elasticsearch、logstash、kibana
 
 - 官网地址：https://www.elastic.co/downloads/
-
+- 版本一览：https://www.elastic.co/cn/support/matrix#matrix_jvm
 
 ## 1. Elasticsearch
 
