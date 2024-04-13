@@ -402,7 +402,410 @@ docker cp [local_path] rabbitmq:/[container_path]/  # 将主机文件copy至rabb
 docker cp [local_path] rabbitmq:/[container_path]   # 将主机文件copy至rabbitmq容器，目录重命名为[container_path]（注意与非重命名copy的区别）
 ```
 
-## 3. 仓库
+## 3. 构建
+
+### 3.1 Dockerfile
+
+```bash
+FROM        # 设置基础镜像
+MAINTAINER  # 设置维护者信息
+ADD         # 设置需要添加容器中的文件（自动解压）
+COPY        # 设置复制到容器中的文件（不会解压）
+USER        # 设置运行RUN指令的用户
+ENV         # 设置环境变量可在RUN  指令中使用
+RUN         # 设置镜像制作过程中需要运行的指令
+ENTRYPOINT  # 设置容器启动时运行的命令(无法覆盖)
+CMD         # 设置容器启动时运行的命令(可以覆盖)
+WORKDIR     # 设置进入容器的工作目录
+EXPOSE      # 设置可被暴露的端口号（端口映射）
+VOLUME      # 设置可被挂载的数据卷（目录映射）
+ONBUILD     # 设置在构建时需要自动执行的命令
+```
+
+> Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
+
+#### 3.1.1 jar
+
+1. 创建Dockerfile
+
+```bash
+vi Dockerfile
+```
+
+```bash
+FROM openjdk:8-jdk-alpine
+ARG JAR_FILE
+# 复制文件到容器 ，COPY . /public  # 当前路径所有复制到容器内
+COPY ${JAR_FILE} app.jar
+# 声明需要暴露的端口
+EXPOSE 9001
+# 配置容器启动后执行的命令
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+2. 构建镜像
+
+```bash
+docker build --build-arg JAR_FILE=test-sso.jar -t test-sso:1.0 . # -f :指定要使用的Dockerfile路径；
+docker images       # 查看镜像是否创建成功
+docker run -p 9876:9001 --name=test-sso -d test-sso:1.0 # 创建容器
+docker exec -it [containerid] /bin/ash                  # 进入容器
+cat /etc/issue  # 查看操作系统
+uname -a        # 查看内核
+```
+
+#### 3.1.2 tomcat
+
+1. 创建Dockerfile
+
+```bash
+vi Dockerfile
+```
+
+```bash
+FROM centos:7
+MAINTAINER xzh xzh@163.com
+# 拷贝tomcat jdk 到镜像并解压
+ADD apache-tomcat-8.5.66.tar.gz /opt
+ADD jdk-8u202-linux-x64.tar.gz /usr/local
+# 定义交互时登录路径
+ENV MYPATH /opt/apache-tomcat-8.5.66
+WORKDIR $MYPATH
+# 配置jdk 和tomcat环境变量
+ENV JAVA_HOME /usr/local/jdk1.8.0_202
+ENV CATALINA_HOME /opt/apache-tomcat-8.5.66
+ENV CATALINA_BASE /opt/apache-tomcat-8.5.66
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
+# 设置暴露的端口
+EXPOSE 8080
+# 运行tomcat
+CMD /opt/apache-tomcat-8.5.66/bin/startup.sh && tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
+```
+
+2. 构建镜像
+
+```bash
+docker build -t xzh/tomcat8 .
+docker run -p 9876:8080 --name=tomcat8 -d xzh/tomcat8  # 创建容器
+docker exec -it [containerid] /bin/bash                # 进入容器
+```
+
+#### 3.1.3 turnserver
+
+1. 创建Dockerfile
+
+```bash
+vi Dockerfile
+```
+
+```bash
+# Coturn
+#
+# VERSION 4.4.2.2
+FROM  ubuntu:14.04
+MAINTAINER xzh<xzh@gmail.com>
+
+RUN apt-get update && apt-get install -y \
+  curl \
+  libevent-core-2.0-5 \
+  libevent-extra-2.0-5 \
+  libevent-openssl-2.0-5 \
+  libevent-pthreads-2.0-5 \
+  libhiredis0.10 \
+  libmysqlclient18 \
+  libpq5 \
+  telnet \
+  wget
+
+RUN wget http://turnserver.open-sys.org/downloads/v4.4.2.2/turnserver-4.4.2.2-debian-wheezy-ubuntu-mint-x86-64bits.tar.gz \
+  && tar xzf turnserver-4.4.2.2-debian-wheezy-ubuntu-mint-x86-64bits.tar.gz \
+  && dpkg -i coturn_4.4.2.2-1_amd64.deb
+
+COPY ./turnserver.sh /turnserver.sh
+
+ENV TURN_USERNAME kurento
+ENV TURN_PASSWORD kurento
+ENV REALM kurento.org
+ENV NAT true
+
+EXPOSE 3478 3478/udp
+
+ENTRYPOINT ["/turnserver.sh"]
+```
+
+2. 编写启动脚本
+
+```bash
+vim turnserver.sh
+```
+
+```bash
+#!/bin/bash
+set -e
+
+if [ $NAT = "true" -a -z "$EXTERNAL_IP" ]; then
+
+  # Try to get public IP
+  PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4) || echo "No public ip found on http://169.254.169.254/latest/meta-data/public-ipv4"
+  if [ -z "$PUBLIC_IP" ]; then
+    PUBLIC_IP=$(curl http://icanhazip.com) || exit 1
+  fi
+
+  # Try to get private IP
+  PRIVATE_IP=$(ifconfig | awk '/inet addr/{print substr($2,6)}' | grep -v 127.0.0.1) || exit 1
+  export EXTERNAL_IP="$PUBLIC_IP/$PRIVATE_IP"
+  echo "Starting turn server with external IP: $EXTERNAL_IP"
+fi
+
+echo 'min-port=49152' > /etc/turnserver.conf
+echo 'max-port=65535' >> /etc/turnserver.conf
+echo 'fingerprint' >> /etc/turnserver.conf
+echo 'lt-cred-mech' >> /etc/turnserver.conf
+echo "realm=$REALM" >> /etc/turnserver.conf
+echo 'log-file stdout' >> /etc/turnserver.conf
+echo "user=$TURN_USERNAME:$TURN_PASSWORD" >> /etc/turnserver.conf
+[ $NAT = "true" ] && echo "external-ip=$EXTERNAL_IP" >> /etc/turnserver.conf
+
+exec /usr/bin/turnserver "$@"
+```
+
+
+3. 构建镜像
+
+```bash
+chmod -R 777 /home/coturn
+sudo docker build --tag coturn .
+sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
+```
+
+#### 3.1.4 hadoop 3.x
+
+1. 构建centos7-ssh-sync
+
+```bash
+cd /opt/software/docker/centos7-ssh-sync-dockerfile
+vi Dockerfile
+```
+
+```bash
+FROM centos:7
+MAINTAINER xzh
+
+#install vim & net-tools
+RUN yum -y install vim
+RUN yum -y install net-tools
+
+#install rsync
+RUN yum -y install rsync
+
+#安装ssh
+RUN yum install -y openssh-server sudo
+RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
+RUN yum  install -y openssh-clients
+
+#配置root名
+#123456是ssh密码
+RUN echo "root:123456" | chpasswd
+RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
+#生成ssh key
+RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+
+#配置sshd服务
+RUN mkdir /var/run/sshd
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+```
+
+```bash
+docker build -f Dockerfile -t centos7-ssh-sync .
+```
+
+2. 构建centos7-hadoop
+
+```bash
+cd /opt/software/docker/centos7-hadoop3-dockerfile
+vi Dockerfile
+```
+
+```bash
+FROM centos7-ssh-sync
+MAINTAINER xzh
+
+# install jdk8
+ADD jdk-8u202-linux-x64.tar.gz /usr/local/
+ENV JAVA_HOME /usr/local/jdk1.8.0_202
+ENV PATH $PATH:$JAVA_HOME/bin
+
+# install hadoop3.1.4
+ADD hadoop-3.1.4-bin-snappy-CentOS7.tar.gz /usr/local/
+ENV HADOOP_HOME /usr/local/hadoop-3.1.4
+ENV PATH $PATH:$HADOOP_HOME/bin
+ENV PATH $PATH:$HADOOP_HOME/sbin
+
+WORKDIR /usr/local
+```
+
+```bash
+docker build -f Dockerfile -t centos7-hadoop3 .
+```
+
+3. 运行
+
+```bash
+docker run -dit --name hadoop3 -h hadoop3 -p 1022:22 \
+-p 8020:8020 -p 9870:9870 -p 9871:9871 \
+-p 9866:9866 -p 9864:9864 -p 9865:9865 \
+-p 8088:8088 \
+-p 14000:14000 --restart=always --privileged=true centos7-hadoop3
+```
+
+4. 测试
+
+```bash
+docker exec -it hadoop3 /bin/bash
+hadoop version
+java -version
+```
+
+5. 伪集群
+
+```bash
+cd /usr/local/hadoop-3.1.4/etc/hadoop
+```
+
+```bash
+vi hadoop-env.sh 
+# 编辑内容
+export JAVA_HOME=/usr/local/jdk1.8.0_202
+# 添加到末尾，设置用户以执行对应角色shell命令
+export HDFS_NAMENODE_USER=root
+export HDFS_DATANODE_USER=root
+export HDFS_SECONDARYNAMENODE_USER=root
+export YARN_RESOURCEMANAGER_USER=root
+export YARN_NODEMANAGER_USER=root 
+```
+
+```bash
+vi core-site.xml
+# 编辑内容
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://hadoop3:8020</value>
+    </property>
+    <property>
+        <name>hadoop.http.staticuser.user</name>
+        <value>root</value>
+    </property>
+</configuration>
+```
+
+```bash
+vi hdfs-site.xml
+# 编辑内容
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+</configuration>
+```
+
+```bash
+ssh-keygen
+ssh-copy-id hadoop3
+hdfs namenode -format
+start-all.sh
+jps
+```
+
+访问地址：http://ip:9870
+
+### 3.2 容器构建
+
+基于一个已存在的容器构建出镜像
+   - -a 提交的镜像作者；
+   - -c 使用Dockerfile指令来创建镜像；
+   - -m :提交时的说明文字；
+
+```bash
+docker commit  -a="xzh" -m="my haha" [containerid]  haha:v1.1
+```
+
+### 3.3 插件构建
+
+pom.xml
+
+```xml
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  <java.version>1.8</java.version>
+  <skipTests>true</skipTests>
+  <docker.baseImage>openjdk:8-jre-alpine</docker.baseImage>
+  <docker.volumes>/tmp</docker.volumes>
+  <docker.host>http://172.17.17.148:2375</docker.host>
+  <docker.image.prefix>172.17.17.148:88/ec_platform</docker.image.prefix>
+  <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
+  <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
+</properties>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <serverId>docker148-harbor88</serverId>
+              <dockerHost>${docker.host}</dockerHost>
+                <imageName>${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
+                <pushImage>true</pushImage>
+                <baseImage>${docker.baseImage}</baseImage>
+                <volumes>${docker.volumes}</volumes>
+                <env>
+                    <JAVA_OPTS>${docker.java.opts}</JAVA_OPTS>
+                </env>
+                <runs>
+                  <run>apk add --update ttf-dejavu fontconfig</run>
+                </runs>
+                <entryPoint>["sh","-c","java $JAVA_OPTS ${docker.java.security.egd} -jar /${project.build.finalName}.jar"]</entryPoint>
+                <resources>
+                    <resource>
+                        <targetPath>/</targetPath>
+                        <directory>${project.build.directory}</directory>
+                        <include>${project.build.finalName}.jar</include>
+                    </resource>
+                </resources>
+            </configuration>
+        </plugin>
+    </plugins>
+    <finalName>${project.artifactId}</finalName>
+</build>
+```
+
+## 4. 仓库
 
 官网地址：https://hub.docker.com/
 
@@ -994,32 +1397,75 @@ docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 
 #### 3.6.8 SkyWalking
 
+1. 相关组件版本
+
+| **组件** | **版本** | **端口** |
+| :---------- | :----------: | :----------: |
+| skywalking-oap-server | 8.9.1 | 11800，12800 |
+| skywalking-ui | 8.9.1 | 8080 |
+| elasticsearch | 7.17.6 | 9200 |
+| apache-skywalking-java-agent| 8.15.0 | xxx |
+
+2. 创建目录赋予权限
+
 ```bash
-docker pull elasticsearch:7.6.2
-docker pull apache/skywalking-oap-server:6.6.0-es7
-docker pull apache/skywalking-ui:6.6.0
+mkdir /data/elasticsearch/{data，logs} -p
+chmod 775 /data/elasticsearch
+```
 
-# 安装server 因为之前elk是compose安装,默认在data_default的网桥中
-docker run --name oap --restart always -d \
---network data_default \
---restart=always \
--e TZ=Asia/Shanghai \
--p 12800:12800 \
--p 11800:11800 \
---link elasticsearch:es \
--e SW_STORAGE=elasticsearch \
--e SW_STORAGE_ES_CLUSTER_NODES=es:9200 \
-apache/skywalking-oap-server:6.6.0-es7
+3. 准备docker-compose.yml文件
 
-# 安装ui
-docker run -d --name skywalking-ui \
---network data_default \
---restart=always \
--e TZ=Asia/Shanghai \
--p 8088:8080 \
---link oap:oap \
--e SW_OAP_ADDRESS=oap:12800 \
-apache/skywalking-ui:6.6.0
+```yml
+version: '3.3'
+services:
+  elasticsearch:
+    image: elasticsearch:7.17.6
+    container_name: elasticsearch
+    restart: always
+    ports:
+      - 9200:9200
+    environment:
+      - "TAKE_FILE_OWNERSHIP=true" #volumes 挂载权限 如果不想要挂载es文件改配置可以删除
+      - "discovery.type=single-node" #单机模式启动
+      - "TZ=Asia/Shanghai" # 设置时区
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # 设置jvm内存大小
+    volumes:
+      - /data/elasticsearch/logs:/usr/share/elasticsearch/logs
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  skywalking-oap-server:
+    image: apache/skywalking-oap-server:8.9.1
+    container_name: skywalking-oap-server
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    restart: always
+    ports:
+      - 11800:11800
+      - 12800:12800
+    environment:
+      SW_STORAGE: elasticsearch  # 指定ES版本
+      SW_STORAGE_ES_CLUSTER_NODES: elasticsearch:9200
+      TZ: Asia/Shanghai
+    #volumes:
+     #- ./oap/conf/alarm-settings.yml:/skywalking/config/alarm-settings.yml
+  skywalking-ui:
+    image: apache/skywalking-ui:8.9.1
+    container_name: skywalking-ui
+    depends_on:
+      - skywalking-oap-server
+    links:
+      - skywalking-oap-server
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      SW_OAP_ADDRESS: http://skywalking-oap-server:12800
+      TZ: Asia/Shanghai
 ```
 
 Agent下载地址：https://archive.apache.org/dist/skywalking/6.6.0/apache-skywalking-apm-6.6.0.tar.gz
@@ -1236,7 +1682,7 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-7. 其他版本
+7. 其他版本8.6.2v
 
 ```bash
 docker run -p 9201:9200 -p 9303:9300 --name elasticsearch8 \
@@ -1769,405 +2215,3 @@ docker run -it -d -p 3000:3000 -v "/data/theia-java:/home/project:cached" theiai
 docker run -it -d --init -p 3000:3000 -v "/data/theia-full:/home/project:cached" theiaide/theia-full
 ```
 
-## 4. 构建
-
-### 4.1 Dockerfile
-
-```bash
-FROM        # 设置基础镜像
-MAINTAINER  # 设置维护者信息
-ADD         # 设置需要添加容器中的文件（自动解压）
-COPY        # 设置复制到容器中的文件（不会解压）
-USER        # 设置运行RUN指令的用户
-ENV         # 设置环境变量可在RUN  指令中使用
-RUN         # 设置镜像制作过程中需要运行的指令
-ENTRYPOINT  # 设置容器启动时运行的命令(无法覆盖)
-CMD         # 设置容器启动时运行的命令(可以覆盖)
-WORKDIR     # 设置进入容器的工作目录
-EXPOSE      # 设置可被暴露的端口号（端口映射）
-VOLUME      # 设置可被挂载的数据卷（目录映射）
-ONBUILD     # 设置在构建时需要自动执行的命令
-```
-
-> Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
-
-#### 4.1.1 jar
-
-1. 创建Dockerfile
-
-```bash
-vi Dockerfile
-```
-
-```bash
-FROM openjdk:8-jdk-alpine
-ARG JAR_FILE
-# 复制文件到容器 ，COPY . /public  # 当前路径所有复制到容器内
-COPY ${JAR_FILE} app.jar
-# 声明需要暴露的端口
-EXPOSE 9001
-# 配置容器启动后执行的命令
-ENTRYPOINT ["java","-jar","/app.jar"]
-```
-
-2. 构建镜像
-
-```bash
-docker build --build-arg JAR_FILE=test-sso.jar -t test-sso:1.0 . # -f :指定要使用的Dockerfile路径；
-docker images       # 查看镜像是否创建成功
-docker run -p 9876:9001 --name=test-sso -d test-sso:1.0 # 创建容器
-docker exec -it [containerid] /bin/ash                  # 进入容器
-cat /etc/issue  # 查看操作系统
-uname -a        # 查看内核
-```
-
-#### 4.1.2 tomcat
-
-1. 创建Dockerfile
-
-```bash
-vi Dockerfile
-```
-
-```bash
-FROM centos:7
-MAINTAINER xzh xzh@163.com
-# 拷贝tomcat jdk 到镜像并解压
-ADD apache-tomcat-8.5.66.tar.gz /opt
-ADD jdk-8u202-linux-x64.tar.gz /usr/local
-# 定义交互时登录路径
-ENV MYPATH /opt/apache-tomcat-8.5.66
-WORKDIR $MYPATH
-# 配置jdk 和tomcat环境变量
-ENV JAVA_HOME /usr/local/jdk1.8.0_202
-ENV CATALINA_HOME /opt/apache-tomcat-8.5.66
-ENV CATALINA_BASE /opt/apache-tomcat-8.5.66
-ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
-# 设置暴露的端口
-EXPOSE 8080
-# 运行tomcat
-CMD /opt/apache-tomcat-8.5.66/bin/startup.sh && tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
-```
-
-2. 构建镜像
-
-```bash
-docker build -t xzh/tomcat8 .
-docker run -p 9876:8080 --name=tomcat8 -d xzh/tomcat8  # 创建容器
-docker exec -it [containerid] /bin/bash                # 进入容器
-```
-
-#### 4.1.3 turnserver
-
-1. 创建Dockerfile
-
-```bash
-vi Dockerfile
-```
-
-```bash
-# Coturn
-#
-# VERSION 4.4.2.2
-FROM  ubuntu:14.04
-MAINTAINER xzh<xzh@gmail.com>
-
-RUN apt-get update && apt-get install -y \
-  curl \
-  libevent-core-2.0-5 \
-  libevent-extra-2.0-5 \
-  libevent-openssl-2.0-5 \
-  libevent-pthreads-2.0-5 \
-  libhiredis0.10 \
-  libmysqlclient18 \
-  libpq5 \
-  telnet \
-  wget
-
-RUN wget http://turnserver.open-sys.org/downloads/v4.4.2.2/turnserver-4.4.2.2-debian-wheezy-ubuntu-mint-x86-64bits.tar.gz \
-  && tar xzf turnserver-4.4.2.2-debian-wheezy-ubuntu-mint-x86-64bits.tar.gz \
-  && dpkg -i coturn_4.4.2.2-1_amd64.deb
-
-COPY ./turnserver.sh /turnserver.sh
-
-ENV TURN_USERNAME kurento
-ENV TURN_PASSWORD kurento
-ENV REALM kurento.org
-ENV NAT true
-
-EXPOSE 3478 3478/udp
-
-ENTRYPOINT ["/turnserver.sh"]
-```
-
-2. 编写启动脚本
-
-```bash
-vim turnserver.sh
-```
-
-```bash
-#!/bin/bash
-set -e
-
-if [ $NAT = "true" -a -z "$EXTERNAL_IP" ]; then
-
-  # Try to get public IP
-  PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4) || echo "No public ip found on http://169.254.169.254/latest/meta-data/public-ipv4"
-  if [ -z "$PUBLIC_IP" ]; then
-    PUBLIC_IP=$(curl http://icanhazip.com) || exit 1
-  fi
-
-  # Try to get private IP
-  PRIVATE_IP=$(ifconfig | awk '/inet addr/{print substr($2,6)}' | grep -v 127.0.0.1) || exit 1
-  export EXTERNAL_IP="$PUBLIC_IP/$PRIVATE_IP"
-  echo "Starting turn server with external IP: $EXTERNAL_IP"
-fi
-
-echo 'min-port=49152' > /etc/turnserver.conf
-echo 'max-port=65535' >> /etc/turnserver.conf
-echo 'fingerprint' >> /etc/turnserver.conf
-echo 'lt-cred-mech' >> /etc/turnserver.conf
-echo "realm=$REALM" >> /etc/turnserver.conf
-echo 'log-file stdout' >> /etc/turnserver.conf
-echo "user=$TURN_USERNAME:$TURN_PASSWORD" >> /etc/turnserver.conf
-[ $NAT = "true" ] && echo "external-ip=$EXTERNAL_IP" >> /etc/turnserver.conf
-
-exec /usr/bin/turnserver "$@"
-```
-
-
-3. 构建镜像
-
-```bash
-chmod -R 777 /home/coturn
-sudo docker build --tag coturn .
-sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
-```
-
-#### 4.1.4 hadoop 3.x
-
-1. 构建centos7-ssh-sync
-
-```bash
-cd /opt/software/docker/centos7-ssh-sync-dockerfile
-vi Dockerfile
-```
-
-```bash
-FROM centos:7
-MAINTAINER xzh
-
-#install vim & net-tools
-RUN yum -y install vim
-RUN yum -y install net-tools
-
-#install rsync
-RUN yum -y install rsync
-
-#安装ssh
-RUN yum install -y openssh-server sudo
-RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
-RUN yum  install -y openssh-clients
-
-#配置root名
-#123456是ssh密码
-RUN echo "root:123456" | chpasswd
-RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
-#生成ssh key
-RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
-RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
-
-#配置sshd服务
-RUN mkdir /var/run/sshd
-EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
-```
-
-```bash
-docker build -f Dockerfile -t centos7-ssh-sync .
-```
-
-2. 构建centos7-hadoop
-
-```bash
-cd /opt/software/docker/centos7-hadoop3-dockerfile
-vi Dockerfile
-```
-
-```bash
-FROM centos7-ssh-sync
-MAINTAINER xzh
-
-# install jdk8
-ADD jdk-8u202-linux-x64.tar.gz /usr/local/
-ENV JAVA_HOME /usr/local/jdk1.8.0_202
-ENV PATH $PATH:$JAVA_HOME/bin
-
-# install hadoop3.1.4
-ADD hadoop-3.1.4-bin-snappy-CentOS7.tar.gz /usr/local/
-ENV HADOOP_HOME /usr/local/hadoop-3.1.4
-ENV PATH $PATH:$HADOOP_HOME/bin
-ENV PATH $PATH:$HADOOP_HOME/sbin
-
-WORKDIR /usr/local
-```
-
-```bash
-docker build -f Dockerfile -t centos7-hadoop3 .
-```
-
-3. 运行
-
-```bash
-docker run -dit --name hadoop3 -h hadoop3 -p 1022:22 \
--p 8020:8020 -p 9870:9870 -p 9871:9871 \
--p 9866:9866 -p 9864:9864 -p 9865:9865 \
--p 8088:8088 \
--p 14000:14000 --restart=always --privileged=true centos7-hadoop3
-```
-
-4. 测试
-
-```bash
-docker exec -it hadoop3 /bin/bash
-hadoop version
-java -version
-```
-
-5. 伪集群
-
-```bash
-cd /usr/local/hadoop-3.1.4/etc/hadoop
-```
-
-```bash
-vi hadoop-env.sh 
-# 编辑内容
-export JAVA_HOME=/usr/local/jdk1.8.0_202
-# 添加到末尾，设置用户以执行对应角色shell命令
-export HDFS_NAMENODE_USER=root
-export HDFS_DATANODE_USER=root
-export HDFS_SECONDARYNAMENODE_USER=root
-export YARN_RESOURCEMANAGER_USER=root
-export YARN_NODEMANAGER_USER=root 
-```
-
-```bash
-vi core-site.xml
-# 编辑内容
-<configuration>
-    <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://hadoop3:8020</value>
-    </property>
-    <property>
-        <name>hadoop.http.staticuser.user</name>
-        <value>root</value>
-    </property>
-</configuration>
-```
-
-```bash
-vi hdfs-site.xml
-# 编辑内容
-<configuration>
-    <property>
-        <name>dfs.replication</name>
-        <value>1</value>
-    </property>
-</configuration>
-```
-
-```bash
-ssh-keygen
-ssh-copy-id hadoop3
-hdfs namenode -format
-start-all.sh
-jps
-```
-
-访问地址：http://ip:9870
-
-### 4.2 容器构建
-
-基于一个已存在的容器构建出镜像
-   - -a 提交的镜像作者；
-   - -c 使用Dockerfile指令来创建镜像；
-   - -m :提交时的说明文字；
-
-```bash
-docker commit  -a="xzh" -m="my haha" [containerid]  haha:v1.1
-```
-
-### 4.3 插件构建
-
-pom.xml
-
-```xml
-<properties>
-  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  <java.version>1.8</java.version>
-  <skipTests>true</skipTests>
-  <docker.baseImage>openjdk:8-jre-alpine</docker.baseImage>
-  <docker.volumes>/tmp</docker.volumes>
-  <docker.host>http://172.17.17.148:2375</docker.host>
-  <docker.image.prefix>172.17.17.148:88/ec_platform</docker.image.prefix>
-  <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
-  <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
-</properties>
-
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>repackage</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-        <plugin>
-            <groupId>com.spotify</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>build-image</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>build</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <serverId>docker148-harbor88</serverId>
-              <dockerHost>${docker.host}</dockerHost>
-                <imageName>${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
-                <pushImage>true</pushImage>
-                <baseImage>${docker.baseImage}</baseImage>
-                <volumes>${docker.volumes}</volumes>
-                <env>
-                    <JAVA_OPTS>${docker.java.opts}</JAVA_OPTS>
-                </env>
-                <runs>
-                  <run>apk add --update ttf-dejavu fontconfig</run>
-                </runs>
-                <entryPoint>["sh","-c","java $JAVA_OPTS ${docker.java.security.egd} -jar /${project.build.finalName}.jar"]</entryPoint>
-                <resources>
-                    <resource>
-                        <targetPath>/</targetPath>
-                        <directory>${project.build.directory}</directory>
-                        <include>${project.build.finalName}.jar</include>
-                    </resource>
-                </resources>
-            </configuration>
-        </plugin>
-    </plugins>
-    <finalName>${project.artifactId}</finalName>
-</build>
-```
