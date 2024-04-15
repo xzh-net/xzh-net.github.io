@@ -1410,7 +1410,7 @@ docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 
 ```bash
 mkdir /data/elasticsearch/{data,logs} -p
-chmod 775 /data/elasticsearchcd
+chmod 775 /data/elasticsearch/
 ```
 
 3. 准备docker-compose.yml文件
