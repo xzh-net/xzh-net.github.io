@@ -5,23 +5,25 @@ DataX 是阿里巴巴开源的一个异构数据源离线同步工具，致力�
 - 源码地址：https://github.com/alibaba/DataX
 - 下载地址：http://datax-opensource.oss-cn-hangzhou.aliyuncs.com/datax.tar.gz
 
-## 1. 上传解压
+## 1. 安装
+
+### 1.1 上传解压
 
 ```bash
 cd /opt/software
 tar -zxvf datax.tar.gz -C /opt/
 ```
 
-## 2. 运行
+启动服务
 
 ```bash
 cd /opt/datax
 bin/datax.py job/job.json
 ```
 
-## 3. 基本使用
+## 2. 基本使用
 
-### 3.1 从stream读取数据并打印到控制台
+### 2.1 从stream读取数据并打印到控制台
 
 ```bash
 python /opt/datax/bin/datax.py -r streamreader -w streamwriter  # 模板
@@ -78,7 +80,7 @@ vi stream2stream.json
 /opt/datax/bin/datax.py /opt/datax/job/stream2stream.json
 ```
 
-### 3.2 HDFS导入数据到Mysql
+### 2.2 HDFS导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r hdfsreader -w mysqlwriter  # 模板
@@ -139,7 +141,7 @@ vi hdfs2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/hdfs2mysql.json
 ```
 
-### 3.3 Mysql导入数据到HDFS
+### 2.3 Mysql导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r mysqlreader -w hdfswriter  # 模板
@@ -210,7 +212,7 @@ vi mysql2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/mysql2hdfs.json
 ```
 
-### 3.4 Mysql导入数据到Hbase
+### 2.4 Mysql导入数据到Hbase
 
 ```bash
 python /opt/datax/bin/datax.py -r mysqlreader -w hbase11xwriter  # 模板
@@ -285,7 +287,7 @@ vi mysql2hbase.json
 /opt/datax/bin/datax.py /opt/datax/job/mysql2hbase.json
 ```
 
-### 3.5 Oracle导入数据到HDFS
+### 2.5 Oracle导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r oraclereader -w hdfswriter  # 模板
@@ -356,7 +358,7 @@ vi oracle2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/oracle2hdfs.json
 ```
 
-### 3.6 Oracle导入数据到Mysql
+### 2.6 Oracle导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r oraclereader -w mysqlwriter  # 模板
@@ -446,7 +448,7 @@ CREATE TABLE `pms_product_bak` (
 /opt/datax/bin/datax.py /opt/datax/job/oracle2mysql.json
 ```
 
-### 3.7 MongoDB导入数据到HDFS
+### 2.7 MongoDB导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r mongodbreader -w hdfswriter   # 模板
@@ -517,7 +519,7 @@ vi mongdb2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/mongdb2hdfs.json
 ```
 
-### 3.8 MongoDB导入数据到Mysql
+### 2.8 MongoDB导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r mongodbreader -w mysqlwriter  # 模板
@@ -585,7 +587,7 @@ vi mongodb2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/mongodb2mysql.json
 ```
 
-### 3.9 SQLServer导入数据到HDFS
+### 2.9 SQLServer导入数据到HDFS
 
 
 ```bash
@@ -680,7 +682,7 @@ CREATE TABLE `pms_product_bak` (
 /opt/datax/bin/datax.py /opt/datax/job/sqlserver2hdfs.json
 ```
 
-### 3.10 SQLServer导入到Mysql
+### 2.10 SQLServer导入到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r sqlserverreader -w mysqlwriter  # 模板
@@ -748,7 +750,7 @@ vi sqlserver2mysql.json
 /opt/datax/bin/datax.py /opt/datax/job/sqlserver2mysql.json
 ```
 
-### 3.11 PostgreSQL导入数据到HDFS
+### 2.11 PostgreSQL导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r postgresqlreader -w hdfswriter  # 模板
@@ -831,7 +833,7 @@ create table pms_product (
 /opt/datax/bin/datax.py /opt/datax/job/postgresql2hdfs.json
 ```
 
-### 3.12 PostgreSQL导入数据到PostgreSQL
+### 2.12 PostgreSQL导入数据到PostgreSQL
 
 ```bash
 python /opt/datax/bin/datax.py -r postgresqlreader -w postgresqlwriter  # 模板
@@ -893,7 +895,7 @@ vi postgresql2postgresql.json
 /opt/datax/bin/datax.py /opt/datax/job/postgresql2mysql.json
 ```
 
-### 3.13 Hbase导入数据到HDFS
+### 2.13 Hbase导入数据到HDFS
 
 ```bash
 python /opt/datax/bin/datax.py -r hbase11xreader -w hdfswriter  # 模板
@@ -965,7 +967,7 @@ vi hbase2hdfs.json
 /opt/datax/bin/datax.py /opt/datax/job/hbase2hdfs.json
 ```
 
-### 3.4 Hbase导入数据到Mysql
+### 2.14 Hbase导入数据到Mysql
 
 ```bash
 python /opt/datax/bin/datax.py -r hbase11xreader -w mysqlwriter  # 模板
