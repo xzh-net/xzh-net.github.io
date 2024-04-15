@@ -4,7 +4,7 @@ Apache Hbase是一个开源的、分布式的、带版本的、非关系型数�
 
 ## 1. 安装
 
-### 1.1 上传安装包
+### 1.1 上传解压
 
 ```bash
 mkdir -p /opt/software
@@ -73,7 +73,7 @@ node02.xuzhihao.net
 node03.xuzhihao.net
 ```
 
-### 1.3 设置Hbase环境变量
+### 1.3 设置环境变量
 
 ```bash
 vim /etc/profile
