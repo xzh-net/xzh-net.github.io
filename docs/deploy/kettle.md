@@ -1,18 +1,14 @@
 # pdi-ce-7.1.0.0-12
 
 Kettle是一款开源的ETL工具，纯java编写，可以在Window、Linux、Unix上运行，绿色无需安装，数据抽取高效稳定
-1. 勺子(Spoon.bat/spoon.sh) :是-个图形化的界面，可以让我们用图形化的方式开发转换和作业。windows选择.bat; Linux选择.sh。
-2. 煎锅(Pan.bat/pan.sh) : 利用Pan可以用命令行的形式调用Trans。
-3. 厨房(Kitchen batkitchen.sh) : 利用Kitchen可以使用命令行调用job
-4. 菜单(Carte.bat/ Carte.sh): Carte是一 个轻量级的Web容器，用于建立专用、远程的ETL Server。
+ - 勺子(Spoon.bat/spoon.sh) :是1个图形化的界面，可以让我们用图形化的方式开发转换和作业。windows选择.bat; Linux选择.sh。
+ - 煎锅(Pan.bat/pan.sh) : 利用Pan可以用命令行的形式调用Trans。
+ - 厨房(Kitchen batkitchen.sh) : 利用Kitchen可以使用命令行调用job
+ - 菜单(Carte.bat/ Carte.sh): Carte是一 个轻量级的Web容器，用于建立专用、远程的ETL Server。
 
-- jdk1.8：https://www.oracle.com/java/technologies/downloads
-- kettle：https://sourceforge.net/projects/pentaho/files/Data%20Integration
-- mysql驱动：https://dev.mysql.com/downloads/connector/j
+下载地址： https://sourceforge.net/projects/pentaho/files/Data%20Integration
 
-将mysql驱动和oracle驱动放在kettle包下面的lib包下面即可
-
-## 1. 快速体验
+## 1. 安装
 
 ### 1.1 DB连接
 
