@@ -4,30 +4,24 @@
 
 ## 1. 安装
 
-### 1.1 下载
-
-```bash
-cd /opt/software
-wget https://openresty.org/download/openresty-1.25.3.1.tar.gz
-```
-
-### 1.2 安装依赖
+### 1.1 安装依赖
 
 ```bash
 yum install -y pcre-devel openssl-devel gcc curl zlib-devel readline-devel
 ```
 
-### 1.3 解压编译
+### 1.2 下载编译
 
 ```bash
 cd /opt/software
+wget https://openresty.org/download/openresty-1.25.3.1.tar.gz
 tar -zxf openresty-1.25.3.1.tar.gz
 cd openresty-1.25.3.1
 ./configure
 make && make install
 ```
 
-### 1.4 设置环境变量
+### 1.3 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -35,9 +29,9 @@ export PATH=$PATH:/usr/local/openresty/nginx/sbin
 source /etc/profile
 ```
 
-### 1.5 入门案例
+### 1.4 入门案例
 
-#### 1.5.1 hello World
+#### 1.4.1 hello World
 
 ```bash
 cd /usr/local/openresty/nginx/conf
@@ -67,7 +61,7 @@ ngx.say("hello World");
 ```
 
 
-#### 1.5.2 获取http请求信息
+#### 1.4.2 获取http请求信息
 
 ```lua
 -- 获取get请求参数
@@ -104,7 +98,7 @@ curl -H "Content-Type: application/json" -X POST -d '{"id": "001", "name":"张�
 ```
 
 
-#### 1.5.3 操作redis
+#### 1.4.3 操作redis
 
 将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
 
