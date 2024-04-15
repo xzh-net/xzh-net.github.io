@@ -1409,7 +1409,7 @@ docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 2. 创建目录赋予权限
 
 ```bash
-mkdir /tmp/elasticsearch/{data,logs} -p
+mkdir /data/elasticsearch/{data,logs} -p
 chmod 775 /data/elasticsearchcd
 ```
 
