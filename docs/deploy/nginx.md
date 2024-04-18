@@ -476,7 +476,7 @@ http {
     proxy_headers_hash_max_size 51200;      # 存放http报文头的哈希表容量上限，默认为512个字符。
     proxy_headers_hash_bucket_size 6400;    # nginx服务器申请存放http报文头的哈希表容量大小。默认为64个字符。
     # 代理区处理-超时时间
-    proxy_connect_timeout 60s;              # 与后端/上游服务器建立连接的超时时间，默认为60s，此时间不超过75s
+    proxy_connect_timeout 60s;              # 与后端/上游服务器建立连接的超时时间，默认为60s
     proxy_read_timeout 60s;                 # 设置从后端/上游服务器读取响应的超时时间，默认为60s
     proxy_send_timeout 60s;                 # 设置往后端/上游服务器发送请求的超时时间，默认为60s
     # 采用gzip压缩的形式发送数据，减少发送数据量，但会增加请求处理时间及CPU处理时间
