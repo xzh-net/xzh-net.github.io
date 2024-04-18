@@ -2,7 +2,7 @@
 
 - 官方网址：https://www.redhat.com
 
-## 1. VMware
+## 1. 安装VMware
 
 ![](../../assets/_images/deploy/rhel7/Vm1.png)
 ![](../../assets/_images/deploy/rhel7/Vm2.png)
