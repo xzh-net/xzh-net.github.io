@@ -12,18 +12,16 @@
 ![](../../assets/_images/deploy/rhel7/Vm6.png)
 ![](../../assets/_images/deploy/rhel7/Vm7.png)
 
-1. 配置首选项
+1. 编辑-首选项
 
 ![](../../assets/_images/deploy/rhel7/Vm8.png)
 
 
-2. 桥接模式
-
-必须手动选择宿主机对应的网卡
+2. 虚拟网络编辑器-桥接模式
 
 ![](../../assets/_images/deploy/rhel7/Vm9.png)
 
-Windows10 连接虚拟机修改网络设置，确认宿主机VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选，防火墙关闭。宿主机与虚拟机相同级别，都可连接外网
+> 虚拟机和Windows10宿主机互相无法ping的时候，确认宿主机VMware Bridge Protocol被勾选，DNE LightWeight Filter未被勾选，防火墙关闭。
 
 ![](../../assets/_images/deploy/rhel7/Vm10.png)
 
