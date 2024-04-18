@@ -453,7 +453,7 @@ http {
     tcp_nopush on;                          # 提升网络传输效率，在一个数据包里发送所有头文件
     tcp_nodelay on;                         # 禁用Nagle算法，取消合并，即数据包立即发送出去
     server_names_hash_bucket_size 128;      # 服务器名字的哈希表大小
-    keepalive_timeout 60s;                  # 长连接超时时间,设置为0，则表示禁用长连接
+    keepalive_timeout 60s;                  # 长连接超时时间，设置为0，则表示禁用长连接
     send_timeout 30s;                       # 设置发送响应到客户端的超时时间，默认为60s
     # 请求头处理
     client_header_buffer_size 32k;          # 请求头缓冲区大小
@@ -462,16 +462,16 @@ http {
     # 请求体处理
     client_max_body_size 10m;               # 请求主体最大限制，上传文件大小，默认值为1m（1024kb）
     client_body_buffer_size 10m;            # 请求主体缓冲区大小，如果主体大于缓冲区并且小于主体最大限制，则将文件存储到临时文件中（client_body_temp）
-    client_body_timeout 60s;                # 设置读取客户端主体内容体超时时间，默认为60s,响应408
+    client_body_timeout 60s;                # 设置读取客户端主体内容体超时时间，默认为60s，响应408
     client_body_temp_path /data/temp/;      # 请求主体临时保存路径
-    client_body_in_file_only off;           # 将请求体存储在临时文件中，默认关闭。clean：请求后删除,on：请求后不删除
+    client_body_in_file_only off;           # 将请求体存储在临时文件中，默认关闭。clean：请求后删除，on：请求后不删除
     client_body_in_single_buffer off;       # 默认关闭，开启优化读取$request_body变量时涉及的I/O操作
     # 代理区处理-响应缓冲区
     proxy_buffering on;                     # 开启响应缓冲区
     proxy_buffers 8 8k;                     # 代理缓冲区空间，每个worker进程可以使用8个大小为8k的缓冲区
     proxy_buffer_size 8k;                   # 单个代理缓冲区空间
     proxy_busy_buffers_size 8k;             # 设置标注“client-ready”缓冲区的最大尺寸
-    proxy_max_temp_file_size 1024k;         # 当proxy_buffers放不下后端服务器的响应内容时,写入临时文件
+    proxy_max_temp_file_size 1024k;         # 当proxy_buffers放不下后端服务器的响应内容时，写入临时文件
     proxy_temp_file_write_size 64k;         # 当缓存被代理的服务器响应到临时文件时文件写入速度
     proxy_headers_hash_max_size 51200;      # 存放http报文头的哈希表容量上限，默认为512个字符。
     proxy_headers_hash_bucket_size 6400;    # nginx服务器申请存放http报文头的哈希表容量大小。默认为64个字符。
