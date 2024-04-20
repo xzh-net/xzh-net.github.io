@@ -1843,9 +1843,7 @@ tar xf harbor-offline-installer-v2.0.1.tgz -C /opt/
 
 ```bash
 cd /opt/harbor
-# 复制配置文件
 cp harbor.yml.tmpl harbor.yml
-# 编辑
 vi harbor.yml
 ```
 
