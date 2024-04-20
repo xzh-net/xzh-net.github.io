@@ -760,8 +760,8 @@ docker commit  -a="xzh" -m="my haha" [containerid]  haha:v1.1
   <skipTests>true</skipTests>
   <docker.baseImage>openjdk:8-jre-alpine</docker.baseImage>
   <docker.volumes>/tmp</docker.volumes>
-  <docker.host>http://172.17.17.148:2375</docker.host>
-  <docker.image.prefix>xuzhihao/ec_platform</docker.image.prefix>
+  <docker.host>http://192.168.2.100:2375</docker.host>
+  <docker.image.prefix>192.168.2.100:88/ec_platform</docker.image.prefix>
   <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
   <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
 </properties>
