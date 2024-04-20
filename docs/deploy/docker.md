@@ -79,22 +79,34 @@ yum localinstall *.rpm
 - Docker官方中国区：https://registry.docker-cn.com
 - 中国科学技术大学：https://docker.mirrors.ustc.edu.cn
 
+1. 设置下载镜像仓库，提交镜像仓库，镜像保存路径
+
 ```bash
 vi /etc/docker/daemon.json
 
 {
     "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
-    "insecure-registries": ["192.168.3.200:5000"],
+    "insecure-registries": ["192.168.2.100:88"],
     "exec-opts":["native.cgroupdriver=systemd"],
     "data-root": "/data/docker"
 }
 ```
 
+2. 开启Remote API
+
 ```bash
-mv /var/lib/docker /data    # 非初始化环境迁移镜像
+vim /usr/lib/systemd/system/docker.service
+# 添加配置文件内容，-H之前是默认参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+ExecStart=/usr/bin/dockerd  -H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock
 ```
 
-重启服务
+3. 非初始化安装后迁移镜像（可选）
+
+```bash
+mv /var/lib/docker /data
+```
+
+4. 重启服务
 
 ```bash
 sudo systemctl daemon-reload 
@@ -738,7 +750,7 @@ docker commit  -a="xzh" -m="my haha" [containerid]  haha:v1.1
 
 ### 3.3 插件构建
 
-pom.xml
+基于 `docker-maven-plugin` 构建
 
 ```xml
 <properties>
@@ -749,7 +761,7 @@ pom.xml
   <docker.baseImage>openjdk:8-jre-alpine</docker.baseImage>
   <docker.volumes>/tmp</docker.volumes>
   <docker.host>http://172.17.17.148:2375</docker.host>
-  <docker.image.prefix>172.17.17.148:88/ec_platform</docker.image.prefix>
+  <docker.image.prefix>xuzhihao/ec_platform</docker.image.prefix>
   <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
   <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
 </properties>
@@ -780,7 +792,7 @@ pom.xml
               </execution>
             </executions>
             <configuration>
-              <serverId>docker148-harbor88</serverId>
+              <serverId>harbor88</serverId>
               <dockerHost>${docker.host}</dockerHost>
                 <imageName>${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
                 <pushImage>true</pushImage>
@@ -823,15 +835,6 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     portainer/portainer-ce:2.11.0
 ```
 
-```bash
-vim /usr/lib/systemd/system/docker.service
-# 添加配置文件内容，xxx是代表原有的参数，追加 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
-ExecStart= xxx -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
-
-systemctl daemon-reload   # 加载docker守护线程
-systemctl restart docker  # 重启docker
-```
-
 #### 4.1.2 Nginx
 
 ```bash
@@ -842,12 +845,12 @@ docker run -p 80:80 --name nginx \
 ```
 
 ```bash
-docker container cp nginx:/etc/nginx /data/nginx/ # 将容器内的配置文件拷贝到指定目录
-mv /data/nginx/nginx /data/nginx/conf           # 修改文件
+docker container cp nginx:/etc/nginx /data/nginx/   # 将容器内的配置文件拷贝到指定目录
+mv /data/nginx/nginx /data/nginx/conf               # 修改文件
 docker rm -f nginx
 ```
 
-启动Nginx服务：
+启动服务
 
 ```bash
 docker run -p 80:80 -p 443:443 --name nginx \
@@ -1827,12 +1830,18 @@ docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sona
 
 #### 4.9.3 Harbor
 
-> wget https://github.com/goharbor/harbor/releases/download/v2.0.1/harbor-offline-installer-v2.0.1.tgz
+1. 上传解压
 
 ```shell
-tar xf harbor-offline-installer-v2.0.1.tgz
-mkdir /opt/harbor
-mv harbor/* /opt/harbor
+mkdir /opt/softwarte
+wget https://github.com/goharbor/harbor/releases/download/v2.0.1/harbor-offline-installer-v2.0.1.tgz
+tar xf harbor-offline-installer-v2.0.1.tgz -C /opt/
+```
+
+
+2. 修改配置
+
+```bash
 cd /opt/harbor
 # 复制配置文件
 cp harbor.yml.tmpl harbor.yml
@@ -1864,13 +1873,13 @@ data_volume: /data
 ···
 ```
 
-安装
+3. 安装
 
-```shell
+```bash
 ./install.sh 
-docker-compose up -d #启动
-docker-compose stop #停止
-docker-compose restart #重新启动
+docker-compose up -d    # 启动
+docker-compose stop     # 停止
+docker-compose restart  # 重新启动
 ```
 
 默认账户密码：admin/Harbor12345
