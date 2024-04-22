@@ -83,7 +83,6 @@ yum localinstall *.rpm
 
 ```bash
 vi /etc/docker/daemon.json
-
 {
     "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
     "insecure-registries": ["192.168.2.100:88"],
