@@ -483,7 +483,7 @@ vi Dockerfile
 FROM centos:7
 MAINTAINER xzh xzh@163.com
 # 拷贝tomcat jdk 到镜像并解压
-ADD apache-tomcat-8.5.66.tar.gz /opt
+ADD apache-tomcat-8.5.61.tar.gz /opt
 ADD jdk-8u202-linux-x64.tar.gz /usr/local
 # 定义交互时登录路径
 ENV MYPATH /opt/apache-tomcat-8.5.61
