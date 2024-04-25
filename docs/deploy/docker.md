@@ -334,7 +334,7 @@ rm -rf /var/lib/docker
 
 ## 2. 命令
 
-### 2.1 基本信息
+### 2.1 基本
 
 ```bash
 docker version              # 查看docker版本
@@ -345,28 +345,35 @@ docker system df            # 查看占用的磁盘空间
 docker info | grep "Docker Root Dir"  # 查看镜像位置
 ```
 
-### 2.2 网络存储
+### 2.2 网络
 
 ```bash
-docker network ls                                     # 查看网络
-docker network create -d bridge my-bridge             # 创建一个连接方式是bridge网桥
-docker inspect my-bridge                              # 查看my-bridge网络里面的容器
-docker network connect my-bridage [containerid]       # 手动将某个容器加入网桥
-docker run --name mynginx2 --network my-bridge -p 8080:80 -d nginx:latest # 创建容器时添加到指定网桥中
+docker network ls                                       # 查看网络
+docker network create -d bridge my-bridge               # 创建一个连接方式是bridge网桥
+docker inspect my-bridge                                # 查看my-bridge网络里面的容器
+docker network connect my-bridage [containerid]         # 手动将某个容器加入网桥
+docker run --name mynginx2 --network my-bridge -p 8080:80 -d nginx:latest   # 创建容器时添加到指定网桥中
+```
+
+### 2.3 存储
+
+```bash
+docker volume ls
 docker volume create pgdata       # 创建卷
 docker volume inspect pgdata      # 查看卷位置
+docker volume rm $(docker volume ls -qf dangling=true)          # 删除所有dangling数据卷(即无用的volume)
 docker run -it -v /[local_path]|pgdata:/[container_path] [imageid] /bin/bash   # 挂载宿主机的一个目录/卷
 ```
 
-### 2.3 镜像
+### 2.4 镜像
 
 ```bash
 docker images                   # 查看镜像
 docker history                  # 查看构建历史
-docker rmi [imageid]                                                        # 删除镜像
-docker rmi -f $(docker images -qa)                                          # 强制删除所有镜像
+docker rmi [imageid]                                                        # 删除指定镜像
 docker rmi $(docker images | grep "none" | awk '{print $3}')                # 删除none的镜像
 docker images | grep -v CONTAINER | awk '{print $3}' | xargs docker rmi     # 删除所有镜像
+docker rmi -f $(docker images -qa)                                          # 强制删除所有镜像
 docker save -o logstash_7.6.2.tar logstash:7.6.2                # 镜像备份
 docker load -i logstash_7.6.2.tar                               # 镜像导入
 docker tag  serv:1.0 192.168.3.200/xzh/serv:1.1                 # 镜像标记
@@ -376,10 +383,9 @@ docker stats [containerid]                              # 监控指定容器
 docker stats $(docker ps -a -q)                         # 监控所有容器
 docker stats --no-stream=true $(docker ps -a -q)        # 监控所有容器
 docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest influxdb:1.8
-
 ```
 
-### 2.4 容器
+### 2.5 容器
 
 ```bash
 docker ps -a|-q|-l  
@@ -390,24 +396,20 @@ docker kill [containerid]
 docker stop [containerid]
 docker exec -it [containerid] /bin/bash
 
-docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]  # 查看容器ip地址
-docker inspect nodered | grep Mounts -A 20                                # 查看容器映射目录
-docker rm [containerid]                                                   # 删除指定容器
-docker rm `docker ps -a -q`                                               # 删除所有容器
-docker rm $(docker ps -a | awk '/[imageid]/ {print $1}')        # 删除相同imageid的容器
-docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm    # 删除所有关闭的容器
-docker volume rm $(docker volume ls -qf dangling=true)          # 删除所有dangling数据卷(即无用的volume)
-docker update --restart=always [container_id]                   # 修改指定容器自动启动
-docker update --restart=always $(docker ps -q -a)               # 更新所有容器启动时自动启动
-docker run --net=host                                           # host模式执行容器，容器端口全部映射给主机
-docker run -p 80:80 --name nginx -e TZ="Asia/Shanghai" -d nginx:1.17.0      # 指定容器时区
-
+docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]    # 查看容器ip地址
+docker inspect nodered | grep Mounts -A 20                                  # 查看容器映射目录
+docker update --restart=always [container_id]                               # 修改指定容器自动启动
+docker update --restart=always $(docker ps -q -a)                           # 更新所有容器启动时自动启动
+# 删除
+docker rm [containerid]                                                     # 删除指定容器
+docker rm $(docker ps -a | awk '/[imageid]/ {print $1}')                    # 删除相同imageid的容器
+docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm                # 删除所有关闭的容器
+docker rm -f `docker ps -a -q`                                              # 强制删除所有容器
 # 日志
 docker logs -t --since="2018-02-08T13:23:37" [containerid]                  # 查看某时间之后的日志
 docker logs -f -t --since="2018-02-08" --tail=100 [containerid]             # 查看指定时间后的日志，只显示最后100行
 docker logs --since 30m [containerid]                                       # 查看最近30分钟的日志
 docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" [containerid]  # 查看某时间段日志
-
 # 数据拷贝
 docker cp rabbitmq:/[container_path] [local_path]   # 将容器中的文件copy至本地路径
 docker cp /etc/localtime [containerid]:/etc/        # 将主机时间到容器
