@@ -1,5 +1,7 @@
 # Java 8
 
+- 官网地址：https://www.oracle.com/java/technologies/downloads/archive/
+
 ## 1. Windows
 
 ### 1.1 安装Jdk
