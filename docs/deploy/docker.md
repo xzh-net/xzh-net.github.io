@@ -437,37 +437,39 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 > Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
 
-#### 3.1.1 jar
+#### 3.1.1 基于环境构建Jar
 
-1. 创建Dockerfile
+1. 创建文件
 
 ```bash
-vi Dockerfile
+cd /data/apps
+vi eureka-server.Dockerfile
 ```
 
 ```bash
-FROM openjdk:8-jdk-alpine
-ARG JAR_FILE
-# 复制文件到容器 ，COPY . /public  # 当前路径所有复制到容器内
-COPY ${JAR_FILE} app.jar
-# 声明需要暴露的端口
+FROM openjdk:8-jre-alpine
+WORKDIR /apps
+COPY eureka /apps/
 EXPOSE 9001
-# 配置容器启动后执行的命令
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","eureka-server.jar"]
 ```
 
 2. 构建镜像
 
 ```bash
-docker build --build-arg JAR_FILE=test-sso.jar -t test-sso:1.0 . # -f :指定要使用的Dockerfile路径；
-docker images       # 查看镜像是否创建成功
-docker run -p 9876:9001 --name=test-sso -d test-sso:1.0 # 创建容器
-docker exec -it [containerid] /bin/ash                  # 进入容器
-cat /etc/issue  # 查看操作系统
-uname -a        # 查看内核
+docker build -f eureka-server.Dockerfile -t eureka-server .
 ```
 
-#### 3.1.2 tomcat
+3. 运行
+
+```bash
+docker run -dit --name eureka-server -p 9001:9001 eureka-server
+docker exec -it eureka-server /bin/ash      # 进入容器
+cat /etc/issue                              # 查看操作系统
+uname -a                                    # 查看内核
+```
+
+#### 3.1.2 基于操作系统构建Tomcat
 
 1. 创建Dockerfile
 
@@ -482,26 +484,31 @@ MAINTAINER xzh xzh@163.com
 ADD apache-tomcat-8.5.66.tar.gz /opt
 ADD jdk-8u202-linux-x64.tar.gz /usr/local
 # 定义交互时登录路径
-ENV MYPATH /opt/apache-tomcat-8.5.66
+ENV MYPATH /opt/apache-tomcat-8.5.61
 WORKDIR $MYPATH
 # 配置jdk 和tomcat环境变量
 ENV JAVA_HOME /usr/local/jdk1.8.0_202
-ENV CATALINA_HOME /opt/apache-tomcat-8.5.66
-ENV CATALINA_BASE /opt/apache-tomcat-8.5.66
+ENV CATALINA_HOME /opt/apache-tomcat-8.5.61
+ENV CATALINA_BASE /opt/apache-tomcat-8.5.61
 ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
 # 设置暴露的端口
 EXPOSE 8080
 # 运行tomcat
-CMD /opt/apache-tomcat-8.5.66/bin/startup.sh && tail -f /opt/apache-tomcat-8.5.66/logs/catalina.out
+CMD /opt/apache-tomcat-8.5.61/bin/startup.sh && tail -f /opt/apache-tomcat-8.5.61/logs/catalina.out
 ```
 
 2. 构建镜像
 
 ```bash
-docker build -t xzh/tomcat8 .
-docker run -p 9876:8080 --name=tomcat8 -d xzh/tomcat8  # 创建容器
-docker exec -it [containerid] /bin/bash                # 进入容器
+docker build -t tomcat8 .
+```
+
+3. 运行
+
+```bash
+docker run -dit --name tomcat8 -p 8080:8080 tomcat8
+docker exec -it tomcat8 /bin/bash
 ```
 
 #### 3.1.3 turnserver
@@ -744,7 +751,7 @@ jps
    - -m :提交时的说明文字；
 
 ```bash
-docker commit  -a="xzh" -m="my haha" [containerid]  haha:v1.1
+docker commit  -a="xzh" -m="my container" [containerid]  container:v1.1
 ```
 
 ### 3.3 插件构建
