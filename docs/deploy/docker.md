@@ -767,9 +767,9 @@ docker commit  -a="xzh" -m="my container" [containerid]  container:v1.1
     <version>0.44.0</version>
     <configuration>
         <!--指定远程服务器的Docker服务访问地址 -->
-        <dockerHost>tcp://172.17.17.161:2375</dockerHost>
+        <dockerHost>tcp://192.168.2.100:2375</dockerHost>
         <!--指定私有仓库的访问路径 -->
-        <pushRegistry>http://172.17.17.161:88</pushRegistry>
+        <pushRegistry>http://192.168.2.100:88</pushRegistry>
         <!--指定私有仓库的用户名与密码 -->
         <authConfig>
             <username>admin</username>
@@ -778,7 +778,7 @@ docker commit  -a="xzh" -m="my container" [containerid]  container:v1.1
         <images>
             <image>
                 <!--指定私有仓库访问地址/项目名称/镜像名称/版本 -->
-                <name>172.17.17.161:88/ec_platform/${project.artifactId}:${project.version}</name>
+                <name>192.168.2.100/ec_platform/${project.artifactId}:${project.version}</name>
                 <build>
                     <!--指定Dockerfile的路径 -->
                     <dockerFileDir>${project.basedir}</dockerFileDir>
