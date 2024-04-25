@@ -758,73 +758,55 @@ docker commit  -a="xzh" -m="my container" [containerid]  container:v1.1
 
 ### 3.3 插件构建
 
-基于 `docker-maven-plugin` 构建
+基于 `io.fabric8` 构建，强烈推荐
 
 ```xml
-<properties>
-  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  <java.version>1.8</java.version>
-  <skipTests>true</skipTests>
-  <docker.baseImage>openjdk:8-jre-alpine</docker.baseImage>
-  <docker.volumes>/tmp</docker.volumes>
-  <docker.host>http://192.168.2.100:2375</docker.host>
-  <docker.image.prefix>192.168.2.100:88/ec_platform</docker.image.prefix>
-  <docker.java.security.egd>-Djava.security.egd=file:/dev/./urandom</docker.java.security.egd>
-  <docker.java.opts>-Xms128m -Xmx128m</docker.java.opts>
-</properties>
+<plugin>
+    <groupId>io.fabric8</groupId>
+    <artifactId>docker-maven-plugin</artifactId>
+    <version>0.44.0</version>
+    <configuration>
+        <!--指定远程服务器的Docker服务访问地址 -->
+        <dockerHost>tcp://172.17.17.161:2375</dockerHost>
+        <!--指定私有仓库的访问路径 -->
+        <pushRegistry>http://172.17.17.161:88</pushRegistry>
+        <!--指定私有仓库的用户名与密码 -->
+        <authConfig>
+            <username>admin</username>
+            <password>Harbor12345</password>
+        </authConfig>
+        <images>
+            <image>
+                <!--指定私有仓库访问地址/项目名称/镜像名称/版本 -->
+                <name>172.17.17.161:88/ec_platform/${project.artifactId}:${project.version}</name>
+                <build>
+                    <!--指定Dockerfile的路径 -->
+                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                </build>
+            </image>
+        </images>
+    </configuration>
+    <!--指定在每次打包或者重新打包的时候运行该插件的build, push, run目标 -->
+    <executions>
+        <execution>
+            <id>build-image</id>
+            <phase>package</phase>
+            <goals>
+                <goal>build</goal>
+                <goal>push</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
 
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>repackage</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-        <plugin>
-            <groupId>com.spotify</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>build-image</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>build</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <serverId>harbor88</serverId>
-              <dockerHost>${docker.host}</dockerHost>
-                <imageName>${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
-                <pushImage>true</pushImage>
-                <baseImage>${docker.baseImage}</baseImage>
-                <volumes>${docker.volumes}</volumes>
-                <env>
-                    <JAVA_OPTS>${docker.java.opts}</JAVA_OPTS>
-                </env>
-                <runs>
-                  <run>apk add --update ttf-dejavu fontconfig</run>
-                </runs>
-                <entryPoint>["sh","-c","java $JAVA_OPTS ${docker.java.security.egd} -jar /${project.build.finalName}.jar"]</entryPoint>
-                <resources>
-                    <resource>
-                        <targetPath>/</targetPath>
-                        <directory>${project.build.directory}</directory>
-                        <include>${project.build.finalName}.jar</include>
-                    </resource>
-                </resources>
-            </configuration>
-        </plugin>
-    </plugins>
-    <finalName>${project.artifactId}</finalName>
-</build>
+创建Dockerfile
+
+```bash
+FROM openjdk:8-jre-alpine
+COPY target/*.jar /app.jar
+EXPOSE 8080
+ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
 ```
 
 ## 4. 仓库
