@@ -472,7 +472,7 @@ uname -a                                    # 查看内核
 
 #### 3.1.2 基于操作系统构建Tomcat
 
-1. 创建Dockerfile
+1. 创建文件
 
 ```bash
 vi Dockerfile
@@ -514,7 +514,7 @@ docker exec -it tomcat8 /bin/bash
 
 #### 3.1.3 turnserver
 
-1. 创建Dockerfile
+1. 创建文件
 
 ```bash
 vi Dockerfile
@@ -605,7 +605,7 @@ sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 1. 构建centos7-ssh-sync
 
 ```bash
-cd /opt/software/docker/centos7-ssh-sync-dockerfile
+cd /data/dockerfile/centos7-ssh-sync
 vi Dockerfile
 ```
 
@@ -613,6 +613,7 @@ vi Dockerfile
 FROM centos:7
 MAINTAINER xzh
 
+ENV TZ=Asia/Shanghai
 #install vim & net-tools
 RUN yum -y install vim
 RUN yum -y install net-tools
@@ -625,8 +626,7 @@ RUN yum install -y openssh-server sudo
 RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 RUN yum  install -y openssh-clients
 
-#配置root名
-#123456是ssh密码
+#配置用户名和密码
 RUN echo "root:123456" | chpasswd
 RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
 #生成ssh key
@@ -646,7 +646,7 @@ docker build -f Dockerfile -t centos7-ssh-sync .
 2. 构建centos7-hadoop
 
 ```bash
-cd /opt/software/docker/centos7-hadoop3-dockerfile
+cd /data/dockerfile/centos7-hadoop3
 vi Dockerfile
 ```
 
@@ -682,7 +682,7 @@ docker run -dit --name hadoop3 -h hadoop3 -p 1022:22 \
 -p 14000:14000 --restart=always --privileged=true centos7-hadoop3
 ```
 
-4. 测试
+4. 登录容器
 
 ```bash
 docker exec -it hadoop3 /bin/bash
@@ -690,17 +690,16 @@ hadoop version
 java -version
 ```
 
-5. 伪集群
+5. 设置hadoop-env.sh
 
 ```bash
 cd /usr/local/hadoop-3.1.4/etc/hadoop
+vi hadoop-env.sh 
 ```
 
 ```bash
-vi hadoop-env.sh 
-# 编辑内容
+# 添加下面这些内容
 export JAVA_HOME=/usr/local/jdk1.8.0_202
-# 添加到末尾，设置用户以执行对应角色shell命令
 export HDFS_NAMENODE_USER=root
 export HDFS_DATANODE_USER=root
 export HDFS_SECONDARYNAMENODE_USER=root
@@ -708,9 +707,13 @@ export YARN_RESOURCEMANAGER_USER=root
 export YARN_NODEMANAGER_USER=root 
 ```
 
+6. 设置core-site.xml
+
 ```bash
 vi core-site.xml
-# 编辑内容
+```
+
+```yaml
 <configuration>
     <property>
         <name>fs.defaultFS</name>
@@ -720,12 +723,20 @@ vi core-site.xml
         <name>hadoop.http.staticuser.user</name>
         <value>root</value>
     </property>
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
+    </property>
 </configuration>
 ```
 
+7. 设置hdfs-site.xml
+
 ```bash
 vi hdfs-site.xml
-# 编辑内容
+```
+
+```yaml
 <configuration>
     <property>
         <name>dfs.replication</name>
@@ -733,6 +744,8 @@ vi hdfs-site.xml
     </property>
 </configuration>
 ```
+
+8. 启动服务
 
 ```bash
 ssh-keygen
@@ -743,6 +756,8 @@ jps
 ```
 
 访问地址：http://ip:9870
+
+> web上传附件，需要在本地hosts添加 `0.0.0.0 hadoop3`，否则提示`Couldn't upload the file`问题
 
 ### 3.2 容器构建
 
