@@ -891,10 +891,7 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
   --name rancher rancher/rancher 
 ```
 
-重置密码
-```bash
-docker exec -it rancher reset-password
-```
+默认安装密码 `docker logs rancher 2>&1 | grep "Bootstrap Password:"`，重置密码 `docker exec -it rancher reset-password`
 
 ### 4.2 关系型数据库
 
@@ -914,6 +911,9 @@ docker run -p 3306:3306 --name mysql \
 docker cp /data/mall.sql mysql:/  # sql拷贝到容器中
 docker exec -it mysql /bin/bash
 mysql -uroot -proot --default-character-set=utf8
+```
+
+```sql
 create database mall character set utf8
 use mall;
 source /mall.sql;
@@ -1180,16 +1180,16 @@ docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /data
 
 #### 4.5.2 MinIO
 
-minioadmin/minioadmin
-
 ```bash
 docker pull minio/minio:RELEASE.2022-01-04T07-41-07Z
 
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
-  -v /mnt/data:/data \
-  -v /mnt/config:/root/.minio \
+  -v /data/minio/data:/data \
+  -v /data/minio/config:/root/.minio \
   minio/minio:RELEASE.2022-01-04T07-41-07Z server /data --console-address ":9001"
 ```
+
+访问地址：http://192.168.2.100:9001/ ，账户密码：minioadmin/minioadmin
 
 #### 4.5.3 Hadoop 2.x
 
