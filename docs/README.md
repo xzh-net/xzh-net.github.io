@@ -1,14 +1,7 @@
 # 参考内容
 
-1. 商城前台Vue https://github.com/macrozheng/mall-admin-web
-2. 微服务商城 https://github.com/macrozheng/mall-swarm
-3. 电商技术实现 https://github.com/macrozheng/mall-learning
-4. SpringCloud技术实现 https://github.com/macrozheng/springcloud-learning
-5. 单应用快速开发脚手架 https://github.com/macrozheng/mall-tiny
-6. Bilibili安卓客户端 https://github.com/macrozheng/bilibili-android-client
 7. Kubernetes资源 https://github.com/fungitive/kubernetes
 8. 分布式任务调度 https://github.com/xuxueli/xxl-job
-9. macrozheng部署 http://www.macrozheng.com/
 10. 虫洞栈学习 https://github.com/fuzhengwei/CodeGuide
 11. 物美智能 https://gitee.com/kerwincui/wumei-smart
 12. activiti-5.22配置 https://github.com/Activiti/Activiti/releases/tag/activiti-5.22.0
