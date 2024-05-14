@@ -1,6 +1,7 @@
 # Java 8
 
 - 官网地址：https://www.oracle.com/java/technologies/downloads/archive/
+- 基线地址：https://javadl-esd-secure.oracle.com/update/baseline.version
 
 ## 1. Windows
 
