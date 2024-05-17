@@ -200,23 +200,48 @@ mysql -uroot -proot -h 127.0.0.1 -P 3306 sonar</tmp/all.sql                     
 
 ## 3. 表操作
 
-### 3.1 表结构注释
+### 3.1 表结构
    
 ```sql
--- 获取所有表结构信息
-select table_name tableName, engine engine, table_comment tableComment, create_time createTime from
-    information_schema.tables
-    where table_schema = (select database())
-    and table_name = 'tableName'
-    order by create_time desc
+-- 获取所有表信息
+SELECT
+    table_name,
+    ENGINE,
+    table_comment,
+    create_time 
+FROM
+    information_schema.TABLES 
+WHERE
+    table_schema = (
+    SELECT DATABASE
+    ()) 
+    AND table_name = 'tableName' 
+ORDER BY
+    create_time DESC
 
--- 获取表名及备注sql
-select table_name tableName, engine, table_comment tableComment, create_time createTime from information_schema.tables
-    where table_schema = (select database()) and table_name = 'tableName'
-
--- 获取指定表的字段名称主键等
-select column_name columnName, data_type dataType, column_comment columnComment, column_key columnKey, extra from information_schema.columns
-    where table_name ='tableName' and table_schema = (select database()) order by ordinal_position
+-- 获取指定表结构信息
+SELECT
+    TABLE_SCHEMA AS '库名',
+    TABLE_NAME AS '表名',
+    COLUMN_NAME AS '列名',
+    ORDINAL_POSITION AS '列的排列顺序',
+    COLUMN_DEFAULT AS '默认值',
+    IS_NULLABLE AS '是否为空',
+    DATA_TYPE AS '数据类型',
+    CHARACTER_MAXIMUM_LENGTH AS '字符最大长度',
+    NUMERIC_PRECISION AS '数值精度(最大位数)',
+    NUMERIC_SCALE AS '小数精度',
+    COLUMN_TYPE AS '列类型',
+    COLUMN_KEY 'KEY',
+    EXTRA AS '额外说明',
+    COLUMN_COMMENT AS '注释' 
+FROM
+    information_schema.COLUMNS 
+WHERE
+    TABLE_NAME = 'tableName' 
+ORDER BY
+    TABLE_NAME,
+    ORDINAL_POSITION
 ```
 
 ## 4. 统计信息
