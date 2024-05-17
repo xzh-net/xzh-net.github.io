@@ -1494,14 +1494,14 @@ http://192.168.2.201:8080
 
 #### 4.7.1 ActiveMQ 
 
-admin/admin
 ```bash
 docker run -d --name activemq -p 61616:61616 -p 8161:8161 webcenter/activemq:5.14.3
 ```
 
-#### 4.7.2 RabbitMQ
+控制台地址：http://0.0.0.0:8161
+默认账号密码admin/admin
 
-- 3.7.15
+#### 4.7.2 RabbitMQ
 
 ```bash
 docker run -p 5672:5672 -p 15672:15672 --name rabbitmq -d rabbitmq:3.7.15
@@ -1518,22 +1518,29 @@ rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 ```
 
 控制台地址：http://0.0.0.0:15672
-
-- 3.9
+账号密码admin/123456
 
 ```bash
+# 其他版本
 docker run -dit --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
 ```
 
 #### 4.7.3 RocketMQ
 
+1. 创建目录
+
 ```bash
-# 创建目录
 mkdir -p /data/rocketmq/data/namesrv/logs /root/rocketmq/data/namesrv/store /data/rocketmq/conf /data/rocketmq/data/broker/logs /data/rocketmq/data/broker/stor
 ```
 
+2. 创建broker.conf配置
+
+```bash
+cd /data/rocketmq/conf
+vi broker.conf
+```
+
 ```conf
-# 进入 /data/rocketmq/conf 创建 broker.conf
 brokerClusterName = DefaultCluster
 brokerName = broker-a
 brokerId = 0
@@ -1545,26 +1552,26 @@ brokerIP1 = 172.17.17.200
 messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
 ```
 
-拉取镜像
+3. 拉取镜像
 
 ```bash
 docker pull rocketmqinc/rocketmq:4.4.0
 docker pull apacherocketmq/rocketmq-dashboard:1.0.0
 ```
 
-启动namesrv
+4. 启动namesrv
 
 ```bash
 docker run -d -p 9876:9876 -v /data/rocketmq/data/namesrv/logs:/root/logs -v /data/rocketmq/data/namesrv/store:/root/store --name rmqnamesrv -e "MAX_POSSIBLE_HEAP=100000000" rocketmqinc/rocketmq:4.4.0 sh mqnamesrv
 ```
 
-启动broker
+5. 启动broker
 
 ```
 docker run -d -p 10911:10911 -p 10909:10909 -v  /data/rocketmq/data/broker/logs:/root/logs -v  /data/rocketmq/data/broker/store:/root/store -v  /data/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf --name rmqbroker --link rmqnamesrv:namesrv -e "NAMESRV_ADDR=namesrv:9876" -e "MAX_POSSIBLE_HEAP=200000000" rocketmqinc/rocketmq:4.4.0 sh mqbroker -c /opt/rocketmq-4.4.0/conf/broker.conf
 ```
 
-启动dashboard
+6. 启动dashboard
 
 ```bash
 docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=172.17.17.200:9876" -p 9080:8080 -t apacherocketmq/rocketmq-dashboard:1.0.0
@@ -1628,11 +1635,12 @@ curl \
 ```
 
 访问地址：http://192.168.2.201:9527
+账号密码admin/12345678
 
 添加Environment连接集群：http://192.168.2.201:8080
 
 
-#### 4.7.6 EMQ
+#### 4.7.6 EMQX
 
 ```bash
 docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx:4.3.10        # 开源版
