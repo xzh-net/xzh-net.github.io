@@ -202,8 +202,9 @@ mysql -uroot -proot -h 127.0.0.1 -P 3306 sonar</tmp/all.sql                     
 
 ### 3.1 表结构
    
+获取所有表信息
+
 ```sql
--- 获取所有表信息
 SELECT
     table_name,
     ENGINE,
@@ -218,8 +219,11 @@ WHERE
     AND table_name = 'tableName' 
 ORDER BY
     create_time DESC
+```
 
--- 获取指定表结构信息
+获取指定表结构信息
+
+```sql
 SELECT
     TABLE_SCHEMA AS '库名',
     TABLE_NAME AS '表名',
