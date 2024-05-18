@@ -33,10 +33,11 @@ mv emqx /opt
 
 ### 1.2 集群
 
+## 2. 高级
 
-## 2. 插件管理
+### 2.1 插件
 
-目前 EMQX 发行包提供的插件包括：
+目前EMQX发行包提供的插件包括：
 
 | 插件                      | 配置文件       | 说明                                                         |
 | ------------------------- | ---------- | ------------------------------------------------------------ |
@@ -80,29 +81,7 @@ mv emqx /opt
 
 EMQX的HTTP API服务默认监听8081端口，可通过`etc/plugins/emqx_management.conf` 配置文件修改监听端口，或启用HTTPS监听。EMQX 4.0以后的所有API调用均以api/v4开头
 
-## 3. 认证
-
-### 3.1 认证简介
-
-#### 3.1.1 认证方式
-
-EMQX支持的认证方式：
-
-内置数据源
-- Mnesia (用户名/Client ID）认证
-
-外部数据源
-- LDAP 认证
-- MySQL 认证
-- PostgreSQL 认证
-- Redis 认证
-- MongoDB 认证
-
-其他
-- HTTP 认证
-- JWT 认证
-
-#### 3.1.2 匿名登录
+### 2.2 认证
 
 EMQX默认配置中启用了匿名认证，任何客户端都能接入EMQX。没有启用认证插件或认证插件没有显式允许/拒绝（ignore）连接请求时，EMQX将根据匿名认证启用情况决定是否允许客户端连接
 
@@ -113,60 +92,7 @@ EMQX默认配置中启用了匿名认证，任何客户端都能接入EMQX。没
 allow_anonymous = false
 ```
 
-#### 3.1.3 密码加盐规则与哈希方法
-
-EMQX 多数认证插件中可以启用哈希方法，数据源中仅保存密码密文，保证数据安全。
-
-启用哈希方法时，用户可以为每个客户端都指定一个 salt（盐）并配置加盐规则，数据库中存储的密码是按照加盐规则与哈希方法处理后的密文。
-
-以 MySQL 认证为例，加盐规则与哈希方法配置：
-
-```sh
-# etc/plugins/emqx_auth_mysql.conf
-
-## 不加盐，仅做哈希处理
-auth.mysql.password_hash = sha256
-
-## salt 前缀：使用 sha256 加密 salt + 密码 拼接的字符串
-auth.mysql.password_hash = salt,sha256
-
-## salt 后缀：使用 sha256 加密 密码 + salt 拼接的字符串
-auth.mysql.password_hash = sha256,salt
-
-## pbkdf2 with macfun iterations dklen
-## macfun: md4, md5, ripemd160, sha, sha224, sha256, sha384, sha512
-## auth.mysql.password_hash = pbkdf2,sha256,1000,20
-```
-
-#### 3.1.4 认证流程
-
-1. 根据配置的认证SQL结合客户端传入的信息，查询出密码（密文）和salt（盐）等认证数据，没有查询结果时，认证将终止并返回ignore结果
-2. 根据配置的加盐规则与哈希方法计算得到密文，没有启用哈希方法则跳过此步
-3. 将数据库中存储的密文与当前客户端计算的到的密文进行比对，比对成功则认证通过，否则认证失败（更改哈希方法会造成已有认证数据失效）
-4. 当同时启用多个认证方式时，EMQX将按照插件开启先后顺序进行链式认证，如果认证成功，终止认证链并允许客户端接入。一旦认证失败，跳过当前认证方式进入下一个，直到最后一个认证方式仍未通过，根据匿名认证配置判定。
-5. 生产环境只启用一个认证插件可以提高客户端身份认证效率
-
-
-#### 3.1.5 TLS认证
-
-TLS的默认端口是8883，可通过`etc/emqx.conf`修改
-
-```conf
-listener.ssl.external = 8883
-listener.ssl.external.keyfile = etc/certs/key.pem
-listener.ssl.external.certfile = etc/certs/cert.pem
-listener.ssl.external.cacertfile = etc/certs/cacert.pem
-```
-
-注意，默认的`etc/certs`目录下面的 `key.pem`、`cert.pem` 和 `cacert.pem` 是EMQX生成的自签名证书，所以在使用支持TLS的客户端测试的时候，需要将上面的CA证书`etc/certs/cacert.pem` 配置到客户端。
-
-服务端支持的cipher列表需要显式指定，默认的列表与Mozilla的服务端cipher列表一致：
-
-```conf
-listener.ssl.external.ciphers = ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384,ECDHE-ECDSA-AES256-SHA384,ECDHE-RSA-AES256-SHA384,ECDHE-ECDSA-DES-CBC3-SHA,ECDH-ECDSA-AES256-GCM-SHA384,ECDH-RSA-AES256-GCM-SHA384,ECDH-ECDSA-AES256-SHA384,ECDH-RSA-AES256-SHA384,DHE-DSS-AES256-GCM-SHA384,DHE-DSS-AES256-SHA256,AES256-GCM-SHA384,AES256-SHA256,ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES128-SHA256,ECDHE-RSA-AES128-SHA256,ECDH-ECDSA-AES128-GCM-SHA256,ECDH-RSA-AES128-GCM-SHA256,ECDH-ECDSA-AES128-SHA256,ECDH-RSA-AES128-SHA256,DHE-DSS-AES128-GCM-SHA256,DHE-DSS-AES128-SHA256,AES128-GCM-SHA256,AES128-SHA256,ECDHE-ECDSA-AES256-SHA,ECDHE-RSA-AES256-SHA,DHE-DSS-AES256-SHA,ECDH-ECDSA-AES256-SHA,ECDH-RSA-AES256-SHA,AES256-SHA,ECDHE-ECDSA-AES128-SHA,ECDHE-RSA-AES128-SHA,DHE-DSS-AES128-SHA,ECDH-ECDSA-AES128-SHA,ECDH-RSA-AES128-SHA,AES128-SHA
-```
-
-### 3.2 Mnesia 认证
+#### 2.2.1 Mnesia 认证
 
 Mnesia认证使用EMQX内置Mnesia数据库存储客户端Client ID/Username与密码，支持通过HTTP API管理认证数据。
 
@@ -238,7 +164,7 @@ auth.user.2.username = admin
 auth.user.2.password = public
 ```
 
-### 3.3 HTTP 认证
+#### 2.2.2 HTTP 认证
 
 使用外部自建HTTP应用认证数据源，根据API返回的数据判定认证结果，能够实现复杂的认证鉴权逻辑。在请求中传递明文密码，加盐规则与哈希方法取决于HTTP应用。
 
@@ -265,13 +191,13 @@ auth.http.auth_req.headers.content-type = application/x-www-form-urlencoded
 auth.http.auth_req.params = clientid=%c,username=%u,password=%P,ip=%a
 ```
 
-### 3.4 JWT 认证
+#### 2.2.3 JWT 认证
 
-### 3.5 LDAP 认证
+#### 2.2.4 LDAP 认证
 
-### 3.6 MySQL 认证
+#### 2.2.5 MySQL 认证
 
-### 3.7 PostgreSQL 认证
+#### 2.2.6 PostgreSQL 认证
 
 要启用PostgreSQL认证，需要在`etc/plugins/emqx_auth_pgsql.conf`中配置以下内容：
 
@@ -326,10 +252,67 @@ auth.pgsql.auth_query = select password from mqtt_user where username = '%u' lim
 ```
 
 
-### 3.8 Redis 认证
+#### 2.2.7 Redis 认证
 
-### 3.9 MongoDB 认证
+#### 2.2.8 MongoDB 认证
 
-## 4. 发布订阅ACL
+### 2.3 发布订阅ACL
 
-### 4.1 发布订阅ACL简介
+默认配置中ACL是开放授权的，即授权结果为忽略（ignore）时允许客户端通过授权。
+
+通过`etc/emqx.conf`中的AC 配置可以更改该属性：
+
+```conf
+# etc/emqx.conf
+
+## ACL 未匹配时默认授权
+## Value: allow | deny
+acl_nomatch = allow
+```
+
+配置默认ACL文件，使用文件定义默认ACL规则：
+
+```conf
+# etc/emqx.conf
+
+acl_file = etc/acl.conf
+```
+
+配置ACL授权结果为禁止的响应动作，为disconnect时将断开设备：
+
+```conf
+# etc/emqx.conf
+
+## Value: ignore | disconnect
+acl_deny_action = ignore
+```
+
+> 在 MQTT v3.1和v3.1.1协议中，发布操作被拒绝后服务器无任何报文错误返回，这是协议设计的一个缺陷。但在 MQTT v5.0协议上已经支持应答一个相应的错误报文。
+
+#### 2.3.1 内置 ACL
+
+#### 2.3.2 Mnesia ACL
+
+#### 2.3.3 HTTP ACL
+
+#### 2.3.4 JWT ACL
+
+#### 2.3.5 MySQL ACL
+
+#### 2.3.6 PostgreSQL ACL
+
+#### 2.3.7 Redis 认证
+
+#### 2.3.8 MongoDB 认证
+
+### 2.4 WebHook 
+
+### 2.5 HTTP API
+
+### 2.6 数据集成
+
+### 2.7 消息桥接
+
+### 2.8 规则引擎
+
+
