@@ -43,6 +43,7 @@
   - [RabbitMQ](deploy/rabbitmq)
   - [RocketMQ](deploy/rocketmq)
   - [Pulsar](deploy/pulsar)
+  - [Emqx](deploy/emqx)
   - [Mycat](deploy/mycat)
   - [Debezium](deploy/debezium)
   - [FastDFS](deploy/fastdfs)
