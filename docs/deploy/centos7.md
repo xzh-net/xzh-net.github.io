@@ -1367,6 +1367,7 @@ sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home            
 # Find查找
 ll | grep hwcq.online               # 当前路径过滤显示
 grep -n -r "hwcq.online" ./         # 当前路径递归向下查找内容
+egrep -v "(^#|^$)" server.conf      # 过滤注释
 find / -name memcached              # 查找文件
 find / -iname 'conF' -type d        # 查找文件夹,忽略大小写
 find / -type f -size +100M -print0 | xargs -0 du -sh | sort -nr     # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件

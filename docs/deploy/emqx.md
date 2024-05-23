@@ -245,7 +245,7 @@ auth.http.auth_req.method = post
 auth.http.auth_req.headers.content-type = application/x-www-form-urlencoded
 
 ## 请求参数
-auth.http.auth_req.params = clientid=%c,username=%u,password=%P,ip=%a
+auth.http.auth_req.params = clientid=%c,username=%u,password=%P,ipaddr=%a
 ```
 
 #### 2.2.3 JWT 认证
@@ -351,6 +351,23 @@ acl_deny_action = ignore
 #### 2.3.2 Mnesia ACL
 
 #### 2.3.3 HTTP ACL
+
+```conf
+# etc/plugins/emqx_auth_http.conf
+
+auth.http.super_req.url = http://172.17.17.165:8080/mqtt/superuser
+auth.http.super_req.method = post
+auth.http.super_req.headers.content-type = application/x-www-form-urlencoded
+auth.http.super_req.params = clientid=%c,username=%u,ipaddr=%a
+auth.http.acl_req.url = http://172.17.17.165:8080/mqtt/acl
+auth.http.acl_req.method = post
+auth.http.acl_req.headers.content-type = application/x-www-form-urlencoded
+auth.http.acl_req.params = access=%A,username=%u,clientid=%c,ipaddr=%a,topic=%t,mountpoint=%m
+auth.http.timeout = 5s
+auth.http.connect_timeout = 5s
+auth.http.pool_size = 32
+auth.http.enable_pipelining = 100
+```
 
 #### 2.3.4 JWT ACL
 
