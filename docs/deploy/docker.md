@@ -1495,7 +1495,7 @@ http://192.168.2.201:8080
 #### 4.7.1 ActiveMQ 
 
 ```bash
-docker run -d --name activemq -p 61616:61616 -p 8161:8161 webcenter/activemq:5.14.3
+docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:61616  webcenter/activemq:5.14.3
 ```
 
 控制台地址：http://0.0.0.0:8161
