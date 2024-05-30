@@ -165,9 +165,70 @@ bin/kafka-storage.sh format -t 0T25c_coRNqGuGvssegx3Q -c /opt/kafka_2.13-3.1.0/c
 ${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/server.properties
 ```
 
-## 2. 脚本
 
-### 2.1 xcall
+## 2. 可视化监控
+
+下载地址：http://download.kafka-eagle.org/
+
+### 2.1 上传解压
+
+```bash
+cd /opt/software
+tar -zxvf kafka-eagle-bin-3.0.1.tar.gz -C /opt/
+cd /opt/kafka-eagle-bin-3.0.1 && tar -zxvf efak-web-3.0.1-bin.tar.gz -C /opt/
+rm -rf /opt/kafka-eagle-bin-3.0.1
+cd /opt/efak-web-3.0.1
+```
+
+### 2.2 设置环境变量
+
+```bash
+vi /etc/profile
+```
+
+```conf
+export KE_HOME=/opt/efak-web-3.0.1
+export PATH=$PATH:$KE_HOME/bin
+```
+
+```bash
+source /etc/profile
+```
+
+### 2.3 修改配置
+
+```bash
+cd /opt/efak-web-3.0.1/conf
+```
+
+```bash
+vi system-config.properties
+```
+
+```conf
+efak.zk.cluster.alias=cluster1
+cluster1.zk.list=node01:2181,node02:2181,node03:2181
+
+efak.driver=com.mysql.cj.jdbc.Driver
+efak.url=jdbc:mysql://127.0.0.1:3306/ke?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+efak.username=root
+efak.password=root
+```
+
+### 2.4 启动服务
+
+```bash
+cd ${KE_HOME}/bin
+chmod +x ke.sh 
+ke.sh start | stop | status | restart
+```
+
+访问地址：http://192.168.3.201:8048 admin/123456
+
+
+## 3. 脚本
+
+### 3.1 xcall
 
 ```bash
 #!/bin/bash
@@ -180,7 +241,7 @@ done
 
 ```
 
-### 2.2 zk.sh
+### 3.2 zk.sh
 
 ```bash
 #!/bin/bash
@@ -221,7 +282,7 @@ export PATH=$PATH:$JAVA_HOME/bin
 ```
 
 
-### 2.3 ka.sh
+### 3.3 ka.sh
 
 ```bash
 #!/bin/bash
@@ -254,7 +315,7 @@ case $1 in
 esac
 ```
 
-### 2.4 kraft.sh
+### 3.4 kraft.sh
 
 ```bash
 #!/bin/bash
@@ -286,61 +347,3 @@ case $1 in
 ;;
 esac
 ```
-
-## 3. 可视化监控
-
-下载地址：http://download.kafka-eagle.org/
-
-### 3.1 上传解压
-
-```bash
-cd /opt/software
-tar -zxvf kafka-eagle-bin-2.1.0.tar.gz -C /opt/
-cd /opt/kafka-eagle-bin-2.1.0 && tar -zxvf efak-web-2.1.0-bin.tar.gz -C /opt/
-rm -rf /opt/kafka-eagle-bin-2.1.0
-cd /opt/efak-web-2.1.0
-```
-
-### 3.2 设置环境变量
-
-```bash
-vi /etc/profile
-export KE_HOME=/opt/efak-web-2.1.0
-export PATH=$PATH:$KE_HOME/bin
-source /etc/profile
-```
-
-### 3.3 修改配置
-
-```bash
-cd /opt/efak-web-2.1.0/conf
-
-vi system-config.properties
-efak.zk.cluster.alias=cluster1
-cluster1.zk.list=node01:2181,node02:2181,node03:2181
-
-efak.driver=com.mysql.cj.jdbc.Driver
-efak.url=jdbc:mysql://127.0.0.1:3306/ke?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
-efak.username=root
-efak.password=123456
-```
-
-vi kafka-server-start.sh 
-```bash
-export KAFKA_HEAP_OPTS="-server -Xms2G -Xmx2G -XX:PermSize=128m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=8 -XX:ConcGCThreads=5 -XX:InitiatingHeapOccupancyPercent=70"
-export JMX_PORT="9999"
-```
-
-### 3.4 启动服务
-
-```bash
-cd ${KE_HOME}/bin
-chmod +x ke.sh 
-ke.sh start
-ke.sh stop
-ke.sh status
-ke.sh stats
-ke.sh restart
-```
-
-访问地址：http://192.168.3.200:8048 admin/123456
