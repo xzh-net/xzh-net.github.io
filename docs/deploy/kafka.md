@@ -12,7 +12,7 @@ Apache Kafka 是一个开源分布式事件流平台
 
 ```bash
 cd /opt/software
-tar -xzf kafka_2.13-3.1.0.tgz -C /opt/
+tar -zxf kafka_2.13-3.1.0.tgz -C /opt/
 ```
 
 #### 1.1.2 设置环境变量
@@ -59,7 +59,7 @@ bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-serve
 
 ```bash
 cd /opt/software
-tar -xzf kafka_2.13-3.1.0.tgz -C /opt/
+tar -zxf kafka_2.13-3.1.0.tgz -C /opt/
 ```
 
 #### 1.2.2 修改配置

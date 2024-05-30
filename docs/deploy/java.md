@@ -107,7 +107,7 @@ scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 
 ```bash
 cd /opt/software
-tar -xzf apache-maven-3.6.3-bin.tar.gz -C /opt    # 解压
+tar -zxf apache-maven-3.6.3-bin.tar.gz -C /opt    # 解压
 ```
 
 2. 配置环境变量

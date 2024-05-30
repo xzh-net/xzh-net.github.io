@@ -11,7 +11,7 @@ Etcd是CoreOS基于Raft协议开发的分布式key-value存储，可用于服务
 
 ```bash
 cd /opt/software
-tar -xzf etcd-v3.3.10-linux-amd64.tar.gz -C /opt/
+tar -zxf etcd-v3.3.10-linux-amd64.tar.gz -C /opt/
 mv /opt/etcd-v3.3.10-linux-amd64 /opt/etcd
 mkdir -p /opt/etcd/{bin,cfg,ssl,tls}
 mv /opt/etcd/{etcd,etcdctl} /opt/etcd/bin/

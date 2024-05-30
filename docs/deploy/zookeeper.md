@@ -13,7 +13,7 @@ ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服�
 
 ```bash
 cd /opt/software
-tar -xzf apache-zookeeper-3.7.0-bin.tar.gz -C /opt/
+tar -zxf apache-zookeeper-3.7.0-bin.tar.gz -C /opt/
 mv /opt/apache-zookeeper-3.7.0-bin /opt/apache-zookeeper-3.7.0
 sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0 # 非root启动
 ```

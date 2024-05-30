@@ -258,7 +258,7 @@ ssh-keygen -t rsa
 
 ```bash
 cd /opt/software
-tar -xzf apache-maven-3.6.3-bin.tar.gz -C /opt # 解压
+tar -zxf apache-maven-3.6.3-bin.tar.gz -C /opt # 解压
 
 vi /etc/profile
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
@@ -328,7 +328,7 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 ```bash
 yum install java-1.8.0-openjdk* -y              # 安装JDK（已完成）
 cd /opt/software/
-tar -xzf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
+tar -zxf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
 /opt/apache-tomcat-8.5.66/bin/startup.sh        # 启动
 ```
 
