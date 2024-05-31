@@ -19,8 +19,14 @@ tar -zxf kafka_2.13-3.1.0.tgz -C /opt/
 
 ```bash
 vim /etc/profile
+```
+
+```conf
 export KAFKA_HOME=/opt/kafka_2.13-3.1.0
 export PATH=:$PATH:${KAFKA_HOME}
+```
+
+```bash
 source /etc/profile
 ```
 
@@ -29,8 +35,13 @@ source /etc/profile
 ```bash
 cd /opt/kafka_2.13-3.1.0/
 mkdir -p /opt/kafka_2.13-3.1.0/data
-vi config/server.properties
+```
 
+```bash
+vi config/server.properties
+```
+
+```conf
 broker.id=0
 listeners=PLAINTEXT://192.168.3.200:9092     # brokder对外提供的服务入口地址
 zookeeper.connect=192.168.3.200:2181
@@ -66,8 +77,13 @@ tar -zxf kafka_2.13-3.1.0.tgz -C /opt/
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
-vi config/server.properties
+```
 
+```bash
+vi config/server.properties
+```
+
+```conf
 broker.id=1
 log.dirs=/opt/kafka_2.13-3.1.0/data
 zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
@@ -80,14 +96,17 @@ zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
 ```bash
 scp -r /opt/kafka_2.13-3.1.0/ node02:/opt/kafka_2.13-3.1.0/
 scp -r /opt/kafka_2.13-3.1.0/ node03:/opt/kafka_2.13-3.1.0/
+```
 
-# 修改另外两个节点的broker.id分别为2和3
-# 192.168.3.202
+修改192.168.3.202节点的broker.id
+```bash
 cd /opt/kafka_2.13-3.1.0/
 vi config/server.properties
 broker.id=2
+```
 
-# 192.168.3.203
+修改192.168.3.203节点的broker.id
+```bash
 cd /opt/kafka_2.13-3.1.0/
 vi config/server.properties
 broker.id=3
@@ -100,8 +119,11 @@ vim /etc/profile
 export KAFKA_HOME=/opt/kafka_2.13-3.1.0
 export PATH=:$PATH:${KAFKA_HOME}
 source /etc/profile
+```
 
-# 分发到各个节点
+分发到各个节点
+
+```bash
 scp /etc/profile node02:/etc/profile
 scp /etc/profile node03:/etc/profile
 # 每个节点加载环境变量
@@ -125,9 +147,14 @@ bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 ```bash
 cd /opt/kafka_2.13-3.1.0/config/kraft
 mkdir -p /opt/kafka_2.13-3.1.0/data
-vi server.properties
+```
 
-# 修改以下配置
+```bash
+vi server.properties
+```
+
+修改配置
+```conf
 process.roles=broker,controller	# 数据节点，控制节点
 node.id=1	# 对应broker.id
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093 # 对应zk
