@@ -43,7 +43,8 @@ vi config/server.properties
 
 ```conf
 broker.id=0
-listeners=PLAINTEXT://192.168.3.200:9092     # brokder对外提供的服务入口地址
+# brokder对外提供的服务入口地址
+listeners=PLAINTEXT://192.168.3.200:9092
 zookeeper.connect=192.168.3.200:2181
 log.dirs=/opt/kafka_2.13-3.1.0/data
 ```
@@ -52,7 +53,7 @@ log.dirs=/opt/kafka_2.13-3.1.0/data
 
 ```bash
 cd /opt/kafka_2.13-3.1.0/
-nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 自2.8.0取消了zookeeper
+nohup bin/zookeeper-server-start.sh config/zookeeper.properties &
 nohup bin/kafka-server-start.sh config/server.properties &
 ```
 
@@ -60,8 +61,8 @@ nohup bin/kafka-server-start.sh config/server.properties &
 
 ```bash
 bin/kafka-topics.sh --create --topic product --partitions 2 --replication-factor 3 --bootstrap-server 192.168.3.200:9092 	# 创建主题
-bin/kafka-console-producer.sh --topic product --bootstrap-server 192.168.3.200:9092                  # 发送消息
-bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 192.168.3.200:9092 # 消费
+bin/kafka-console-producer.sh --topic product --bootstrap-server 192.168.3.200:9092                                         # 发送消息
+bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 192.168.3.200:9092                        # 消费
 ```
 
 ### 1.2 集群
