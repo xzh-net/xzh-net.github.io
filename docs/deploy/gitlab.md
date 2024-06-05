@@ -84,7 +84,7 @@ gitlab-ctl restart
 
 ### 3.2 下载项目
 
-1. 复制项目连接
+1. 复制连接
 
 ![](../../assets/_images/deploy/gitlab/project_clone.png)
 
@@ -94,74 +94,33 @@ gitlab-ctl restart
 
 3. 设置用户名密码
 
-```bash
-git credential-manager uninstall # 清除掉缓存在git中的用户名和密码
-```
-  
-4. 项目clone
+![](../../assets/_images/deploy/gitlab/gitlab_auth.png)
 
-```bash
-git clone http://192.168.3.200:82/xzh-group/xzh-spring-boot.git
-```
 
 ### 3.3 提交代码
 
 ```bash
 cd xzh-spring-boot            # 进入项目工程目录
 git add .                     # 将当前修改的文件添加到暂存区
+git rm README.md              # 删除文件
 git commit -m "first commit"  # 提交代码
 git push                      # 推送到远程仓库
 git pull                      # 拉取代码
-git checkout -b dev           # 切换并从当前分支创建一个dev分支
-git push origin dev           # 将新创建的dev分支推送到远程仓库
+
+git checkout -b dev           # 创建新分支，并把当前分支内容复制到新分支中
+git push origin dev           # 将新分支推送到远程仓库
 ```
 
-## 4. git命令
-
-### 4.1 Git全局设置
+### 3.4 常用命令
 
 ```bash
-git config --global user.name "xzh"
-git config --global user.email "xzh@163.com"
-```
+git config --global user.name "13998417419"
+git config --global user.email "xcg992224@163.com"
+git config --global credential.helper store     # 
 
-### 4.2 创建仓库
-
-```bash
-git clone http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
-cd xzh-spring-boot
-touch README.md
-git add README.md
-git commit -m "add README"
-git push -u origin master
-```
-
-### 4.3 推送现有文件夹
-
-```bash
-cd existing_folder
-git init
-git remote add origin http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
-git add .
-git commit -m "Initial commit"
-git push -u origin master
-```
-
-### 4.4 本地代码推送到仓库
-
-```bash
-cd existing_repo
-git remote rename origin old-origin
-git remote add origin http://172.17.17.200:82/xzh-group/xzh-spring-boot.git
-git push -u origin --all
-git push -u origin --tags
-```
-
-### 4.5 其他
-
-```bash
-git checkout dev # 切换到dev分支
-git status # 查看本地仓库文件状况
-git branch # 查看本地所有分支
-git log # 查看提交记录
+git clone --branch dev http://192.168.3.200:82/xzh-group/xzh-spring-boot.git
+git config --global --list  # 查看全局配置
+git branch  # 查看分支
+git log     # 查看提交记录
+git status  # 查看本地仓库文件状况
 ```
