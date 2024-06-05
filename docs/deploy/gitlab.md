@@ -100,13 +100,11 @@ gitlab-ctl restart
 ### 3.3 提交代码
 
 ```bash
-cd xzh-spring-boot            # 进入项目工程目录
-git add .                     # 将当前修改的文件添加到暂存区
+git add .                     # 提交文件到暂存区
 git rm README.md              # 删除文件
-git commit -m "first commit"  # 提交代码
+git commit -m "first commit"  # 提交代码以...为注释
 git push                      # 推送到远程仓库
 git pull                      # 拉取代码
-
 git checkout -b dev           # 创建新分支，并把当前分支内容复制到新分支中
 git push origin dev           # 将新分支推送到远程仓库
 ```
@@ -121,6 +119,6 @@ git config --global credential.helper store     # 持久化
 git clone --branch dev http://192.168.3.200:82/xzh-group/xzh-spring-boot.git
 git config --global --list  # 查看全局配置
 git branch  # 查看分支
-git log     # 查看提交记录
 git status  # 查看本地仓库文件状况
+git log     # 查看提交记录
 ```
