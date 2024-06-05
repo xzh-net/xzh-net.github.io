@@ -116,7 +116,7 @@ git push origin dev           # 将新分支推送到远程仓库
 ```bash
 git config --global user.name "13998417419"
 git config --global user.email "xcg992224@163.com"
-git config --global credential.helper store     # 
+git config --global credential.helper store     # 持久化
 
 git clone --branch dev http://192.168.3.200:82/xzh-group/xzh-spring-boot.git
 git config --global --list  # 查看全局配置
