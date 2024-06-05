@@ -102,7 +102,7 @@ gitlab-ctl restart
 ```bash
 git add .                     # 提交文件到暂存区
 git rm README.md              # 删除文件
-git commit -m "first commit"  # 提交代码以...为注释
+git commit -m "remark"        # 提交代码以...为注释
 git push                      # 推送到远程仓库
 git pull                      # 拉取代码
 git checkout -b dev           # 创建新分支，并把当前分支内容复制到新分支中
