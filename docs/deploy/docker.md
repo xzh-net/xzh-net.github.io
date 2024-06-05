@@ -1807,27 +1807,39 @@ docker run --name kibana -p 5601:5601 \
 
 #### 4.9.1 GitLab
 
+拉取镜像
+
 ```bash
 docker pull gitlab/gitlab-ce:12.4.2-ce.0
-mkdir -p /home/gitlab/{config,logs,data}  # 创建目录
+mkdir -p /data/gitlab/{config,logs,data}  # 创建目录
+```
 
+启动服务
+
+```bash
 docker run -d  \
 -p 443:443 \
 -p 80:80 \
--p 222:22 \
+-p 22:22 \
 --name gitlab \
 --restart always \
--v /home/gitlab/config:/etc/gitlab \
--v /home/gitlab/logs:/var/log/gitlab \
--v /home/gitlab/data:/var/opt/gitlab \
+-v /data/gitlab/config:/etc/gitlab \
+-v /data/gitlab/logs:/var/log/gitlab \
+-v /data/gitlab/data:/var/opt/gitlab \
 gitlab/gitlab-ce:12.4.2-ce.0
+```
 
+修改配置
+```bash
 # 修改配置，gitlab.rb文件内容默认全是注释
-vi /home/gitlab/config/gitlab.rb
+vi /data/gitlab/config/gitlab.rb
 # 配置ssh协议所使用的访问地址和端口
-gitlab_rails['gitlab_ssh_host'] = '172.17.17.196'
-gitlab_rails['gitlab_shell_ssh_port'] = 222
+gitlab_rails['gitlab_ssh_host'] = '192.168.2.201'
+gitlab_rails['gitlab_shell_ssh_port'] = 22
+```
 
+重启服务
+```bash
 docker restart gitlab
 ```
 
