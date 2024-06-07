@@ -75,16 +75,15 @@ yum localinstall *.rpm
 
 ### 1.4 修改配置
 
-- 网易：http://hub-mirror.c.163.com
-- Docker官方中国区：https://registry.docker-cn.com
-- 中国科学技术大学：https://docker.mirrors.ustc.edu.cn
-
 1. 设置下载镜像仓库，提交镜像仓库，镜像保存路径
 
 ```bash
 vi /etc/docker/daemon.json
+```
+
+```conf
 {
-    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
+    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn","https://registry.docker-cn.com","https://registry.cn-hangzhou.aliyuncs.com"],
     "insecure-registries": ["192.168.2.100:88"],
     "exec-opts":["native.cgroupdriver=systemd"],
     "data-root": "/data/docker"
@@ -108,8 +107,8 @@ mv /var/lib/docker /data
 4. 重启服务
 
 ```bash
-sudo systemctl daemon-reload 
-sudo systemctl restart docker 
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 ```
 
 ### 1.5 安装docker-compose
