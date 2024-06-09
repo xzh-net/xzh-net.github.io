@@ -4,17 +4,18 @@
 
 ## 1. 安装
 
-### 1.1 在线安装
+### 1.1 yum安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 yum makecache fast
-yum list docker-ce --showduplicates | sort -r
 yum install docker-ce
-yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 systemctl start docker  
-chkconfig docker on     # 设置开机启动
+systemctl enable docker
+# 查询所有版本，安装指定版本
+yum list docker-ce --showduplicates | sort -r   
+yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 ```
 
 ### 1.2 离线安装
