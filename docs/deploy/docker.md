@@ -392,22 +392,22 @@ docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:
 
 # 获取所有的镜像ID
 image_ids=$(docker images -q)
-
 # 循环遍历每个镜像ID
 for id in $image_ids; do
     # 获取镜像的名字和版本号
-    old_image_name=$(docker inspect --format='{{ .RepoTags }}' $id | cut -d':' -f1 | tr -d '[]')
-    image_name=$(echo $old_image_name | sed 's/\//_/g')
-    image_version=$(docker inspect --format='{{ .RepoTags }}' $id | cut -d':' -f2 | tr -d '[]')
+    image_name=$(docker inspect --format='{{ .RepoTags }}' $id | tr -d '[]')
+    image_tar=$(echo $image_name | sed 's/\//_/g')
     # 导出镜像为tar文件
-    output_file="${image_name}_${image_version}.tar"
-    docker save -o $output_file $id
-    echo "导出镜像 $image_name:$image_version 为 $output_file"
+    output_file="${image_tar}.tar"
+    docker save -o $output_file $image_name
+    echo "导出镜像 $image_name 为 $output_file"
 done
 ```
 
-镜像导入
+批量导入
 ```bash
+ls *.tar | xargs -I {} docker load -i {}
+for t in *.tar; do docker load -i "$t"; done
 ```
 
 ### 2.5 容器
