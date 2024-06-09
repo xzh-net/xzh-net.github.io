@@ -384,6 +384,32 @@ docker stats --no-stream=true $(docker ps -a -q)        # 监控所有容器
 docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest influxdb:1.8
 ```
 
+> 2024年6月6日，镜像仓库地址无论换成任何第三方全部无法下载，只有阿里云个人镜像容器服务`暂时`可用，让我产生了导出镜像的想法，把平时经常用到的镜像全部离线保存下来，在遇到无法下载时候可以快速搭建调试环境。
+
+镜像导出
+```bash
+#!/bin/bash
+
+# 获取所有的镜像ID
+image_ids=$(docker images -q)
+
+# 循环遍历每个镜像ID
+for id in $image_ids; do
+    # 获取镜像的名字和版本号
+    old_image_name=$(docker inspect --format='{{ .RepoTags }}' $id | cut -d':' -f1 | tr -d '[]')
+    image_name=$(echo $old_image_name | sed 's/\//_/g')
+    image_version=$(docker inspect --format='{{ .RepoTags }}' $id | cut -d':' -f2 | tr -d '[]')
+    # 导出镜像为tar文件
+    output_file="${image_name}_${image_version}.tar"
+    docker save -o $output_file $id
+    echo "导出镜像 $image_name:$image_version 为 $output_file"
+done
+```
+
+镜像导入
+```bash
+```
+
 ### 2.5 容器
 
 ```bash
