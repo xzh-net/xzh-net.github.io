@@ -1177,6 +1177,12 @@ docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /data
     -d registry.cn-beijing.aliyuncs.com/tianzuo/fastdfs
 ```
 
+```bash
+docker exec -it fastdfs /bin/bash
+echo "Hello FastDFS!">index.html
+fdfs_test /etc/fdfs/client.conf upload index.html
+```
+
 #### 4.5.2 MinIO
 
 ```bash
