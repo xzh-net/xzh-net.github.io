@@ -4,17 +4,18 @@
 
 ## 1. 安装
 
-### 1.1 在线安装
+### 1.1 yum安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 yum makecache fast
-yum list docker-ce --showduplicates | sort -r
 yum install docker-ce
-yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 systemctl start docker  
-chkconfig docker on     # 设置开机启动
+systemctl enable docker
+# 查询所有版本，安装指定版本
+yum list docker-ce --showduplicates | sort -r   
+yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 ```
 
 ### 1.2 离线安装
@@ -381,6 +382,32 @@ docker stats [containerid]                              # 监控指定容器
 docker stats $(docker ps -a -q)                         # 监控所有容器
 docker stats --no-stream=true $(docker ps -a -q)        # 监控所有容器
 docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest influxdb:1.8
+```
+
+> 2024年6月6日，镜像仓库地址无论换成任何第三方全部无法下载，只有阿里云个人镜像容器服务`暂时`可用，让我产生了导出镜像的想法，把平时经常用到的镜像全部离线保存下来，在遇到无法下载时候可以快速搭建调试环境。
+
+镜像导出
+```bash
+#!/bin/bash
+
+# 获取所有的镜像ID
+image_ids=$(docker images -q)
+# 循环遍历每个镜像ID
+for id in $image_ids; do
+    # 获取镜像的名字和版本号
+    image_name=$(docker inspect --format='{{ .RepoTags }}' $id | tr -d '[]')
+    image_tar=$(echo $image_name | sed 's/\//_/g')
+    # 导出镜像为tar文件
+    output_file="${image_tar}.tar"
+    docker save -o $output_file $image_name
+    echo "导出镜像 $image_name 为 $output_file"
+done
+```
+
+批量导入
+```bash
+ls *.tar | xargs -I {} docker load -i {}
+for t in *.tar; do docker load -i "$t"; done
 ```
 
 ### 2.5 容器
