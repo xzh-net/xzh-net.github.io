@@ -1290,7 +1290,7 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 
 ### 4.6 分布式中间件
 
-#### 4.6.1 Nacos
+#### 4.6.1 Nacos 2.0.1
 
 ```bash
 docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
@@ -1307,20 +1307,41 @@ docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone \
 --restart=always nacos/nacos-server:2.0.1
 ```
 
-#### 4.6.2 Consul
+#### 4.6.2 Consul 1.12.1
 
 ```
 docker run -d -p 8500:8500 --restart=always --name=consul consul:1.12.1 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
 ```
 
 
-#### 4.6.3 Seata
+#### 4.6.3 Seata 1.4.2 
+
+1. 下载镜像
 
 ```bash
-mkdir -p /opt/seata/config/
-cd /opt/seata/config
-vi registry.conf
+docker pull seataio/seata-server:1.4.2
+```
 
+2. 拷贝文件到宿主机
+
+```bash
+docker run -d --name seata-server -p 8091:8091 seataio/seata-server:1.4.2
+mkdir -p /data/seata/resources
+docker cp seata-server:/seata-server/resources  /data/seata/
+docker rm -f seata-server
+```
+
+3. 修改注册配置
+
+```bash
+cd /data/seata/resources
+```
+
+```bash
+vi registry.conf
+```
+
+```conf
 registry {
   # file 、nacos 、eureka、redis、zk、consul、etcd3、sofa
   type = "nacos"
@@ -1338,28 +1359,30 @@ registry {
 
 config {
   # file、nacos 、apollo、zk、consul、etcd3
-  type = "nacos"
+  type = "file"
 
-  nacos {
-    serverAddr = "172.17.17.165:8848"
-    namespace = "1207ed15-5658-48db-a35a-8e3725930070"
-    group = "SEATA_GROUP"
-    username = "nacos"
-    password = "nacos"
+  file {
+    name = "file.conf"
   }
 }
+```
 
+4. 修改存储配置
+
+```bash
 vi file.conf
+```
 
+```conf
 store {
   mode = "db"
   db {
     datasource = "druid"
     dbType = "postgresql"
     driverClassName = "org.postgresql.Driver"
-    url = "jdbc:postgresql://172.17.17.29:5432/seata"
+    url = "jdbc:postgresql://127.0.0.1:5432/seata"
     user = "postgres"
-    password = "vjsp2020"
+    password = "postgres"
     minConn = 5
     maxConn = 100
     globalTable = "global_table"
@@ -1371,12 +1394,15 @@ store {
 }
 ```
 
+5. 启动容器
+
 ```bash
-docker run --name seata-server -it -d  -p 8091:8091 \
--e SEATA_CONFIG_NAME=file:/root/seata/config/registry \
--e SEATA_IP=172.17.17.137 \
--v /opt/seata/config/:/root/seata/config \
---net=bridge --restart=always docker.io/seataio/seata-server:1.4.0
+docker run -dit --name seata-server --restart always \
+-p 7091:7091 -p 8091:8091 \
+-e SEATA_IP=192.168.2.201 \
+-e SEATA_PORT=8091 \
+-v /mydata/seata/resources:/seata-server/resources \
+seataio/seata-server:1.4.2
 ```
 
 ```bash
@@ -1389,7 +1415,7 @@ SEATA_CONFIG_NAME   # 可选, 指定配置文件位置, 如 file:/root/registry,
 # 如果需要同时指定 file.conf文件，需要将registry.conf的config.file.name的值改为类似file:/root/file.conf：
 ```
 
-#### 4.6.4 Sentinel
+#### 4.6.4 Sentinel 1.7.2
 
 ```bash
 docker run --name sentinel -d -p 8858:8858 -d bladex/sentinel-dashboard:1.7.2
@@ -1404,7 +1430,7 @@ docker run -d -p 7001:7001 -e dubbo.registry.address=zookeeper://172.17.17.200:2
 chenchuxin/dubbo-admin
 ```
 
-#### 4.6.6 Zookeeper
+#### 4.6.6 Zookeeper 3.7.0
 
 ```bash
 docker run -d -p 2181:2181 --name some-zookeeper --restart always -d zookeeper:3.7.0
@@ -1430,13 +1456,13 @@ docker run -p 2181:2181 --name zookeeper \
 ```
 
 
-#### 4.6.7 Zipkin 
+#### 4.6.7 Zipkin 2.23
 
 ```bash
 docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 ```
 
-#### 4.6.8 SkyWalking
+#### 4.6.8 SkyWalking 8.9.1
 
 1. 相关组件版本
 
