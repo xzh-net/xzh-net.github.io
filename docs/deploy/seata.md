@@ -30,34 +30,7 @@ mv /opt/seata/seata-server-1.4.2 /opt/seata-server-1.4.2
 rm -rf /opt/seata
 ```
 
-### 1.2 修改file.conf文件
-
-```bash
-vi /opt/seata-server-1.4.2/conf/file.conf
-```
-
-```conf
-store {
-  mode = "db"
-  db {
-    datasource = "druid"
-    dbType = "postgresql"
-    driverClassName = "org.postgresql.Driver"
-    url = "jdbc:postgresql://127.0.0.1:5432/seata"
-    user = "seata"
-    password = "123456"
-    minConn = 5
-    maxConn = 100
-    globalTable = "global_table"
-    branchTable = "branch_table"
-    lockTable = "lock_table"
-    queryLimit = 100
-    maxWait = 5000
-  }
-}
-```
-
-### 1.3 修改registry.conf文件
+### 1.2 修改配置
 
 ```bash
 vi /opt/seata-server-1.4.2/conf/registry.conf
@@ -85,59 +58,86 @@ config {
     group = "SEATA_GROUP"
     username = "nacos"
     password = "nacos"
+    dataId = "seataServer.properties"
   }
 }
 ```
 
-### 1.4 初始化配置文件到nacos
+### 1.3 nacos添加配置
 
-```bash
-cd /opt/software
-tar -zxvf incubator-seata-1.4.2.tar.gz -C /opt
-cd /opt/incubator-seata-1.4.2/script/config-center/
-```
+为了让tc服务的集群可以共享配置，我们选择了nacos作为统一配置中心。因此服务端配置文件seataServer.properties文件需要在nacos中配好
 
-```bash
-vi config.txt
-```
+![](../../assets/_images/deploy/seata/1.png)
+
+![](../../assets/_images/deploy/seata/2.png)
+
 
 ```conf
-service.vgroupMapping.test_tx_service_group=default
+# 数据存储方式，db代表数据库
 store.mode=db
 store.db.datasource=druid
 store.db.dbType=postgresql
 store.db.driverClassName=org.postgresql.Driver
-store.db.url=jdbc:postgresql://172.17.17.57:5432/ec_oauth_center
-store.db.user=ec_oauth_center
-store.db.password=Fz52cACAlPJFHHOP
+store.db.url=jdbc:postgresql://127.0.0.1:5432/seata
+store.db.user=postgres
+store.db.password=postgres
 store.db.minConn=5
-store.db.maxConn=100
+store.db.maxConn=30
 store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.lockTable=lock_table
 store.db.queryLimit=100
 store.db.maxWait=5000
+# 事务、日志等配置
+server.recovery.committingRetryPeriod=1000
+server.recovery.asynCommittingRetryPeriod=1000
+server.recovery.rollbackingRetryPeriod=1000
+server.recovery.timeoutRetryPeriod=1000
+server.maxCommitRetryTimeout=-1
+server.maxRollbackRetryTimeout=-1
+server.rollbackRetryTimeoutUnlockEnable=false
+server.undo.logSaveDays=7
+server.undo.logDeletePeriod=86400000
+# 客户端与服务端传输方式
+transport.serialization=seata
+transport.compressor=none
+# 关闭metrics功能，提高性能
+metrics.enabled=false
+metrics.registryType=compact
+metrics.exporterList=prometheus
+metrics.exporterPrometheusPort=9898
 ```
 
-
-执行初始化
-
-```bash
-cd /opt/incubator-seata-1.4.2/script/config-center/nacos
-sh nacos-config.sh -h 127.0.0.1 -p 8848 -t 628ea892-099a-4d3b-89ec-b8a32a03c530 -g SEATA_GROUP -u nacos -w nacos
-```
-
-
-### 1.5 配置server数据库
+### 1.4 创建数据库表
 
 进入`/opt/incubator-seata-1.4.2/script/server/db`文件夹，选择相应的数据库新建（数据库名和上述配置需要对应上，默认seata）
 
-### 1.6 配置客户端数据库
+### 1.5 启动服务
+
+```bash
+cd /opt/seata-server-1.4.2/bin
+sh seata-server.sh -p 8091 -h 192.168.2.201     # 主机存在多网卡情况下使用 -h 指定ip
+```
+
+### 1.6 客户端
 
 > 客户端的表需要手动创建
 
-### 1.7 启动服务
-
-
-启动seata-server
-
+```sql
+-- Table structure for undo_log
+-- 需要在业务相关的数据库中添加 undo_log 表，用于保存需要回滚的数据，以下为建表脚本
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."undo_log";
+CREATE TABLE "public"."undo_log" (
+  "id" int8 NOT NULL,
+  "branch_id" int8 NOT NULL,
+  "xid" varchar(100) COLLATE "pg_catalog"."default" NOT NULL,
+  "context" varchar(128) COLLATE "pg_catalog"."default" NOT NULL,
+  "rollback_info" bytea NOT NULL,
+  "log_status" int4 NOT NULL,
+  "log_created" timestamp(6) NOT NULL,
+  "log_modified" timestamp(6) NOT NULL,
+  "ext" varchar(100) COLLATE "pg_catalog"."default"
+);
+COMMENT ON TABLE "public"."undo_log" IS '事务日志表';
+```
