@@ -19,7 +19,7 @@
   - [HBase](deploy/hbase)
   - [DM](deploy/dm)
 
-- 应用中间件
+- 中间件
   - [Nginx](deploy/nginx)
   - [OpenResty](deploy/openresty)
   - [Keepalived](deploy/keepalived)
