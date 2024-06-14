@@ -1331,11 +1331,13 @@ docker cp seata-server:/seata-server/resources  /data/seata/
 docker rm -f seata-server
 ```
 
-3. 修改注册配置
+3. 修改配置
 
 ```bash
 cd /data/seata/resources
 ```
+
+修改注册信息
 
 ```bash
 vi registry.conf
@@ -1367,7 +1369,7 @@ config {
 }
 ```
 
-4. 修改存储配置
+修改存储信息
 
 ```bash
 vi file.conf
@@ -1394,7 +1396,7 @@ store {
 }
 ```
 
-5. 启动容器
+4. 启动容器
 
 ```bash
 docker run -dit --name seata-server --restart always \
