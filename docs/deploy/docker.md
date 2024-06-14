@@ -76,19 +76,21 @@ yum localinstall *.rpm
 
 ### 1.4 修改配置
 
-1. 设置下载镜像仓库，提交镜像仓库，镜像保存路径
+1. 配置镜像加速器、仓库地址、根目录
 
-```bash
-vi /etc/docker/daemon.json
+```bash 
+sudo mkdir -p /etc/docker
 ```
 
-```conf
+```bash
+sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn","https://registry.docker-cn.com","https://registry.cn-hangzhou.aliyuncs.com"],
-    "insecure-registries": ["192.168.2.100:88"],
-    "exec-opts":["native.cgroupdriver=systemd"],
-    "data-root": "/data/docker"
+  "registry-mirrors": ["https://l4ud74lw.mirror.aliyuncs.com"],
+  "insecure-registries": ["192.168.2.100:88"],
+  "exec-opts":["native.cgroupdriver=systemd"],
+  "data-root": "/data/docker"
 }
+EOF
 ```
 
 2. 开启Remote API
