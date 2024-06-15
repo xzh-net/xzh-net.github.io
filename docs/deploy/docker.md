@@ -923,7 +923,7 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 
 ### 4.2 关系型数据库
 
-#### 4.2.1 MySQL
+#### 4.2.1 MySQL 5.7
 
 
 ```bash
@@ -948,7 +948,7 @@ source /mall.sql;
 grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
 
-#### 4.2.2 PostgreSQL
+#### 4.2.2 PostgreSQL 12.4
 
 ```bash
 docker volume create pgdata  # 创建本地卷，数据卷可以在容器之间共享和重用，默认会一直存在，即使容器被删除
@@ -968,7 +968,7 @@ docker exec -it postgres2 /bin/bash
 psql -Upostgres # 连接数据库
 ```
 
-#### 4.2.3 Oracle
+#### 4.2.3 Oracle XE 11
 
 
 ```bash
@@ -999,7 +999,7 @@ system: oracle
 sys: oracle
 ```
 
-#### 4.2.4 SQL Server
+#### 4.2.4 SQL Server 2019
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@w0rd" \
@@ -1026,7 +1026,7 @@ select * from pms_product
 go
 ```
 
-#### 4.2.5 DM
+#### 4.2.5 DM 8.1.2
 
 请在达梦数据库官网下载 [Docker](https://eco.dameng.com/download/) 安装包，拷贝安装包到 `/opt` 目录下，执行以下命令导入安装包：
 
@@ -1041,7 +1041,7 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 
 ### 4.3 非关系型数据库
 
-#### 4.3.1 Memcached
+#### 4.3.1 Memcached 1.6.12
 
 ```bash
 docker pull memcached:1.6.12
@@ -1058,7 +1058,7 @@ ServerName localhost:80
 service apache2 restart
 ```
 
-#### 4.3.2 Redis
+#### 4.3.2 Redis 5
 
 下载镜像
 
@@ -1089,11 +1089,9 @@ docker pull oliver006/redis_exporter:v1.28.0
 docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:v1.28.0 --redis.addr redis://172.17.17.191:16379 --redis.password 'redis16379'
 ```
 
-#### 4.3.3 MongoDB
+#### 4.3.3 MongoDB 4.4.6
 
 ```bash
-docker pull mongo:4.4.6
-
 docker run -p 27017:27017 --name mongo \
 -v /data/mongo/db:/data/db \
 -d mongo:4.4.6
@@ -1103,12 +1101,14 @@ docker run -p 27017:27017 --name mongo \
 
 ```bash
 docker run -p 5984:5984 --name my-couchdb -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=admin -v /data/couchdb/data:/opt/couchdb/data -d couchdb:3.2
-docker run -d -p 8800:8000 --link=my-couchdb --name fauxton 3apaxicom/fauxton sh -c 'fauxton -c http://192.168.3.200:5984'  # 可视化
+# WebUI
+docker run -d -p 8000:8000 --link=couchdb_docker:couchdb --name fauxton -e COUCHDB_SERVER_NAME=couchdb -e COUCHDB_SERVER_PORT=5984 thomaspre/fauxton-supervisord
 ```
+
 
 #### 4.3.5 InfluxDB
 
-- 1.8
+1.8
 
 ```bash
 docker run -d -p 8086:8086 \
@@ -1117,7 +1117,7 @@ docker run -d -p 8086:8086 \
       influxdb:1.8
 ```
 
-- 2.0.6
+2.0.6
 
 ```bash
 docker run -d -p 8086:8086 \
@@ -1132,15 +1132,28 @@ docker run -d -p 8086:8086 \
       influxdb:2.0.6
 ```
 
-#### 4.3.6 HBase 2.x
+#### 4.3.6 TDengine
 
 ```bash
-docker run -dti --name hbase2 -h hbase2 \
+docker run -d -p 6041:6041 \
+    -v /data/taos/conf:/etc/taos \
+    -v /data/taos/data:/var/lib/taos \
+    -v /data/taos/logs:/var/log/taos \
+    --name tdengine 
+    tdengine:2.0.19.1
+```
+
+#### 4.3.7 HBase 2.1
+
+```bash
+docker run -dit --name hbase2 -h hbase2 \
 -p 2181:2181 \
 -p 8080:8080 -p 8085:8085 -p 9090:9090 -p 9095:9095 \
 -p 16000:16000 -p 16010:16010 -p 16020:16020 -p 16030:16030 \
 harisekhon/hbase:2.1
+```
 
+```bash
 docker exec -it hbase2 /bin/bash
 hbase shell
 ```
@@ -1158,16 +1171,6 @@ delete "test", "10010", "c1:sex"
 deleteall "test", "10010"
 ```
 
-#### 4.3.7 TDengine
-
-```bash
-docker run -d -p 6041:6041 \
-    -v /data/taos/conf:/etc/taos \
-    -v /data/taos/data:/var/lib/taos \
-    -v /data/taos/logs:/var/log/taos \
-    --name tdengine 
-    tdengine:2.0.19.1
-```
 
 ### 4.4 数仓工具
 
@@ -1192,12 +1195,6 @@ clickhouse-client -m
 ### 4.5 分布式文件系统
 
 #### 4.5.1 FastDFS
-
-```bash
-docker run -dti --network=host --name tracker -v /data/fdfs/tracker:/var/fdfs delron/fastdfs tracker 
-docker run -dti --network=host --name storage -p 8888:8888 -p 23000:23000  \
-   -e TRACKER_SERVER=172.17.17.200:22122 -v /data/fdfs/storage:/var/fdfs delron/fastdfs storage
-```
 
 ```bash
 docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /data/fdfs:/var/local/fdfs \
