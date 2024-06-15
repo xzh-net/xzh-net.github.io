@@ -2218,7 +2218,6 @@ vhost __defaultVhost__ {
 
 #### 4.8.2 Openfire 4.4.4
 
--  4.4.4
 ```bash
 docker run --name openfire -d --restart=always \
   --publish 9090:9090 --publish 5222:5222 --publish 7070:7070 \
