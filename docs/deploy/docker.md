@@ -970,35 +970,33 @@ psql -Upostgres # 连接数据库
 
 #### 4.2.3 Oracle
 
+
 ```bash
-docker pull wnameless/oracle-xe-11g
-docker pull wnameless/oracle-xe-11g-r2
+docker run -dit --name oracle-xe-11g -p 1022:22 -p 1521:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
+docker exec -it oracle-xe-11g /bin/bash
+```
 
-docker run --name oracle-xe-11g -d -v /data/oracle_data:/data/oracle_data -p 49160:22 -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g:14.04.4
+创建表空间
 
-# 连接参数
-port: 49161
+```bash
+su oracle
+cd $ORACLE_HOME
+bin/sqlplus / as sysdba
+create tablespace testspace datafile '/u01/app/oracle/oradata/testspace.dbf' size 100M;
+create user xzh0610 identified by 123456 default tablespace testspace;
+grant connect,resource to xzh0610;
+grant dba to xzh0610;  #  授予dba权限后，这个用户能操作所有用户的表
+```
+
+连接参数
+
+```
+port: 1022
 sid: xe
 username: system
 password: oracle
 system: oracle
 sys: oracle
-
-# 进入容器
-docker exec -it oracle-xe-11g /bin/bash
-
-cd /u01/app/oracle
-mkdir oradata
-chmod 777 oradata
-su oracle
-cd $ORACLE_HOME
-bin/sqlplus / as sysdba
-
-# 创建表空间
-create tablespace xzh datafile '/u01/app/oracle/oradata/xzh.dbf' size 100M;
-create user xzh0610 identified by 123456 default tablespace xzh;
-grant connect,resource to xzh0610;
-grant dba to xzh0610;  #  授予dba权限后，这个用户能操作所有用户的表
 ```
 
 #### 4.2.4 SQL Server
@@ -1052,7 +1050,7 @@ docker run -dit --name memcached -m 128m -c 16382 -p 11211:11211 -d memcached:1.
 
 可视化
 ```bash
-docker run -dit -p 8080:8080 -e MEMADMIN_USERNAME='admin' -e MEMADMIN_PASSWORD='admin' -e MEMCACHED_HOST='172.17.17.200' -e MEMCACHED_PORT='11211' kitsudo/memadmin:latest
+docker run -dit -p 8080:8080 -e MEMADMIN_USERNAME='admin' -e MEMADMIN_PASSWORD='admin' -e MEMCACHED_HOST='172.17.17.200' -e MEMCACHED_PORT='11211' kitsudo/memadmin
 # 启动后报错进入容器，文件最后添加一行
 vim /etc/apache2/apache2.conf
 ServerName localhost:80
@@ -1062,7 +1060,7 @@ service apache2 restart
 
 #### 4.3.2 Redis
 
-- 单机
+下载镜像
 
 ```bash
 docker run -p 6379:6379 --name redis \
@@ -1070,13 +1068,13 @@ docker run -p 6379:6379 --name redis \
 -d redis:5 redis-server --appendonly yes --requirepass "123456"
 ```
 
-- 布隆过滤器（6.0.9）
+布隆过滤器 6.0.15
 
 ```bash
-docker run -dit -p 6379:6379 --name redis-redisbloom -d --restart=always -e TZ="Asia/Shanghai" redislabs/rebloom:2.2.8 --requirepass  "redis6379"
+docker run -dit -p 6379:6379 --name redis-redisbloom -d --restart=always -e TZ="Asia/Shanghai" redislabs/rebloom:2.2.6 --requirepass  "redis6379"
 ```
 
-- 监控
+监控
 
 ```bash
 docker run --name redis-stat --link some-redis:redis -p 8080:63790 -d insready/redis-stat --server redis          # 容器内部自连接
@@ -1084,7 +1082,7 @@ docker run --name redis-stat -p 8080:63790 -d insready/redis-stat --server 192.1
 docker run --name redis-stat -p 8080:63790 -d insready/redis-stat --server 192.168.3.200:6379 192.168.3.201:6379  # 远程集群或单机
 ```
 
-- prometheus监控
+prometheus监控
 
 ```bash
 docker pull oliver006/redis_exporter:v1.28.0
