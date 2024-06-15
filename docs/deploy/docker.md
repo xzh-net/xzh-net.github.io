@@ -1540,7 +1540,7 @@ http://192.168.2.201:8080
 
 ### 4.7 消息中间件
 
-#### 4.7.1 ActiveMQ 
+#### 4.7.1 ActiveMQ 5.14.3
 
 ```bash
 docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:61616  webcenter/activemq:5.14.3
@@ -1549,7 +1549,7 @@ docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:
 控制台地址：http://0.0.0.0:8161
 默认账号密码admin/admin
 
-#### 4.7.2 RabbitMQ
+#### 4.7.2 RabbitMQ 3.7.15
 
 ```bash
 docker run -p 5672:5672 -p 15672:15672 --name rabbitmq -d rabbitmq:3.7.15
@@ -1567,11 +1567,6 @@ rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 
 控制台地址：http://0.0.0.0:15672
 账号密码admin/123456
-
-```bash
-# 其他版本
-docker run -dit --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
-```
 
 #### 4.7.3 RocketMQ
 
