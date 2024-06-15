@@ -853,7 +853,7 @@ ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./ur
 
 ## 4. 仓库
 
-### 4.1 容器
+### 4.1 容器管理
 
 #### 4.1.1 portainer-ce
 
@@ -921,7 +921,7 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 
 默认安装密码 `docker logs rancher 2>&1 | grep "Bootstrap Password:"`，重置密码 `docker exec -it rancher reset-password`
 
-### 4.2 关系型数据库
+### 4.2 关系型存储
 
 #### 4.2.1 MySQL 5.7
 
@@ -1039,7 +1039,7 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 > 1.如果使用 docker 容器里面的 disql，进入容器后，先执行 source /etc/profile 防止中文乱码。  
 > 2.新版本 Docker 镜像中数据库默认用户名/密码为 SYSDBA/SYSDBA001  
 
-### 4.3 非关系型数据库
+### 4.3 非关系型存储
 
 #### 4.3.1 Memcached 1.6.12
 
@@ -1169,10 +1169,7 @@ delete "test", "10010", "c1:sex"
 deleteall "test", "10010"
 ```
 
-
-### 4.4 数仓工具
-
-#### 4.4.1 ClickHouse
+#### 4.3.8 ClickHouse
 
 ```bash
 docker run -d --name clickhouse-server --privileged=true \
@@ -1190,9 +1187,9 @@ docker exec -it clickhouse-server /bin/bash
 clickhouse-client -m
 ```
 
-### 4.5 分布式文件系统
+### 4.4 分布式文件系统
 
-#### 4.5.1 FastDFS
+#### 4.4.1 FastDFS
 
 ```bash
 docker run --net=host --name=fastdfs -e IP=172.17.17.200 -e WEB_PORT=80 -v /data/fdfs:/var/local/fdfs \
@@ -1205,7 +1202,7 @@ echo "Hello FastDFS!">index.html
 fdfs_test /etc/fdfs/client.conf upload index.html
 ```
 
-#### 4.5.2 MinIO
+#### 4.4.2 MinIO
 
 ```bash
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
@@ -1216,7 +1213,7 @@ docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
 
 访问地址：http://192.168.2.100:9001/ ，账户密码：minioadmin/minioadmin
 
-#### 4.5.3 Hadoop 2.7.1
+#### 4.4.3 Hadoop 2.7.1
 
 ```bash
 docker run -dit --name hadoop2 -h hadoop2 \
@@ -1538,6 +1535,157 @@ https://archive.apache.org/dist/skywalking/java-agent/8.16.0/apache-skywalking-j
 
 http://192.168.2.201:8080
 
+
+#### 4.6.9 Elasticsearch 7.6.2
+
+1. 拉取镜像
+
+```bash
+docker pull elasticsearch:7.6.2
+```
+
+2. 临时修改虚拟内存区域大小，否则会因为过小而无法启动
+
+```bash
+sysctl -w vm.max_map_count=262144
+```
+
+3. 目录授权
+
+```bash
+chmod 777 /data/elasticsearch/data/
+```
+
+4. 启动服务
+
+```bash
+docker run -p 9200:9200 -p 9300:9300 --name elasticsearch \
+-e "discovery.type=single-node" \
+-e "cluster.name=elasticsearch" \
+-v /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins \
+-v /data/elasticsearch/data:/usr/share/elasticsearch/data \
+-d elasticsearch:7.6.2
+```
+
+5. 安装中文分词器IKAnalyzer
+
+```bash
+docker exec -it elasticsearch /bin/bash
+#此命令需要在容器中运行
+elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.6.2/elasticsearch-analysis-ik-7.6.2.zip
+docker restart elasticsearch
+http://192.168.3.200:9200/_cat/plugins
+```
+
+6. 安装elasticsearch-head插件
+
+```bash
+docker run -d -p 9100:9100 docker.io/mobz/elasticsearch-head:5
+```
+
+elasticsearch.yml，在文件末尾加入以下配置开启跨域
+
+```yml
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+```
+
+#### 4.6.10 Logstash 7.6.2
+
+1. 拉取镜像
+
+```bash
+docker pull logstash:7.6.2
+```
+
+2. 创建logstash.conf
+
+```
+input {
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4560
+    codec => json_lines
+    type => "debug"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4561
+    codec => json_lines
+    type => "error"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4562
+    codec => json_lines
+    type => "business"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4563
+    codec => json_lines
+    type => "record"
+  }
+}
+filter{
+  if [type] == "record" {
+    mutate {
+      remove_field => "port"
+      remove_field => "host"
+      remove_field => "@version"
+    }
+    json {
+      source => "message"
+      remove_field => ["message"]
+    }
+  }
+}
+output {
+  elasticsearch {
+    hosts => "es:9200"
+    index => "mall-%{type}-%{+YYYY.MM.dd}"
+  }
+}
+```
+
+3. 创建`/data/logstash`目录，并将Logstash的配置文件`logstash.conf`拷贝到该目录；
+
+```bash
+mkdir /data/logstash
+```
+
+4. 使用如下命令启动Logstash服务；
+
+```bash
+docker run --name logstash -p 4560:4560 -p 4561:4561 -p 4562:4562 -p 4563:4563 \
+--link elasticsearch:es \
+-v /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf \
+-d logstash:7.6.2
+```
+
+5. 进入容器内部，安装`json_lines`插件。
+
+```bash
+docker exec -it logstash /bin/bash
+cd /usr/share/logstash/bin
+logstash-plugin install logstash-codec-json_lines
+```
+
+#### 4.6.11 Kibana 7.6.2
+
+访问地址：http://192.168.3.200:5601
+
+```bash
+docker run --name kibana -p 5601:5601 \
+--link elasticsearch:es \
+-e "elasticsearch.hosts=http://es:9200" \
+-d kibana:7.6.2
+```
+
 ### 4.7 消息中间件
 
 #### 4.7.1 ActiveMQ 5.14.3
@@ -1568,7 +1716,7 @@ rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 控制台地址：http://0.0.0.0:15672
 账号密码admin/123456
 
-#### 4.7.3 RocketMQ
+#### 4.7.3 RocketMQ 4.4.0
 
 1. 创建目录
 
@@ -1680,170 +1828,16 @@ curl \
 添加Environment连接集群：http://192.168.2.201:8080
 
 
-#### 4.7.6 EMQX
+#### 4.7.6 EMQX 4.4.19
 
 ```bash
-docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx:4.3.10        # 开源版
-docker run -d --name emqx-ee -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx-ee:4.2.9   # 企业版
+docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx:4.4.19
 ```
 
-
-
-### 4.8 Elastic Stack
-
-#### 4.8.1 Elasticsearch
-
-1. 拉取镜像
-
-```bash
-docker pull elasticsearch:7.6.2
-```
-
-2. 临时修改虚拟内存区域大小，否则会因为过小而无法启动
-
-```bash
-sysctl -w vm.max_map_count=262144
-```
-
-3. 目录授权
-
-```bash
-chmod 777 /data/elasticsearch/data/
-```
-
-4. 启动服务
-
-```bash
-docker run -p 9200:9200 -p 9300:9300 --name elasticsearch \
--e "discovery.type=single-node" \
--e "cluster.name=elasticsearch" \
--v /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins \
--v /data/elasticsearch/data:/usr/share/elasticsearch/data \
--d elasticsearch:7.6.2
-```
-
-5. 安装中文分词器IKAnalyzer
-
-```bash
-docker exec -it elasticsearch /bin/bash
-#此命令需要在容器中运行
-elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.6.2/elasticsearch-analysis-ik-7.6.2.zip
-docker restart elasticsearch
-http://192.168.3.200:9200/_cat/plugins
-```
-
-6. 安装elasticsearch-head插件
-
-```bash
-docker run -d -p 9100:9100 docker.io/mobz/elasticsearch-head:5
-```
-
-elasticsearch.yml，在文件末尾加入以下配置开启跨域
-
-```yml
-http.cors.enabled: true
-http.cors.allow-origin: "*"
-```
-
-#### 4.8.2 Logstash
-
-1. 拉取镜像
-
-```bash
-docker pull logstash:7.6.2
-```
-
-2. 创建logstash.conf
-
-```
-input {
-  tcp {
-    mode => "server"
-    host => "0.0.0.0"
-    port => 4560
-    codec => json_lines
-    type => "debug"
-  }
-  tcp {
-    mode => "server"
-    host => "0.0.0.0"
-    port => 4561
-    codec => json_lines
-    type => "error"
-  }
-  tcp {
-    mode => "server"
-    host => "0.0.0.0"
-    port => 4562
-    codec => json_lines
-    type => "business"
-  }
-  tcp {
-    mode => "server"
-    host => "0.0.0.0"
-    port => 4563
-    codec => json_lines
-    type => "record"
-  }
-}
-filter{
-  if [type] == "record" {
-    mutate {
-      remove_field => "port"
-      remove_field => "host"
-      remove_field => "@version"
-    }
-    json {
-      source => "message"
-      remove_field => ["message"]
-    }
-  }
-}
-output {
-  elasticsearch {
-    hosts => "es:9200"
-    index => "mall-%{type}-%{+YYYY.MM.dd}"
-  }
-}
-```
-
-3. 创建`/data/logstash`目录，并将Logstash的配置文件`logstash.conf`拷贝到该目录；
-
-```bash
-mkdir /data/logstash
-```
-
-4. 使用如下命令启动Logstash服务；
-
-```bash
-docker run --name logstash -p 4560:4560 -p 4561:4561 -p 4562:4562 -p 4563:4563 \
---link elasticsearch:es \
--v /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf \
--d logstash:7.6.2
-```
-
-5. 进入容器内部，安装`json_lines`插件。
-
-```bash
-docker exec -it logstash /bin/bash
-cd /usr/share/logstash/bin
-logstash-plugin install logstash-codec-json_lines
-```
-
-#### 4.8.3 Kibana
-
-访问地址：http://192.168.3.200:5601
-
-```bash
-docker run --name kibana -p 5601:5601 \
---link elasticsearch:es \
--e "elasticsearch.hosts=http://es:9200" \
--d kibana:7.6.2
-```
 
 ### 4.9 持续集成
 
-#### 4.9.1 GitLab
+#### 4.9.1 GitLab 12.4.2
 
 创建目录
 
@@ -1943,7 +1937,7 @@ docker-compose restart  # 重新启动
 默认账户密码：admin/Harbor12345
 
 
-#### 4.9.4 SonarQube
+#### 4.9.4 SonarQube 8.6
 
 ```bash
 docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:8.6-community #H2默认存储
@@ -1961,16 +1955,16 @@ docker run -d --name sonarqube \
     sonarqube:8.6-community
 ```
 
-#### 4.9.5 Jenkins
+#### 4.9.5 Jenkins 2.332.4
 
 ```bash
 docker pull jenkins/jenkins:lts
-docker pull jenkins/jenkins
+docker pull jenkins/jenkins：
 
 mkdir -p /data/jenkins_home/
 chown -R 1000:1000 /data/jenkins_home/
 
-docker run -d --name jenkins -p 8888:8080 -p 50000:50000 -v /data/jenkins_home:/var/jenkins_home jenkins/jenkins
+docker run -d --name jenkins -p 8888:8080 -p 50000:50000 -v /data/jenkins_home:/var/jenkins_home jenkins/jenkins2.332.4
 
 cd /data/jenkins_home
 vi hudson.model.UpdateCenter.xml
@@ -2222,7 +2216,7 @@ vhost __defaultVhost__ {
 ./objs/srs -c conf/srs.woniu.conf
 ```
 
-#### 4.10.2 Openfire
+#### 4.10.2 Openfire 4.4.4
 
 -  4.4.4
 ```bash
@@ -2230,47 +2224,4 @@ docker run --name openfire -d --restart=always \
   --publish 9090:9090 --publish 5222:5222 --publish 7070:7070 \
   --volume /srv/docker/openfire:/var/lib/openfire \
   gizmotronic/openfire:4.4.4
-```
-
-### 4.11 其他
-
-#### 4.11.1 Zentao
-
-```bash
-mkdir -p /data/zbox
-docker run -d -p 8080:80 -p 3316:3306 -e USER="admin" -e PASSWD="admin" -e BIND_ADDRESS="false" -e SMTP_HOST="163.177.90.125 smtp.exmail.qq.com" -v /data/zbox/:/opt/zbox/ --name zentao-server idoop/zentao:latest 
-```
-
-- 8080 访问禅道外部端口号
-- 3316 把容器3306数据库端口映射到主机3316端口
-- USER 设置登录账号 admin
-- PASSWD 设置登录密码 123456
-- BIND_ADDRESS 设置为false
-
-
-#### 4.11.2 Node-RED
-
-```bash
-sudo docker run -it -p 1880:1880 --name=nodered --restart=always --user=root --net=host -v /data/nodered:/data -e TZ=Asia/Shanghai nodered/node-red
-```
-
-
-#### 4.11.3 Eclipse Che
-
-http://ip:8080
-
-```bash
-docker run -it -d --rm \
--v /var/run/docker.sock:/var/run/docker.sock \
--v /data/che:/data \
-eclipse/che start
-```
-
-#### 4.11.4 Theia
-
-```bash
-chown -R 1000:1000 /data/
-docker run -it -d -p 3000:3000 -v "/data/theia:/home/project:cached" theiaide/theia
-docker run -it -d -p 3000:3000 -v "/data/theia-java:/home/project:cached" theiaide/theia-java
-docker run -it -d --init -p 3000:3000 -v "/data/theia-full:/home/project:cached" theiaide/theia-full
 ```
