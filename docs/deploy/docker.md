@@ -1210,17 +1210,17 @@ fdfs_test /etc/fdfs/client.conf upload index.html
 #### 4.5.2 MinIO
 
 ```bash
-docker pull minio/minio:RELEASE.2022-01-04T07-41-07Z
+docker pull minio/minio
 
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   -v /data/minio/data:/data \
   -v /data/minio/config:/root/.minio \
-  minio/minio:RELEASE.2022-01-04T07-41-07Z server /data --console-address ":9001"
+  minio/minio server /data --console-address ":9001"
 ```
 
 访问地址：http://192.168.2.100:9001/ ，账户密码：minioadmin/minioadmin
 
-#### 4.5.3 Hadoop 2.x
+#### 4.5.3 Hadoop 2.7.1
 
 ```bash
 docker run -dit --name hadoop2 -h hadoop2 \
@@ -1233,17 +1233,12 @@ docker run -dit --name hadoop2 -h hadoop2 \
 
 ```bash
 docker exec -it hadoop2 /bin/bash
-# 配置环境
-vi /etc/profile
-export HADOOP_HOME="/usr/local/hadoop-2.7.1"
-export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
-
-source /etc/profile
+cd /usr/local/hadoop-2.7.1/
 # 统计高频词出现次数
-hadoop fs -mkdir -p /wordcount/input
-hadoop fs -put a.txt /wordcount/input # 创建a.txt并编辑内容
-hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar wordcount /wordcount/input /wordcount/output
-hadoop fs -cat /wordcount/output/part-r-00000
+bin/hadoop fs -mkdir -p /wordcount/input
+bin/hadoop fs -put a.txt /wordcount/input # 创建a.txt并编辑内容
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar wordcount /wordcount/input /wordcount/output
+bin/hadoop fs -cat /wordcount/output/part-r-00000
 ```
 
 ```lua
