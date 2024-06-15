@@ -1044,7 +1044,6 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 #### 4.3.1 Memcached 1.6.12
 
 ```bash
-docker pull memcached:1.6.12
 docker run -dit --name memcached -m 128m -c 16382 -p 11211:11211 -d memcached:1.6.12
 ```
 
@@ -1085,7 +1084,6 @@ docker run --name redis-stat -p 8080:63790 -d insready/redis-stat --server 192.1
 prometheus监控
 
 ```bash
-docker pull oliver006/redis_exporter:v1.28.0
 docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:v1.28.0 --redis.addr redis://172.17.17.191:16379 --redis.password 'redis16379'
 ```
 
@@ -1210,8 +1208,6 @@ fdfs_test /etc/fdfs/client.conf upload index.html
 #### 4.5.2 MinIO
 
 ```bash
-docker pull minio/minio
-
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   -v /data/minio/data:/data \
   -v /data/minio/config:/root/.minio \
@@ -1651,9 +1647,7 @@ docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.200:218
 
 #### 4.7.5 Pulsar
 
-
 ```bash
-docker pull apachepulsar/pulsar:2.8.4
 docker run -dit \
     -p 6650:6650 \
     -p 8080:8080 \
@@ -1665,7 +1659,6 @@ docker run -dit \
 ```
 
 ```bash
-docker pull apachepulsar/pulsar-manager:v0.2.0
 docker run -dit \
     -p 9527:9527 -p 7750:7750 \
     -e SPRING_CONFIGURATION_FILE=/pulsar-manager/pulsar-manager/application.properties \
@@ -1847,8 +1840,6 @@ logstash-plugin install logstash-codec-json_lines
 访问地址：http://192.168.3.200:5601
 
 ```bash
-docker pull kibana:7.6.2
-
 docker run --name kibana -p 5601:5601 \
 --link elasticsearch:es \
 -e "elasticsearch.hosts=http://es:9200" \
@@ -1859,11 +1850,10 @@ docker run --name kibana -p 5601:5601 \
 
 #### 4.9.1 GitLab
 
-拉取镜像
+创建目录
 
 ```bash
-docker pull gitlab/gitlab-ce:12.4.2-ce.0
-mkdir -p /data/gitlab/{config,logs,data}  # 创建目录
+mkdir -p /data/gitlab/{config,logs,data}
 ```
 
 启动服务
@@ -1899,7 +1889,6 @@ docker restart gitlab
 #### 4.9.2 Nexus3
 
 ```bash
-docker pull sonatype/nexus3:3.36.0
 mkdir -p /home/mvn/nexus-data  && chown -R 200 /home/mvn/nexus-data
 docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sonatype/nexus3:3.36.0
 ```
@@ -2072,7 +2061,6 @@ admin:admin
 #### 4.10.1 SRS
 
 ```bash
-docker pull ossrs/srs:v4.0.187
 # 默认安装
 docker run --rm -p 1935:1935 -p 1985:1985 -p 8080:8080 \
     -v /home/srs-4.0.187/trunk/conf/srs.conf:/usr/local/srs/conf/srs.conf \
