@@ -1271,9 +1271,9 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 ```
 
 
-### 4.6 分布式中间件
+### 4.5 分布式中间件
 
-#### 4.6.1 Nacos 2.0.1
+#### 4.5.1 Nacos 2.0.1
 
 ```bash
 docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
@@ -1290,14 +1290,14 @@ docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone \
 --restart=always nacos/nacos-server:2.0.1
 ```
 
-#### 4.6.2 Consul 1.12.1
+#### 4.5.2 Consul 1.12.1
 
 ```
 docker run -d -p 8500:8500 --restart=always --name=consul consul:1.12.1 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
 ```
 
 
-#### 4.6.3 Seata 1.4.2 
+#### 4.5.3 Seata 1.4.2 
 
 1. 下载镜像
 
@@ -1400,13 +1400,13 @@ SEATA_CONFIG_NAME   # 可选, 指定配置文件位置, 如 file:/root/registry,
 # 如果需要同时指定 file.conf文件，需要将registry.conf的config.file.name的值改为类似file:/root/file.conf：
 ```
 
-#### 4.6.4 Sentinel 1.7.2
+#### 4.5.4 Sentinel 1.7.2
 
 ```bash
 docker run --name sentinel -d -p 8858:8858 -d bladex/sentinel-dashboard:1.7.2
 ```
 
-#### 4.6.5 Dubbo Admin
+#### 4.5.5 Dubbo Admin
 
 ```bash
 docker run -d -p 7001:7001 -e dubbo.registry.address=zookeeper://172.17.17.200:2181 \
@@ -1415,7 +1415,7 @@ docker run -d -p 7001:7001 -e dubbo.registry.address=zookeeper://172.17.17.200:2
 chenchuxin/dubbo-admin
 ```
 
-#### 4.6.6 Zookeeper 3.7.0
+#### 4.5.6 Zookeeper 3.7.0
 
 ```bash
 docker run -d -p 2181:2181 --name some-zookeeper --restart always -d zookeeper:3.7.0
@@ -1441,13 +1441,13 @@ docker run -p 2181:2181 --name zookeeper \
 ```
 
 
-#### 4.6.7 Zipkin 2.23
+#### 4.5.7 Zipkin 2.23
 
 ```bash
 docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 ```
 
-#### 4.6.8 SkyWalking 8.9.1
+#### 4.5.8 SkyWalking 8.9.1
 
 1. 相关组件版本
 
@@ -1536,7 +1536,7 @@ https://archive.apache.org/dist/skywalking/java-agent/8.16.0/apache-skywalking-j
 http://192.168.2.201:8080
 
 
-#### 4.6.9 Elasticsearch 7.6.2
+#### 4.5.9 Elasticsearch 7.6.2
 
 1. 拉取镜像
 
@@ -1590,7 +1590,7 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-#### 4.6.10 Logstash 7.6.2
+#### 4.5.10 Logstash 7.6.2
 
 1. 拉取镜像
 
@@ -1675,7 +1675,7 @@ cd /usr/share/logstash/bin
 logstash-plugin install logstash-codec-json_lines
 ```
 
-#### 4.6.11 Kibana 7.6.2
+#### 4.5.11 Kibana 7.6.2
 
 访问地址：http://192.168.3.200:5601
 
@@ -1686,9 +1686,9 @@ docker run --name kibana -p 5601:5601 \
 -d kibana:7.6.2
 ```
 
-### 4.7 消息中间件
+### 4.6 消息中间件
 
-#### 4.7.1 ActiveMQ 5.14.3
+#### 4.6.1 ActiveMQ 5.14.3
 
 ```bash
 docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:61616  webcenter/activemq:5.14.3
@@ -1697,7 +1697,7 @@ docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:
 控制台地址：http://0.0.0.0:8161
 默认账号密码admin/admin
 
-#### 4.7.2 RabbitMQ 3.7.15
+#### 4.6.2 RabbitMQ 3.7.15
 
 ```bash
 docker run -p 5672:5672 -p 15672:15672 --name rabbitmq -d rabbitmq:3.7.15
@@ -1716,7 +1716,7 @@ rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 控制台地址：http://0.0.0.0:15672
 账号密码admin/123456
 
-#### 4.7.3 RocketMQ 4.4.0
+#### 4.6.3 RocketMQ 4.4.0
 
 1. 创建目录
 
@@ -1768,7 +1768,7 @@ docker run -d -p 10911:10911 -p 10909:10909 -v  /data/rocketmq/data/broker/logs:
 docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=172.17.17.200:9876" -p 9080:8080 -t apacherocketmq/rocketmq-dashboard:1.0.0
 ```
 
-#### 4.7.4 Kafka
+#### 4.6.4 Kafka
 
 ```
 docker pull wurstmeister/kafka:2.13-2.8.1
@@ -1788,7 +1788,7 @@ docker run -itd --name kafka -p 9092:9092 \
 docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.200:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
 ```
 
-#### 4.7.5 Pulsar
+#### 4.6.5 Pulsar
 
 ```bash
 docker run -dit \
@@ -1828,16 +1828,16 @@ curl \
 添加Environment连接集群：http://192.168.2.201:8080
 
 
-#### 4.7.6 EMQX 4.4.19
+#### 4.6.6 EMQX 4.4.19
 
 ```bash
 docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx:4.4.19
 ```
 
 
-### 4.9 持续集成
+### 4.7 持续集成
 
-#### 4.9.1 GitLab 12.4.2
+#### 4.7.1 GitLab 12.4.2
 
 创建目录
 
@@ -1875,14 +1875,14 @@ docker restart gitlab
 ```
 
 
-#### 4.9.2 Nexus3
+#### 4.7.2 Nexus3
 
 ```bash
 mkdir -p /home/mvn/nexus-data  && chown -R 200 /home/mvn/nexus-data
 docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sonatype/nexus3:3.36.0
 ```
 
-#### 4.9.3 Harbor
+#### 4.7.3 Harbor
 
 1. 上传解压
 
@@ -1937,7 +1937,7 @@ docker-compose restart  # 重新启动
 默认账户密码：admin/Harbor12345
 
 
-#### 4.9.4 SonarQube 8.6
+#### 4.7.4 SonarQube 8.6
 
 ```bash
 docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:8.6-community #H2默认存储
@@ -1955,7 +1955,7 @@ docker run -d --name sonarqube \
     sonarqube:8.6-community
 ```
 
-#### 4.9.5 Jenkins 2.332.4
+#### 4.7.5 Jenkins 2.332.4
 
 ```bash
 docker pull jenkins/jenkins:lts
@@ -1971,7 +1971,7 @@ vi hudson.model.UpdateCenter.xml
 # http://mirror.xmission.com/jenkins/updates/update-center.json
 ```
 
-#### 4.9.6 Prometheus
+#### 4.7.6 Prometheus
 
 ```bash
 docker pull prom/prometheus
@@ -2036,7 +2036,7 @@ scrape_configs:
 docker-compose -f docker-compose-prometheus.yml up -d  
 ```
 
-#### 4.9.7 Grafana
+#### 4.7.7 Grafana
 
 ```bash
 docker run -d -p 3000:3000 --name grafana grafana/grafana
@@ -2045,9 +2045,9 @@ docker run -d -p 3000:3000 --name grafana grafana/grafana
 admin:admin
 
 
-### 4.10 即时通讯
+### 4.8 即时通讯
 
-#### 4.10.1 SRS
+#### 4.8.1 SRS
 
 ```bash
 # 默认安装
@@ -2216,7 +2216,7 @@ vhost __defaultVhost__ {
 ./objs/srs -c conf/srs.woniu.conf
 ```
 
-#### 4.10.2 Openfire 4.4.4
+#### 4.8.2 Openfire 4.4.4
 
 -  4.4.4
 ```bash
