@@ -855,7 +855,7 @@ ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./ur
 
 ### 4.1 容器管理
 
-#### 4.1.1 portainer-ce
+#### 4.1.1 portainer 2.11
 
 ```bash
 docker volume create portainer_data
@@ -867,7 +867,7 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     portainer/portainer-ce:2.11.0
 ```
 
-#### 4.1.2 Nginx
+#### 4.1.2 Nginx 1.20
 
 ```bash
 docker run -p 80:80 --name nginx \
