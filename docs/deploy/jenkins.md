@@ -341,15 +341,14 @@ tar -zxf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
 ```bash
 vi /opt/apache-tomcat-8.5.66/conf/tomcat-users.xml
 
-<tomcat-users>
-<role rolename="tomcat"/>
-<role rolename="role1"/>
-<role rolename="manager-script"/>
+<tomcat-users>  
 <role rolename="manager-gui"/>
 <role rolename="manager-status"/>
+<role rolename="manager-script"/>
+<role rolename="manager-jmx"/>
 <role rolename="admin-gui"/>
 <role rolename="admin-script"/>
-<user username="tomcat" password="tomcat" roles="manager-gui,manager-script,tomcat,admin-gui,admin-script"/>
+<user username="tomcat" password="tomcat" roles="manager-gui,manager-status,manager-script,manager-jmx,admin-gui,admin-script"/>
 </tomcat-users>
 ```
 
