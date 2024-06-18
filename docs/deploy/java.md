@@ -53,6 +53,47 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
         keystorePass="123456" /> 
 ```
 
+3. 内置角色
+
+Tomcat针对manager内置了6个角色，分别为 admin-gui , admin-script , manager-gui , manager-script , manager-status , manager-jmx
+
+负责Server Status、Manager App 功能的角色
+   - manager-gui：访问 HTML 页面
+   - manager-status：仅访问 “服务器状态” 页面
+   - manager-script：访问脚本页面，以及 “服务器状态” 页面
+   - manager-jmx：访问 JMX 代理接口和 “服务器状态” 页面
+
+负责 Host Manager 功能的角色
+   - admin-gui：访问HTML页面
+   - admin-script： 访问脚本页面
+
+
+进入tomcat的/conf目录下，打开tomcat-users.xml文件，复制以下内容到配置文件中
+
+```conf
+<tomcat-users>  
+    <role rolename="manager-gui"/>
+    <role rolename="manager-status"/>
+    <role rolename="manager-script"/>
+    <role rolename="manager-jmx"/>
+    <role rolename="admin-gui"/>
+    <role rolename="admin-script"/>
+    <user username="tomcat" password="tomcat" roles="manager-gui,manager-status,manager-script,manager-jmx,admin-gui,admin-script"/>
+</tomcat-users>
+```
+
+然后将/webapps/manager/META-INF/和webapps/host-manager/META-INF/下的context.xml进行修改（manager和host-manager目录下的context.xml两个都要改）
+
+将context.xml的只针对本地请求放行这一设置注释掉即可，如下：
+
+```conf
+<Context antiResourceLocking="false" privileged="true" >
+<!--  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+         allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" /> -->
+  <Manager sessionAttributeValueClassNameFilter="java\.lang\.(?:Boolean|Integer|Long|Number|String)|org\.apache\.catalina\.filters\.CsrfPreventionFilter\$LruCache(?:\$1)?|java\.util\.(?:Linked)?HashMap"/>
+</Context>
+```
+
 ### 1.3 安装IDEA
 
 ![](../../assets/_images/deploy/java/1.png)
