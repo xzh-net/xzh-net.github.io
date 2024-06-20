@@ -16,9 +16,22 @@
   - [SQL Server](deploy/mssql)
   - [MongoDB](deploy/mongodb)
   - [Redis](deploy/redis)
-  - [HBase](deploy/hbase)
   - [DM](deploy/dm)
 
+- 大数据
+  - [HBase](deploy/hbase)
+  - [ClickHouse](deploy/clickhouse)
+  - [Kudu](deploy/kudu)
+  - [Kafka](deploy/kafka)
+  - [Hadoop](deploy/hadoop)
+  - [Spark](deploy/spark)
+  - [Flink](deploy/flink)
+  - [Flume](deploy/flume)
+  - [Hive](deploy/hive)
+  - [Kettle](deploy/kettle)
+  - [DataX](deploy/datax)
+  - [Debezium](deploy/debezium)
+  
 - 中间件
   - [Nginx](deploy/nginx)
   - [OpenResty](deploy/openresty)
@@ -33,8 +46,14 @@
   - [Jenkins](deploy/jenkins)
   - [Prometheus](deploy/prometheus)
   - [Zabbix](deploy/zabbix)
-  - [Skywalking](deploy/skywalking)
+  - [Simple RTMP Server](deploy/srs)
+  - [Turnserver](deploy/turnserver)
+  - [Nps](deploy/nps)
+
+- 分布式
   - [Elastic Stack](deploy/elk)
+  - [FastDFS](deploy/fastdfs)
+  - [Skywalking](deploy/skywalking)
   - [Zookeeper](deploy/zookeeper)
   - [Etcd](deploy/etcd)
   - [Seata](deploy/seata)
@@ -42,22 +61,8 @@
   - [RocketMQ](deploy/rocketmq)
   - [Pulsar](deploy/pulsar)
   - [Emqx](deploy/emqx)
-  - [Kafka](deploy/kafka)
-  - [Debezium](deploy/debezium)
-  - [FastDFS](deploy/fastdfs)
-  - [Hadoop](deploy/hadoop)
-  - [Spark](deploy/spark)
-  - [Flink](deploy/flink)
-  - [Flume](deploy/flume)
-  - [Hive](deploy/hive)
-  - [ClickHouse](deploy/clickhouse)
-  - [Kettle](deploy/kettle)
-  - [DataX](deploy/datax)
-  - [Simple RTMP Server](deploy/srs)
-  - [TURN Server](deploy/turnserver)
-  - [Nps](deploy/nps)
   - [Mycat](deploy/mycat)
-
+  
 - 开发工具
   - [Java](deploy/java)
   - [Sacla](deploy/scala)
