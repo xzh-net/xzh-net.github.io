@@ -1,6 +1,6 @@
-# TURN Server 4.5.0.8
+# Turnserver 4.5.0.8
 
-TURN Server是VoIP媒体流量NAT穿越服务器和网关。它也可以用作通用网络流量TURN服务器和网关。在使用WebRTC进行即时通讯时，需要使浏览器进行P2P通讯，但是由于NAT环境的复杂性，并不是所有情况下都能进行P2P，这时需要TURN Server来帮助客户端之间转发数据
+Turnserver是VoIP媒体流量NAT穿越服务器和网关。它也可以用作通用网络流量Turn服务器和网关。在使用WebRTC进行即时通讯时，需要使浏览器进行P2P通讯，但是由于NAT环境的复杂性，并不是所有情况下都能进行P2P，这时需要Turnserver来帮助客户端之间转发数据
 
 libevent是一个事件通知库，适用于windows、linux、bsd等多种平台，内部使用select、epoll、kqueue、IOCP等系统调用管理事件机制。著名分布式缓存软件memcached也是基于libevent，coturn的底层网络部分依赖libevent
 
