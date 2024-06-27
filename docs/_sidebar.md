@@ -49,6 +49,7 @@
   - [Simple RTMP Server](deploy/srs)
   - [Turnserver](deploy/turnserver)
   - [Nps](deploy/nps)
+  - [Fisco Bcos](deploy/fisco)
 
 - 分布式
   - [Elastic Stack](deploy/elk)
