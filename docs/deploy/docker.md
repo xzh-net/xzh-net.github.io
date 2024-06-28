@@ -1875,14 +1875,14 @@ docker restart gitlab
 ```
 
 
-#### 4.7.2 Nexus3
+#### 4.7.2 Nexus3 3.36
 
 ```bash
 mkdir -p /home/mvn/nexus-data  && chown -R 200 /home/mvn/nexus-data
 docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sonatype/nexus3:3.36.0
 ```
 
-#### 4.7.3 Harbor
+#### 4.7.3 Harbor 2.0.1
 
 1. 上传解压
 
