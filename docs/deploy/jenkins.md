@@ -98,24 +98,15 @@ sed -i 's/http:\/\/updates.jenkinsci.org\/download/https:\/\/mirrors.tuna.tsingh
 sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ```
 
-
-
-
 重启服务：http://172.17.17.200:8888/restart
-
 
 #### 1.3.2 下载中文汉化插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
-插件下载错误，需要下载skip-certificate-check，用于ssl无法识别问题以及插件安装超时问题，可以到国内清华大学开源软件镜像站的插件中心https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/skip-certificate-check 下载后直接放在你的Jenkins的plugins目录下即可，需要重启两次完成加载
-
-### 1.4 Jenkins用户权限管理
+### 1.4 权限管理
 
 #### 1.4.1 忘记密码
-
-1. 修改密码
-   
 
 编辑config.xml文件，替换passwordHash行的内容123456
 
@@ -125,7 +116,7 @@ vim /var/lib/jenkins/users/admin_1679382529066310837/config.xml
 systemctl restart jenkins
 ```
 
-2. 关闭安全功能
+#### 1.4.2 关闭安全功能
 
 ```bash
 vim /var/lib/jenkins/config.xml
@@ -133,9 +124,9 @@ vim /var/lib/jenkins/config.xml
 systemctl restart jenkins
 ```
 
-#### 1.4.2 权限设置
+#### 1.4.3 权限设置
 
-1. 安装Role-based Authorization Strategy插件来管理Jenkins用户权限
+1. 安装`Role-based Authorization Strategy`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_role.png)
 
@@ -143,13 +134,11 @@ systemctl restart jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set.png)
 
-3. 授权策略切换为"Role-Based Strategy"
+3. 授权策略切换为`Role-Based Strategy`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set2.png)
 
 4. 创建角色
-
-在系统管理页面进入 Manage and Assign Roles
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_role.png)
 
@@ -167,21 +156,19 @@ missing the Overall/Read permission
 
 5. 创建用户
 
-在系统管理页面进入 Manage Users
-
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user2.png)
 
+6. 用户角色绑定
+
 系统管理页面进入Manage and Assign Roles，点击Assign Roles，绑定规则如下：
-- zhangsan用户分别绑定baseRole和role1角色(xuzhihao)
-- lisi用户分别绑定baseRole和role2角色(xzh)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user3.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user_role.png)
 
-6. 创建项目测试权限
+1. 创建项目测试权限
 
 以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
