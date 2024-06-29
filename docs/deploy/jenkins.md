@@ -27,7 +27,8 @@ wget https://get.jenkins.io/redhat-stable/jenkins-2.332.1-1.1.noarch.rpm
 rpm -ivh jenkins-2.332.1-1.1.noarch.rpm
 ```
 
-如果安装过，直接卸载
+> 如果安装过，可以卸载
+
 ```bash
 rpm -qa |grep jenkins
 rpm -e --nodeps jenkins-2.332.1-1.1.noarch
@@ -37,20 +38,39 @@ rpm -e --nodeps jenkins-2.332.1-1.1.noarch
 
 ```bash
 vi /etc/sysconfig/jenkins
-JENKINS_USER="root"
-JENKINS_PORT="8888"
+```
 
-firewall-cmd --zone=public --add-port=8888/tcp --permanent
-firewall-cmd --reload
+设置启动用户和默认端口号
+
+```conf
+JENKINS_USER="root"
+JENKINS_PORT="8080"
+```
+
+#### 1.2.3 启动服务
+
+```bash
 systemctl daemon-reload
 systemctl start jenkins
 ```
 
-访问地址：http://172.17.17.200:8888/
+访问地址：http://172.17.17.200:8080/
 
-![](../../assets/_images/deploy/jenkins/jenkins_skip.png)
 
-![](../../assets/_images/deploy/jenkins/jenkins_admin.png)
+![](../../assets/_images/deploy/jenkins/jenkins_skip1.png)
+
+查看管理员密码
+```bash
+/var/lib/jenkins/secrets/initialAdminPassword
+```
+
+因为Jenkins插件需要连接默认官网下载，速度非常慢，所以我们暂时先跳过插件安装
+
+![](../../assets/_images/deploy/jenkins/jenkins_skip2.png)
+
+![](../../assets/_images/deploy/jenkins/jenkins_skip3.png)
+
+![](../../assets/_images/deploy/jenkins/jenkins_skip4.png)
 
 
 ### 1.3 Jenkins插件管理
