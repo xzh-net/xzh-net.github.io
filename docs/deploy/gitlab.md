@@ -23,9 +23,9 @@ firewall-cmd --reload
 ### 1.3 下载安装
 
 ```bash
-wget https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el6/gitlab-ce-12.4.2-ce.0.el6.x86_64.rpm --no-check-certificate
+wget https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7/gitlab-ce-12.4.2-ce.0.el7.x86_64.rpm --no-check-certificate
 # 安装
-rpm -i gitlab-ce-12.4.2-ce.0.el6.x86_64.rpm --force --nodeps
+rpm -i gitlab-ce-12.4.2-ce.0.el7.x86_64.rpm --force --nodeps
 ```
 
 ### 1.4 修改配置
