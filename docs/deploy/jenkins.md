@@ -73,7 +73,7 @@ systemctl start jenkins
 ![](../../assets/_images/deploy/jenkins/jenkins_skip4.png)
 
 
-### 1.3 Jenkins插件管理
+### 1.3 插件管理
 
 #### 1.3.1 修改插件源
 
@@ -187,7 +187,7 @@ missing the Overall/Read permission
 以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
 
-### 1.5 Jenkins凭证管理
+### 1.5 凭证管理
 
 凭据可以用来存储需要密文保护的数据库密码、Gitlab密码信息、Docker私有仓库密码等，以便Jenkins可以和这些第三方的应用进行交互
 
@@ -352,8 +352,8 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 ```bash
 yum install java-1.8.0-openjdk* -y              # 安装JDK（已完成）
 cd /opt/software/
-tar -zxf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
-/opt/apache-tomcat-8.5.66/bin/startup.sh        # 启动
+tar -zxf apache-tomcat-8.5.100.tar.gz -C /opt    # 解压
+/opt/apache-tomcat-8.5.100/bin/startup.sh        # 启动
 ```
 
 > 地址为：http://172.17.17.196/8080
@@ -363,7 +363,7 @@ tar -zxf apache-tomcat-8.5.66.tar.gz -C /opt    # 解压
 默认情况下Tomcat是没有配置用户角色权限的，后续Jenkins部署项目到Tomcat服务器，需要用到Tomcat的用户，所以修改tomcat以下配置，添加用户及权限
 
 ```bash
-vi /opt/apache-tomcat-8.5.66/conf/tomcat-users.xml
+vi /opt/apache-tomcat-8.5.100/conf/tomcat-users.xml
 
 <tomcat-users>  
 <role rolename="manager-gui"/>
@@ -378,7 +378,7 @@ vi /opt/apache-tomcat-8.5.66/conf/tomcat-users.xml
 
 用户和密码都是：tomcat，为了能够刚才配置的用户登录到Tomcat，还需要修改以下配置
 ```bash
-vi /opt/apache-tomcat-8.5.66/webapps/manager/META-INF/context.xml
+vi /opt/apache-tomcat-8.5.100/webapps/manager/META-INF/context.xml
 
 <!--
 <Valve className="org.apache.catalina.valves.RemoteAddrValve"
