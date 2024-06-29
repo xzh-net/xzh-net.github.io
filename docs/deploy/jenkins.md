@@ -1,4 +1,4 @@
-# Jenkins 2.332
+# Jenkins 2.426 LTS
 
 Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工具，用于监控持续重复的工作，旨在提供一个开放易用的软件平台，使软件项目可以进行持续集成
 
@@ -9,8 +9,8 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 | **名称**  | **IP地址**  | **安装的软件**  |
 | :---------- | :---------- | :---------------------------------- |
 | 代码托管服务器    | 172.17.17.196 | Gitlab-12.4.2 |
-| 持续集成服务器    | 172.17.17.200 | Jenkins-2.332，JDK1.8，Maven3.6.3，Git，SonarQube |
-| 应用测试服务器    | 172.17.17.196 | JDK1.8，Tomcat8.5 |
+| 持续集成服务器    | 172.17.17.200 | Jenkins-2.426，JDK17，Maven3.6.3，Git，SonarQube |
+| 应用测试服务器    | 172.17.17.196 | JDK8，Tomcat8.5.100 |
 
 ### 1.1 Gitlab安装
 
@@ -21,30 +21,35 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 #### 1.2.1 下载安装
 
 ```bash
-yum install java-1.8.0-openjdk* -y  # 安装目录：/usr/lib/jvm
+# 安装依赖
 yum -y install epel-release daemonize
-wget https://get.jenkins.io/redhat-stable/jenkins-2.332.1-1.1.noarch.rpm
-rpm -ivh jenkins-2.332.1-1.1.noarch.rpm
+# 安装jdk17
+wget https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm
+rpm -ivh jdk-17_linux-x64_bin.rpm
+# jenkins
+wget https://get.jenkins.io/redhat-stable/jenkins-2.426.1-1.1.noarch.rpm
+rpm -ivh jenkins-2.426.1-1.1.noarch.rpm
 ```
 
 > 如果安装过，可以卸载
 
 ```bash
 rpm -qa |grep jenkins
-rpm -e --nodeps jenkins-2.332.1-1.1.noarch
+rpm -e --nodeps jenkins-2.426.1-1.1.noarch
+find / -iname jenkins | xargs -n 1000 rm -rf
 ```
 
 #### 1.2.2 修改配置
 
 ```bash
-vi /etc/sysconfig/jenkins
+vim /usr/lib/systemd/system/jenkins.service
 ```
 
-设置启动用户和默认端口号
+设置启动用户组
 
 ```conf
-JENKINS_USER="root"
-JENKINS_PORT="8080"
+User=root
+Group=root
 ```
 
 #### 1.2.3 启动服务
@@ -72,18 +77,18 @@ systemctl start jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_skip4.png)
 
+![](../../assets/_images/deploy/jenkins/jenkins_skip5.png)
+
+![](../../assets/_images/deploy/jenkins/jenkins_skip6.png)
 
 ### 1.3 插件管理
 
 #### 1.3.1 修改插件下载地址
 
-Jenkins->Manage Jenkins->Manage Plugins，点击`Advanced`，把`Update Site`地址改为`http://updates.jenkins-zh.cn/update-center.json`来解除https校验，这样做是为了把Jenkins官方的插件列表下载到本地。
+Dashboard -> Manage Jenkins -> Plugins，点击`Advanced settings`，将`Update Site`地址改为`https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json`
 
-![](../../assets/_images/deploy/jenkins/jenkins_plugin_https.png)
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_tuna.png)
 
-然后，Manage Plugins点击`Available`待全部载入完毕
-
-![](../../assets/_images/deploy/jenkins/jenkins_plugin_load.png)
 
 修改地址文件
 
@@ -93,18 +98,13 @@ sed -i 's/http:\/\/updates.jenkinsci.org\/download/https:\/\/mirrors.tuna.tsingh
 sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ```
 
-最后，Manage Plugins点击`Advanced`，把`Update Site`改为清华大学插件下载地址
 
-```bash
-https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
-```
 
-![](../../assets/_images/deploy/jenkins/jenkins_plugin_tuna.png)
 
 重启服务：http://172.17.17.200:8888/restart
 
 
-#### 1.3.2 汉化插件
+#### 1.3.2 下载中文汉化插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
