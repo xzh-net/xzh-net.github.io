@@ -134,13 +134,11 @@ systemctl restart jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set.png)
 
-#### 1.4.5 设置授权策略
-
 授权策略切换为`Role-Based Strategy`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set2.png)
 
-#### 1.4.6 创建角色
+#### 1.4.5 创建角色
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_role.png)
 
@@ -156,19 +154,19 @@ missing the Overall/Read permission
 
 ![](../../assets/_images/deploy/jenkins/jenkins_role2.png)
 
-#### 1.4.7 创建用户
+#### 1.4.6 创建用户
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user2.png)
 
-#### 1.4.8 用户角色绑定
+#### 1.4.7 用户角色绑定
 
 系统管理页面进入Manage and Assign Roles，点击Assign Roles，绑定规则如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user3.png)
 
-#### 1.4.9 创建项目测试权限
+#### 1.4.8 创建项目测试权限
 
 以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
@@ -282,14 +280,14 @@ git ls-remote -h git@git.xxx.cn:root/website.git HEAD
 
 #### 1.6.1 Maven安装
 
-上传Maven上传到持续集成服务器172.17.17.200
+上传`apache-maven-3.6.3-bin.tar.gz`到Jenkins服务器
 
 ```bash
 cd /opt/software
 tar -zxf apache-maven-3.6.3-bin.tar.gz -C /opt # 解压
 
 vi /etc/profile
-export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
+export JAVA_HOME=/usr/local/jdk1.8.0_202
 export MAVEN_HOME=/opt/apache-maven-3.6.3
 export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin
 
@@ -297,23 +295,22 @@ source /etc/profile                   # 配置生效
 mvn -v                                # 查找Maven版本
 ```
 
-#### 1.6.2 全局工具配置关联JDK和Maven
+#### 1.6.2 全局配置关联JDK和Maven
 
-Jenkins->Global Tool Configuration->JDK->新增JDK，配置如下：
+Dashboard->Manage Jenkins->Tools，新增JDK和Maven配置如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_jdk.png)
-
-Jenkins->Global Tool Configuration->Maven->新增Maven，配置如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_maven.png)
 
 #### 1.6.3 添加Jenkins全局变量
 
-Manage Jenkins->Configure System->Global Properties ，添加三个全局变量JAVA_HOME、M2_HOME、PATH+EXTRA
+Dashboard->Manage Jenkins->System->全局属性 ，添加三个全局变量`JAVA_HOME`、`M2_HOME`、`PATH+EXTRA`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_env.png)
 
-1. 修改Maven的settings.xml
+
+#### 1.6.4 修改Maven配置文件
 
 ```bash
 mkdir /opt/repository # 仓库目录
@@ -336,13 +333,15 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 </mirrors>
 ```
 
-#### 1.6.4 测试Maven是否配置成功
+#### 1.6.5 测试Maven是否配置成功
 
-使用之前的gitlab密码测试项目，修改配置，构建->增加构建步骤->Execute Shell
+使用之前的测试项目->配置->构建步骤->增加构建步骤->Execute Shell
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mvn_build.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mvn_build2.png)
+
+![](../../assets/_images/deploy/jenkins/jenkins_mvn_build3.png)
 
 > 输入命令：mvn clean package
 
@@ -351,10 +350,9 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 
 #### 1.7.1 安装Tomcat8.5
 
-上传tomcat上传到应用服务器172.17.17.196
+上传`apache-tomcat-8.5.100.tar.gz`到Jenkins应用服务器
 
 ```bash
-yum install java-1.8.0-openjdk* -y              # 安装JDK（已完成）
 cd /opt/software/
 tar -zxf apache-tomcat-8.5.100.tar.gz -C /opt    # 解压
 /opt/apache-tomcat-8.5.100/bin/startup.sh        # 启动
