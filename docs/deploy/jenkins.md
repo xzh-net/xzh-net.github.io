@@ -124,21 +124,23 @@ vim /var/lib/jenkins/config.xml
 systemctl restart jenkins
 ```
 
-#### 1.4.3 权限设置
+#### 1.4.3 下载权限插件
 
-1. 安装`Role-based Authorization Strategy`插件
+安装`Role-based Authorization Strategy`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_role.png)
 
-2. 开启权限全局安全配置
+#### 1.4.4 开启权限全局安全配置
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set.png)
 
-3. 授权策略切换为`Role-Based Strategy`
+#### 1.4.5 设置授权策略
+
+授权策略切换为`Role-Based Strategy`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set2.png)
 
-4. 创建角色
+#### 1.4.6 创建角色
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_role.png)
 
@@ -154,21 +156,19 @@ missing the Overall/Read permission
 
 ![](../../assets/_images/deploy/jenkins/jenkins_role2.png)
 
-5. 创建用户
+#### 1.4.7 创建用户
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user2.png)
 
-6. 用户角色绑定
+#### 1.4.8 用户角色绑定
 
 系统管理页面进入Manage and Assign Roles，点击Assign Roles，绑定规则如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user3.png)
 
-![](../../assets/_images/deploy/jenkins/jenkins_create_user_role.png)
-
-1. 创建项目测试权限
+#### 1.4.9 创建项目测试权限
 
 以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
@@ -177,15 +177,17 @@ missing the Overall/Read permission
 
 凭据可以用来存储需要密文保护的数据库密码、Gitlab密码信息、Docker私有仓库密码等，以便Jenkins可以和这些第三方的应用进行交互
 
-#### 1.5.1 安装Credentials Binding插件
+#### 1.5.1 下载凭证插件
+
+安装`Credentials Binding`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials.png)
+
+安装成功后，多了一个凭证的菜单，可以管理所有凭证
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials2.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials3.png)
-
-安装插件后，左边多了"凭证"菜单，在这里管理所有凭证
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials4.png)
 
@@ -199,15 +201,17 @@ missing the Overall/Read permission
 常用的凭证类型有：`Username with password（用户密码）`和`SSH Username with private key（SSH密钥）`
 
 
-#### 1.5.2 安装Git插件和Git工具
+#### 1.5.2 下载Git插件
 
 为了让Jenkins支持从Gitlab拉取源码，需要安装Git插件以及在CentOS7上安装Git工具。
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_git.png)
 
+CentOS7上安装Git工具
+
 ```bash
-yum install git -y #安装
-git --version #安装后查看版本
+yum install git -y  # 安装
+git --version       # 查看版本
 ```
 
 #### 1.5.3 用户密码类型凭证
