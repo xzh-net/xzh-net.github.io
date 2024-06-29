@@ -222,15 +222,21 @@ git --version       # 查看版本
 
 选择"Username with password"，输入Gitlab的用户名和密码，点击"确定"
 
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_git3.png)
+
 2. 测试凭证是否可用
 
 创建一个FreeStyle项目：新建Item->FreeStyle Project->确定
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_project.png)
 
-找到"源码管理"->"Git"，在Repository URL复制Gitlab中的项目URL，选择刚才创建的凭证就不会报错
+找到`源码管理`->`Git`，在`Repository URL`复制Gitlab中的项目URL
 
 ![](../../assets/_images/deploy/jenkins/jenkins_clone_project.png)
+
+这时会报错说无法连接仓库！在Credentials选择刚刚添加的凭证就不报错啦
+
+![](../../assets/_images/deploy/jenkins/jenkins_clone_project2.png)
 
 保存配置后，点击构建”Build Now“ 开始构建项目
 
@@ -238,31 +244,39 @@ git --version       # 查看版本
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_bulid_console.png)
 
-> 代码的构建目录:/var/lib/jenkins/workspace
+查看/var/lib/jenkins/workspace/，发现已经从Gitlab成功拉取了代码到Jenkins中。
 
 #### 1.5.4 SSH密钥类型凭证
 
 ![](../../assets/_images/deploy/jenkins/jenkins_ssh_rsa.png)
 
-1. gitlab服务器使用root用户生成公钥和私钥在/root/.ssh/目录
+jenkins服务器使用root用户生成公钥和私钥，并存放在/root/.ssh/目录下
 
 ```bash
 ssh-keygen -t rsa
 ```
 
-2. 把生成的公钥放在Gitlab中
+在Gitlab中添加凭证，配置公钥
 
-以root账户登录->点击头像->Settings->SSH Public Keys->复制刚才id_rsa.pub文件的内容到这里，点击"Add Key"
+`账户登录->点击头像->用户设置->SSH密钥`复制刚才id_rsa.pub文件的内容到这里，点击`添加密钥`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_git_secret.png)
 
-3. 在Jenkins中添加凭证，配置私钥
+在Jenkins中添加凭证，配置私钥
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_credentials2.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_git_ssh.png)
 
-4. 测试凭证是否可用
+测试凭证是否可用
 
 ![](../../assets/_images/deploy/jenkins/jenkins_git_ssh_test.png)
+
+如果Jenkins新建任务时，输入远程仓库地址设置，选择凭证后一直提示连不上。提示：jenkins stderr: No ECDSA host key is known for gitee.com and you have requested strict checking. Host key verification failed。需要在jenkins的主机执行一下命令访问git上的仓库地址，把git的主机添加到/root/.ssh/known_hosts（执行命令前known_hosts这个文件是不存在的，执行后就有了）。
+
+```bash
+git ls-remote -h git@git.xxx.cn:root/website.git HEAD
+```
 
 ### 1.6 Maven安装和配置
 
