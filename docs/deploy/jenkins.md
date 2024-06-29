@@ -75,32 +75,31 @@ systemctl start jenkins
 
 ### 1.3 插件管理
 
-#### 1.3.1 修改插件源
+#### 1.3.1 修改插件下载地址
 
-1. Manage Plugins点击Advanced，首先把Update Site改为`http://updates.jenkins-zh.cn/update-center.json`来解除https校验
+Jenkins->Manage Jenkins->Manage Plugins，点击`Advanced`，把`Update Site`地址改为`http://updates.jenkins-zh.cn/update-center.json`来解除https校验，这样做是为了把Jenkins官方的插件列表下载到本地。
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_https.png)
 
-2. 然后点击`available`待全部载入完毕
+然后，Manage Plugins点击`Available`待全部载入完毕
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_load.png)
 
-3. 更换清华大学源
-
-```bash
-https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
-```
-
-![](../../assets/_images/deploy/jenkins/jenkins_plugin_tuna.png)
-
-
-4. 修改插件下载地址
+修改地址文件
 
 ```bash
 cd /var/lib/jenkins/updates
 sed -i 's/http:\/\/updates.jenkinsci.org\/download/https:\/\/mirrors.tuna.tsinghua.edu.cn\/jenkins/g' default.json
 sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ```
+
+最后，Manage Plugins点击`Advanced`，把`Update Site`改为清华大学插件下载地址
+
+```bash
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
+```
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_tuna.png)
 
 重启服务：http://172.17.17.200:8888/restart
 
