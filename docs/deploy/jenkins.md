@@ -2,6 +2,8 @@
 
 Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工具，用于监控持续重复的工作，旨在提供一个开放易用的软件平台，使软件项目可以进行持续集成
 
+下载地址：https://get.jenkins.io/redhat-stable/
+
 ## 1. 安装
 
 | **名称**  | **IP地址**  | **安装的软件**  |
@@ -21,12 +23,12 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 ```bash
 yum install java-1.8.0-openjdk* -y  # jdk:/usr/lib/jvm
 yum -y install epel-release daemonize
-wget https://mirrors.tuna.tsinghua.edu.cn/jenkins/redhat/jenkins-2.332-1.1.noarch.rpm
-rpm -ivh jenkins-2.332-1.1.noarch.rpm
+wget https://get.jenkins.io/redhat-stable/jenkins-2.332.4-1.1.noarch.rpm
+rpm -ivh jenkins-2.332.4-1.1.noarch.rpm
 
 # 如果安装过，直接卸载
 rpm -qa |grep jenkins
-rpm -e --nodeps jenkins-2.332-1.1.noarch
+rpm -e --nodeps jenkins-2.332.4-1.1.noarch
 ```
 
 #### 1.2.2 修改配置
