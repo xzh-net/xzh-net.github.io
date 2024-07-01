@@ -443,7 +443,7 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 
 ### 2.2 Maven项目
 
-#### 2.2.1 安装Maven Integration插件
+#### 2.2.1 下载Maven Integration插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_maven.png)
 
@@ -453,7 +453,7 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 
 #### 2.2.3 配置项目
 
-拉取代码和远程部署的过程和自由风格项目一样，只是"构建"部分不同
+拉取代码和远程部署的过程和自由风格项目一样，只是`构建`部分不同
 
 ![](../../assets/_images/deploy/jenkins/jenkins_maven_build.png)
 
@@ -465,21 +465,20 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 - Pipeline 也有两种创建方法：可以直接在 Jenkins 的 Web UI 界面中输入脚本；也可以通过创建一个 Jenkinsfile 脚本文件放入项目源码库中（一般我们都推荐在 Jenkins 中直接从源代码控制(SCM)中直接载入 Jenkinsfile Pipeline 这种方法）。
 
 
-#### 2.3.1 安装 Pipeline 插件
+#### 2.3.1 下载Pipeline插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_pipeline.png)
+
+
+#### 2.3.2 创建项目
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline.png)
 
 
-#### 2.3.2 Pipeline语法快速入门
+1. 声明式快速入门
 
-1. Declarative声明式-Pipeline
-   - stages：代表整个流水线的所有执行阶段。通常stages只有1个，里面包含多个stage
-   - stage：代表流水线中的某个阶段，可能出现n个。一般分为拉取代码，编译构建，部署等阶段。
-   - steps：代表一个阶段内需要执行的逻辑。steps里面是shell脚本，git拉取代码，ssh远程发布等任意内容。
 
-> 流水线->选择HelloWorld模板
+![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline2.png)
 
 ```shell
 pipeline {
@@ -505,15 +504,17 @@ pipeline {
 }
 ```
 
-![](../../assets/_images/deploy/jenkins/jenkins_pipeline_declarative.png)
+- stages：代表整个流水线的所有执行阶段。通常stages只有1个，里面包含多个stage
+- stage：代表流水线中的某个阶段，可能出现n个。一般分为拉取代码，编译构建，部署等阶段。
+- steps：代表一个阶段内需要执行的逻辑。steps里面是shell脚本，git拉取代码，ssh远程发布等任意内容。
 
-点击构建，可以看到整个构建过程
+![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline3.png)
 
-2. Pipeline脚本式-Pipeline
-   - Node：节点，一个 Node 就是一个 Jenkins 节点，Master 或者 Agent，是执行 Step 的具体运行环境，后续讲到Jenkins的Master-Slave架构的时候用到。
-   - Stage：阶段，一个 Pipeline 可以划分为若干个 Stage，每个 Stage 代表一组操作，比如：Build、Test、Deploy，Stage 是一个逻辑分组的概念。
-   - Step：步骤，Step 是最基本的操作单元，可以是打印一句话，也可以是构建一个 Docker 镜像，由各类 Jenkins 插件提供，比如命令：sh ‘make’，就相当于我们平时 shell 终端中执行 make 命令
-一样。
+
+2. 脚本式快速入门
+
+![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline4.png)
+
 
 ```shell
 node {
@@ -530,9 +531,10 @@ node {
 }
 ```
 
-![](../../assets/_images/deploy/jenkins/jenkins_pipeline_script.png)
-
-构建结果和声明式一样！
+- Node：节点，一个 Node 就是一个 Jenkins 节点，Master 或者 Agent，是执行 Step 的具体运行环境，后续讲到Jenkins的Master-Slave架构的时候用到。
+- Stage：阶段，一个 Pipeline 可以划分为若干个 Stage，每个 Stage 代表一组操作，比如：Build、Test、Deploy，Stage 是一个逻辑分组的概念。
+- Step：步骤，Step 是最基本的操作单元，可以是打印一句话，也可以是构建一个 Docker 镜像，由各类 Jenkins 插件提供，比如命令：sh ‘make’，就相当于我们平时 shell 终端中执行 make 命令
+一样。
 
 
 #### 2.3.3 拉取代码
@@ -553,7 +555,7 @@ pipeline {
 }
 ```
 
-#### 2.3.4 编译打包
+#### 2.3.5 编译打包
 
 ```
 pipeline {
@@ -574,7 +576,7 @@ pipeline {
 }
 ```
 
-#### 2.3.5 部署
+#### 2.3.6 部署
 
 ```
 pipeline {
@@ -602,9 +604,15 @@ pipeline {
 
 构建后查看结果
 
-#### 2.3.6 Pipeline Script from SCM
+#### 2.3.7 Pipeline Script from SCM
 
 刚才我们都是直接在Jenkins的UI界面编写Pipeline代码，这样不方便脚本维护，建议把Pipeline脚本放在项目中（一起进行版本控制）,在项目根目录建立Jenkinsfile文件，把内容复制到该文件中并上传到Gitlab
+
+
+![](../../assets/_images/deploy/jenkins/jenkins_scm1.png)
+
+
+在项目根目录创建该文件，名为`Jenkinsfile`
 
 ```shell
 pipeline {
@@ -630,16 +638,9 @@ pipeline {
 }
 ```
 
-在项目中引用该文件
+## 3. 高级构建
 
-![](../../assets/_images/deploy/jenkins/jenkins_scm1.png)
-
-![](../../assets/_images/deploy/jenkins/jenkins_scm2.png)
-
-
-### 2.4 Jenkins项目构建参数
-
-#### 2.4.1 常用的构建触发器
+### 3.1 构建触发器
 
 Jenkins内置4种构建触发器：
 - 触发远程构建
@@ -648,17 +649,17 @@ Jenkins内置4种构建触发器：
 - 轮询SCM（Poll SCM）
 
 
-1.  触发远程构建
+#### 3.1.1 触发远程构建
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_triger1.png)
 
 触发构建url：http://172.17.17.200:8888/job/test_pipeline01/build?token=123456
 
-2. 其他工程构建后触发
+#### 3.1.2 其他工程构建后触发
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_after.png)
 
-3. 定时构建
+#### 3.1.3 定时构建
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_task.png)
 ```bash
@@ -674,12 +675,12 @@ HH(8-15)/2 * * 1-5
 HH 1,15 1-11 *
 ```
 
-4. 轮询SCM
+#### 3.1.4 轮询SCM
 
 轮询SCM，是指定时扫描本地代码仓库的代码是否有变更，如果代码有变更就触发项目构建。但是定时扫描本地整个项目的代码，增大系统的开销，不建议使用
 ![](../../assets/_images/deploy/jenkins/jenkins_build_scm.png)
 
-#### 2.4.2 Git hook自动触发构建
+### 3.2 Git hook自动触发构建
 
 利用Gitlab的webhook实现代码push到仓库，立即触发项目自动构建
 
@@ -710,7 +711,7 @@ HH 1,15 1-11 *
 
 
 
-#### 2.4.3 Jenkins的参数化构建
+### 3.3 参数化构建
 
 有时在项目构建的过程中，我们需要根据用户的输入动态传入一些参数，从而影响整个构建结果，这时我们可以使用参数化构建。
 
@@ -734,7 +735,7 @@ git push -u origin master:test
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param3.png)
 
 
-#### 2.4.4 配置邮箱服务器发送构建结果
+### 3.4 配置邮箱服务器发送构建结果
 
 安装Email Extension Template插件
 
