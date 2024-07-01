@@ -720,9 +720,6 @@ HH 1,15 1-11 *
 ![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook2.png)
 
 
-
-
-
 ### 3.3 参数化构建
 
 有时在项目构建的过程中，我们需要根据用户的输入动态传入一些参数，从而影响整个构建结果，这时我们可以使用参数化构建。
@@ -732,11 +729,6 @@ Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param0.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param1.png)
-
-创建分支：test，代码稍微改动下，然后提交到gitlab上。
-```bash
-git push -u origin master:test
-```
 
 改动pipeline流水线代码
 
@@ -749,21 +741,37 @@ git push -u origin master:test
 
 ### 3.4 配置邮箱服务器发送构建结果
 
-安装Email Extension Template插件
+#### 3.4.1 下载插件
+
+安装`Email Extension Template`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_email.png)
 
-Jenkins设置邮箱相关参数， Manage Jenkins->Configure System
+
+#### 3.4.2 Jenkins设置邮箱发件人
+
+Manage Jenkins-> System
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin.png)
 
-设置邮件参数，Extended E-mail Notification
+
+#### 3.4.3 Jenkins设置邮件参数
+
+Manage Jenkins-> System -> Extended E-mail Notification
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin2.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin3.png)
 
+
+#### 3.4.4 Jenkins设置默认邮箱信息
+
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin4.png)
+
+> 邮件通知和凭证中使用的密码均为`授权码`
+
+
+#### 3.4.5 设置邮件模板
 
 准备邮件内容,在项目根目录编写email.html，并把文件推送到Gitlab，内容如下
 
@@ -839,6 +847,8 @@ Jenkins设置邮箱相关参数， Manage Jenkins->Configure System
 </body>
 </html>
 ```
+
+#### 3.4.6 流水线增加构建后发送邮件
 
 编写Jenkinsfile添加构建后发送邮件
 
