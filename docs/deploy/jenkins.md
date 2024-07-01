@@ -653,7 +653,9 @@ Jenkins内置4种构建触发器：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_triger1.png)
 
-触发构建url：http://172.17.17.200:8888/job/test_pipeline01/build?token=123456
+触发构建url：http://172.17.17.200:8080/job/jenkins_project_pipeline/build?token=123456
+
+如何触发构建但是不需要登录可以借助`Build Authorization Token Root Plugin`插件实现
 
 #### 3.1.2 其他工程构建后触发
 
@@ -662,6 +664,7 @@ Jenkins内置4种构建触发器：
 #### 3.1.3 定时构建
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_task.png)
+
 ```bash
 # 每十五分钟（可能在 :07, :22, :37, :52）：
 H/15 * * * *
@@ -677,37 +680,46 @@ HH 1,15 1-11 *
 
 #### 3.1.4 轮询SCM
 
-轮询SCM，是指定时扫描本地代码仓库的代码是否有变更，如果代码有变更就触发项目构建。但是定时扫描本地整个项目的代码，增大系统的开销，不建议使用
+轮询SCM，是指定时扫描本地代码仓库的代码是否有变更，如果代码有变更就触发项目构建。
+
+> 注意：这次构建触发器，Jenkins会定时扫描本地整个项目的代码，增大系统的开销，不建议使用
+
 ![](../../assets/_images/deploy/jenkins/jenkins_build_scm.png)
 
 ### 3.2 Git hook自动触发构建
 
 利用Gitlab的webhook实现代码push到仓库，立即触发项目自动构建
 
-安装插件：`Generic Webhook Trigger`和`GitLab`
+#### 3.2.1 下载插件
+
+`Generic Webhook Trigger`和`GitLab`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook.png)
 
-1. Jenkins设置自动构建
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_hook2.png)
+
+#### 3.2.2 Jenkins设置自动构建
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_webhook.png)
 
-2. Gitlab配置webhook
+> 注意：以下设置必须完成，否则会报错！Manage Jenkins->System
 
-1）开启webhook功能
-使用root账户登录到后台，点击Admin Area -> Settings -> Network
-勾选`Allow requests to the local network from web hooks and services`
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
+
+#### 3.2.3 Gitlab配置webhook
+
+1. 开启webhook功能
+
+使用root账户登录到后台，点击Admin Area -> Settings -> Network，勾选`Allow requests to the local network from web hooks and services`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook.png)
 
-2）在项目添加webhook
-点击项目->Settings->Integrations
+2. 在项目添加webhook
 
 ![](../../assets/_images/deploy/jenkins/jenkins_gitlab_webhook2.png)
 
-> 注意：以下设置必须完成，否则会报错！Manage Jenkins->Configure System
 
-![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
 
 
 
