@@ -4,7 +4,7 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 
 下载地址：https://get.jenkins.io/redhat-stable/
 
-## 1. 安装
+## 1. 环境配置
 
 | **名称**  | **IP地址**  | **安装的软件**  |
 | :---------- | :---------- | :---------------------------------- |
@@ -214,7 +214,7 @@ git --version       # 查看版本
 
 #### 1.5.3 用户密码类型凭证
 
-1. 创建凭证
+创建凭证
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_git2.png)
 
@@ -222,9 +222,7 @@ git --version       # 查看版本
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_git3.png)
 
-2. 测试凭证是否可用
-
-创建一个FreeStyle项目：新建Item->FreeStyle Project->确定
+测试凭证是否可用，创建一个FreeStyle项目：新建Item->FreeStyle Project->确定
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_project.png)
 
@@ -350,7 +348,7 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 
 #### 1.7.1 安装Tomcat8.5
 
-上传`apache-tomcat-8.5.100.tar.gz`到Jenkins应用服务器
+上传`apache-tomcat-8.5.100.tar.gz`到应用服务器
 
 ```bash
 cd /opt/software/
@@ -366,7 +364,9 @@ tar -zxf apache-tomcat-8.5.100.tar.gz -C /opt    # 解压
 
 ```bash
 vi /opt/apache-tomcat-8.5.100/conf/tomcat-users.xml
+```
 
+```conf
 <tomcat-users>  
 <role rolename="manager-gui"/>
 <role rolename="manager-status"/>
@@ -378,24 +378,26 @@ vi /opt/apache-tomcat-8.5.100/conf/tomcat-users.xml
 </tomcat-users>
 ```
 
-用户和密码都是：tomcat，为了能够刚才配置的用户登录到Tomcat，还需要修改以下配置
+用户和密码都是：tomcat，为了能够刚才配置的用户登录到Tomcat，还需要修改以下配置，将其注释掉以后重启服务
+
 ```bash
 vi /opt/apache-tomcat-8.5.100/webapps/manager/META-INF/context.xml
+```
 
+```conf
 <!--
 <Valve className="org.apache.catalina.valves.RemoteAddrValve"
 allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 -->
 ```
 
-把上面这行注释掉，重启
-
 > 访问： http://192.168.66.102:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat2.png)
 
 
-## 2. 构建项目
+
+## 2. 项目构建
 
 Jenkins中自动构建项目的类型有很多，常用的有以下三种：
 - 自由风格软件项目（FreeStyle Project）
@@ -404,7 +406,7 @@ Jenkins中自动构建项目的类型有很多，常用的有以下三种：
 
 推荐使用流水线类型，因为灵活度非常高
 
-### 2.1 自由风格项目构建
+### 2.1 自由风格项目
 
 #### 2.1.1 拉取代码
 
@@ -412,35 +414,29 @@ Jenkins中自动构建项目的类型有很多，常用的有以下三种：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_free_build.png)
 
-```bash
-echo "开始编译和打包"
-mvn clean package
-echo "编译和打包结束"
-```
+![](../../assets/_images/deploy/jenkins/jenkins_free_build2.png)
 
-#### 2.1.2 部署
+#### 2.1.2 下载部署插件
 
-1. 安装 Deploy to container插件
-
-Jenkins本身无法实现远程部署到Tomcat的功能，需要安装Deploy to container插件实现
+Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to container`插件实现
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_deploy.png)
 
-2. 添加Tomcat用户凭证
+#### 2.1.3 添加Tomcat用户凭证
 
-![](../../assets/_images/deploy/jenkins/jenkins_tomcat_auth.png)
+![](../../assets/_images/deploy/jenkins/jenkins_deploy_tomcat_credentials.png)
 
-#### 2.1.3 添加构建后操作
+#### 2.1.4 添加构建后操作
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy2.png)
 
-点击"Build Now"，开始构建过程
-
-#### 2.1.4 部署成功后，访问项目
+点击`Build Now`，开始构建过程
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy3.png)
+
+#### 2.1.5 访问项目
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat_deploy4.png)
 
