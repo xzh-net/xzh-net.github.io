@@ -102,6 +102,8 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 
 #### 1.3.2 下载中文汉化插件
 
+安装`Localization: Chinese (Simplified)`插件
+
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
 ### 1.4 权限管理
@@ -201,7 +203,7 @@ missing the Overall/Read permission
 
 #### 1.5.2 下载Git插件
 
-为了让Jenkins支持从Gitlab拉取源码，需要安装Git插件以及在CentOS7上安装Git工具。
+安装`Git`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_git.png)
 
@@ -445,6 +447,8 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 
 #### 2.2.1 下载Maven Integration插件
 
+安装`Maven Integration`插件
+
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_maven.png)
 
 #### 2.2.2 创建Maven项目
@@ -466,6 +470,8 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 
 
 #### 2.3.1 下载Pipeline插件
+
+安装`Pipeline`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_pipeline.png)
 
@@ -692,7 +698,7 @@ HH 1,15 1-11 *
 
 #### 3.2.1 下载插件
 
-`Generic Webhook Trigger`和`GitLab`
+安装`Generic Webhook Trigger`和`GitLab`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook.png)
 
@@ -886,3 +892,19 @@ pipeline {
 ```
 
 ### 3.5 代码审查
+
+
+## 4. 微服务持续集成
+
+### 4.1 静态网站发布
+
+#### 4.1.1 下载插件
+
+安装`Publish Over SSH`插件
+
+
+### 4.2 非Dockerfile发布
+
+### 4.3 Dockerfile镜像发布
+
+## 5. 基于K8S构建Jenkins持续集成平台
