@@ -902,6 +902,8 @@ pipeline {
 
 安装`NodeJS`插件
 
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_node.png)
+
 #### 4.1.2 下载发布插件
 
 安装`Publish Over SSH`插件
