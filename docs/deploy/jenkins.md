@@ -268,7 +268,7 @@ ssh-keygen -t rsa
 
 测试凭证是否可用
 
-![](../../assets/_images/deploy/jenkins/jenkins_git_ssh_test.png)
+![](../../assets/_images/deploy/jenkins/jenkins_git_ssh2.png)
 
 如果Jenkins新建任务时，输入远程仓库地址设置，选择凭证后一直提示连不上。提示：jenkins stderr: No ECDSA host key is known for gitee.com and you have requested strict checking. Host key verification failed。需要在jenkins的主机执行一下命令访问git上的仓库地址，把git的主机添加到/root/.ssh/known_hosts（执行命令前known_hosts这个文件是不存在的，执行后就有了）。
 
@@ -696,7 +696,7 @@ HH 1,15 1-11 *
 
 利用Gitlab的webhook实现代码push到仓库，立即触发项目自动构建
 
-#### 3.2.1 下载插件
+#### 3.2.1 下载GitLab插件
 
 安装`Generic Webhook Trigger`和`GitLab`插件
 
@@ -747,7 +747,7 @@ Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
 
 ### 3.4 配置邮箱服务器发送构建结果
 
-#### 3.4.1 下载插件
+#### 3.4.1 下载发送邮件插件
 
 安装`Email Extension Template`插件
 
@@ -898,12 +898,24 @@ pipeline {
 
 ### 4.1 静态网站发布
 
-#### 4.1.1 下载插件
+#### 4.1.1 下载发布插件
 
 安装`Publish Over SSH`插件
 
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh.png)
+
+Dashboard->Manage Jenkins->System->全局属性 ，配置SSH服务器站点，ip，账号，密码
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh2.png)
 
 ### 4.2 非Dockerfile发布
+
+#### 4.2.1 下载参数选择插件
+
+安装`Extended Choice Parameter`插件
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_choice_parameter.png)
+
 
 ### 4.3 Dockerfile镜像发布
 
