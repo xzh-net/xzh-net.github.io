@@ -481,7 +481,7 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline.png)
 
 
-1. 声明式快速入门
+1. Declarative 声明式快速入门
 
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline2.png)
@@ -517,7 +517,7 @@ pipeline {
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline3.png)
 
 
-2. 脚本式快速入门
+2. Scripted pipeline 脚本式快速入门
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline4.png)
 
@@ -547,7 +547,7 @@ node {
 
 使用语法生成器
 
-```
+```shell
 pipeline {
    agent any
 
@@ -563,7 +563,7 @@ pipeline {
 
 #### 2.3.5 编译打包
 
-```
+```shell
 pipeline {
    agent any
 
@@ -584,7 +584,7 @@ pipeline {
 
 #### 2.3.6 部署
 
-```
+```shell
 pipeline {
    agent any
 
@@ -736,7 +736,7 @@ Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param1.png)
 
-改动pipeline流水线代码
+修改pipeline流水线代码
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param2.png)
 
@@ -858,7 +858,7 @@ Manage Jenkins-> System -> Extended E-mail Notification
 
 编写Jenkinsfile添加构建后发送邮件
 
-```bash
+```shell
 pipeline {
    agent any
 
@@ -898,7 +898,11 @@ pipeline {
 
 ### 4.1 静态网站发布
 
-#### 4.1.1 下载发布插件
+#### 4.1.1 下载NodeJS插件
+
+安装`NodeJS`插件
+
+#### 4.1.2 下载发布插件
 
 安装`Publish Over SSH`插件
 
@@ -915,6 +919,50 @@ Dashboard->Manage Jenkins->System->全局属性 ，配置SSH服务器站点，ip
 安装`Extended Choice Parameter`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_choice_parameter.png)
+
+添加参数选择`Extended Choice Parameter`类型
+
+![](../../assets/_images/deploy/jenkins/jenkins_choice_parameter_add.png)
+
+新建项目名称参数
+
+![](../../assets/_images/deploy/jenkins/jenkins_choice_parameter_add2.png)
+
+设置参数值和显示文字
+
+![](../../assets/_images/deploy/jenkins/jenkins_choice_parameter_add3.png)
+
+
+#### 4.2.2 修改流水线代码
+
+```shell
+pipeline {
+   agent any
+
+   stages {
+      stage('代码拉取') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+         }
+      }
+      stage('编译构建') {
+         steps {
+            sh 'mvn clean package'
+         }
+      }
+      stage('项目部署') {
+         steps {
+            sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/opt/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+         }
+      }
+   }
+}
+```
+
+
+#### 4.2.3 构建项目
+
+![](../../assets/_images/deploy/jenkins/jenkins_choice_parameter_add4.png)
 
 
 ### 4.3 Dockerfile镜像发布
