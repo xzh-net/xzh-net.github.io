@@ -970,7 +970,7 @@ node {
       }
    }
    stage('项目部署') {
-        sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/data/html/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: 'dist', sourceFiles: 'dist/**')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+        sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '/usr/local/nginx/sbin/nginx -s reload',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/data/html/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: 'dist', sourceFiles: 'dist/**')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
     }
 
 }
@@ -1004,14 +1004,29 @@ node {
 
 ```shell
 node {
+    //把选择的项目信息转为数组
+    def selectedProjects = "${project_name}".split(',')
+
     stage('代码拉取') {
         checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '97c1f104-6dca-4792-993a-3b2b418344a1', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-service.git']]])
     }
+    stage('编译并安装公共工程') {
+        sh "mvn -f vjsp-commons clean install"
+    }
     stage('编译构建') {
-            sh 'mvn clean package -Dmaven.test.skip=true'
+        for(int i=0;i<selectedProjects.size();i++){
+            //取出每个项目的名称和端口
+            def currentProject = selectedProjects[i];
+            sh 'mvn -f ${currentProjectName} clean package -Dmaven.test.skip=true'
+        }  
     }
     stage('项目部署') {
-        sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '/data/jenkins_shell/deploy.sh $project_name',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/data/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+
+        for(int i=0;i<selectedProjects.size();i++){
+            //取出每个项目的名称和端口
+            def currentProject = selectedProjects[i];
+            sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '/home/jar/jenkins_shell/deploy.sh $project_name',execTimeout: 1200000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/home/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+        }
     }
 }
 ```
