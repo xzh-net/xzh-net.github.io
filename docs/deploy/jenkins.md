@@ -476,15 +476,20 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_pipeline.png)
 
 
-#### 2.3.2 创建项目
+#### 2.3.2 语法快速入门
+
+创建项目
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline.png)
 
-
 1. Declarative 声明式快速入门
 
+![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline1.png)
+
+选择模板或者使用片段生成器
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline2.png)
+
 
 ```shell
 pipeline {
@@ -903,6 +908,38 @@ pipeline {
 安装`NodeJS`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_node.png)
+
+#### 4.1.2 全局配置关联NodeJS
+
+Dashboard -> Manage Jenkins -> Tools，新增NodeJS配置如下：
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_node2.png)
+
+#### 4.1.3 建立Jenkinsfile构建脚本
+
+```shell
+pipeline {
+   agent any
+
+   stages {
+      stage('代码拉取') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+         }
+      }
+      stage('编译构建') {
+         steps {
+            sh 'mvn clean package'
+         }
+      }
+      stage('项目部署') {
+         steps {
+            sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/opt/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+         }
+      }
+   }
+}
+```
 
 #### 4.1.2 下载发布插件
 
