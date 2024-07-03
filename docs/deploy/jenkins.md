@@ -1004,46 +1004,48 @@ node {
 
 ```shell
 node {
-	//全局配置
-	//备份目录
-	def backup_dir="/opt/app/backup"
+    //全局配置
+    //备份目录
+    def backup_dir = "/opt/app/backup"
 
-	//项目配置
-	//项目编译默认根路径
+    //项目配置
+    //项目编译默认根路径
     def service_path = '';
-	//目标机器ssh信息
-	def target_ssh="root@192.168.2.201"
-	//目标传输路径
-	def target_dir="/data/application/microservices-platform"
-	
-	//参数配置
+    //目标机器ssh信息
+    def target_ssh = "root@192.168.2.201"
+    //目标传输路径
+    def target_dir = "/data/application/microservices-platform"
+
+    //参数配置
     //获取当前选择的项目名称
     def apps = "${project_name}".split(",")
 
-	//逻辑正文
+    //逻辑正文
     stage('代码拉取') {
         checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '97c1f104-6dca-4792-993a-3b2b418344a1', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-service.git']]])
     }
     stage('编译并安装公共工程') {
         sh "mvn -f commons clean install"
     }
-    
-    stage('编译构建') {
+
+    stage('编译，部署，重启') {
         for (int i = 0; i < apps.size(); ++i) {
-			//自定义不同子模块构建路径
+            //自定义不同子模块构建路径
             if ("${apps[i]}" == 'sc-gateway') {
                 service_path = ''
             } else {
                 service_path = 'business/'
             }
-			//编译
+            //编译
             sh "mvn -f ${service_path}${apps[i]} clean package -Dmaven.test.skip=true"
-			//备份
-			sh "cp "+service_path+"${apps[i]}/target/*.jar ${backup_dir}/${project_version}/"
-			//保留历史处理
-			sh ""
-			//传输,基于免密
-			sh "scp "+service_path+"${apps[i]}/target/*.jar ${target_ssh}:${target_dir}"
+            //备份
+            sh "cp " + service_path + "${apps[i]}/target/*.jar ${backup_dir}/${project_version}/"
+            //保留历史处理
+            sh ""
+            //传输,基于免密
+            sh "scp " + service_path + "${apps[i]}/target/*.jar ${target_ssh}:${target_dir}"
+            //重启
+            sh "ssh ${target_ssh} 'cd ${target_dir};sh shutdown.sh ${apps[i]}'"
         }  
     }
 }
