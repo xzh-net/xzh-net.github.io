@@ -733,6 +733,8 @@ HH 1,15 1-11 *
 
 ### 3.3 参数化构建
 
+#### 3.3.1 新增构建参数
+
 有时在项目构建的过程中，我们需要根据用户的输入动态传入一些参数，从而影响整个构建结果，这时我们可以使用参数化构建。
 
 Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
@@ -741,7 +743,7 @@ Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param1.png)
 
-修改pipeline流水线代码
+#### 3.3.2 修改流水线代码
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_param2.png)
 
@@ -922,7 +924,7 @@ node {
    stage('代码拉取') {
 		checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-web.git']]])
    }
-   stage('编译，部署') {
+   stage('编译构建') {
       nodejs('NodeJS16'){
          sh '''
                npm install --registry=https://registry.npmmirror.com
@@ -933,15 +935,47 @@ node {
 }
 ```
 
+构建结果
+
+![](../../assets/_images/deploy/jenkins/jenkins_node_suscess.png)
+
 #### 4.1.2 下载发布插件
 
 安装`Publish Over SSH`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh.png)
 
+
+#### 4.1.3 添加SSH全局服务
+
 Dashboard->Manage Jenkins->System->全局属性 ，配置SSH服务器站点，ip，账号，密码
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh2.png)
+
+#### 4.1.4 修改流水线代码
+
+增加了`项目部署`的内容，脚本内容可以使用片段生成器生成。
+
+```shell
+node {
+   stage('代码拉取') {
+		checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-web.git']]])
+   }
+   stage('编译构建') {
+      nodejs('NodeJS16'){
+         sh '''
+               npm install --registry=https://registry.npmmirror.com
+               npm run build:test
+         '''
+      }
+   }
+   stage('项目部署') {
+        sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/data/html/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: 'dist', sourceFiles: 'dist/**')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+    }
+
+}
+```
+
 
 ### 4.2 非Dockerfile发布
 
@@ -950,6 +984,8 @@ Dashboard->Manage Jenkins->System->全局属性 ，配置SSH服务器站点，ip
 安装`Extended Choice Parameter`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_choice_parameter.png)
+
+#### 4.2.2 添加参数
 
 添加参数选择`Extended Choice Parameter`类型
 
@@ -967,26 +1003,16 @@ Dashboard->Manage Jenkins->System->全局属性 ，配置SSH服务器站点，ip
 #### 4.2.2 修改流水线代码
 
 ```shell
-pipeline {
-   agent any
-
-   stages {
-      stage('代码拉取') {
-         steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
-         }
-      }
-      stage('编译构建') {
-         steps {
-            sh 'mvn clean package -Dmaven.test.skip=true '
-         }
-      }
-      stage('项目部署') {
-         steps {
-            sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/opt/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
-         }
-      }
-   }
+node {
+    stage('代码拉取') {
+        checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '97c1f104-6dca-4792-993a-3b2b418344a1', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-service.git']]])
+    }
+    stage('编译构建') {
+            sh 'mvn clean package -Dmaven.test.skip=true'
+    }
+    stage('项目部署') {
+        sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '/data/jenkins_shell/deploy.sh $project_name',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/data/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
+    }
 }
 ```
 
