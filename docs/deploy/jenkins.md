@@ -1051,7 +1051,34 @@ node {
 }
 ```
 
-#### 4.2.3 构建项目
+#### 4.2.3 免密设置
+
+1. 获取jenkins服务器公钥
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+
+2. 如果上一步没有这个文件我们就创建一个
+
+```bash
+ssh-keygen -t rsa
+```
+
+3. 把生成的公钥发送到对方的主机上去
+
+```bash
+cd /root/.ssh
+ssh-copy-id -i id_rsa.pub root@192.168.3.202
+```
+
+4. 测试
+
+```bash
+ssh 192.168.3.202
+```
+
+#### 4.2.4 构建项目
 
 ![](../../assets/_images/deploy/jenkins/jenkins_choice_parameter_add4.png)
 
