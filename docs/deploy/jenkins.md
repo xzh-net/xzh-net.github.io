@@ -146,7 +146,6 @@ systemctl restart jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_role2.png)
 
-![](../../assets/_images/deploy/jenkins/jenkins_role1.png)
 
 添加以下三个角色：
 - baseRole：该角色为全局角色。这个角色需要绑定Overall下面的Read权限，是为了给所有用户绑定最基本的Jenkins访问权限。注意：如果不给后续用户绑定这个角色，会报错误：用户名 is
