@@ -580,7 +580,7 @@ pipeline {
       }
       stage('编译构建') {
          steps {
-            sh 'mvn clean package'
+            sh 'mvn clean package -Dmaven.test.skip=true '
          }
       }
    }
@@ -601,7 +601,7 @@ pipeline {
       }
       stage('编译构建') {
          steps {
-            sh 'mvn clean package'
+            sh 'mvn clean package -Dmaven.test.skip=true '
          }
       }
       stage('项目部署') {
@@ -637,7 +637,7 @@ pipeline {
       }
       stage('编译构建') {
          steps {
-            sh 'mvn clean package'
+            sh 'mvn clean package -Dmaven.test.skip=true -Pdev'
          }
       }
       stage('项目部署') {
@@ -875,7 +875,7 @@ pipeline {
       }
       stage('编译构建') {
          steps {
-            sh 'mvn clean package'
+            sh 'mvn clean package -Dmaven.test.skip=true '
          }
       }
       stage('项目部署') {
@@ -918,24 +918,16 @@ Dashboard -> Manage Jenkins -> Tools，新增NodeJS配置如下：
 #### 4.1.3 建立Jenkinsfile构建脚本
 
 ```shell
-pipeline {
-   agent any
-
-   stages {
-      stage('代码拉取') {
-         steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
-         }
-      }
-      stage('编译构建') {
-         steps {
-            sh 'mvn clean package'
-         }
-      }
-      stage('项目部署') {
-         steps {
-            sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '',execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/opt/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
-         }
+node {
+   stage('代码拉取') {
+		checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-web.git']]])
+   }
+   stage('编译，部署') {
+      nodejs('NodeJS16'){
+         sh '''
+               npm install --registry=https://registry.npmmirror.com
+               npm run build:test
+         '''
       }
    }
 }
@@ -986,7 +978,7 @@ pipeline {
       }
       stage('编译构建') {
          steps {
-            sh 'mvn clean package'
+            sh 'mvn clean package -Dmaven.test.skip=true '
          }
       }
       stage('项目部署') {
