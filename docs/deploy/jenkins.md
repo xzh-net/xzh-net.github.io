@@ -358,7 +358,7 @@ tar -zxf apache-tomcat-8.5.100.tar.gz -C /opt    # 解压
 /opt/apache-tomcat-8.5.100/bin/startup.sh        # 启动
 ```
 
-> 地址为：http://172.17.17.196/8080
+> 地址为：http://192.168.3.201/8080
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat.png)
 
@@ -393,7 +393,7 @@ allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 -->
 ```
 
-> 访问： http://192.168.66.102:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
+> 访问： http://192.168.3.201:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat2.png)
 
@@ -1069,7 +1069,7 @@ ssh-keygen -t rsa
 
 ```bash
 cd /root/.ssh
-ssh-copy-id -i id_rsa.pub root@192.168.3.20
+ssh-copy-id -i id_rsa.pub root@192.168.3.201
 ```
 
 4. 测试
