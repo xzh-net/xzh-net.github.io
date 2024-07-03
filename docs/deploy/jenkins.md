@@ -1004,33 +1004,50 @@ node {
 
 ```shell
 node {
-    //把选择的项目信息转为数组
-    def selectedProjects = "${project_name}".split(',')
+	//全局配置
+	//备份目录
+	def backup_dir="/opt/app/backup"
 
+	//项目配置
+	//项目编译默认根路径
+    def service_path = '';
+	//目标机器ssh信息
+	def target_ssh="root@192.168.2.201"
+	//目标传输路径
+	def target_dir="/data/application/microservices-platform"
+	
+	//参数配置
+    //获取当前选择的项目名称
+    def apps = "${project_name}".split(",")
+
+	//逻辑正文
     stage('代码拉取') {
         checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '97c1f104-6dca-4792-993a-3b2b418344a1', url: 'git@git.vjspnet.cn:root/cogent-auto-platform-service.git']]])
     }
     stage('编译并安装公共工程') {
-        sh "mvn -f vjsp-commons clean install"
+        sh "mvn -f commons clean install"
     }
+    
     stage('编译构建') {
-        for(int i=0;i<selectedProjects.size();i++){
-            //取出每个项目的名称和端口
-            def currentProject = selectedProjects[i];
-            sh 'mvn -f ${currentProjectName} clean package -Dmaven.test.skip=true'
+        for (int i = 0; i < apps.size(); ++i) {
+			//自定义不同子模块构建路径
+            if ("${apps[i]}" == 'sc-gateway') {
+                service_path = ''
+            } else {
+                service_path = 'business/'
+            }
+			//编译
+            sh "mvn -f ${service_path}${apps[i]} clean package -Dmaven.test.skip=true"
+			//备份
+			sh "cp "+service_path+"${apps[i]}/target/*.jar ${backup_dir}/${project_version}/"
+			//保留历史处理
+			sh ""
+			//传输,基于免密
+			sh "scp "+service_path+"${apps[i]}/target/*.jar ${target_ssh}:${target_dir}"
         }  
-    }
-    stage('项目部署') {
-
-        for(int i=0;i<selectedProjects.size();i++){
-            //取出每个项目的名称和端口
-            def currentProject = selectedProjects[i];
-            sshPublisher(publishers: [sshPublisherDesc(configName: 'localhost161',transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '/home/jar/jenkins_shell/deploy.sh $project_name',execTimeout: 1200000, flatten: false, makeEmptyDirs: false, noDefaultExcludes:false, patternSeparator: '\\n', remoteDirectory:'/home/jar/'+'${JOB_NAME}'+'/'+'${BUILD_NUMBER}',remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/*.jar')],usePromotionTimestamp: false,useWorkspaceInPromotion: false, verbose: false)])
-        }
     }
 }
 ```
-
 
 #### 4.2.3 构建项目
 
