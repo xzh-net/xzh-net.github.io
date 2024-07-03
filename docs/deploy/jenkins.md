@@ -104,6 +104,8 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 
 安装`Localization: Chinese (Simplified)`插件
 
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_center.png)
+
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
 ### 1.4 权限管理
