@@ -1012,7 +1012,7 @@ node {
     //项目编译默认根路径
     def service_path = '';
     //目标机器ssh信息
-    def target_ssh = "root@192.168.2.201"
+    def target_ssh = "root@192.168.3.201"
     //目标传输路径
     def target_dir = "/data/application/microservices-platform"
 
@@ -1069,13 +1069,13 @@ ssh-keygen -t rsa
 
 ```bash
 cd /root/.ssh
-ssh-copy-id -i id_rsa.pub root@192.168.3.202
+ssh-copy-id -i id_rsa.pub root@192.168.3.20
 ```
 
 4. 测试
 
 ```bash
-ssh 192.168.3.202
+ssh 192.168.3.201
 ```
 
 #### 4.2.4 构建项目
