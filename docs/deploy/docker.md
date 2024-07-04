@@ -1937,12 +1937,22 @@ docker-compose restart  # 重新启动
 默认账户密码：admin/Harbor12345
 
 
-#### 4.7.4 SonarQube 8.6
+#### 4.7.4 SonarQube 7.8
 
+最简安装
 ```bash
-docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:8.6-community #H2默认存储
+docker run -dit --name sonarqube -p 9000:9000 sonarqube:7.8-community # H2默认存储
+```
 
-#postgres外挂存储
+插件安装
+```bash
+docker cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar sonarqube:/opt/sonarqube/extensions/plugins
+docker cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar sonarqube:/opt/sonarqube/extensions/plugins
+docker restart sonarqube
+```
+
+配置第三方存储
+```bash
 docker run -d --name sonarqube \
     --link postgres2 \
     -p 9000:9000 \
