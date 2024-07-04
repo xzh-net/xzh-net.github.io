@@ -902,6 +902,22 @@ pipeline {
 ### 3.5 代码审查
 
 
+#### 3.5.1 安装SonarQube
+
+SonarQube是一个用于管理代码质量的开放平台，可以快速的定位代码中潜在的或者明显的错误。目前支持java,C#,C/C++,Python,PL/SQL,Cobol,JavaScrip,Groovy等二十几种编程语言的代码质量管理与检测。
+
+#### 3.5.2 下载SonarQube Scanner插件
+
+安装`SonarQube Scanner`插件
+
+![](../../assets/_images/deploy/jenkins/jenkins_plugin_sonarqube.png)
+
+#### 3.5.3 添加SonarQube凭证
+
+#### 3.5.4 设置
+
+
+
 ## 4. 微服务持续集成
 
 ### 4.1 静态网站发布
