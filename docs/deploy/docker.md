@@ -1939,9 +1939,51 @@ docker-compose restart  # 重新启动
 
 #### 4.7.4 SonarQube 7.8
 
-最简安装
+测试环境，内嵌数据库无法扩展，也无法升级到新版本的SonarQube，并且不能支持将你的数据迁移至其他数据库引擎
 ```bash
 docker run -dit --name sonarqube -p 9000:9000 sonarqube:7.8-community # H2默认存储
+```
+
+
+修改文件资源限制
+
+```bash
+vi /etc/security/limits.conf
+# 末尾添加
+* soft nofile 65536
+* hard nofile 65536
+* soft nproc 131072
+* hard nproc 131072
+```
+
+修改虚拟内存
+```bash
+vi /etc/sysctl.conf
+# 末尾添加
+vm.max_map_count=655360
+
+# 使配置生效
+sysctl -p
+```
+
+配置第三方存储
+```bash
+mkdir -p /data/sonarqube/sonarqube_extensions
+mkdir -p /data/sonarqube/sonarqube_logs
+mkdir -p /data/sonarqube/sonarqube_data
+```
+
+```bash
+docker run -dit --name sonarqube \
+    --link postgres \
+    -p 9000:9000 \
+    -e SONARQUBE_JDBC_URL=jdbc:postgresql://xxx.xxx.xxx.xxx:5432/sonardb \
+    -e SONARQUBE_JDBC_USERNAME=postgres \
+    -e SONARQUBE_JDBC_PASSWORD=123456 \
+    -v /data/sonarqube/sonarqube_extensions:/opt/sonarqube/extensions \
+    -v /data/sonarqube/sonarqube_logs:/opt/sonarqube/logs \
+    -v /data/sonarqube/sonarqube_data:/opt/sonarqube/data \
+    sonarqube:7.8-community
 ```
 
 插件安装
@@ -1951,19 +1993,7 @@ docker cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar sonarqube:/opt/s
 docker restart sonarqube
 ```
 
-配置第三方存储
-```bash
-docker run -d --name sonarqube \
-    --link postgres2 \
-    -p 9000:9000 \
-    -e sonar.jdbc.url=jdbc:postgresql://172.17.17.80:5432/sonardb \
-    -e sonar.jdbc.username=sonar \
-    -e sonar.jdbc.password=123456 \
-    -v /data/sonarqube/sonarqube_extensions:/opt/sonarqube/extensions \
-    -v /data/sonarqube/sonarqube_logs:/opt/sonarqube/logs \
-    -v /data/sonarqube/sonarqube_data:/opt/sonarqube/data \
-    sonarqube:8.6-community
-```
+默认账户密码：admin/admin
 
 #### 4.7.5 Jenkins 2.332.4
 
