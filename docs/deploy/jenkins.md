@@ -298,7 +298,7 @@ mvn -v                                # 查找Maven版本
 
 #### 1.6.2 全局配置关联JDK和Maven
 
-Dashboard->Manage Jenkins->Tools，新增JDK和Maven配置如下：
+Dashboard -> Manage Jenkins -> Tools，新增JDK和Maven配置如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_jdk.png)
 
@@ -306,7 +306,7 @@ Dashboard->Manage Jenkins->Tools，新增JDK和Maven配置如下：
 
 #### 1.6.3 添加Jenkins全局变量
 
-Dashboard->Manage Jenkins->System->全局属性 ，添加三个全局变量`JAVA_HOME`、`M2_HOME`、`PATH+EXTRA`
+Dashboard -> Manage Jenkins -> System - >全局属性 ，添加三个全局变量`JAVA_HOME`、`M2_HOME`、`PATH+EXTRA`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_env.png)
 
@@ -715,7 +715,7 @@ HH 1,15 1-11 *
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_webhook.png)
 
-> 注意：以下设置必须完成，否则会报错！Manage Jenkins->System
+> 注意：以下设置必须完成，否则会报错！Manage Jenkins -> System
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
 
@@ -764,14 +764,14 @@ Jenkins支持非常丰富的参数类型，在Jenkins添加字符串类型参数
 
 #### 3.4.2 Jenkins设置邮箱发件人
 
-Manage Jenkins-> System
+Manage Jenkins -> System
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin.png)
 
 
 #### 3.4.3 Jenkins设置邮件参数
 
-Manage Jenkins-> System -> Extended E-mail Notification
+Manage Jenkins -> System -> Extended E-mail Notification
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin2.png)
 
@@ -914,8 +914,86 @@ SonarQube是一个用于管理代码质量的开放平台，可以快速的定�
 
 #### 3.5.3 添加SonarQube凭证
 
-#### 3.5.4 设置
+![](../../assets/_images/deploy/jenkins/jenkins_sonarqube_credentials1.png)
 
+![](../../assets/_images/deploy/jenkins/jenkins_sonarqube_credentials2.png)
+
+#### 3.5.4 全局配置关联SonarScanner
+
+Dashboard -> Manage Jenkins -> Tools，新增SonarScanner配置如下：
+
+![](../../assets/_images/deploy/jenkins/jenkins_sonar_scanner.png)
+
+#### 3.5.5 添加Jenkins全局变量
+
+Dashboard -> Manage Jenkins -> System，新增SonarQube配置如下：
+
+![](../../assets/_images/deploy/jenkins/jenkins_sonarqube_system.png)
+
+#### 3.5.6 添加SonaQube代码审查
+
+项目根目录添加`sonar-project.properties`文件
+
+```properties
+sonar.projectKey=web_demo
+sonar.projectName=web_demo
+sonar.projectVersion=1.0-SNAPSHOT
+
+
+sonar.sources=.
+sonar.exclusions=**/test/**,**/target/**
+
+sonar.java.source=1.8
+sonar.java.target=1.8
+
+sonar.sourceEncoding=UTF-8
+sonar.java.binaries=target/classes
+```
+
+#### 3.5.7 修改流水线代码
+
+```shell
+pipeline {
+   agent any
+
+   stages {
+      stage('代码拉取') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+         }
+      }
+      stage('代码审查') {
+         script {
+            scannerHome = tool 'sonarqube-scanner'
+         }
+        withSonarQubeEnv('sonarqube7.8') {
+            sh "${scannerHome}/bin/sonar-scanner"
+        }
+      }
+      stage('编译构建') {
+         steps {
+            sh 'mvn clean package -Dmaven.test.skip=true '
+         }
+      }
+      stage('项目部署') {
+         steps {
+            deploy adapters: [tomcat8(credentialsId: '9cfdcd8f-7b51-428d-ae79-25d64e70455a', path: '', url: 'http://172.17.17.196:8080')], contextPath: '/aaa', war: 'target/*.war'
+         }
+      }
+   }
+   post {
+         always {
+            emailext(
+               subject: '构建通知：${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!',
+               body: '${FILE,path="email.html"}',
+               to: 'xcg992224@163.com'
+            )
+         }
+   }
+}
+```
+
+![](../../assets/_images/deploy/jenkins/jenkins_build_sonar.png)
 
 
 ## 4. 微服务持续集成
@@ -965,7 +1043,7 @@ node {
 
 #### 4.1.3 添加SSH全局服务
 
-Dashboard->Manage Jenkins->System->全局属性 ，配置SSH服务器站点，ip，账号，密码
+Dashboard -> Manage Jenkins -> System -> 全局属性 ，配置SSH服务器站点，ip，账号，密码
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh2.png)
 
