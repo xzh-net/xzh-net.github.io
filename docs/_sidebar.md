@@ -43,6 +43,7 @@
   - [Istio](deploy/istio)
   - [Nexus](deploy/nexus)
   - [Gitlab](deploy/gitlab)
+  - [SonarQube](deploy/sonarqube)
   - [Jenkins](deploy/jenkins)
   - [Prometheus](deploy/prometheus)
   - [Zabbix](deploy/zabbix)
