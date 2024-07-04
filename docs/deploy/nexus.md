@@ -29,10 +29,6 @@ Nexus仓库类型
 
 ## 1. 安装
 
-### 1.1 二进制安装
-
-### 1.2 docker安装
-
 ```bash
 docker pull sonatype/nexus3:3.38.0
 docker volume create --name nexus-data
