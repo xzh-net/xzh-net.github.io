@@ -105,6 +105,14 @@ chown -R sonar:sonar /opt/sonarqube-7.8/
 su sonar /opt/sonarqube-7.8/bin/linux-x86-64/sonar.sh start
 ```
 
+设置开机自动
+
+```bash
+vi /etc/rc.d/rc.local
+
+# 添加以下命令
+su sonar /opt/sonarqube-7.8/bin/linux-x86-64/sonar.sh start
+```
 
 ### 1.7 插件管理
 
