@@ -62,18 +62,6 @@ vi /opt/sonarqube-7.8/conf/wrapper.conf
 wrapper.java.command=/usr/local/jdk1.8.0_202/bin/java
 ```
 
-#### 1.3.3 修改ES限制
-
-```bash
-vi /opt/sonarqube-7.8/elasticsearch/config/elasticsearch.yml
-```
-
-```bash
-
-```
-
-
-
 ### 1.4 系统设置
 
 #### 1.4.1 修改文件资源限制
@@ -98,7 +86,29 @@ vm.max_map_count=655360
 sysctl -p
 ```
 
-### 1.5 安装插件
+### 1.5 插件管理
+
+#### 1.5.1 中文插件
+
+把下载成功的插件复制到\extensions\plugins目录
+
+```bash
+cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar /opt/sonarqube-7.8/extensions/plugins
+```
+
+> 重启服务，如果是root用户上传后，需`chown -R sonar:sonar /opt/sonarqube-7.8/`，否则重启不成功
+
+#### 1.5.2 p3c插件
+
+P3C是根据《阿里巴巴Java开发手册》转化而成的自动化插件。
+
+P3C原是海上巡逻机的型号。宽大机身可携带大量电子设备，翼下有十个武器外挂点，机腹下有八个内部炸弹舱，可携带AGM-65空地导弹、AGM-84反舰导弹、MK-46/50鱼雷和MU-90鱼雷以及深水炸弹、水雷等；被用来执行侦察、反潜、反水面、监视巡逻等海上任务。代码的世界里专治新手小毛病、老油条的各种不服
+
+```bash
+cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar /opt/sonarqube-7.8/extensions/plugins
+```
+
+重启服务
 
 ### 1.6 创建启动用户
 
