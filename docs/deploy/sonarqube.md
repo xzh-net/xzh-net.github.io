@@ -50,7 +50,7 @@ sonar.login=admin
 sonar.password=admin
 ```
 
-#### 1.3.2 修改SonarQube的JDK版本
+#### 1.3.2 修改Sonar的JDK版本
 
 ```bash
 vi /opt/sonarqube-7.8/conf/wrapper.conf
@@ -86,31 +86,7 @@ vm.max_map_count=655360
 sysctl -p
 ```
 
-### 1.5 插件管理
-
-#### 1.5.1 中文插件
-
-把下载成功的插件复制到\extensions\plugins目录
-
-```bash
-cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar /opt/sonarqube-7.8/extensions/plugins
-```
-
-> 重启服务，如果是root用户上传后，需`chown -R sonar:sonar /opt/sonarqube-7.8/`，否则重启不成功
-
-#### 1.5.2 p3c插件
-
-P3C是根据《阿里巴巴Java开发手册》转化而成的自动化插件。
-
-P3C原是海上巡逻机的型号。宽大机身可携带大量电子设备，翼下有十个武器外挂点，机腹下有八个内部炸弹舱，可携带AGM-65空地导弹、AGM-84反舰导弹、MK-46/50鱼雷和MU-90鱼雷以及深水炸弹、水雷等；被用来执行侦察、反潜、反水面、监视巡逻等海上任务。代码的世界里专治新手小毛病、老油条的各种不服
-
-```bash
-cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar /opt/sonarqube-7.8/extensions/plugins
-```
-
-重启服务
-
-### 1.6 创建启动用户
+### 1.5 创建启动用户
 
 ```bash
 useradd sonar
@@ -123,7 +99,7 @@ useradd sonar
 chown -R sonar:sonar /opt/sonarqube-7.8/
 ```
 
-### 1.7 启动服务
+### 1.6 启动服务
 
 ```bash
 su - sonar
@@ -132,6 +108,65 @@ sh sonar.sh start
 ```
 
 
+### 1.7 插件管理
+
+#### 1.7.1 中文插件
+
+把下载成功的插件复制到\extensions\plugins目录
+
+```bash
+cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar /opt/sonarqube-7.8/extensions/plugins
+```
+
+```bash
+su - sonar
+cd /opt/sonarqube-7.8/bin/linux-x86-64
+sh sonar.sh restart
+```
+
+> 重启服务，如果是root用户上传后，需`chown -R sonar:sonar /opt/sonarqube-7.8/`，否则重启不成功
+
+#### 1.7.2 p3c插件
+
+P3C是根据《阿里巴巴Java开发手册》转化而成的自动化插件。
+
+P3C原是海上巡逻机的型号。宽大机身可携带大量电子设备，翼下有十个武器外挂点，机腹下有八个内部炸弹舱，可携带AGM-65空地导弹、AGM-84反舰导弹、MK-46/50鱼雷和MU-90鱼雷以及深水炸弹、水雷等；被用来执行侦察、反潜、反水面、监视巡逻等海上任务。代码的世界里专治新手小毛病、老油条的各种不服
+
+```bash
+cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar /opt/sonarqube-7.8/extensions/plugins
+```
+
+重启服务
+
+```bash
+su - sonar
+cd /opt/sonarqube-7.8/bin/linux-x86-64
+sh sonar.sh restart
+```
+
 ## 2. 应用设置
 
-### 2.1 
+### 2.1 生成令牌
+
+我的账号 -> 安全 -> 点击【生成】
+
+![](../../assets/_images/deploy/sonarqube/create_token.png)
+
+### 2.2 质量配置
+
+管理员帐户登录，质量配置 -> 创建
+
+![](../../assets/_images/deploy/sonarqube/add_rule.png)
+
+
+激活规则
+
+![](../../assets/_images/deploy/sonarqube/activate_rule.png)
+
+![](../../assets/_images/deploy/sonarqube/activate_rule2.png)
+
+
+设置规则
+
+![](../../assets/_images/deploy/sonarqube/rule_set_default.png)
+
