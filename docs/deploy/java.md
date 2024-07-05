@@ -5,27 +5,39 @@
 
 ## 1. Windows
 
-### 1.1 安装Jdk
-
-设置环境变量
+### 1.1 配置JDK
 
 ```lua
 JAVA_HOME
 D:\java\jdk1.8.0_202
-MAVEN_HOME
-D:\java\apache-maven-3.6.3
-GRADLE_HOME
-D:\java\gradle-6.8.3
-GRADLE_USER_HOME
-D:\Repositories\Maven
 
 PATH
 %JAVA_HOME%\bin
+```
+
+### 1.2 配置Maven
+
+```lua
+MAVEN_HOME
+D:\java\apache-maven-3.6.3
+
+PATH
 %MAVEN_HOME%\bin
+```
+
+### 1.3 配置Gradle
+
+```lua
+GRADLE_HOME
+D:\java\gradle-8.8
+GRADLE_USER_HOME
+D:\Repositories\Gradle
+
+PATH
 %GRADLE_HOME%\bin
 ```
 
-### 1.2 安装Tomcat
+### 1.4 配置Tomcat
 
 1. 指定jdk版本
 
@@ -94,7 +106,7 @@ Tomcat针对manager内置了6个角色，分别为 admin-gui , admin-script , ma
 </Context>
 ```
 
-### 1.3 安装IDEA
+### 1.5 安装IDEA
 
 ![](../../assets/_images/deploy/java/1.png)
 
