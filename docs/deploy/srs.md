@@ -2,7 +2,7 @@
 
 SRS是一个采用MIT协议授权的国产简单RTMP/HLS直播服务器。最新版还支持FLV模式，同时具备了RTMP的实时性，以及HLS中属于HTTP协议对各种网络环境高度适应性，并且支持更多播放器。它的功能与nginx-rtmp-module类似, 可以实现RTMP/HLS的分发,可用于直播/录播/视频客服等多种场景，其定位是运营级的互联网直播服务器集群
 
-- 下载地址：https://github.com/ossrs/srs/releases/download/v4.0-r1/srs-server-4.0-r1.tar.gz
+- 下载地址：https://github.com/ossrs/srs/releases/download/v4.0-r5/srs-server-4.0-r5.tar.gz
 
 
 ## 1. 安装
@@ -11,8 +11,8 @@ SRS是一个采用MIT协议授权的国产简单RTMP/HLS直播服务器。最新
 
 ```bash
 cd /opt/software
-tar -zxvf srs-server-4.0-b10.tar.gz -C /opt
-cd /opt/srs-server-4.0-b10/trunk
+tar -zxvf srs-server-4.0-r5.tar.gz -C /opt
+cd /opt/srs-server-4.0-r5/trunk
 ./configure
 make
 ```
@@ -20,8 +20,7 @@ make
 ### 1.2 修改配置
 
 ```bash
-cd conf
-vi http.hls.conf
+vi /opt/srs-server-4.0-r5/trunk/conf/http.hls.conf
 ```
 
 ```conf
@@ -65,29 +64,27 @@ vhost __defaultVhost__ {
 ### 1.3 启动服务
 
 ```bash
-cd /opt/srs-server-4.0-b10/trunk
-./objs/srs -c conf/srs.conf     # 启动
-./etc/init.d/srs status         # 查看状态
-tail -n 30 -f ./objs/srs.log    # 查看日志
+cd /opt/srs-server-4.0-r5/trunk
+./objs/srs -c conf/srs.conf         # 启动
+./etc/init.d/srs status             # 查看状态
+tail -n 30 -f ./objs/srs.log        # 查看日志
 ```
 
-检查SRS是否成功启动，可以打开 http://39.105.58.136:8080/
-
-控制台网址 http://39.105.58.136:1985/console/ng_index.html
+访问网址：http://192.168.3.201:8080/
 
 
 ## 2. 客户端测试
 
-- RTMP流地址：rtmp://39.105.58.136/live/time （端口号1935）
-- FLV地址：http://39.105.58.136:8080/live/time.flv （端口号8080）
-- HLS流地址：http://39.105.58.136:8080/live/time.m3u8 （端口号8080）
-- WebRTC流地址: webrtc://39.105.58.136/live/time （webrtc使用的是udp,默认监听8000,不需要设置端口号）
+- RTMP流地址：rtmp://192.168.3.201/live/time （端口号1935）
+- FLV地址：http://192.168.3.201:8080/live/time.flv （端口号8080）
+- HLS流地址：http://192.168.3.201:8080/live/time.m3u8 （端口号8080）
+- WebRTC流地址: webrtc://192.168.3.201/live/time （webrtc使用的是udp,默认监听8000,不需要设置端口号）
 
 ### 2.1 FFmpeg
 
 下载地址：http://ffmpeg.org 
 
-FFmpeg推流，使用rtmp协议时，默认使用1935端口，这里使用windows10安装ffmpeg来测试
+FFmpeg推流，使用rtmp协议时，默认使用1935端口，这里使用windows10安装ffmpeg来测试。
 
 #### 2.1.1 配置环境
 
@@ -96,17 +93,17 @@ path环境变量添加`D:\tools\ffmpeg\bin`
 #### 2.1.2 推流
 
 ```bash
-ffmpeg -re -i time.flv -vcodec copy -acodec copy -f flv -y rtmp://39.105.58.136/live/time
+ffmpeg -re -i time.flv -vcodec copy -acodec copy -f flv -y rtmp://192.168.3.201/live/time
 ```
 
 #### 2.1.3 拉流
 
-- rtmp://39.105.58.136/live/time
-- rtmp://39.105.58.136:8080/live/time.flv
-- rtmp://39.105.58.136:8080/live/time.m3u8
+- rtmp://192.168.3.201/live/time
+- rtmp://192.168.3.201:8080/live/time.flv
+- rtmp://192.168.3.201:8080/live/time.m3u8
 
 ```bash
-ffplay rtmp://39.105.58.136/live/time
+ffplay rtmp://192.168.3.201/live/time
 ```
 
 ### 2.2 VLC
@@ -158,7 +155,7 @@ ffplay rtmp://39.105.58.136/live/time
 
 ### 2.4 在线播放器
 
-http://39.105.58.136:8080/players/srs_player.html
+http://192.168.3.201:8080/players/srs_player.html
 
 
 
