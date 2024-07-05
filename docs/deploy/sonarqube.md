@@ -102,9 +102,7 @@ chown -R sonar:sonar /opt/sonarqube-7.8/
 ### 1.6 启动服务
 
 ```bash
-su - sonar
-cd /opt/sonarqube-7.8/bin/linux-x86-64
-sh sonar.sh start
+su sonar /opt/sonarqube-7.8/bin/linux-x86-64/sonar.sh start
 ```
 
 
@@ -119,9 +117,7 @@ cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar /opt/sonarqube-7.8/exte
 ```
 
 ```bash
-su - sonar
-cd /opt/sonarqube-7.8/bin/linux-x86-64
-sh sonar.sh restart
+su sonar /opt/sonarqube-7.8/bin/linux-x86-64/sonar.sh restart
 ```
 
 > 重启服务，如果是root用户上传后，需`chown -R sonar:sonar /opt/sonarqube-7.8/`，否则重启不成功
@@ -139,9 +135,7 @@ cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar /opt/sonarqube-7.
 重启服务
 
 ```bash
-su - sonar
-cd /opt/sonarqube-7.8/bin/linux-x86-64
-sh sonar.sh restart
+su sonar /opt/sonarqube-7.8/bin/linux-x86-64/sonar.sh restart
 ```
 
 ## 2. 应用设置
@@ -151,6 +145,10 @@ sh sonar.sh restart
 我的账号 -> 安全 -> 点击【生成】
 
 ![](../../assets/_images/deploy/sonarqube/create_token.png)
+
+如果与jenkins集成需要关闭审查结果上传到SCM功能
+
+![](../../assets/_images/deploy/sonarqube/close_scm.png)
 
 ### 2.2 质量配置
 
