@@ -108,6 +108,39 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
+
+#### 1.3.3 插件安装方式（可选）
+
+1. 在线安装
+
+安装过程可能失败，点击下面的重启按钮，重启服务一般都能解决此种问题
+
+2. 离线安装
+
+下载插件到本地
+
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/plugins/publish-over-ssh/latest/publish-over-ssh.hpi
+
+在插件管理中，点击高级，然后找到上传插件页面，点击上传刚刚下载的文件，找到后点击上传按钮
+
+![](../../assets/_images/deploy/jenkins/jenkins_upload_plugin.png)
+
+上传后，会自动开始安装插件及依赖关系，安装完成后仍然点击安装完成后重启，待重启完成后，就可以在插件中心看到。
+
+3. 解压安装
+
+因为主程序版本的迭代更新，插件会出现兼容问题导致无法安装，此时又不能升级主程序版本号，这时候就需要我们把之前部署好的环境中插件全部备份，在新环境还原即可。
+
+```bash
+# 备份
+cd /var/lib/jenkins
+tar -zcvf plugins.tar.gz plugins/
+
+# 还原
+tar -zxvf /opt/jenkins/plugins.tar.gz -C /var/lib/jenkins/
+```
+
+
 ### 1.4 权限管理
 
 #### 1.4.1 忘记密码
