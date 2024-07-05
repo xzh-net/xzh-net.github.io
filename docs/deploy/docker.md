@@ -1995,16 +1995,15 @@ docker restart sonarqube
 
 默认账户密码：admin/admin
 
-#### 4.7.5 Jenkins 2.332.4
+#### 4.7.5 Jenkins 2.426.1
 
 ```bash
-docker pull jenkins/jenkins:lts
-docker pull jenkins/jenkins：
+docker pull jenkins/jenkins:2.426.1-lts-jdk17
 
 mkdir -p /data/jenkins_home/
 chown -R 1000:1000 /data/jenkins_home/
 
-docker run -d --name jenkins -p 8888:8080 -p 50000:50000 -v /data/jenkins_home:/var/jenkins_home jenkins/jenkins2.332.4
+docker run -d --name jenkins -p 8888:8080 -p 50000:50000 -v /data/jenkins_home:/var/jenkins_home jenkins/jenkins:2.426.1-lts-jdk17
 
 cd /data/jenkins_home
 vi hudson.model.UpdateCenter.xml
