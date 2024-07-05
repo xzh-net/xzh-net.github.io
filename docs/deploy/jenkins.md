@@ -930,15 +930,18 @@ Dashboard -> Manage Jenkins -> System，新增SonarQube配置如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_sonarqube_system.png)
 
-#### 3.5.6 添加SonaQube代码审查
+#### 3.5.6 SonaQube关闭审查结果上传到SCM功能
+
+![](../../assets/_images/deploy/jenkins/jenkins_close_scm.png)
+
+#### 3.5.7 添加SonaQube代码审查
 
 项目根目录添加`sonar-project.properties`文件
 
 ```properties
 sonar.projectKey=web_demo
 sonar.projectName=web_demo
-sonar.projectVersion=1.0-SNAPSHOT
-
+sonar.projectVersion=1.0
 
 sonar.sources=.
 sonar.exclusions=**/test/**,**/target/**
@@ -947,10 +950,9 @@ sonar.java.source=1.8
 sonar.java.target=1.8
 
 sonar.sourceEncoding=UTF-8
-sonar.java.binaries=target/classes
 ```
 
-#### 3.5.7 修改流水线代码
+#### 3.5.8 修改流水线代码
 
 ```shell
 pipeline {

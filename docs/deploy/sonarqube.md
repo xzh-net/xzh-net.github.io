@@ -146,10 +146,6 @@ su sonar /opt/sonarqube-7.8/bin/linux-x86-64/sonar.sh restart
 
 ![](../../assets/_images/deploy/sonarqube/create_token.png)
 
-如果与jenkins集成需要关闭审查结果上传到SCM功能
-
-![](../../assets/_images/deploy/sonarqube/close_scm.png)
-
 ### 2.2 质量配置
 
 管理员帐户登录，质量配置 -> 创建
