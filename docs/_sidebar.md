@@ -69,7 +69,7 @@
   - [Java](deploy/java)
   - [Sacla](deploy/scala)
   - [Python](deploy/python)
-  - [Golang](deploy/go)
+  - [Go](deploy/go)
   - [Node.js](deploy/node)
   - [TypeScript](deploy/typescript)
   - [CLion](deploy/clion)
