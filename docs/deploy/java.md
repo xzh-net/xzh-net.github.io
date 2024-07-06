@@ -5,7 +5,7 @@
 
 ## 1. Windows
 
-### 1.1 配置JDK
+### 1.1 JDK
 
 ```lua
 JAVA_HOME
@@ -15,7 +15,7 @@ PATH
 %JAVA_HOME%\bin
 ```
 
-### 1.2 配置Maven
+### 1.2 Maven
 
 ```lua
 MAVEN_HOME
@@ -25,7 +25,7 @@ PATH
 %MAVEN_HOME%\bin
 ```
 
-### 1.3 配置Gradle
+### 1.3 Gradle
 
 ```lua
 GRADLE_HOME
@@ -37,7 +37,7 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
-### 1.4 配置Tomcat
+### 1.4 Tomcat
 
 1. 指定jdk版本
 
@@ -136,7 +136,7 @@ Tomcat针对manager内置了6个角色，分别为 admin-gui , admin-script , ma
 
 ## 2. Linux
 
-### 2.1 安装Jdk
+### 2.1 安装JDK
 
 Oracle最后一个商用免费版本
 
