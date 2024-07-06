@@ -35,7 +35,7 @@ PATH
 
 ## 2. Linux
 
-### 2.1 安装Sdk
+### 2.1 安装SDK
 
 
 ```scala
