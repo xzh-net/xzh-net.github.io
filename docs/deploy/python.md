@@ -1,10 +1,11 @@
 # Ptyhon 3.12.2
 
+- 官网地址：https://www.python.org/
+- 下载地址：https://www.python.org/ftp/python/
+
 ## 1. Windows
 
 ### 1.1 安装Ptyhon
-
-下载地址：https://www.python.org/downloads
 
 ![](../../assets/_images/deploy/python/1.png)
 
