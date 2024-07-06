@@ -2,7 +2,7 @@
 
 ## 1. Windows
 
-### 1.1 安装Sdk
+### 1.1 安装SDK
 
 下载地址：https://www.scala-lang.org/download/2.12.16.html
 
