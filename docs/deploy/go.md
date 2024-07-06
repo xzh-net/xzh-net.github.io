@@ -1,12 +1,11 @@
 # Go 1.13.4
 
 - 官方网站：https://go.dev/
+- 下载地址：https://go.dev/dl/go1.13.4.windows-amd64.msi
 
 ## 1. Windows
 
 ### 1.1 安装Go
-
-下载地址：https://dl.google.com/go/go1.22.0.windows-amd64.zip
 
 设置环境变量
 
