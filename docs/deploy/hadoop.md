@@ -744,7 +744,7 @@ hdfs dfsadmin -report
 
 ## 4. shell命令
 
-https://hadoop.apache.org/docs/r3.1.4/hadoop-project-dist/hadoop-common/FileSystemShell.html
+- 官方文档：https://hadoop.apache.org/docs/r3.1.4/hadoop-project-dist/hadoop-common/FileSystemShell.html
 
 ### 4.1 hdfs
 

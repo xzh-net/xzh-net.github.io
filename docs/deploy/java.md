@@ -1,11 +1,11 @@
-# Java 8
-
-- 官网地址：https://www.oracle.com/java/technologies/downloads/archive/
-- 基线地址：https://javadl-esd-secure.oracle.com/update/baseline.version
+# Java
 
 ## 1. Windows
 
 ### 1.1 JDK
+
+- 官网地址：https://www.oracle.com/java/technologies/downloads/archive/
+- 基线地址：https://javadl-esd-secure.oracle.com/update/baseline.version
 
 ```lua
 JAVA_HOME
@@ -17,6 +17,8 @@ PATH
 
 ### 1.2 Maven
 
+- 下载地址：https://archive.apache.org/dist/maven/maven-3/
+
 ```lua
 MAVEN_HOME
 D:\java\apache-maven-3.6.3
@@ -26,6 +28,8 @@ PATH
 ```
 
 ### 1.3 Gradle
+
+- 下载地址：https://services.gradle.org/distributions/
 
 ```lua
 GRADLE_HOME
@@ -38,6 +42,8 @@ PATH
 ```
 
 ### 1.4 Tomcat
+
+- 下载地址：https://archive.apache.org/dist/tomcat/
 
 1. 指定jdk版本
 
