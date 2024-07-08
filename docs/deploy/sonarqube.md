@@ -90,7 +90,7 @@ sysctl -p
 
 ```bash
 useradd sonar
-useradd sonar
+passwd sonar
 ```
 
 赋予启动用户执行权限
