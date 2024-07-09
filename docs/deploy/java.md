@@ -45,7 +45,7 @@ PATH
 
 - 下载地址：https://archive.apache.org/dist/tomcat/
 
-1. 指定jdk版本
+#### 1.4.1 配置JDK版本
 
 ```bash
 # 修改setclasspath.sh
@@ -53,7 +53,7 @@ JAVA_HOME=D:\Java\jdk1.8.0_202
 JRE_HOME=D:\Java\jdk1.8.0_202\jre
 ```
 
-2. 自签名证书
+#### 1.4.2 自签名证书
 
 生成
 
@@ -71,7 +71,7 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore d:/tomcat.keystore
         keystorePass="123456" /> 
 ```
 
-3. 内置角色
+#### 1.4.3 服务管理
 
 Tomcat针对manager内置了6个角色，分别为 admin-gui , admin-script , manager-gui , manager-script , manager-status , manager-jmx
 
