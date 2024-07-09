@@ -35,7 +35,7 @@ PATH
 GRADLE_HOME
 D:\java\gradle-8.8
 GRADLE_USER_HOME
-D:\Repositories\Gradle
+D:\Repositories\Maven
 
 PATH
 %GRADLE_HOME%\bin
