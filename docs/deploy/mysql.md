@@ -1,5 +1,7 @@
 # MySQL 5.7.44
 
+- 下载地址：https://dev.mysql.com/downloads/mysql/
+
 ## 1. 安装
 
 ### 1.1 单机
