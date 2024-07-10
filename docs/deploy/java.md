@@ -114,6 +114,8 @@ Tomcat针对manager内置了6个角色，分别为 admin-gui , admin-script , ma
 
 ### 1.5 安装IDEA
 
+下载地址：https://www.jetbrains.com/idea/download/other.html
+
 ![](../../assets/_images/deploy/java/1.png)
 
 ![](../../assets/_images/deploy/java/2.png)
