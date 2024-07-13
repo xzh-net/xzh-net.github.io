@@ -1,10 +1,10 @@
 # Docker 18.06.3
 
-仓库地址：https://hub.docker.com/
+- 仓库地址：https://hub.docker.com/
 
 ## 1. 安装
 
-### 1.1 yum安装
+### 1.1 在线安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -20,10 +20,10 @@ yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 
 ### 1.2 离线安装
 
-下载地址：https://download.docker.com/linux/static/stable/x86_64/
+下载地址：https://download.docker.com/linux/static/stable/x86_64/docker-18.06.3-ce.tgz
 
 ```bash
-tar zxf docker-18.06.1-ce.tgz   # 上传解压
+tar zxf docker-18.06.3-ce.tgz   # 上传解压
 sudo cp docker/* /usr/bin/      # 拷贝到全局命令中
 sudo dockerd &                  # 启动
 ```
@@ -66,10 +66,14 @@ systemctl enable docker
 
 ### 1.3 RPM安装
 
-
+下载
 ```bash
 yum install -y yum-plugin-downloadonly
-yum install --downloadonly --downloaddir=/data/rpm/ docker-ce-18.06.3.ce-3.el7  # 只下载不安装
+yum install --downloadonly --downloaddir=/data/rpm/ docker-ce-18.06.3.ce-3.el7
+```
+
+安装
+```
 cd /data/rpm
 yum localinstall *.rpm
 ```
@@ -319,18 +323,25 @@ rddFilter.collect()                             # 打印rddFilter内容
 
 ### 1.6 卸载
 
+1. 安装包卸载
+
 ```bash
-sudo yum remove docker \
-                  docker-client \
-                  docker-client-latest \
-                  docker-common \
-                  docker-latest \
-                  docker-latest-logrotate \
-                  docker-logrotate \
-                  docker-selinux \
-                  docker-engine-selinux \
-                  docker-engine
+yum list installed | grep docker
+yum remove package_name
+```
+
+2. rpm包查找卸载
+
+```bash
+rpm -qa docker | xargs rpm -e 
+```
+
+3. 删除相关目录和文件
+
+```bash
+rm -rf /etc/systemd/system/docker*
 rm -rf /var/lib/docker
+rm -rf /var/run/docker
 ```
 
 
