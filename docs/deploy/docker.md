@@ -1724,8 +1724,7 @@ rabbitmqctl set_user_tags admin administrator
 rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 ```
 
-控制台地址：http://0.0.0.0:15672
-账号密码admin/123456
+控制台地址：http://0.0.0.0:15672 账号密码：admin/123456
 
 #### 4.6.3 RocketMQ 4.4.0
 
