@@ -49,32 +49,59 @@ vi rabbitmq-defaults
 CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 ```
 
-### 1.3 启动服务
+### 1.3 插件管理
 
-```bash
-systemctl start rabbitmq-server
-rabbitmq-plugins enable rabbitmq_management        # 开启管控台
-rabbitmqctl add_user admin 123456                  # 添加用户
-rabbitmqctl set_user_tags admin administrator      # 用户授权,administartor为管理员权限，四种权限【management、policymaker、monitoring、administrator】
-rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
-cd /var/log/rabbitmq                               # 查看日志
-```
+#### 1.3.1 延时队列
 
-访问地址：http://0.0.0.0:15672
-
-### 1.4 插件管理
+下载安装
 
 ```bash
 wget https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.9.0/rabbitmq_delayed_message_exchange-3.9.0.ez
 cp rabbitmq_delayed_message_exchange-3.9.0.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.9.12/plugins/
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+```
 
+常用插件端口号
+
+```bash
 rabbitmq-plugins enable rabbitmq_mqtt               # 1883
 rabbitmq-plugins enable rabbitmq_web_mqtt           # 15675
 rabbitmq-plugins enable rabbitmq_stomp              # 61613
 rabbitmq-plugins enable rabbitmq_web_stomp          # 15674
 ```
 
+### 1.4 用户权限设置
+
+开启管控台
+```bash
+rabbitmq-plugins enable rabbitmq_management
+```
+
+添加用户
+```bash
+rabbitmqctl add_user admin 123456
+```
+
+用户授权，administartor为管理员权限，四种权限【management、policymaker、monitoring、administrator】
+```bash
+rabbitmqctl set_user_tags admin administrator
+```
+
+开启用户远程访问
+```bash
+rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
+```
+
+
+### 1.5 启动服务
+
+```bash
+systemctl start rabbitmq-server
+# 查看日志
+cd /var/log/rabbitmq
+```
+
+访问地址：http://0.0.0.0:15672
 
 
 ## 2. 命令
