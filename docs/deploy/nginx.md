@@ -792,6 +792,20 @@ location /images {
 
 ### 3.7 Rewrite
 
+Rewrite作用就是使用nginx提供的全局变量或自己设置的变量，结合正则表达式和标志位实现url重写以及重定向
+
+语法格式
+
+```conf
+rewrite regex replacement [flag];
+```
+
+flag标记
+- last 本条规则匹配完成后， 继续向下匹配新其他uri规则
+- break 本条规则匹配完成即终止， 不再匹配后面的任何规则
+- redirect 返回 302 临时重定向， 浏览器地址栏会显示跳转后的url地址
+- permanent 返回 301 永久重定向， 浏览器地址栏会显示跳转后的url地址
+
 常用变量
 
 | 变量               | 说明                                                         |
@@ -818,9 +832,12 @@ location /images {
 | $request_filename  | 变量中存储了当前请求的资源文件的路径名                       |
 | $request_uri       | 变量中存储了当前请求的URI，并且携带请求参数，比如http://192.168.200.133/server?id=10&name=zhangsan中的"/server?id=10&name=zhangsan" |
 
-目录合并
+
+使用示例
 
 ```conf
+
+## 目录合并
 server {
     listen 80;
     server_name www.web.name;
@@ -828,11 +845,8 @@ server {
         rewrite ^/server-([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)\.html$ /server/$1/$2/$3/$4/$5.html last;
     }
 }
-```
 
-二级转发
-
-```conf
+## 永久重定向
 server {
     listen 80;
     server_name  www.xuzhihao.net;
@@ -841,6 +855,7 @@ server {
     }
 }
 ```
+
 
 ### 3.8 web缓存
 
