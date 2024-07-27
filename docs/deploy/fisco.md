@@ -112,8 +112,7 @@ node.dir=node0
 python3 deploy.py installAll
 ```
 
-> 不要用sudo执行脚本，sudo会导致无法获取当前用户的环境变量如JAVA_HOME。默认账号为 admin ，默认密码为 Abcd1234 ，密码不能包含特殊字符。
-
+> 不要用sudo执行脚本，sudo会导致无法获取当前用户的环境变量如JAVA_HOME。
 
 ```bash
 cd /opt/webase-deploy
@@ -132,6 +131,34 @@ python3 deploy.py startSign     # 启动WeBASE-Sign
 python3 deploy.py stopSign      # 停止WeBASE-Sign
 python3 deploy.py startFront    # 启动WeBASE-Front
 python3 deploy.py stopFront     # 停止WeBASE-Front
+```
+
+访问地址：http://localhost:5000 ，默认账号为 admin ，默认密码为 Abcd1234 ，密码不能包含特殊字符。
+
+#### 1.1.4 设置节点存储方式
+
+通过群组配置文件group.[group_id].ini的storage配置项可配置MySQL为存储介质，如本地节点0的群组1的配置文件位置是`nodes/127.0.0.1/node0/group.1.ini`
+
+```bash
+cd /opt/webase-deploy/nodes/127.0.0.1/node0/conf
+```
+
+```bash
+# 修改存储类型为mysql
+sed -i 's/type=rocksdb/type=mysql/g' ~/fisco/nodes/127.0.0.1/node*/conf/group.1.ini
+
+# 配置数据库用户名和密码
+sed -i 's/db_username=/db_username=root/g' ~/fisco/nodes/127.0.0.1/node*/conf/group.1.ini
+sed -i 's/db_passwd=/db_passwd=123456/g' ~/fisco/nodes/127.0.0.1/node*/conf/group.1.ini
+sed -i 's/db_name=/db_name=db/g' ~/fisco/nodes/127.0.0.1/node*/conf/group.1.ini
+```
+
+重启节点
+
+```bash
+cd /opt/webase-deploy
+python3 deploy.py stopNode
+python3 deploy.py startNode
 ```
 
 
