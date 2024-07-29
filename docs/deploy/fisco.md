@@ -192,7 +192,7 @@ curl -#LO https://github.com/FISCO-BCOS/console/releases/download/v2.9.2/downloa
 
 1. 区块链节点和证书的配置
 
-将conf目录下的config-example.toml文件重命名为config.toml文件。配置config.toml文件，其中添加注释的内容根据区块链节点配置做相应修改，如果搭链时设置的channel_listen_ip(若节点版本小于v2.3.0，查看配置项listen_ip)为127.0.0.1或者0.0.0.0，channel_port为`20200`， 则config.toml配置不用修改
+将conf目录下的config-example.toml文件重命名为config.toml文件。配置config.toml文件，其中添加注释的内容根据区块链节点配置做相应修改，如果搭链时设置的channel_listen_ip（若节点版本小于v2.3.0，查看配置项listen_ip）为127.0.0.1或者0.0.0.0，channel_port为`20200`， 则config.toml配置不用修改
 
 ```bash
 cd /opt/fisco/console
