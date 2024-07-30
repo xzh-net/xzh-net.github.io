@@ -1,6 +1,73 @@
 # Oracle
 
-## 1. 事务隔离级别以及MySQL区别
+## 1. 实例
+
+### 1.1 物理存储结构
+![](../../assets/_images/java/share/oracle2.png)
+
+- Data File 数据文件
+- Control File 控制文件
+- Redo Log File 重做日志文件
+
+```sql
+col name for a50
+SELECT name FROM v$datafile
+union all
+SELECT name FROM v$controlfile
+union all
+SELECT member FROM v$lofile；
+```
+
+查看分配给数据库的内存大小
+
+```sql
+show parameter memory 
+```
+
+### 1.2 内存结构
+![](../../assets/_images/java/share/oracle.png)
+
+
+是一种数据库访问机制，主要由内存结构和进程结构组成
+
+内存结构主要包括系统全局区（System Global Area，`SGA`）、进程全局区（Process Global Area，`PGA`）等
+
+
+### 1.3 Database Buffer Cache的组成
+
+Buffer Cache 有两个管理列表：写列表和最近最少使⽤的(LRU)列表。
+
+Buffer Cache中的内存缓冲区分成三部分：
+1. free buffer 空闲缓冲区不包含任何有⽤的数据，数据库可以重⽤他们保存从磁盘读取的新数据
+2. dirty buffer 脏缓冲区，包含已修改但尚未写到磁盘的数据。
+3. pinned buffer 钉住/保留缓冲区，是⽤户会话当前正在激活使⽤的数据缓冲区
+
+### 1.4 Database Buffer Cache
+
+LRU 缓冲区清除算法
+
+### 1.5 Shared Pool
+
+### 1.6 SQL在Oracle内部的处理流程
+
+1. 软解析
+   - 任何不适硬解析的解析都是软解析。如果提交的语句与在共享式中某个可重⽤SQL语句相同，则数据库将重⽤该现有代码。重⽤代码也称为库缓存命中。⼀般的，软解析⽐硬解析更可取，因为数据库可以跳过优化和⾏源⽣成步骤，⽽直接进⼊到直⾏阶段。下图是在专⽤服务器体系结构中，⼀个update语句的共享池检查的简化表示
+2. 硬解析
+   - 如果数据库不能重⽤现有代码，则它必须⽣成应⽤程序代码的⼀个新的可执⾏版本，此操作称为⼀个硬解析，或库缓存未命中。数据库对DDL始终执⾏硬解析。
+   在硬解析期间，数据库多次访问库缓存和数据字典缓存以检查数据字典。当数据库访问这些区域时，它在所需对象上使⽤⼀个叫做闩锁的串⾏化设备，以便它们的定义不糊被更改。闩锁的争⽤会增加语句的执⾏时间，并降低并发
+
+### 1.7 系统五大后台常驻进程
+- 数据写入进程（DBWR）
+- 检查点进程（CKPT）
+- 日志写入进程（LGWR）
+- 系统监控进程（SMON）
+- 进程监控进程（PMON）
+
+netstat -tulnp|grep 5560 -查看端口号是否被占用
+
+
+## 2. 事务隔离级别
+
 | 隔离级别| 脏读可能性 | 不可重复度可能性 | 幻读可能性 | 加锁读 |
 | ----- | ----- | ----- | ----- | ----- |
 | READ UNCOMMITTED| 是 | 是 | 是 | 否 |
@@ -8,7 +75,7 @@
 | REPEATABLE READ| 否 | 否 | 是 | 否 |
 | SERIALIZABLE| 否 | 否 | 否 | 是 |
 
-mysql和oracle的区别：
+## 3. MySQL & Oracle 区别
 
 1、类型和成本的区别
 
@@ -83,73 +150,7 @@ MYSQL的非空字段也可以有空的内容，ORACLE里定义了非空字段就
 MYSQL里用 字段名 like '%字符串%'；ORACLE里也可以用 字段名 like '%字符串%' 但这种方法不能使用索引， 速度不快。
 
 
-## 2. Oracle实例
-
-### 2.1 物理存储结构
-![](../../assets/_images/java/share/oracle2.png)
-
-- Data File 数据文件
-- Control File 控制文件
-- Redo Log File 重做日志文件
-
-```sql
-col name for a50
-SELECT name FROM v$datafile
-union all
-SELECT name FROM v$controlfile
-union all
-SELECT member FROM v$lofile；
-```
-
-查看分配给数据库的内存大小
-
-```sql
-show parameter memory 
-```
-
-### 2.2 内存结构
-![](../../assets/_images/java/share/oracle.png)
-
-
-是一种数据库访问机制，主要由内存结构和进程结构组成
-
-内存结构主要包括系统全局区（System Global Area，`SGA`）、进程全局区（Process Global Area，`PGA`）等
-
-
-### 2.3 Database Buffer Cache的组成
-
-Buffer Cache 有两个管理列表：写列表和最近最少使⽤的(LRU)列表。
-
-Buffer Cache中的内存缓冲区分成三部分：
-1. free buffer 空闲缓冲区不包含任何有⽤的数据，数据库可以重⽤他们保存从磁盘读取的新数据
-2. dirty buffer 脏缓冲区，包含已修改但尚未写到磁盘的数据。
-3. pinned buffer 钉住/保留缓冲区，是⽤户会话当前正在激活使⽤的数据缓冲区
-
-### 2.4 Database Buffer Cache
-
-LRU 缓冲区清除算法
-
-### 2.5 Shared Pool
-
-### 2.6 SQL在Oracle内部的处理流程
-
-1. 软解析
-   - 任何不适硬解析的解析都是软解析。如果提交的语句与在共享式中某个可重⽤SQL语句相同，则数据库将重⽤该现有代码。重⽤代码也称为库缓存命中。⼀般的，软解析⽐硬解析更可取，因为数据库可以跳过优化和⾏源⽣成步骤，⽽直接进⼊到直⾏阶段。下图是在专⽤服务器体系结构中，⼀个update语句的共享池检查的简化表示
-2. 硬解析
-   - 如果数据库不能重⽤现有代码，则它必须⽣成应⽤程序代码的⼀个新的可执⾏版本，此操作称为⼀个硬解析，或库缓存未命中。数据库对DDL始终执⾏硬解析。
-   在硬解析期间，数据库多次访问库缓存和数据字典缓存以检查数据字典。当数据库访问这些区域时，它在所需对象上使⽤⼀个叫做闩锁的串⾏化设备，以便它们的定义不糊被更改。闩锁的争⽤会增加语句的执⾏时间，并降低并发
-
-### 2.7 系统五大后台常驻进程
-- 数据写入进程（DBWR）
-- 检查点进程（CKPT）
-- 日志写入进程（LGWR）
-- 系统监控进程（SMON）
-- 进程监控进程（PMON）
-
-netstat -tulnp|grep 5560 -查看端口号是否被占用
-
-
-## 3. SQL三大范式
+## 4. SQL范式
 
 1. 第一范式:确保每列的原子性
 2. 第二范式:在第一范式的基础上更进一层,目标是确保表中的每列都和主键相关

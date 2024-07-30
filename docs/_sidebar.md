@@ -103,6 +103,6 @@
   - [分布式理论与算法](java/distributed/cap)
   - [Spring Cloud Netflix](java/microservice/springcloud)
   - [Spring Cloud Alibaba](java/microservice/springclouda)
-  - [Mysql](java/database/mysql)
+  - [MySQL](java/database/mysql)
   - [Oracle](java/database/oracle)
   - [ShardingSphere](java/database/shardingsphere)
