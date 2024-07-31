@@ -3,11 +3,13 @@
 ## 1. 实例
 
 ### 1.1 物理存储结构
-![](../../assets/_images/java/share/oracle2.png)
 
 - Data File 数据文件
 - Control File 控制文件
 - Redo Log File 重做日志文件
+
+![](../../assets/_images/java/database/oracle/2.png)
+
 
 ```sql
 col name for a50
@@ -25,7 +27,8 @@ show parameter memory
 ```
 
 ### 1.2 内存结构
-![](../../assets/_images/java/share/oracle.png)
+
+![](../../assets/_images/java/database/oracle/1.png)
 
 
 是一种数据库访问机制，主要由内存结构和进程结构组成

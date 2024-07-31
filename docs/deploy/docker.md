@@ -1002,13 +1002,14 @@ grant dba to xzh0610;  #  授予dba权限后，这个用户能操作所有用户
 连接参数
 
 ```
-port: 1022
+port: 1521
 sid: xe
-username: system
-password: oracle
-system: oracle
-sys: oracle
+username: xzh0610
+password: 123456
 ```
+
+管理员账号：system / oracle，sys / oracle
+
 
 #### 4.2.4 SQL Server 2019
 
