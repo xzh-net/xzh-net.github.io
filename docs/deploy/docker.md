@@ -477,13 +477,13 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 > Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
 
-#### 3.1.1 基于环境构建Jar
+#### 3.1.1 基于环境构建
 
 1. 创建文件
 
 ```bash
 cd /data/apps
-vi eureka-server.Dockerfile
+vi Dockerfile2
 ```
 
 ```bash
@@ -497,7 +497,7 @@ ENTRYPOINT ["java","-jar","eureka-server.jar"]
 2. 构建镜像
 
 ```bash
-docker build -f eureka-server.Dockerfile -t eureka-server .
+docker build -f Dockerfile2 -t eureka-server .
 ```
 
 3. 运行
@@ -509,7 +509,7 @@ cat /etc/issue                              # 查看操作系统
 uname -a                                    # 查看内核
 ```
 
-#### 3.1.2 基于操作系统构建Tomcat
+#### 3.1.2 基于操作系统构建
 
 1. 创建文件
 
@@ -551,7 +551,7 @@ docker run -dit --name tomcat8 -p 8080:8080 tomcat8
 docker exec -it tomcat8 /bin/bash
 ```
 
-#### 3.1.3 turnserver
+#### 3.1.3 Turnserver
 
 1. 创建文件
 
@@ -639,7 +639,7 @@ sudo docker build --tag coturn .
 sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 ```
 
-#### 3.1.4 hadoop 3.x
+#### 3.1.4 Hadoop 3.x
 
 1. 构建centos7-ssh-sync
 
