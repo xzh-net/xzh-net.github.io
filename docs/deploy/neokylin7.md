@@ -63,15 +63,28 @@
 ![](../../assets/_images/deploy/neokylin/11.png)
 
 
-## 2. 虚拟机
+## 2. 初始化
 
-### 2.1 初始化
+### 2.1 关闭防火墙
 
 ```bash
-nkvers  # 查看版本
+systemctl stop firewalld.service
+systemctl disable firewalld.service     # 关闭
+systemctl enable firewalld.service      # 随系统启动
+```
+
+
+### 2.2 安装常用软件
+
+```bash
+# 查看版本
+nkvers  
+
 yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
 yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
-systemctl stop firewalld.service
-systemctl disable firewalld.service # 关闭
+
+# 同步时间
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      
+
 ```
+

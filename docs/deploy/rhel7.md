@@ -141,9 +141,9 @@
 
 ![](../../assets/_images/deploy/rhel7/34.png)
 
-## 3. 虚拟机
+## 3. 初始化
 
-### 3.1 网络配置
+### 3.1 手动配置IP地址
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-ens33   

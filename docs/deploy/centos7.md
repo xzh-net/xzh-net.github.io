@@ -1865,40 +1865,9 @@ JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
 $JAVA ${JAVA_OPT} $@
 ```
 
-## 3. 虚拟机
+## 3. 初始化
 
-### 3.1 初始化
-
-```bash
-yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
-yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
-
-systemctl stop iptables.service
-systemctl disable iptables.service  # 关闭
-systemctl stop firewalld.service
-systemctl disable firewalld.service # 关闭
-sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
-```
-
-### 3.2 ssh配置
-
-```bash
-vi /etc/ssh/sshd_config
-
-# 配置文件
-Port 22
-ListenAddress 0.0.0.0
-ListenAddress ::
-PermitRootLogin yes # 允许远程登录
-PasswordAuthentication yes  # 开启用户名和密码来验证
-
-# 重启
-service sshd start
-systemctl enable sshd
-```
-
-### 3.3 网络配置
+### 3.1 手动配置IP地址
 
 ```bash
 vi /etc/hosts
@@ -1935,7 +1904,34 @@ DNS1=114.114.114.114
 systemctl restart network
 ```
 
-### 3.4 更换yum源
+### 3.2 ssh配置
+
+```bash
+vi /etc/ssh/sshd_config
+
+# 配置文件
+Port 22
+ListenAddress 0.0.0.0
+ListenAddress ::
+PermitRootLogin yes # 允许远程登录
+PasswordAuthentication yes  # 开启用户名和密码来验证
+
+# 重启
+service sshd start
+systemctl enable sshd
+```
+
+### 3.3 关闭防火墙
+
+```bash
+systemctl stop iptables.service
+systemctl disable iptables.service  # 关闭
+systemctl stop firewalld.service
+systemctl disable firewalld.service # 关闭
+sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+```
+
+### 3.4 更换软件源
 
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
@@ -1944,13 +1940,22 @@ yum clean all # 清空缓存
 yum makecache # 更新yum缓存
 ```
 
-### 3.5 卸载软件
+
+### 3.5 删除自带的工具
 
 ```bash
 rpm -e --nodeps `rpm -qa | grep mariadb`
 ```
 
-### 3.6 安装vim
+### 3.6 安装常用软件
+
+```bash
+yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
+```
+
+### 3.7 安装vim
 
 ```bash
 yum -y install vim*

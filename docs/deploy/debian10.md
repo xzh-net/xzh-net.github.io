@@ -86,27 +86,15 @@
 
 ![](../../assets/_images/deploy/debian/13.png)
 
-## 2. 虚拟机
+## 2. 初始化
 
-### 2.1 初始化
-
-```bash
-sudo passwd root    # 修改root密码
-```
-
-### 2.2 ssh配置
+### 2.1 开启root账号
 
 ```bash
-apt-get install ssh     # 安装
-echo -e "ListenAddress 0.0.0.0\nPasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config # 开启密码验证和root账号登录 
-service ssh start       # 启动ssh服务
-service ssh status      # 查看ssh服务状态
-update-rc.d ssh enable  # 添加开机自启动
+sudo passwd root
 ```
 
-### 2.3 网络配置
-
-1. 设置静态ip
+### 2.2 手动配置IP地址
 
 ```bash
 ip addr
@@ -125,11 +113,22 @@ gateway 192.168.2.1
 systemctl restart networking
 ```
 
-2. 设置dns
+修改DNS
 
 ```bash
 vim /etc/resolv.conf
 ```
+
+### 2.3 ssh配置
+
+```bash
+apt-get install ssh     # 安装
+echo -e "ListenAddress 0.0.0.0\nPasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config # 开启密码验证和root账号登录 
+service ssh start       # 启动ssh服务
+service ssh status      # 查看ssh服务状态
+update-rc.d ssh enable  # 添加开机自启动
+```
+
 
 ### 2.4 更换软件源
 

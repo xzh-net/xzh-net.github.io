@@ -64,31 +64,9 @@
 
 ![](../../assets/_images/deploy/kylin/12.png)
 
-## 2. 虚拟机
+## 2. 初始化
 
-### 2.1 初始化
-
-```bash
-nkvers  # 查看版本
-yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
-yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
-/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w      # 同步时间
-systemctl stop firewalld.service
-systemctl disable firewalld.service # 关闭
-```
-
-### 2.2 ssh配置
-
-```bash
-echo -e "ListenAddress 0.0.0.0\nPasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config # 开启密码验证和root账号登录 
-
-service sshd start
-systemctl enable sshd   # 开机启动
-```
-
-### 2.3 网络配置
-
-1. 设置静态ip
+### 2.1 手动配置IP地址
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
@@ -119,8 +97,40 @@ IPV6_PRIVACY=no
 systemctl restart network
 ```
 
-2. 设置dns
+修改DNS
 
 ```bash
 vim /etc/resolv.conf
+```
+
+
+### 2.2 ssh配置
+
+```bash
+# 开启密码验证和root账号登录 
+echo -e "ListenAddress 0.0.0.0\nPasswordAuthentication yes\nPermitRootLogin yes" >> /etc/ssh/sshd_config
+
+service sshd start
+systemctl enable sshd   # 开机启动
+```
+
+### 2.3 关闭防火墙
+
+```bash
+systemctl stop firewalld.service
+systemctl disable firewalld.service     # 关闭
+systemctl enable firewalld.service      # 随系统启动
+```
+
+### 2.4 安装常用软件
+
+```bash
+# 查看版本
+nkvers
+
+yum install -y zip unzip telnet lsof ntpdate openssh-server wget net-tools.x86_64
+yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+
+# 同步时间
+/usr/sbin/ntpdate ntp4.aliyun.com;/sbin/hwclock -w
 ```
