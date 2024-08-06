@@ -131,7 +131,7 @@ systemctl restart networking
 vim /etc/resolv.conf
 ```
 
-### 2.4 更换apt源
+### 2.4 更换软件源
 
 1. 网络源
 

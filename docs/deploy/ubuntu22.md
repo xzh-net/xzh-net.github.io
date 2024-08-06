@@ -120,30 +120,26 @@ kvm-ok
 
 ## 2. 虚拟机
 
-### 2.1 初始化
+### 2.1 开启root账号
 
 ```bash
-sudo passwd root    # 修改密码
-apt-get install -y zip unzip telnet lsof wget net-tools
+sudo passwd root
 ```
 
-### 2.2 ssh配置
+### 2.2 删除自带的工具
 
 ```bash
-vi /etc/ssh/sshd_config
+# 彻底删除 snap 以及其配置文件
+sudo apt remove -y snapd --purge
 
-# 配置文件
-Port 22
-ListenAddress 0.0.0.0
-ListenAddress ::
-PermitRootLogin yes # 允许远程登录
-PasswordAuthentication yes  # 开启用户名和密码来验证
+# 删除云功能和自动升级功能
+sudo apt remove -y unattended-upgrades cloud-init
 
-/etc/init.d/ssh restart # 启动服务
-update-rc.d ssh enable  # 开机启动
+# 清理相关依赖
+sudo apt install -f && sudo apt autoremove
 ```
 
-### 2.3 网络配置
+### 2.3 手动配置IP地址
 
 ```bash
 vi /etc/netplan/00-installer-config.yaml
@@ -169,18 +165,51 @@ network:
 netplan apply
 ```
 
+### 2.4 安装常用软件
 
-### 2.4 更换apt源
+```bash
+apt-get install -y vim zip unzip telnet lsof wget net-tools
+```
+
+### 2.5 关闭防火墙
+
+```bash
+sudo ufw enable     # 开启防火墙
+sudo ufw disable    # 关闭防火墙
+sudo ufw status     # 查看防火墙状态
+ufw allow 443/tcp   # 配置放行端口
+```
+
+### 2.6 ssh配置
+
+```bash
+vi /etc/ssh/sshd_config
+
+# 配置文件
+Port 22
+ListenAddress 0.0.0.0
+ListenAddress ::
+PermitRootLogin yes         # 允许远程登录
+PasswordAuthentication yes  # 开启用户名和密码来验证
+```
+
+```bash
+/etc/init.d/ssh restart     # 启动服务
+update-rc.d ssh enable      # 开机启动
+```
+
+### 2.7 更换软件源
 
 ```bash
 vim /etc/apt/sources.list
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
-apt update
+apt update      # 更新apt
+apt upgrade     # 更新系统
 ```
 
-### 2.5 Docker
+### 2.8 安装Docker
 
-1. apt安装
+#### 2.8.1 在线安装
 
 ```bash
 # 卸载
@@ -200,7 +229,7 @@ systemctl start docker
 systemctl enable docker
 ```
 
-2. 安装docker-compose
+#### 2.8.2 安装docker-compose
 
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -208,7 +237,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 
-3. Portainer
+#### 2.8.3 安装Portainer
 
 ```bash
 docker volume create portainer_data
