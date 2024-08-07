@@ -151,7 +151,7 @@ systemctl restart NetworkManager    # 重启网络
 ifdown ens33; ifup ens33
 ```
 
-### 3.2 更换yum源
+### 3.2 更换软件源
 
 1. 下载yum安装包
 
