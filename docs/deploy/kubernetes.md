@@ -10,7 +10,7 @@
 | k8s-node1 | 192.168.2.202 | 2CPU，2G内存，20G硬盘 |
 | k8s-node2 | 192.168.2.203 | 2CPU，2G内存，20G硬盘 |
 
-### 1.2 基础环境准备(三台机器)
+### 1.2 基础环境准备(三台)
 
 #### 1.2.1 修改主机名
 
@@ -122,9 +122,9 @@ chmod +x /etc/sysconfig/modules/ipvs.modules
 lsmod | grep -e ip_vs -e nf_conntrack_ipv4
 ```
 
-### 1.3 安装docker(三台机器)
+### 1.3 安装Docker(三台)
 
-1. yum安装
+#### 1.3.1 在线安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -135,22 +135,25 @@ systemctl start docker
 systemctl enable docker
 ```
 
-2. 修改镜像源
+#### 1.3.2 配置镜像加速器、仓库地址、根目录
 
 ```bash
-vi /etc/docker/daemon.json
+sudo mkdir -p /etc/docker
 ```
 
 ```conf
+sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-    "registry-mirrors":["https://docker.mirrors.ustc.edu.cn","https://registry.docker-cn.com","https://registry.cn-hangzhou.aliyuncs.com"],
-    "insecure-registries": ["192.168.2.100:88"],
-    "exec-opts":["native.cgroupdriver=systemd"],
-    "data-root": "/data/docker"
+  "registry-mirrors": ["https://l4ud74lw.mirror.aliyuncs.com"],
+  "insecure-registries": ["192.168.2.100:88"],
+  "exec-opts":["native.cgroupdriver=systemd"],
+  "data-root": "/data/docker"
 }
+EOF
+
 ```
 
-3. 启动服务
+#### 1.3.3 启动服务
 
 ```bash
 sudo systemctl daemon-reload 
@@ -158,9 +161,9 @@ sudo systemctl restart docker
 ```
 
 
-### 1.4 安装kubernetes组件(三台机器)
+### 1.4 安装kubernetes组件(三台)
 
-1. 修改镜像源
+#### 1.4.1 修改镜像源
 
 ```bash
 cat > /etc/yum.repos.d/kubernetes.repo <<EOF
@@ -175,13 +178,13 @@ https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
 EOF
 ```
 
-2. 安装kubeadm、kubelet和kubectl
+#### 1.4.2 安装kubeadm、kubelet和kubectl
 
 ```bash
 yum install --setopt=obsoletes=0 kubeadm-1.17.4-0 kubelet-1.17.4-0 kubectl-1.17.4-0 -y
 ```
 
-3.  配置kubelet的cgroup
+#### 1.4.3 配置kubelet的cgroup
 
 ```bash
 vi /etc/sysconfig/kubelet
@@ -190,13 +193,13 @@ KUBELET_CGROUP_ARGS="--cgroup-driver=systemd"
 KUBE_PROXY_MODE="ipvs"
 ```
 
-4. 设置kubelet开机自启
+#### 1.4.4 设置kubelet开机自启
 
 ```bash
 systemctl enable kubelet
 ```
 
-### 1.5 准备集群镜像(三台机器)
+### 1.5 准备集群镜像(三台)
 
 在安装kubernetes集群之前，必须要提前准备好集群需要的镜像，所需镜像可以通过下面命令查看
 
@@ -204,7 +207,7 @@ systemctl enable kubelet
 kubeadm config images list --kubernetes-version v1.17.4
 ```
 
-此镜像在kubernetes的仓库中,由于网络原因,无法连接，下面提供了一种替代方案
+此镜像在kubernetes的仓库中，由于网络原因无法连接，下面提供了一种替代方案
 
 ```bash
 images=(
@@ -255,13 +258,12 @@ Master节点查看集群状态
 kubectl get nodes
 ```
 
-### 1.7 网络插件安装
+### 1.7 安装网络插件
 
 kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
-下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-
-https://github.com/xzh-net/other/tree/main/k8s/flannel
+- 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+- 本地下载：https://github.com/xzh-net/other/tree/main/k8s/flannel
 
 ```bash
 kubectl apply -f kube-flannel.yml   # 安装插件
