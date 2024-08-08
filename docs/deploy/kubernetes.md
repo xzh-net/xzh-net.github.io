@@ -1436,10 +1436,11 @@ wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/dep
 wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
 ```
 
-执行部署
+安装部署
 
 ```bash
 mkdir /opt/k8s/ingress  
+kubectl create ns ingress-nginx                 # 创建namespace
 kubectl apply -f mandatory.yaml                 # 创建ingress-nginx
 kubectl apply -f service-nodeport.yaml          # 创建service
 kubectl get pod,svc -n ingress-nginx -o wide    # 查看ingress-nginx
@@ -2108,13 +2109,9 @@ more /secret/config/password
 
 ## 3. DashBoard
 
-### 3.1 部署
+### 3.1 下载安装
 
-下载文件
-
-```bash
-wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
-```
+下载地址：https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 
 修改kubernetes-dashboard的Service类型
 
