@@ -1424,7 +1424,7 @@ dig @10.96.0.10 service-externalname.dev.svc.cluster.local
 
 Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量路由由Ingress资源上定义的规则控制。
 
-数据流向：Ingress-Service端口(30080) -> ingress-Pod端口(80) -> 通过绑定规则(域名+80) - > 应用service端口 -> 应用Pod端口
+数据流向：Ingress-Service端口（30080） -> ingress-Pod端口（80） -> 通过绑定规则（域名+80） - > 应用service端口 -> 应用Pod端口
 
 #### 2.8.1 安装nginx-ingress-controller
 
