@@ -2216,3 +2216,14 @@ kubectl delete pod <pod name> -n kube-system
 
 ![](../../assets/_images/deploy/k8s/image7.png)
 
+
+### 3.5 Api Tonken获取
+
+```bash
+# 创建用户
+kubectl create serviceaccount dashboard-admin -n kube-system
+# 用户授权
+kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
+# # 获取用户Token
+kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
+```
