@@ -1,14 +1,24 @@
 # Kubernetes 1.17.4
 
+- Master：集群控制节点，每个集群需要至少一个master节点负责集群的管控
+- Node：工作负载节点，由master分配容器到这些node工作节点上，然后node节点上的docker负责容器的运行
+- Pod：kubernetes的最小控制单元，容器都是运行在pod中的，一个pod中可以有1个或者多个容器
+- Controller：控制器，通过它来实现对pod的管理，比如启动pod、停止pod、伸缩pod的数量等等
+- Service：pod对外服务的统一入口，下面可以维护者同一类的多个pod
+- Label：标签，用于对pod进行分类，同一类pod会拥有相同的标签
+- NameSpace：命名空间，用来隔离pod的运行环境
+
 ## 1. 集群搭建
 
-### 1.1 集群规划
+### 1.1 主机规划
 
 | 主机名称 | IP地址 | 配置 |
 | ------- | ------- | ------- |
 | k8s-master | 192.168.2.201 | 2CPU，2G内存，20G硬盘 |
 | k8s-node1 | 192.168.2.202 | 2CPU，2G内存，20G硬盘 |
 | k8s-node2 | 192.168.2.203 | 2CPU，2G内存，20G硬盘 |
+
+本次环境搭建需要安装三台Centos服务器（一主二从），然后在每台服务器中分别安装docker（18.06.3），kubeadm（1.17.4）、kubelet（1.17.4）、kubectl（1.17.4）程序。
 
 ### 1.2 基础环境准备(三台)
 
@@ -262,6 +272,8 @@ kubectl get nodes
 
 kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
+> 以下操作只在 master 节点执行即可，插件使用的是DaemonSet的控制器，它会在每个节点上都运行
+
 - 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 - 本地下载：https://github.com/xzh-net/other/tree/main/k8s/flannel
 
@@ -273,20 +285,24 @@ kubectl get nodes                   # 验证插件是否安装成功
 kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报错，进行查看
 ```
 
-### 1.8 服务部署
+### 1.8 部署测试
 
 ```bash
 # 部署nginx
 kubectl create deployment nginx --image=nginx:1.22.1
-# 端口暴漏 NodePort表示集群外浏览器访问
-kubectl expose deployment nginx --port=80 --type=NodePort
+# 端口暴漏，为集群所有Node节点上绑定一个端口，外部客户端通过nodeIP:nodePort
+kubectl expose deployment nginx --port=80 --type=NodePort --target-port=80 --name=nginx-service
 # 查看服务状态
 kubectl get pods,service
+# 删除服务和端口
+kubectl delete deployment nginx
+kubectl delete service nginx
 ```
 
-访问地址：http://192.168.2.201:port/
+访问地址：http://192.168.2.201:port/ ，NodePort在不指定端口的情况下，会随机分配一个端口
 
-## 2. 组件
+
+## 2. 高级
 
 ### 2.1 Kubectl
 
