@@ -2263,22 +2263,3 @@ docker run --name openfire -d --restart=always \
   --volume /srv/docker/openfire:/var/lib/openfire \
   gizmotronic/openfire:4.4.4
 ```
-
-
-### 4.9.1 Code Server 4.91.1
-
-```bash
-mkdir -p ~/.config
-docker run -it --name code-server -p 8080:8080 \
-  -v "$HOME/.config:/home/coder/.config" \
-  -v "$PWD:/home/coder/project" \
-  -u "$(id -u):$(id -g)" \
-  -e "DOCKER_USER=$USER" \
-  codercom/code-server:4.91.1
-```
-
-查看密码
-```bash
-docker exec -it code-server /bin/bash
-cat ~/.config/code-server/config.yaml
-```
