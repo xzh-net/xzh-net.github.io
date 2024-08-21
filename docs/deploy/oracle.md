@@ -319,7 +319,7 @@ chmod +x /etc/rc.d/rc.local
 
 #### 1.2.1 一键安装和配置VNC图形化相关
 
-下载脚本：https://github.com/xzh-net/other/tree/main/oracle11g
+- 百度网盘：/Oracle/工具
 
 ```bash
 #!/bin/bash
