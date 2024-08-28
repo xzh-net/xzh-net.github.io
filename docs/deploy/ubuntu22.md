@@ -172,12 +172,36 @@ update-rc.d ssh enable      # 开机启动
 
 ### 2.4 关闭防火墙
 
+启动、停止和检查状态
 ```bash
-sudo ufw enable     # 开启防火墙
-sudo ufw disable    # 关闭防火墙
-sudo ufw status     # 查看防火墙状态
-ufw allow 443/tcp   # 配置放行端口
+sudo apt-get install ufw    # 安装防火墙
+sudo ufw enable             # 开启防火墙
+sudo ufw disable            # 关闭防火墙
+sudo ufw status             # 查看防火墙状态
 ```
+
+增加和删除规则
+```bash
+sudo ufw allow 8080         # 允许HTTP流量通过端口8080
+sudo ufw allow 22/tcp       # 允许SSH流量通过端口22，使用TCP协议
+sudo ufw allow from 192.168.1.2 to any port 3306    # 允许192.168.1.2访问本机的3306端口
+sudo ufw delete allow 8080  # 删除允许端口8080的规则
+sudo ufw show added         # 查看添加的规则
+```
+
+设置默认策略
+```bash
+sudo ufw default allow      # 默认允许外部访问
+sudo ufw default deny       # 默认禁止外部访问
+```
+
+其他
+```bash
+sudo ufw reset      # 重置防火墙规则
+sudo ufw reload     # 重新加载防火墙规则
+sudo ufw limit 22   # 限制22端口连接数
+```
+
 
 ### 2.5 更换软件源
 
