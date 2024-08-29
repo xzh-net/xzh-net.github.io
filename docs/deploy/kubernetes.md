@@ -1762,17 +1762,22 @@ access.log  error.log
 
 1. 准备单独的nfs服务器
 
+安装
 ```bash
-# 安装
 yum install -y nfs-utils
-# 创建共享目录
+```
+
+创建共享目录
+```bash
 mkdir /data/nfs -pv
 # 共享配置，将共享目录以读写权限暴露给192.168.2.0/24网段中的所有主机
 vim /etc/exports
 # 添加内容
 /root/data/nfs  192.168.2.0/24(rw,no_root_squash)
+```
 
-# 启动nfs服务
+启动nfs服务
+```bash
 systemctl start nfs
 ```
 
