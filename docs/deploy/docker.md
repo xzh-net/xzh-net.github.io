@@ -11,11 +11,12 @@ yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 yum makecache fast
 yum install docker-ce
-systemctl start docker  
+systemctl start docker
 systemctl enable docker
-# 查询所有版本，安装指定版本
-yum list docker-ce --showduplicates | sort -r   
+# 查看yum源支持的docker版本，安装指定版本
+yum list docker-ce --showduplicates | sort -r
 yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
+docker -v
 ```
 
 ### 1.2 离线安装
@@ -323,11 +324,21 @@ rddFilter.collect()                             # 打印rddFilter内容
 
 ### 1.6 卸载
 
-1. 安装包卸载
+1. yum安装卸载
 
 ```bash
 yum list installed | grep docker
 yum remove package_name
+yum remove docker \
+           docker-client \
+           docker-client-latest \
+           docker-common \
+           docker-latest \
+           docker-latest-logrotate \
+           docker-logrotate \
+           docker-selinux \
+           docker-engine-selinux \
+           docker-engine
 ```
 
 2. rpm包查找卸载
