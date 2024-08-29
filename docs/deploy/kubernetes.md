@@ -439,7 +439,7 @@ kubectl get pod nginx  -n dev --show-labels
 
 ### 2.4 Pod
 
-#### 2.4.1 资源清单
+#### 2.4.1 资源模板
 
 ```yaml
 apiVersion: v1     #必选，版本号，例如v1
@@ -796,9 +796,9 @@ spec:
 ```
 
 ```bash
-kubectl create -f pod-liveness-exec.yaml    # 创建Pod
-kubectl get pods -n dev -o wide             # 查看Pod，RESTARTS一直增长说明钩子生效
-kubectl describe pods pod-liveness-exec -n dev    # 查看Pod详情，提示找不到/tmp/hello.txt
+kubectl create -f pod-liveness-exec.yaml            # 创建Pod
+kubectl get pods -n dev -o wide                     # 查看Pod，RESTARTS一直增长说明钩子生效
+kubectl describe pods pod-liveness-exec -n dev      # 查看Pod详情，提示找不到/tmp/hello.txt
 ```
 
 2. TCPSocket
@@ -836,9 +836,9 @@ spec:
 ```
 
 ```bash
-kubectl create -f pod-liveness-tcpsocket.yaml   # 创建Pod
-kubectl get pods -n dev -o wide                 # 查看Pod，RESTARTS一直增长说明钩子生效
-kubectl describe pods pod-liveness-tcpsocket -n dev    # 提示 8080: connect: connection refused
+kubectl create -f pod-liveness-tcpsocket.yaml           # 创建Pod
+kubectl get pods -n dev -o wide                         # 查看Pod，RESTARTS一直增长说明钩子生效
+kubectl describe pods pod-liveness-tcpsocket -n dev     # 提示 8080: connect: connection refused
 ```
 
 
@@ -930,7 +930,7 @@ kubectl describe pods pod-restartpolicy  -n dev
 kubectl get pods pod-restartpolicy -n dev
 ```
 
-### 2.5 Pod调度
+#### 2.4.10 定向调度
 
 在默认情况下，一个Pod在哪个Node节点上运行，是由Scheduler组件采用相应的算法计算出来的，这个过程是不受人工控制的。但是在实际使用中，这并不满足的需求，因为很多情况下，我们想控制某些Pod到达某些节点上，那么应该怎么做呢？这就要求了解kubernetes对Pod的调度规则，kubernetes提供了四大类调度方式：
 
@@ -938,8 +938,6 @@ kubectl get pods pod-restartpolicy -n dev
 - 定向调度：NodeName、NodeSelector
 - 亲和性调度：NodeAffinity、PodAffinity、PodAntiAffinity
 - 污点（容忍）调度：Taints、Toleration
-
-#### 2.5.1 定向调度
 
 定向调度，指的是利用在pod上声明nodeName或者nodeSelector，以此将Pod调度到期望的node节点上。注意，这里的调度是强制的，这就意味着即使要调度的目标Node不存在，也会向上面进行调度，只不过pod运行失败而已
 
@@ -1005,7 +1003,7 @@ kubectl create -f pod-nodeselector.yaml
 kubectl get pods pod-nodeselector -n dev -o wide
 ```
 
-#### 2.5.2 亲和性调度
+#### 2.4.11 亲和性调度
 
 kubernetes还提供了一种亲和性调度（Affinity）。它在NodeSelector的基础之上的进行了扩展，可以通过配置的形式，实现优先选择满足条件的Node进行调度，如果没有，也可以调度到不满足条件的节点上，使调度更加灵活
 
@@ -1162,7 +1160,7 @@ spec:
         topologyKey: kubernetes.io/hostname
 ```
 
-#### 2.5.3 污点和容忍
+#### 2.4.12 污点和容忍
 
 1. 污点
 
@@ -1234,11 +1232,11 @@ spec:
 
 添加了容忍之后，该pod可以正常运行在有污点的节点上
 
-### 2.6 Pod控制器
+### 2.5 Deployment
 
 Pod控制器是管理pod的中间层，使用Pod控制器之后，只需要告诉Pod控制器，想要多少个什么样的Pod就可以了，它会创建出满足条件的Pod并确保每一个Pod资源处于用户期望的目标状态。如果Pod资源在运行中出现故障，它会基于指定策略重新编排Pod
 
-#### 2.6.1 资源清单
+#### 2.5.1 资源模板
 
 ```yaml
 apiVersion: apps/v1 # 版本号
@@ -1275,7 +1273,7 @@ spec: # 详情描述
         - containerPort: 80
 ```
 
-#### 2.6.2 命令式
+#### 2.5.2 命令式
 
 ```bash
 kubectl run nginx --image=nginx:1.22.1 --port=80 --replicas=3 -n dev
@@ -1285,7 +1283,7 @@ kubectl describe deploy nginx -n dev    # 查看deployment的详细信息
 kubectl delete deploy nginx -n dev      # 删除控制器
 ```
 
-#### 2.6.3 Deployment
+#### 2.5.3 部署示例
 
 ```bash
 vi deploy-nginx.yaml
@@ -1323,11 +1321,11 @@ kubectl set image deployment pc-deployment nginx=nginx:1.22.2 -n dev  # 镜像�
 kubectl delete -f pc-deployment.yaml
 ```
 
-### 2.7 Service
+### 2.6 Service
 
 Service可以看作是一组同类Pod`对外的访问接口`。借助Service，应用可以方便地实现服务发现和负载均衡。
 
-#### 2.7.1 资源清单
+#### 2.6.1 资源模板
 
 ```yaml
 kind: Service  # 资源类型
@@ -1348,7 +1346,7 @@ spec: # 描述
       nodePort: 31122 # 主机端口
 ```
 
-#### 2.7.2 命令式
+#### 2.6.2 命令式
 
 1. 创建集群内部可访问的Service
 
@@ -1375,7 +1373,7 @@ Checksum Offload 是网卡的一个功能选项。如果该选项开启，则网
 ethtool -K flannel.1 tx-checksum-ip-generic off
 ```
 
-#### 2.7.3 ClusterIP
+#### 2.6.3 ClusterIP
 
 ```bash
 vi service-clusterip.yaml
@@ -1406,7 +1404,7 @@ ipvsadm -Ln   # 查看ipvs的映射规则
 kubectl delete -f service-clusterip.yaml
 ```
 
-#### 2.7.4 HeadLiness
+#### 2.6.4 HeadLiness
 
 在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自己来控制负载均衡策略，针对这种情况，kubernetes提供了HeadLiness  Service，这类Service不会分配Cluster IP，如果想要访问service，只能通过service的域名进行查询
 
@@ -1436,7 +1434,7 @@ cat /etc/resolv.conf
 dig @10.96.0.10 service-headliness.dev.svc.cluster.local  # 需要安装yum -y install bind-utils
 ```
 
-#### 2.7.5 NodePort
+#### 2.6.5 NodePort
 
 ```yaml
 apiVersion: v1
@@ -1459,7 +1457,7 @@ kubectl create -f service-nodeport.yaml
 kubectl get svc -n dev -o wide
 ```
 
-#### 2.7.6 ExternalName
+#### 2.6.6 ExternalName
 
 ExternalName类型的Service用于引入集群外部的服务，它通过`externalName`属性指定外部一个服务的地址，然后在集群内部访问此service就可以访问到外部的服务了
 
@@ -1480,13 +1478,13 @@ kubectl get svc -n dev -o wide
 dig @10.96.0.10 service-externalname.dev.svc.cluster.local
 ```
 
-### 2.8 Ingress
+### 2.7 Ingress
 
 Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量路由由Ingress资源上定义的规则控制。
 
 数据流向：Ingress-Service端口（30080） -> ingress-Pod端口（80） -> 通过绑定规则（域名+80） - > 应用service端口 -> 应用Pod端口
 
-#### 2.8.1 安装nginx-ingress-controller
+#### 2.7.1 安装nginx-ingress-controller
 
 - 下载地址：
   - https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
@@ -1504,7 +1502,7 @@ kubectl apply -f service-nodeport.yaml          # 创建service
 kubectl get pod,svc -n ingress-nginx -o wide    # 查看ingress-nginx
 ```
 
-#### 2.8.2 创建测试应用
+#### 2.7.2 创建测试应用
 
 ```yaml
 apiVersion: apps/v1
@@ -1589,7 +1587,7 @@ kubectl apply -f tomcat-nginx.yaml   # 创建应用
 kubectl get pods,svc -n dev          # 查看
 ```
 
-#### 2.8.3 配置http规则
+#### 2.7.3 配置http规则
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -1617,7 +1615,7 @@ curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查�
 ```
 
 
-#### 2.8.4 配置https规则
+#### 2.7.4 配置https规则
 
 ```bash
 # 生成证书
@@ -1656,9 +1654,9 @@ curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
 
-### 2.9 数据存储
+### 2.8 数据存储
 
-#### 2.9.1 EmptyDir
+#### 2.8.1 EmptyDir
 
 EmptyDir是最基础的Volume类型，一个EmptyDir就是Host上的一个空目录。
 
@@ -1701,7 +1699,7 @@ curl 10.244.1.27
 kubectl logs -f volume-emptydir -n dev -c busybox
 ```
 
-#### 2.9.2 HostPath
+#### 2.8.2 HostPath
 
 HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就可以保证Pod销毁了，但是数据依据可以存在于Node主机上。
 
@@ -1736,12 +1734,12 @@ spec:
 ```lua
 关于type的值的一点说明：
   DirectoryOrCreate 目录存在就使用，不存在就先创建后使用
-  Directory	目录必须存在
-  FileOrCreate  文件存在就使用，不存在就先创建后使用
-  File 文件必须存在	
-  Socket	unix套接字必须存在
-  CharDevice	字符设备必须存在
-  BlockDevice 块设备必须存在
+  Directory	        目录必须存在
+  FileOrCreate      文件存在就使用，不存在就先创建后使用
+  File              文件必须存在	
+  Socket	        unix套接字必须存在
+  CharDevice	    字符设备必须存在
+  BlockDevice       块设备必须存在
 ```
 
 ```bash
@@ -1756,7 +1754,7 @@ ls /root/logs/
 access.log  error.log
 ```
 
-#### 2.9.3 NFS
+#### 2.8.3 NFS
 
 ​HostPath可以解决数据持久化的问题，但是一旦Node节点故障了，Pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的用NFS、CIFS。
 
@@ -1765,10 +1763,11 @@ access.log  error.log
 1. 准备单独的nfs服务器
 
 ```bash
-yum install nfs-utils -y
-# 准备一个共享目录
-mkdir /root/data/nfs -pv
-# 将共享目录以读写权限暴露给192.168.2.0/24网段中的所有主机
+# 安装
+yum install -y nfs-utils
+# 创建共享目录
+mkdir /data/nfs -pv
+# 共享配置，将共享目录以读写权限暴露给192.168.2.0/24网段中的所有主机
 vim /etc/exports
 # 添加内容
 /root/data/nfs  192.168.2.0/24(rw,no_root_squash)
@@ -1809,8 +1808,8 @@ spec:
   volumes:
   - name: logs-volume
     nfs:
-      server: 192.168.2.200   #nfs服务器地址
-      path: /root/data/nfs    #共享文件路径
+      server: 192.168.2.200     # nfs服务器地址
+      path: /data/nfs           # 共享文件路径
 ```
 
 ```bash
@@ -1819,15 +1818,15 @@ kubectl create -f volume-nfs.yaml
 # 查看pod
 kubectl get pods volume-nfs -n dev -o wide
 # 查看nfs服务器上的共享目录，发现已经有文件了
-ls /root/data/
+ls /data/nfs/
 access.log  error.log
 ```
 
-#### 2.9.4 PV
+#### 2.8.4 PV
 
 PV（Persistent Volume）是持久化卷的意思，是对底层的共享存储的一种抽象。一般情况下PV由kubernetes管理员进行创建和配置，它与底层具体的共享存储技术有关，并通过插件完成与共享存储的对接
 
-1. 资源清单
+1. 资源模板
 
 ```yaml
 apiVersion: v1  
@@ -1916,11 +1915,11 @@ kubectl create -f pv.yaml
 kubectl get pv -o wide
 ```
 
-#### 2.9.5 PVC
+#### 2.8.5 PVC
 
 PVC（Persistent Volume Claim）是持久卷声明的意思，是用户对于存储需求的一种声明。换句话说，PVC其实就是用户向kubernetes系统发出的一种资源需求申请
 
-1. 资源清单
+1. 资源模板
 
 ```yaml
 apiVersion: v1
@@ -2044,7 +2043,7 @@ more /root/data/pv1/out.txt
 more /root/data/pv2/out.txt
 ```
 
-#### 2.9.6 ConfigMap
+#### 2.8.6 ConfigMap
 
 ConfigMap是一种比较特殊的存储卷，它的主要作用是用来存储配置信息的。
 
@@ -2100,7 +2099,7 @@ ls
 more info
 ```
 
-#### 2.9.7 Secret
+#### 2.8.7 Secret
 
 在kubernetes中，还存在一种和ConfigMap非常类似的对象，称为Secret对象。它主要用于存储敏感信息，例如密码、秘钥、证书等等。
 
