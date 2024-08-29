@@ -1773,7 +1773,7 @@ mkdir /data/nfs -pv
 # 共享配置，将共享目录以读写权限暴露给192.168.2.0/24网段中的所有主机
 vim /etc/exports
 # 添加内容
-/root/data/nfs  192.168.2.0/24(rw,no_root_squash)
+/data/nfs  192.168.2.0/24(rw,no_root_squash)
 ```
 
 启动nfs服务
@@ -1834,7 +1834,7 @@ PV（Persistent Volume）是持久化卷的意思，是对底层的共享存储�
 1. 资源模板
 
 ```yaml
-apiVersion: v1  
+apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: pv2
@@ -1852,12 +1852,12 @@ spec:
 在nfs服务器进行设置
 
 ```bash
-mkdir /root/data/{pv1,pv2,pv3} -pv
+mkdir /data/nfs/{pv1,pv2,pv3} -pv
 vi /etc/exports
 # 编辑内容
-/root/data/pv1  192.168.2.0/24(rw,no_root_squash)
-/root/data/pv2  192.168.2.0/24(rw,no_root_squash)
-/root/data/pv3  192.168.2.0/24(rw,no_root_squash)
+/data/nfs/pv1  192.168.2.0/24(rw,no_root_squash)
+/data/nfs/pv2  192.168.2.0/24(rw,no_root_squash)
+/data/nfs/pv3  192.168.2.0/24(rw,no_root_squash)
 
 # 重启服务
 systemctl restart nfs
@@ -1877,7 +1877,7 @@ spec:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /root/data/pv1
+    path: /data/nfs/pv1
     server: 192.168.2.200
 
 ---
@@ -1893,7 +1893,7 @@ spec:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /root/data/pv2
+    path: /data/nfs/pv2
     server: 192.168.2.200
     
 ---
@@ -1909,7 +1909,7 @@ spec:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /root/data/pv3
+    path: /data/nfs/pv3
     server: 192.168.2.200
 ```
 
@@ -2044,8 +2044,8 @@ kubectl get pvc -n dev -o wide
 # 查看pv
 kubectl get pv -n dev -o wide
 # 查看nfs中的文件存储
-more /root/data/pv1/out.txt
-more /root/data/pv2/out.txt
+more /data/nfs/pv1/out.txt
+more /data/nfs/pv2/out.txt
 ```
 
 #### 2.8.6 ConfigMap
