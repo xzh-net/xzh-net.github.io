@@ -1654,9 +1654,11 @@ curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 ```
 
-### 2.8 数据存储
+## 3. 数据存储
 
-#### 2.8.1 EmptyDir
+### 3.1 基本存储
+
+#### 3.1.1 EmptyDir
 
 EmptyDir是最基础的Volume类型，一个EmptyDir就是Host上的一个空目录。
 
@@ -1699,7 +1701,7 @@ curl 10.244.1.27
 kubectl logs -f volume-emptydir -n dev -c busybox
 ```
 
-#### 2.8.2 HostPath
+#### 3.2.2 HostPath
 
 HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就可以保证Pod销毁了，但是数据依据可以存在于Node主机上。
 
@@ -1754,7 +1756,7 @@ ls /root/logs/
 access.log  error.log
 ```
 
-#### 2.8.3 NFS
+#### 3.2.3 NFS
 
 ​HostPath可以解决数据持久化的问题，但是一旦Node节点故障了，Pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的用NFS、CIFS。
 
@@ -1827,7 +1829,10 @@ ls /data/nfs/
 access.log  error.log
 ```
 
-#### 2.8.4 PV
+### 3.2 高级存储
+
+
+#### 3.2.1 PV
 
 PV（Persistent Volume）是持久化卷的意思，是对底层的共享存储的一种抽象。一般情况下PV由kubernetes管理员进行创建和配置，它与底层具体的共享存储技术有关，并通过插件完成与共享存储的对接
 
@@ -1920,7 +1925,7 @@ kubectl create -f pv.yaml
 kubectl get pv -o wide
 ```
 
-#### 2.8.5 PVC
+#### 3.2.2 PVC
 
 PVC（Persistent Volume Claim）是持久卷声明的意思，是用户对于存储需求的一种声明。换句话说，PVC其实就是用户向kubernetes系统发出的一种资源需求申请
 
@@ -1989,7 +1994,10 @@ spec:
 # 创建pvc
 kubectl create -f pvc.yaml
 # 查看pvc
-kubectl get pvc  -n dev -o wide
+kubectl get pvc -n dev -o wide
+# 删除pvc出现卡住的情况下，先阻止资源的删除，再强制执行
+kubectl patch pvc pg-pv-claim -p '{"metadata":{"finalizers":null}}' --type=merge
+kubectl delete pvc pg-pv-claim --grace-period=0 --force
 ```
 
 3. 创建pods.yaml, 使用pv
@@ -2048,7 +2056,12 @@ more /data/nfs/pv1/out.txt
 more /data/nfs/pv2/out.txt
 ```
 
-#### 2.8.6 ConfigMap
+### 3.3 配置存储
+
+
+
+
+#### 3.3.1 ConfigMap
 
 ConfigMap是一种比较特殊的存储卷，它的主要作用是用来存储配置信息的。
 
@@ -2104,7 +2117,7 @@ ls
 more info
 ```
 
-#### 2.8.7 Secret
+#### 3.3.2 Secret
 
 在kubernetes中，还存在一种和ConfigMap非常类似的对象，称为Secret对象。它主要用于存储敏感信息，例如密码、秘钥、证书等等。
 
@@ -2169,9 +2182,9 @@ more /secret/config/username
 more /secret/config/password
 ```
 
-## 3. DashBoard
+## 4. DashBoard
 
-### 3.1 下载安装
+### 4.1 下载安装
 
 下载地址：https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 
@@ -2204,7 +2217,7 @@ kubectl create -f recommended.yaml
 kubectl get pod,svc -n kubernetes-dashboard  # 查看资源
 ```
 
-### 3.2 初始化账号
+### 4.2 初始化账号
 
 ```bash
 kubectl create serviceaccount dashboard-admin -n kubernetes-dashboard  # 创建账号
@@ -2213,7 +2226,7 @@ kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin  # 获取账�
 kubectl describe secrets [secretsname] -n kubernetes-dashboard      # 查看token
 ```
 
-### 3.3 证书更换（可选）
+### 4.3 证书更换（可选）
 
 ```bash
 cd /opt/k8s
@@ -2232,7 +2245,7 @@ kubectl get pod -n kube-system
 kubectl delete pod <pod name> -n kube-system
 ```
 
-### 3.4 Dashboard UI
+### 4.4 Dashboard UI
 
 访问地址：https://192.168.2.201:30009
 `鼠标点击页面的任意地方，键盘输入： thisisunsafe`
@@ -2279,7 +2292,7 @@ kubectl delete pod <pod name> -n kube-system
 ![](../../assets/_images/deploy/k8s/image7.png)
 
 
-### 3.5 Api Tonken获取
+### 4.5 Api Tonken获取
 
 ```bash
 # 创建用户
