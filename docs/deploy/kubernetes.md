@@ -491,14 +491,14 @@ spec:  #必选，Pod中容器的详细定义
         - name: string
           value: string
       tcpSocket:     #对Pod内个容器健康检查方式设置为tcpSocket方式
-         port: number
-       initialDelaySeconds: 0       #容器启动完成后首次探测的时间，单位为秒
-       timeoutSeconds: 0    　　    #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
-       periodSeconds: 0     　　    #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
-       successThreshold: 0          #连续探测成功多少次才被认定为成功。默认是1
-       failureThreshold: 0          #连续探测失败多少次才被认定为失败。默认是3。最小值是1
-       securityContext:
-         privileged: false
+        port: number
+        initialDelaySeconds: 0       #容器启动完成后首次探测的时间，单位为秒
+        timeoutSeconds: 0    　　    #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
+        periodSeconds: 0     　　    #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
+        successThreshold: 0          #连续探测成功多少次才被认定为成功。默认是1
+        failureThreshold: 0          #连续探测失败多少次才被认定为失败。默认是3。最小值是1
+        securityContext:
+        privileged: false
   restartPolicy: [Always | Never | OnFailure]  #Pod的重启策略
   nodeName: <string> #设置NodeName表示将该Pod调度到指定到名称的node节点上
   nodeSelector: obeject #设置NodeSelector表示将该Pod调度到包含这个label的node上
