@@ -358,6 +358,7 @@ kubectl delete node k8s-node01  # 删除节点
 kubectl api-resources           # api资源
 kubectl api-versions            # api版本
 kubectl get cs                  # 集群状态
+kubectl describe nodes          # 查看资源占用
 kubectl explain pod             # yaml资源清单
 kubectl explain pod.metadata
 ```
