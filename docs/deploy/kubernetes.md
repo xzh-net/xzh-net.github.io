@@ -532,7 +532,13 @@ kubectl get pods nginx-pod-6fddd965c8-4srb4 -o wide -n dev    # 查看指定pod�
 kubectl describe pod nginx-pod-6fddd965c8-4srb4 -n dev        # 查看指定pod具体信息
 kubectl get pod nginx-pod-6fddd965c8-4srb4 -n dev -o yaml     # 查看资源文件
 kubectl exec -it nginx-pod-6fddd965c8-4srb4 -n dev /bin/sh    # 进入容器
-kubectl delete deploy nginx-pod -n dev                        # 删除pod控制器
+kubectl delete deploy nginx-pod -n dev                        # 删除pod
+# 强制按关键字删除pod
+kubectl delete pod `kubectl get pod -n dev | grep 6fddd965c8 | awk '{print $1}'` --force --grace-period=0   
+# 强制删除所有Evicted、Terminating、Unknown状态的pod
+kubectl -n dev delete pod `kubectl get po --all-namespaces=true | grep 'Evicted\|Terminating\|Unknown' | awk '{print $1}'` --force --grace-period=0 
+
+
 ```
 
 #### 2.4.3 启动命令
@@ -1997,7 +2003,7 @@ kubectl create -f pvc.yaml
 kubectl get pvc -n dev -o wide
 # 删除pvc出现卡住的情况下，先阻止资源的删除，再强制执行
 kubectl patch pvc pg-pv-claim -p '{"metadata":{"finalizers":null}}' --type=merge
-kubectl delete pvc pg-pv-claim --grace-period=0 --force
+kubectl delete pvc pg-pv-claim --force --grace-period=0
 ```
 
 3. 创建pods.yaml, 使用pv
