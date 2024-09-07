@@ -365,7 +365,7 @@ kubectl explain pod.metadata
 
 ### 2.2 Namespace
 
-#### 2.2.1 命令式
+#### 2.2.1 常用命令
 
 ```bash
 kubectl get namespace               # 查看所有命名空间
@@ -397,7 +397,7 @@ kubectl delete namespace dev      # 按名字删除命名空间
 
 ### 2.3 Lable
 
-#### 2.3.1 命令式
+#### 2.3.1 常用命令
 
 ```bash
 kubectl label pod nginx version=1.0 -n dev                # 打标签
@@ -440,7 +440,7 @@ kubectl get pod nginx  -n dev --show-labels
 
 ### 2.4 Pod
 
-#### 2.4.1 命令式
+#### 2.4.1 常用命令
 
 ```bash
 kubectl get pods --all-namespaces -o wide                     # 查看所有pods
@@ -1156,48 +1156,11 @@ spec:
 
 添加了容忍之后，该pod可以正常运行在有污点的节点上
 
-### 2.5 Deployment
+### 2.5 控制器
 
 Pod控制器是管理pod的中间层，使用Pod控制器之后，只需要告诉Pod控制器，想要多少个什么样的Pod就可以了，它会创建出满足条件的Pod并确保每一个Pod资源处于用户期望的目标状态。如果Pod资源在运行中出现故障，它会基于指定策略重新编排Pod
 
-#### 2.5.1 资源模板
-
-```yaml
-apiVersion: apps/v1 # 版本号
-kind: Deployment # 类型       
-metadata: # 元数据
-  name: # rs名称 
-  namespace: # 所属命名空间 
-  labels: #标签
-    controller: deploy
-spec: # 详情描述
-  replicas: 3 # 副本数量
-  revisionHistoryLimit: 3 # 保留历史版本
-  paused: false # 暂停部署，默认是false
-  progressDeadlineSeconds: 600 # 部署超时时间（s），默认是600
-  strategy: # 策略
-    type: RollingUpdate # 滚动更新策略
-    rollingUpdate: # 滚动更新
-      maxSurge: 30% # 最大额外可以存在的副本数，可以为百分比，也可以为整数
-      maxUnavailable: 30% # 最大不可用状态的 Pod 的最大值，可以为百分比，也可以为整数
-  selector: # 选择器，通过它指定该控制器管理哪些pod
-    matchLabels:      # Labels匹配规则
-      app: nginx-pod
-    matchExpressions: # Expressions匹配规则
-      - {key: app, operator: In, values: [nginx-pod]}
-  template: # 模板，当副本数量不足时，会根据下面的模板创建pod副本
-    metadata:
-      labels:
-        app: nginx-pod
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.17.1
-        ports:
-        - containerPort: 80
-```
-
-#### 2.5.2 命令式
+#### 2.5.1 常用命令
 
 ```bash
 kubectl run nginx --image=nginx:1.22.1 --port=80 --replicas=3 -n dev
@@ -1207,11 +1170,43 @@ kubectl describe deploy nginx -n dev    # 查看deployment的详细信息
 kubectl delete deploy nginx -n dev      # 删除控制器
 ```
 
-#### 2.5.3 部署示例
+#### 2.5.2 ReplicaSet
+
+ReplicaSet的主要作用是**保证一定数量的pod正常运行**，它会持续监听这些Pod的运行状态，一旦Pod发生故障，就会重启或重建。同时它还支持对pod数量的扩缩容和镜像版本的升降级
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet   
+metadata:
+  name: pc-replicaset
+  namespace: dev
+spec:
+  replicas: 3
+  selector: 
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.22.1
+```
 
 ```bash
-vi deploy-nginx.yaml
+kubectl apply -f pc-replicaset.yaml                 # 创建ReplicaSet
+kubectl get rs pc-replicaset -n dev -o wide         # 查看ReplicaSet
+kubectl scale rs pc-replicaset --replicas=6 -n dev  # 扩容到6个Pod
+kubectl set image rs pc-replicaset nginx=nginx:1.22.2  -n dev   # 修改镜像版本
+kubectl delete rs pc-replicaset -n dev              # 删除ReplicaSet
 ```
+
+#### 2.5.3 Deployment
+
+部署无状态应用，管理Pod和ReplicaSet，具有上线部署、副本设定、滚动升级、回滚等功能，提供声明式更新。
+
 
 ```yaml
 apiVersion: apps/v1
@@ -1245,32 +1240,112 @@ kubectl set image deployment pc-deployment nginx=nginx:1.22.2 -n dev  # 镜像�
 kubectl delete -f pc-deployment.yaml
 ```
 
+
+#### 2.5.4 DaemonSet
+
+DaemonSet类型的控制器可以保证在集群中的每一台（或指定）节点上都运行一个副本。一般适用于日志收集、节点监控等场景。也就是说，如果一个Pod提供的功能是节点级别的（每个节点都需要且只需要一个），那么这类Pod就适合使用DaemonSet类型的控制器创建
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet      
+metadata:
+  name: pc-daemonset
+  namespace: dev
+spec: 
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.22.1
+```
+
+```bash
+# 查看daemonset，现在每个Node上都运行一个pod
+kubectl get pods -n dev -o wide
+```
+
+#### 2.5.5 Job
+
+Job，主要用于负责**批量处理(一次要处理指定数量任务)**短暂的**一次性(每个任务仅运行一次就结束)**任务。Job特点如下：
+- 当Job创建的pod执行成功结束时，Job将记录成功结束的pod数量
+- 当成功结束的pod达到指定的数量时，Job将完成执行
+
+```yaml
+apiVersion: batch/v1
+kind: Job      
+metadata:
+  name: pc-job
+  namespace: dev
+spec:
+  completions: 6 # 指定job需要成功运行Pods的次数。默认值: 1
+  parallelism: 3 # 指定job在任一时刻应该并发运行Pods的数量。默认值: 1
+  activeDeadlineSeconds: 30 # 指定job可运行的时间期限，超过时间还未结束，系统将会尝试进行终止。
+  backoffLimit: 6 # 指定job失败后进行重试的次数。默认是6
+  manualSelector: true # 是否可以使用selector选择器选择pod，默认是false
+  selector:
+    matchLabels:
+      app: counter-pod
+  template:
+    metadata:
+      labels:
+        app: counter-pod
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: counter
+        image: busybox:1.30
+        command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 3;done"]
+```
+
+
+#### 2.5.6 CronJob
+
+CronJob控制器以Job控制器资源为其管控对象，并借助它管理pod资源对象，Job控制器定义的作业任务在其控制器资源创建之后便会立即执行，但CronJob可以以类似于Linux操作系统的周期性任务作业计划的方式控制其运行**时间点**及**重复运行**的方式。也就是说，**CronJob可以在特定的时间点(反复的)去运行job任务**。
+
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: pc-cronjob
+  namespace: dev
+  labels:
+    controller: cronjob
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    metadata:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: counter
+            image: busybox:1.30
+            command: ["bin/sh","-c","for i in 9 8 7 6 5 4 3 2 1; do echo $i;sleep 3;done"]
+```
+
+#### 2.5.7 StatefulSet
+
+#### 2.5.8 Horizontal Pod Autoscaler(HPA)
+
+HPA可以根据CPU使用率或应用自定义的度量指标，自动调整Pod副本数量，从而实现高可用和高资源利用率。HPA通过监控Pod的负载情况，当负载超过一定阈值时，自动增加Pod副本数量；当负载低于一定阈值时，自动减少Pod副本数量。
+
+
+待补充
+
+
 ### 2.6 Service
 
 Service可以看作是一组同类Pod`对外的访问接口`。借助Service，应用可以方便地实现服务发现和负载均衡。
 
-#### 2.6.1 资源模板
-
-```yaml
-kind: Service  # 资源类型
-apiVersion: v1  # 资源版本
-metadata: # 元数据
-  name: service # 资源名称
-  namespace: dev # 命名空间
-spec: # 描述
-  selector: # 标签选择器，用于确定当前service代理哪些pod
-    app: nginx
-  type: # Service类型，指定service的访问方式
-  clusterIP:  # 虚拟服务的ip地址
-  sessionAffinity: # session亲和性，支持ClientIP、None两个选项
-  ports: # 端口信息
-    - protocol: TCP 
-      port: 3017  # service端口
-      targetPort: 5003 # pod端口
-      nodePort: 31122 # 主机端口
-```
-
-#### 2.6.2 命令式
+#### 2.6.1 常用命令
 
 1. 创建集群内部可访问的Service
 
@@ -1297,7 +1372,7 @@ Checksum Offload 是网卡的一个功能选项。如果该选项开启，则网
 ethtool -K flannel.1 tx-checksum-ip-generic off
 ```
 
-#### 2.6.3 ClusterIP
+#### 2.6.2 ClusterIP
 
 ```bash
 vi service-clusterip.yaml
@@ -1328,7 +1403,7 @@ ipvsadm -Ln   # 查看ipvs的映射规则
 kubectl delete -f service-clusterip.yaml
 ```
 
-#### 2.6.4 HeadLiness
+#### 2.6.3 HeadLiness
 
 在某些场景中，开发人员可能不想使用Service提供的负载均衡功能，而希望自己来控制负载均衡策略，针对这种情况，kubernetes提供了HeadLiness  Service，这类Service不会分配Cluster IP，如果想要访问service，只能通过service的域名进行查询
 
@@ -1358,7 +1433,7 @@ cat /etc/resolv.conf
 dig @10.96.0.10 service-headliness.dev.svc.cluster.local  # 需要安装yum -y install bind-utils
 ```
 
-#### 2.6.5 NodePort
+#### 2.6.4 NodePort
 
 ```yaml
 apiVersion: v1
@@ -1380,6 +1455,10 @@ spec:
 kubectl create -f service-nodeport.yaml
 kubectl get svc -n dev -o wide
 ```
+
+
+#### 2.6.5 LoadBalancer
+
 
 #### 2.6.6 ExternalName
 
