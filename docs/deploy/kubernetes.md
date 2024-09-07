@@ -439,90 +439,7 @@ kubectl get pod nginx  -n dev --show-labels
 
 ### 2.4 Pod
 
-#### 2.4.1 资源模板
-
-```yaml
-apiVersion: v1     #必选，版本号，例如v1
-kind: Pod       　 #必选，资源类型，例如 Pod
-metadata:       　 #必选，元数据
-  name: string     #必选，Pod名称
-  namespace: string  #Pod所属的命名空间,默认为"default"
-  labels:       　　  #自定义标签列表
-    - name: string      　          
-spec:  #必选，Pod中容器的详细定义
-  containers:  #必选，Pod中容器列表
-  - name: string   #必选，容器名称
-    image: string  #必选，容器的镜像名称
-    imagePullPolicy: [ Always|Never|IfNotPresent ]  #获取镜像的策略 
-    command: [string]   #容器的启动命令列表，如不指定，使用打包时使用的启动命令
-    args: [string]      #容器的启动命令参数列表
-    workingDir: string  #容器的工作目录
-    volumeMounts:       #挂载到容器内部的存储卷配置
-    - name: string      #引用pod定义的共享存储卷的名称，需用volumes[]部分定义的的卷名
-      mountPath: string #存储卷在容器内mount的绝对路径，应少于512字符
-      readOnly: boolean #是否为只读模式
-    ports: #需要暴露的端口库号列表
-    - name: string        #端口的名称
-      containerPort: int  #容器需要监听的端口号
-      hostPort: int       #容器所在主机需要监听的端口号，默认与Container相同
-      protocol: string    #端口协议，支持TCP和UDP，默认TCP
-    env:   #容器运行前需设置的环境变量列表
-    - name: string  #环境变量名称
-      value: string #环境变量的值
-    resources: #资源限制和请求的设置
-      limits:  #资源限制的设置
-        cpu: string     #Cpu的限制，单位为core数，将用于docker run --cpu-shares参数
-        memory: string  #内存限制，单位可以为Mib/Gib，将用于docker run --memory参数
-      requests: #资源请求的设置
-        cpu: string    #Cpu请求，容器启动的初始可用数量
-        memory: string #内存请求,容器启动的初始可用数量
-    lifecycle: #生命周期钩子
-      postStart: #容器启动后立即执行此钩子,如果执行失败,会根据重启策略进行重启
-      preStop: #容器终止前执行此钩子,无论结果如何,容器都会终止
-    livenessProbe:  #对Pod内各容器健康检查的设置，当探测无响应几次后将自动重启该容器
-      exec:       　 #对Pod容器内检查方式设置为exec方式
-        command: [string]  #exec方式需要制定的命令或脚本
-      httpGet:       #对Pod内个容器健康检查方法设置为HttpGet，需要制定Path、port
-        path: string
-        port: number
-        host: string
-        scheme: string
-        HttpHeaders:
-        - name: string
-          value: string
-      tcpSocket:     #对Pod内个容器健康检查方式设置为tcpSocket方式
-        port: number
-        initialDelaySeconds: 0       #容器启动完成后首次探测的时间，单位为秒
-        timeoutSeconds: 0    　　    #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
-        periodSeconds: 0     　　    #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
-        successThreshold: 0          #连续探测成功多少次才被认定为成功。默认是1
-        failureThreshold: 0          #连续探测失败多少次才被认定为失败。默认是3。最小值是1
-        securityContext:
-        privileged: false
-  restartPolicy: [Always | Never | OnFailure]  #Pod的重启策略
-  nodeName: <string> #设置NodeName表示将该Pod调度到指定到名称的node节点上
-  nodeSelector: obeject #设置NodeSelector表示将该Pod调度到包含这个label的node上
-  imagePullSecrets: #Pull镜像时使用的secret名称，以key：secretkey格式指定
-  - name: string
-  hostNetwork: false   #是否使用主机网络模式，默认为false，如果设置为true，表示使用宿主机网络
-  volumes:   #在该pod上定义共享存储卷列表
-  - name: string    #共享存储卷名称 （volumes类型有很多种）
-    emptyDir: {}       #类型为emtyDir的存储卷，与Pod同生命周期的一个临时目录。为空值
-    hostPath: string   #类型为hostPath的存储卷，表示挂载Pod所在宿主机的目录
-      path: string      　　        #Pod所在宿主机的目录，将被用于同期中mount的目录
-    secret:            #类型为secret的存储卷，挂载集群与定义的secret对象到容器内部
-      scretname: string  
-      items:     
-      - key: string
-        path: string
-    configMap:         #类型为configMap的存储卷，挂载预定义的configMap对象到容器内部
-      name: string
-      items:
-      - key: string
-        path: string
-```
-
-#### 2.4.2 命令式
+#### 2.4.1 命令式
 
 ```bash
 kubectl get pods --all-namespaces -o wide                     # 查看所有pods
@@ -541,7 +458,7 @@ kubectl -n dev delete pod `kubectl get po --all-namespaces=true | grep 'Evicted\
 
 ```
 
-#### 2.4.3 启动命令
+#### 2.4.2 启动命令
 
 ```bash
 vi pod-command.yaml
@@ -579,7 +496,7 @@ tail -f /tmp/hello.txt
  4 如果command和args都写了，那么Dockerfile的配置被忽略，执行command并追加上args参数
 ```
 
-#### 2.4.4 环境变量
+#### 2.4.3 环境变量
 
 ```bash
 vi pod-env.yaml
@@ -611,7 +528,7 @@ echo $password
 ```
 
 
-#### 2.4.5 端口设置
+#### 2.4.4 端口设置
 
 ```
 vi pod-ports.yaml
@@ -639,7 +556,7 @@ kubectl get pod -n dev
 kubectl get pod pod-ports -n dev -o yaml
 ```
 
-#### 2.4.6 资源配额
+#### 2.4.5 资源配额
 
  容器中的程序要运行，肯定是要占用一定资源的，比如cpu和内存等，如果不对某个容器的资源做限制，那么它就可能吃掉大量资源，导致其它容器无法运行。针对这种情况，kubernetes提供了对内存和cpu的资源进行配额的机制，这种机制主要通过resources选项实现，他有两个子选项：
 - limits：用于限制运行时容器的最大占用资源，当容器占用资源超过limits时会被终止，并进行重启
@@ -673,13 +590,13 @@ kubectl create -f pod-resources.yaml
 kubectl get pod pod-resources -n dev
 ```
 
-#### 2.4.7 钩子函数
+#### 2.4.6 钩子函数
 
 钩子函数能够感知自身生命周期中的事件，并在相应的时刻到来时运行用户指定的程序代码。
 
 kubernetes在主容器的启动之后和停止之前提供了两个钩子函数：
-- post start：容器创建之后执行，如果失败了会重启容器
-- pre stop  ：容器终止之前执行，执行完成之后容器将成功终止，在其完成之前会阻塞删除容器的操作
+- postStart：容器创建之后执行，如果失败了会重启容器
+- preStop：容器终止之前执行，执行完成之后容器将成功终止，在其完成之前会阻塞删除容器的操作
 
 钩子处理器支持使用下面三种方式定义动作：
 
@@ -736,9 +653,9 @@ curl 10.244.2.48                                # 访问
 
 ```yaml
 lifecycle:
-    postStart:
-      tcpSocket:
-        port: 8080
+  postStart:
+    tcpSocket:
+    port: 8080
 ```
 
 3. HTTPGet
@@ -747,15 +664,15 @@ lifecycle:
 
 ```yaml
 lifecycle:
-    postStart:
-      httpGet:
-        path: / #URI地址
-        port: 80 #端口号
-        host: 127.0.0.1 #主机地址
-        scheme: HTTP #支持的协议，http或者https
+  postStart:
+    httpGet:
+    path: / #URI地址
+    port: 80 #端口号
+    host: 127.0.0.1 #主机地址
+    scheme: HTTP #支持的协议，http或者https
 ```
 
-#### 2.4.8 容器探测
+#### 2.4.7 容器探测
 
 容器探测用于检测容器中的应用实例是否正常工作，是保障业务可用性的一种传统机制。如果经过探测，实例的状态不符合预期，那么kubernetes就会把该问题实例" 摘除 "，不承担业务流量。kubernetes提供了两种探针来实现容器探测，分别是：
 - liveness probes：存活性探针，用于检测应用实例当前是否处于正常运行状态，如果不是，k8s会重启容器
@@ -771,8 +688,8 @@ lifecycle:
 
 ```yaml
 livenessProbe:
-    exec:
-      command:
+  exec:
+    command:
       - cat
       - /tmp/healthy
 ```
@@ -813,8 +730,8 @@ kubectl describe pods pod-liveness-exec -n dev      # 查看Pod详情，提示�
 
 ```yaml
 livenessProbe:
-    tcpSocket:
-      port: 8080
+  tcpSocket:
+    port: 8080
 ```
 
 案例
@@ -854,11 +771,11 @@ kubectl describe pods pod-liveness-tcpsocket -n dev     # 提示 8080: connect: 
 
 ```yaml
 livenessProbe:
-    httpGet:
-      path: / #URI地址
-      port: 80 #端口号
-      host: 127.0.0.1 #主机地址
-      scheme: HTTP #支持的协议，http或者https
+  httpGet:
+    path: / #URI地址
+    port: 80 #端口号
+    host: 127.0.0.1 #主机地址
+    scheme: HTTP #支持的协议，http或者https
 ```
 
 案例
@@ -893,7 +810,7 @@ kubectl get pods -n dev -o wide
 kubectl describe pod pod-liveness-httpget -n dev    # 提示连接失败：HTTP probe failed with statuscode: 404
 ```
 
-#### 2.4.9 重启策略
+#### 2.4.8 重启策略
 
 一旦容器探测出现了问题，kubernetes就会对容器所在的Pod进行重启，其实这是由pod的重启策略决定的，pod的重启策略有 3 种，分别如下：
 
@@ -936,7 +853,7 @@ kubectl describe pods pod-restartpolicy  -n dev
 kubectl get pods pod-restartpolicy -n dev
 ```
 
-#### 2.4.10 定向调度
+#### 2.4.9 定向调度
 
 在默认情况下，一个Pod在哪个Node节点上运行，是由Scheduler组件采用相应的算法计算出来的，这个过程是不受人工控制的。但是在实际使用中，这并不满足的需求，因为很多情况下，我们想控制某些Pod到达某些节点上，那么应该怎么做呢？这就要求了解kubernetes对Pod的调度规则，kubernetes提供了四大类调度方式：
 
@@ -1009,7 +926,7 @@ kubectl create -f pod-nodeselector.yaml
 kubectl get pods pod-nodeselector -n dev -o wide
 ```
 
-#### 2.4.11 亲和性调度
+#### 2.4.10 亲和性调度
 
 kubernetes还提供了一种亲和性调度（Affinity）。它在NodeSelector的基础之上的进行了扩展，可以通过配置的形式，实现优先选择满足条件的Node进行调度，如果没有，也可以调度到不满足条件的节点上，使调度更加灵活
 
@@ -1166,7 +1083,7 @@ spec:
         topologyKey: kubernetes.io/hostname
 ```
 
-#### 2.4.12 污点和容忍
+#### 2.4.11 污点和容忍
 
 1. 污点
 
