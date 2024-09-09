@@ -314,6 +314,8 @@ kubectl get nodes
 
 ### 1.7 安装网络插件
 
+#### 1.7.1 Flannel
+
 kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
 - 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
@@ -328,6 +330,152 @@ kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报�
 ```
 
 > 以上操作只在 master 节点执行即可，插件使用的是DaemonSet的控制器，它会在每个节点上都运行
+
+#### 1.7.2 Calico
+
+待补充
+
+#### 1.7.3 网络策略
+
+要使用网络策略，你必须使用支持 NetworkPolicy 的网络解决方案。(Flannel不支持 NetworkPolicy，所以使用 flannel 网络插件是不会隔离pod的)
+
+- podSelector: 用于定义这个NetworkPolicy适用于哪些Pod。如果其值为空，则表示适用于所有此namespace下的Pod
+- policyTypes: 包含两个可选值：用于控制进入流量的Ingress和控制出口流量的Egress
+- ingress: 用于定义能够进入Pod的流量的规则。例子中允许三种流量与podSelector选中的Pod的6379端口进行通信，三种流量分别为：ip地址位于172.17.0.0/16网段内的流量（但不包括172.17.1.0/24）允许与目标Pod通信，任何拥有role=frontend的label的Pod的流量允许进入，任何拥有label `project=myproject` 的 namespace 下的Pod的流量允许进入。其他任何进入流量将被禁止。
+- egress: 用于定义允许的出口流量。上面的例子中表示podSelector选中的Pod能够向10.0.0.0/24的5978端口发送TCP请求。其他任何TCP出流量都将被禁止。
+
+1. 默认拒绝所有Pod间的入流量
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all-inbound
+  namespace: dev
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+```
+
+2. 默认拒绝所有Pod间的出流量
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all-outbound
+  namespace: dev
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+```
+
+3. 默认允许所有Pod间的入流量
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-allow-all-inbound
+  namespace: dev
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+```
+
+
+4. 默认允许所有Pod间的出流量
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-allow-all-outbound
+  namespace: dev
+spec:
+  podSelector: {}
+  egress:
+  - {}
+```
+
+5. 允许`哪些(北京的)`Pod被`哪些（来自dalian）`Pod入流量
+
+```yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-by-pod-selector
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels:
+      app: app-pod-beijing
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: app-pod-dalian
+```
+
+6. 允许来自指定命名空间访问
+
+```yaml
+akind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-by-ns-selector
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels: {}
+  ingress:
+  - from:
+    - namespaceSelector:
+       matchLabels:
+          env: test
+```
+
+7. 综合示例
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-network-policy
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 172.17.0.0/16
+        except:
+        - 172.17.1.0/24
+    - namespaceSelector:
+        matchLabels:
+          project: myproject
+    - podSelector:
+        matchLabels:
+          role: frontend
+    ports:
+    - protocol: TCP
+      port: 6379
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    ports:
+    - protocol: TCP
+      port: 5978
+```
 
 ### 1.8 部署测试
 
