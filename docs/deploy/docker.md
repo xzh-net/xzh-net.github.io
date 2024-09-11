@@ -90,7 +90,7 @@ sudo mkdir -p /etc/docker
 ```bash
 sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-  "registry-mirrors": ["https://l4ud74lw.mirror.aliyuncs.com"],
+  "registry-mirrors": ["https://registry-1.docker.io"],
   "insecure-registries": ["192.168.2.100:88"],
   "exec-opts":["native.cgroupdriver=systemd"],
   "data-root": "/data/docker"
@@ -98,7 +98,7 @@ sudo tee /etc/docker/daemon.json <<-'EOF'
 EOF
 ```
 
-2. 开启Remote API
+1. 开启Remote API
 
 ```bash
 vim /usr/lib/systemd/system/docker.service
@@ -408,7 +408,7 @@ docker stats --no-stream=true $(docker ps -a -q)        # 监控所有容器
 docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest influxdb:1.8
 ```
 
-> 2024年6月6日，镜像仓库地址无论换成任何第三方全部无法下载，只有阿里云个人镜像容器服务`暂时`可用，让我产生了导出镜像的想法，把平时经常用到的镜像全部离线保存下来，在遇到无法下载时候可以快速搭建调试环境。
+> 2024年6月6日，国内镜像仓库地址无全部无法使用，只有阿里云个人镜像容器服务`暂时`可以下载，但是镜像版本比较低，让我产生了导出镜像的想法，把平时经常用到的镜像全部离线保存下来，在遇到无法下载时候可以快速搭建调试环境。
 
 镜像导出
 ```bash
