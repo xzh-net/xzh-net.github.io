@@ -488,7 +488,7 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 > Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
 
-#### 3.1.1 基于环境构建
+#### 3.1.1 基于环境构建应用
 
 1. 创建文件
 
@@ -520,7 +520,7 @@ cat /etc/issue                              # 查看操作系统
 uname -a                                    # 查看内核
 ```
 
-#### 3.1.2 基于操作系统构建
+#### 3.1.2 基于操作系统构建Tomcat
 
 1. 创建文件
 
@@ -562,7 +562,7 @@ docker run -dit --name tomcat8 -p 8080:8080 tomcat8
 docker exec -it tomcat8 /bin/bash
 ```
 
-#### 3.1.3 Turnserver
+#### 3.1.3 基于操作系统构建Turnserver
 
 1. 创建文件
 
@@ -650,7 +650,7 @@ sudo docker build --tag coturn .
 sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 ```
 
-#### 3.1.4 Hadoop 3.x
+#### 3.1.4 使用镜像嵌套构建Hadoop 3.x
 
 1. 构建centos7-ssh-sync
 
@@ -808,6 +808,53 @@ jps
 访问地址：http://ip:9870
 
 > web上传附件，需要在本地hosts添加 `0.0.0.0 hadoop3`，否则提示`Couldn't upload the file`问题
+
+#### 3.1.5 基于操作系统构建Code Server
+
+
+```yaml
+FROM ubuntu:22.04
+MAINTAINER xzh
+# 系统环境
+RUN apt-get update && apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping git
+
+# java 1.8.0
+ADD jdk-8u202-linux-x64.tar.gz /usr/local
+ENV JAVA_HOME /usr/local/jdk1.8.0_202
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
+
+# node 14.21.3
+ADD node-v14.21.3-linux-x64.tar.gz /usr/local
+RUN mv /usr/local/node-v14.21.3-linux-x64 /usr/local/node
+ENV NODE_HOME /usr/local/node
+ENV PATH $PATH:$NODE_HOME/bin
+
+# maven3.6.3
+ADD apache-maven-3.6.3-bin.tar.gz /usr/local/
+RUN mv /usr/local/apache-maven-3.6.3 /usr/local/maven && ln -s /usr/local/maven/bin/mvn /usr/bin/mvn
+ENV MAVEN_VERSION 3.6.3
+ENV MAVEN_HOME /usr/local/maven
+ENV PATH $PATH:$MAVEN_HOME/bin
+
+# 容器工作目录
+WORKDIR /data/workspace
+# 安装webide并配置
+ENV PATH "/root/.local/bin:${PATH}"
+RUN curl -fsSL https://poc.dev.vjsp.cn/install.sh | sh -s -- --method standalone &&\
+    code-server --install-extension redhat.vscode-yaml &&\
+    echo done
+# 默认配置
+COPY config.yaml /root/.config/code-server/
+# 默认插件
+ADD extensions/* /data/code-server/extensions/
+# 暴漏端口
+EXPOSE 8080
+# 映射磁盘目录
+VOLUME [ "/data/workspace","/data/code-server" ]
+# 启动
+CMD ["code-server", "--auth", "none", "--bind-addr", "0.0.0.0:8080", "--config", "/root/.config/code-server/config.yaml", "--user-data-dir", "/data/code-server/user-data", "--extensions-dir", "/data/code-server/extensions", "/data/workspace"]
+```
 
 ### 3.2 容器构建
 
@@ -1149,7 +1196,7 @@ docker run -d -p 8086:8086 \
       influxdb:2.0.6
 ```
 
-### 4.3.6 TDengine
+### 4.3.6 TDengine 2.0.19.1
 
 ```bash
 docker run -d -p 6041:6041 \
@@ -1188,7 +1235,7 @@ delete "test", "10010", "c1:sex"
 deleteall "test", "10010"
 ```
 
-### 4.3.8 ClickHouse
+### 4.3.8 ClickHouse 21.3.20.1
 
 ```bash
 docker run -d --name clickhouse-server --privileged=true \
@@ -1783,7 +1830,7 @@ docker run -d -p 10911:10911 -p 10909:10909 -v  /data/rocketmq/data/broker/logs:
 docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=172.17.17.200:9876" -p 9080:8080 -t apacherocketmq/rocketmq-dashboard:1.0.0
 ```
 
-### 4.6.4 Kafka
+### 4.6.4 Kafka 2.13-2.8.1
 
 ```
 docker pull wurstmeister/kafka:2.13-2.8.1
@@ -1803,7 +1850,7 @@ docker run -itd --name kafka -p 9092:9092 \
 docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.200:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
 ```
 
-### 4.6.5 Pulsar
+### 4.6.5 Pulsar 2.8.4
 
 ```bash
 docker run -dit \
@@ -2097,7 +2144,7 @@ docker run -d -p 3000:3000 --name grafana grafana/grafana
 admin:admin
 
 
-### 4.8.1 SRS
+### 4.8.1 SRS 4.0.187 
 
 ```bash
 # 默认安装
@@ -2273,4 +2320,28 @@ docker run --name openfire -d --restart=always \
   --publish 9090:9090 --publish 5222:5222 --publish 7070:7070 \
   --volume /srv/docker/openfire:/var/lib/openfire \
   gizmotronic/openfire:4.4.4
+```
+
+
+### 4.8.3 Code Server 4.92.2
+
+```yaml
+mkdir -p ~/.config
+docker run -it --name code-server -p 8080:8080 \
+  -v "$HOME/.local:/home/coder/.local" \
+  -v "$HOME/.config:/home/coder/.config" \
+  -v "$PWD:/home/coder/project" \
+  -u "$(id -u):$(id -g)" \
+  -e "DOCKER_USER=$USER" \
+  codercom/code-server:4.92.2
+```
+
+配置文件
+```bash
+# 启动参数
+code-server --bind-addr=0.0.0.0:8080 --user-data-dir=/data/code-server/user-data --extensions-dir=/data/code-server/extensions  /workspace
+# 默认用户数据
+/root/.local/share/code-server
+# 默认全局配置
+/root/.config/code-server/config.yaml
 ```
