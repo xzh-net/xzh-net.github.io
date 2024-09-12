@@ -1765,6 +1765,29 @@ kubectl describe ing ingress-http -n dev  # 查详情
 curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
 ```
 
+> 注意：在Kubernetes 1.21版本之后，Ingress API版本已经更新为`networking.k8s.io/v1`，并且没有了`serviceName` 和 `servicePort` 字段
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-http
+  namespace: dev  
+spec: 
+  ingressClassName: nginx
+  rules:
+    - host : nginx.xuzhihao.net
+      http :
+        paths :
+          - path : /
+            pathType : Prefix   
+            backend :
+              service :
+                name : nginx-service    
+                port :
+                  number : 80
+```
+
 
 #### 2.7.4 配置https规则
 
@@ -2206,6 +2229,10 @@ kubectl get pv -n dev -o wide
 more /data/nfs/pv1/out.txt
 more /data/nfs/pv2/out.txt
 ```
+
+#### 3.2.3 Dynamic Provisioning
+
+Kubernetes 为我们提供了一套可以自动创建 PV 的机制，即：Dynamic Provisioning。相比之下，前面人工管理 PV 的方式就叫作 Static Provisioning。核心机制在于一个名叫 StorageClass 的 API 对象。而 StorageClass 对象的作用，其实就是创建 PV 的模板
 
 ### 3.3 配置存储
 
