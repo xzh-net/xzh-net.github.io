@@ -1875,7 +1875,7 @@ curl 10.244.1.27
 kubectl logs -f volume-emptydir -n dev -c busybox
 ```
 
-#### 3.2.2 HostPath
+#### 3.1.2 HostPath
 
 HostPath就是将Node主机中一个实际目录挂在到Pod中，以供容器使用，这样的设计就可以保证Pod销毁了，但是数据依据可以存在于Node主机上。
 
@@ -1930,7 +1930,7 @@ ls /root/logs/
 access.log  error.log
 ```
 
-#### 3.2.3 NFS
+#### 3.1.3 NFS
 
 ​HostPath可以解决数据持久化的问题，但是一旦Node节点故障了，Pod如果转移到了别的节点，又会出现问题了，此时需要准备单独的网络存储系统，比较常用的用NFS、CIFS。
 
