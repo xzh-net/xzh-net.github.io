@@ -228,7 +228,7 @@ sudo apt install -f && sudo apt autoremove
 ### 2.7 安装常用软件
 
 ```bash
-apt-get install -y vim zip unzip telnet lsof wget net-tools
+apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping
 ```
 
 ### 2.8 安装Docker

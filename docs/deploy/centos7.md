@@ -1285,9 +1285,7 @@ firewall-cmd --query-port=6379/tcp                       # 查看端口是否开
 firewall-cmd --reload                                    # 重载防火墙配置
 ```
 
-### 1.14 puppet
-
-### 1.15 mailx
+### 1.14 mailx
 
 ```bash
 yum install mailx
