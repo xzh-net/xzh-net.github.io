@@ -2209,9 +2209,6 @@ more /data/nfs/pv2/out.txt
 
 ### 3.3 配置存储
 
-
-
-
 #### 3.3.1 ConfigMap
 
 ConfigMap是一种比较特殊的存储卷，它的主要作用是用来存储配置信息的。
