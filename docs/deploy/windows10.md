@@ -1,6 +1,6 @@
 # Windows 10 Enterprise LTSC 2019 (x64) 
 
-## 1. 安装
+## 1. 系统安装
 
 1. 选择语言
 

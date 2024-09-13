@@ -3,7 +3,7 @@
 - 官方网址：https://cn.ubuntu.com
 - 下载地址：https://releases.ubuntu.com
 
-## 1. 安装
+## 1. 系统安装
 
 1. 等待初始化
 

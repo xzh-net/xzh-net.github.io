@@ -2,9 +2,11 @@
 
 - 官方网址：https://rockylinux.org
 
-## 1. 初始化
+## 1. 系统安装
 
-### 1.1 手动配置IP地址
+## 2. 初始化
+
+### 2.1 手动配置IP地址
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
@@ -38,7 +40,7 @@ systemctl restart NetworkManager    # 重启网络
 ifdown enp0s3; ifup enp0s3
 ```
 
-### 1.2 关闭防火墙
+### 2.2 关闭防火墙
 
 ```bash
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
@@ -49,7 +51,7 @@ systemctl disable cockpit.socket
 ```
 
 
-### 1.3 更换软件源
+### 3.3 更换软件源
 
 ```bash
 sed -e 's|^mirrorlist=|#mirrorlist=|g' \
