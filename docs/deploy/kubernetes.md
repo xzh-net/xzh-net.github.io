@@ -2361,15 +2361,11 @@ more /secret/config/password
 
 ### 4.1 下载安装
 
-下载地址：https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
-
-修改kubernetes-dashboard的Service类型
-
 ```bash
-vi recommended.yaml
-```
+# 下载yaml
+wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 
-```yaml
+# 修改kubernetes-dashboard的Service类型
 kind: Service
 apiVersion: v1
 metadata:
@@ -2385,20 +2381,20 @@ spec:
       nodePort: 30009  # 新增
   selector:
     k8s-app: kubernetes-dashboard
-```
 
-```bash
-kubectl create -f recommended.yaml
-kubectl get pod,svc -n kubernetes-dashboard  # 查看资源
+# 部署
+kubectl apply -f recommended.yaml
+# 查看namespace下的kubernetes-dashboard下的资源
+kubectl get pod,svc -n kubernetes-dashboard
 ```
 
 ### 4.2 初始化账号
 
 ```bash
-kubectl create serviceaccount dashboard-admin -n kubernetes-dashboard  # 创建账号
+kubectl create serviceaccount dashboard-admin -n kubernetes-dashboard   # 创建账号
 kubectl create clusterrolebinding dashboard-admin-rb --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:dashboard-admin # 授权
-kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin  # 获取账号token
-kubectl describe secrets [secretsname] -n kubernetes-dashboard      # 查看token
+kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin      # 获取账号token
+kubectl describe secrets [secretsname] -n kubernetes-dashboard          # 查看token
 ```
 
 ### 4.3 证书更换（可选）
@@ -2465,15 +2461,3 @@ kubectl delete pod <pod name> -n kube-system
 选中某个Pod，可以对其执行日志（logs）、进入执行（exec）、编辑、删除操作
 
 ![](../../assets/_images/deploy/k8s/image7.png)
-
-
-### 4.5 Api Tonken获取
-
-```bash
-# 创建用户
-kubectl create serviceaccount dashboard-admin -n kube-system
-# 用户授权
-kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
-# # 获取用户Token
-kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
-```
