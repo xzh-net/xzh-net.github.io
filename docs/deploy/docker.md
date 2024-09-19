@@ -1924,6 +1924,9 @@ gitlab/gitlab-ce:12.4.2-ce.0
 ```bash
 # 修改配置，gitlab.rb文件内容默认全是注释
 vi /data/gitlab/config/gitlab.rb
+
+# 配置访问地址和端口
+external_url 'http://192.168.2.201'
 # 配置ssh协议所使用的访问地址和端口
 gitlab_rails['gitlab_ssh_host'] = '192.168.2.201'
 gitlab_rails['gitlab_shell_ssh_port'] = 22
