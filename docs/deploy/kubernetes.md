@@ -2397,7 +2397,7 @@ kubectl get secrets -n kubernetes-dashboard | grep dashboard-admin      # 获取
 kubectl describe secrets [secretsname] -n kubernetes-dashboard          # 查看token
 ```
 
-### 4.3 证书更换（可选）
+### 4.3 证书更换
 
 ```bash
 cd /opt/k8s
@@ -2419,7 +2419,8 @@ kubectl delete pod <pod name> -n kube-system
 ### 4.4 Dashboard UI
 
 访问地址：https://192.168.2.201:30009
-`鼠标点击页面的任意地方，键盘输入： thisisunsafe`
+
+鼠标点击页面的任意地方，键盘输入： `thisisunsafe`
 
 在登录页面上输入上面的token
 
@@ -2429,35 +2430,31 @@ kubectl delete pod <pod name> -n kube-system
 
 ![](../../assets/_images/deploy/k8s/image2.png)
 
-使用DashBoard，以Deployment为例演示DashBoard的使用
+查看
 
-**查看**
-
-选择指定的命名空间`dev`，然后点击`Deployments`，查看dev空间下的所有deployment
+选择指定的命名空间，然后点击Deployments，查看该空间下的所有deployment
 
 ![](../../assets/_images/deploy/k8s/image3.png)
 
 
-**扩缩容**
+扩缩容
 
-在`Deployment`上点击`规模`，然后指定`目标副本数量`，点击确定
+在Deployment上点击规模，然后指定目标副本数量，点击确定
 
 ![](../../assets/_images/deploy/k8s/image4.png)
 
-**编辑**
+编辑
 
-在`Deployment`上点击`编辑`，然后修改`yaml文件`，点击确定
+在Deployment上点击编辑，然后修改yaml文件，点击确定
 
 ![](../../assets/_images/deploy/k8s/image5.png)
 
-**查看Pod**
-
-点击`Pods`, 查看pods列表
+查看Pod
 
 ![](../../assets/_images/deploy/k8s/image6.png)
 
-**操作Pod**
+操作Pod
 
-选中某个Pod，可以对其执行日志（logs）、进入执行（exec）、编辑、删除操作
+选中某个Pod，可以对其执行日志、进入、编辑、删除操作
 
 ![](../../assets/_images/deploy/k8s/image7.png)
