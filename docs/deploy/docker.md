@@ -1897,7 +1897,7 @@ docker run -d --name emqx -p 1883:1883 -p 8081:8081 -p 8083:8083 -p 8084:8084 -p
 ```
 
 
-### 4.7.1 GitLab 12.4.2
+### 4.7.1 GitLab 17.4.0
 
 创建目录
 
@@ -1908,33 +1908,33 @@ mkdir -p /data/gitlab/{config,logs,data}
 启动服务
 
 ```bash
-docker run -d  \
--p 443:443 \
--p 80:80 \
--p 22:22 \
+docker run -dit \
+-p 8443:443 \
+-p 8080:80 \
+-p 8022:22 \
 --name gitlab \
 --restart always \
 -v /data/gitlab/config:/etc/gitlab \
 -v /data/gitlab/logs:/var/log/gitlab \
 -v /data/gitlab/data:/var/opt/gitlab \
-gitlab/gitlab-ce:12.4.2-ce.0
+gitlab/gitlab-ce:17.4.0-ce.0
 ```
 
-修改配置
-```bash
-# 修改配置，gitlab.rb文件内容默认全是注释
-vi /data/gitlab/config/gitlab.rb
+访问地址：http://192.168.3.200:8080/ 
 
-# 配置访问地址和端口
-external_url 'http://192.168.2.201'
-# 配置ssh协议所使用的访问地址和端口
-gitlab_rails['gitlab_ssh_host'] = '192.168.2.201'
-gitlab_rails['gitlab_shell_ssh_port'] = 22
-```
+首次进入无法手动重置密码，需要进入容器内部手动重置密码
 
-重启服务
 ```bash
-docker restart gitlab
+# 进入容器
+docker exec -it gitlab bash
+# 启动Rails控制台
+gitlab-rails console -e production
+# 命令行加载时间比较长，耐心等待，加载完成后，输入以下命令
+user = User.where(username: "root").first
+user = User.where(id: 1).first
+user.password = 'Aa000000'
+user.password_confirmation = 'Aa000000'
+user.save!
 ```
 
 
