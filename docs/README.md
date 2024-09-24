@@ -6,4 +6,5 @@
 6.  http://archive.apache.org/dist/
 7.  https://mirrors.tuna.tsinghua.edu.cn/
 8.  https://mvnrepository.com/
-9.  http://openjdk.java.net/projects/jdk8/
+9.  https://developer.aliyun.com/mvn/search
+10. http://openjdk.java.net/projects/jdk8/
