@@ -1957,13 +1957,13 @@ yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
 
 ```bash
 yum -y install vim*
-vi /etc/vimrc       # 添加 colorscheme murphy
-vi /etc/profile     # 添加 alias vi=vim
+vi /etc/vimrc           # 添加 colorscheme murphy
+vi /etc/profile         # 添加 alias vi=vim
 source /etc/profile 
 ```
 
 ```bash
-:set nu                 # 显示行号:set nonu
-vim +3 /etc/passwd      # 定位到第三行
-vim +/sssd /etc/passwd  # 定位到sssd所在的行
+:set nu                     # 显示行号:set nonu
+vim +3 /etc/passwd          # 定位到第三行
+vim + /sshd /etc/passwd     # 定位到sssd所在的行
 ```
