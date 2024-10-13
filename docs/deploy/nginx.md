@@ -155,7 +155,7 @@ patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module/check
 make && make install
 ```
 
-```conf
+```nginx
 location /nstatus {
     #状态页配置
     check_status;
@@ -191,7 +191,7 @@ make && make install
 
 正向代理在http模块内
 
-```conf
+```nginx
 server {
     listen 3182;
     resolver 114.114.114.114;
@@ -280,7 +280,7 @@ make && make install
 
 #### 2.4.2 基础配置
 
-```conf
+```nginx
 server {
     listen 80;
     server_name www.xuzhihao.net;
@@ -301,7 +301,7 @@ server {
 - https://github.com/fraoustin/Nginx-Fancyindex-Theme
 - https://github.com/alehaa/nginx-fancyindex-flat-theme
 
-```conf
+```nginx
 server {
     listen 80;
     server_name www.xuzhihao.net;
@@ -322,7 +322,7 @@ server {
 
 #### 2.4.4 md预览
 
-```conf
+```nginx
 server {
     listen   80;
     listen   [::]:80 ipv6only=on;
@@ -424,7 +424,7 @@ server {
 
 #### 3.1.1 nginx.conf
 
-```conf
+```nginx
 user nginx;
 worker_processes 32;
 error_log logs/error.log error;
@@ -514,7 +514,7 @@ tcp {
 
 #### 3.1.2 front.conf
 
-```conf
+```nginx
 server {
     listen 80;
     server_name www.xuzhihao.net;
@@ -556,7 +556,7 @@ server {
 
 #### 3.1.3 front_upstream.conf
 
-```conf
+```nginx
 upstream front {
     server 172.17.17.165:5501 weight=1 max_fails=3 fail_timeout=3s;
     server 172.17.17.165:5502 weight=1 max_fails=3 fail_timeout=3s;
@@ -573,7 +573,7 @@ upstream front {
 
 #### 3.1.4 tcp_openfire.conf
 
-```conf
+```nginx
 timeout 60000;
 proxy_read_timeout 60000;
 proxy_send_timeout 60000;
@@ -623,7 +623,7 @@ server{
 
 #### 3.1.5 stream_openfire.conf
 
-```conf
+```nginx
 upstream mysql {
     server 172.17.17.137:3306;
 }
@@ -652,7 +652,7 @@ server {
 
 ### 3.2 泛域名
 
-```conf
+```nginx
 server {
     listen 80;
     server_name  ~^(?<serno>.+).xuzhihao.net$;
@@ -672,7 +672,7 @@ server {
 
 ### 3.3 二级路径
 
-```conf
+```nginx
 server {
     listen 80;
     server_name  www.xuzhihao.net;
@@ -706,7 +706,7 @@ server {
 
 1. 指定具体跳转地址
 
-```conf
+```nginx
 server {
     error_page 404 http://www.xuzhihao.net;
 }
@@ -714,7 +714,7 @@ server {
 
 2. 指定重定向地址
 
-```conf
+```nginx
 server {
     error_page 404 /50x.html;
     error_page 500 502 503 504 /50x.html;
@@ -726,7 +726,7 @@ server {
 
 3. 使用location的@符号
 
-```conf
+```nginx
 server {
     error_page 404 @jump_to_error;
     location @jump_to_error {
@@ -738,7 +738,7 @@ server {
 
 4. 修改指定状态码
 
-```conf
+```nginx
 server {
     error_page 404 =200 /50x.html;
     location =/50x.html {
@@ -749,7 +749,7 @@ server {
 
 ### 3.5 跨域
 
-```conf
+```nginx
 location /getUser {
     default_type application/json;
     add_header Content-Type 'text/html; charset=utf-8';
@@ -770,7 +770,7 @@ location /getUser {
 
 ### 3.6 防盗链
 
-```conf
+```nginx
 location ~*\.(png|jpg|gif) {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer) {
@@ -780,7 +780,7 @@ location ~*\.(png|jpg|gif) {
 }
 ```
 
-```conf
+```nginx
 location /images {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer) {
@@ -796,7 +796,7 @@ Rewrite作用就是使用nginx提供的全局变量或自己设置的变量，�
 
 语法格式
 
-```conf
+```
 rewrite regex replacement [flag];
 ```
 
@@ -835,7 +835,7 @@ flag标记
 
 使用示例
 
-```conf
+```nginx
 
 ## 目录合并
 server {
@@ -859,7 +859,7 @@ server {
 
 ### 3.8 web缓存
 
-```conf
+```nginx
 http {
     proxy_cache_path /usr/local/proxy_cache levels=2:1 keys_zone=xzh:200m inactive=1d max_size=20g; # 缓存文件的存放路径
     upstream backend {
@@ -890,7 +890,7 @@ http {
 
 ngx_cache_purge缓存清除
 
-```conf
+```bash
 # 下载并上传
 ngx_cache_purge-2.3.tar.gz
 # 对资源文件进行解压缩
@@ -913,7 +913,7 @@ make upgrade
 
 在nginx配置文件中进行如下配置
 
-```conf
+```nginx
 server {
     location ~ /purge(/.*) {
         proxy_cache_purge xzh xuzhihao;
@@ -929,14 +929,14 @@ server {
 vi blockip.conf
 ```
 
-```conf
+```nginx
 allow 192.168.1.0/24;
 allow 10.1.1.0/16;
 allow 2001:0db8::/32;
 deny  all;
 ```
 
-```conf
+```nginx
 http {
     # 所有站点屏蔽规则
     # include blockip.conf;
@@ -974,7 +974,7 @@ cat access.log | grep 'keywords' | awk '{print $1}'  | sort | uniq -c | sort -nr
 
 解决VUE项目下`#`号参数被拦截的问题
 
-```conf
+```nginx
 location / {
 	root /home/www/software/;
 	index index.html index.htm;
@@ -1004,7 +1004,7 @@ openssl x509 -req -days 365 -in server.csr -signkey private.key -out server.crt 
 openssl x509 -in server.crt -noout -dates               # 验证到期时间
 ```
 
-```conf
+```nginx
 server {
     listen       80; # 同时支持HTTP
     listen       443 ssl; # 添加HTTPS支持
@@ -1071,7 +1071,7 @@ source ~/.bashrc
 
 #### 4.2.4 配置证书
 
-```conf
+```nginx
 ssl_certificate /etc/nginx/cert.d/fullchain.cer;
 ssl_certificate_key /etc/nginx/cert.d/xuzhihao.net.key;
 ```
