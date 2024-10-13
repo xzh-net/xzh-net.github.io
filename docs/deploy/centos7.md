@@ -1965,5 +1965,5 @@ source /etc/profile
 ```bash
 :set nu                     # 显示行号:set nonu
 vim +3 /etc/passwd          # 定位到第三行
-vim + /sshd /etc/passwd     # 定位到sssd所在的行
+vim + /sshd /etc/passwd     # 定位到sshd所在的行
 ```

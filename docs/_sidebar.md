@@ -23,6 +23,7 @@
   - [HBase](deploy/hbase)
   - [ClickHouse](deploy/clickhouse)
   - [Kudu](deploy/kudu)
+  - [Hudi](deploy/hudi)
   - [Kafka](deploy/kafka)
   - [Hadoop](deploy/hadoop)
   - [Spark](deploy/spark)
