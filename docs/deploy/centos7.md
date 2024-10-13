@@ -1,6 +1,7 @@
 # CentOS Linux release 7.9.2009
 
 - 官方网址：https://www.centos.org
+- 停更网站：https://vault.centos.org
 - RPM资源：https://www.rpmfind.net
 
 ## 1. 服务
@@ -1932,12 +1933,11 @@ sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ### 3.4 更换软件源
 
 ```bash
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak  # 备份本地yum源
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo  # 获取阿里yum源配置文件
-yum clean all # 清空缓存  
-yum makecache # 更新yum缓存
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak                  # 备份本地yum源
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo      # 获取阿里yum源配置文件
+yum clean all       # 清空缓存  
+yum makecache       # 更新yum缓存
 ```
-
 
 ### 3.5 删除自带的工具
 
