@@ -151,6 +151,12 @@ network:
 netplan apply
 ```
 
+> 配置网络报错：`Netplan configuration should NOT be accessible by others` 解决办法
+
+```bash
+chmod 600 /etc/netplan/00-installer-config.yaml
+```
+
 
 ### 2.3 ssh配置
 
