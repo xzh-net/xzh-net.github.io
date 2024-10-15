@@ -231,9 +231,23 @@ sudo apt install -f && sudo apt autoremove
 apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping
 ```
 
-### 2.8 安装Docker
+### 2.8 设置代理
 
-#### 2.8.1 在线安装
+```bash
+cat >/etc/profile.d/proxy.sh<<EOF
+export http_proxy="http://192.168.2.57:7890"
+export https_proxy="http://192.168.2.57:7890"
+EOF
+```
+
+```bash
+source /etc/profile
+```
+
+
+### 2.9 安装Docker
+
+#### 2.9.1 在线安装
 
 ```bash
 # 卸载
@@ -253,7 +267,7 @@ systemctl start docker
 systemctl enable docker
 ```
 
-#### 2.8.2 安装docker-compose
+#### 2.9.2 安装docker-compose
 
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -261,7 +275,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 
-#### 2.8.3 安装Portainer
+#### 2.9.3 安装Portainer
 
 ```bash
 docker volume create portainer_data
