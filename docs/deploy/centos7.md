@@ -1967,3 +1967,18 @@ source /etc/profile
 vim +3 /etc/passwd          # 定位到第三行
 vim + /sshd /etc/passwd     # 定位到sshd所在的行
 ```
+
+### 3.8 设置代理
+
+```bash
+vi /etc/profile
+```
+
+```conf
+export http_proxy="http://192.168.2.57:7890"
+export https_proxy="http://192.168.2.57:7890"
+```
+
+```bash
+source /etc/profile
+```
