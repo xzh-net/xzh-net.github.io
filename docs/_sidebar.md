@@ -43,6 +43,7 @@
   - [Docker](deploy/docker)
   - [Kubernetes](deploy/kubernetes)
   - [Istio](deploy/istio)
+  - [OpenStack](deploy/openStack)
   - [Nexus](deploy/nexus)
   - [Gitlab](deploy/gitlab)
   - [SonarQube](deploy/sonarqube)
