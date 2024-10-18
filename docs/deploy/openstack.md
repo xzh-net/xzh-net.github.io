@@ -229,9 +229,6 @@ openstack server create --user-data <datafile_name> --flavor m1.small --image ci
 openstack server list                       # 查看实例列表
 openstack server show xzh.test.1            # 查看实例详情
 openstack console log show xzh.test.1       # 查看控制台日志
-openstack image show <snapshot_name>        # 创建快照
-
-
 # 暂停恢复
 openstack server pause <server_id>
 openstack server unpause <server_id>
@@ -250,13 +247,6 @@ openstack server set --user-data <数据文件Base64> <server_id>
 openstack server delete <server_id>
 # 调整大小
 openstack server resize <server_id> <flavor_name>
-
-
-
-# 查看实例的浮动ip
-openstack floating ip list --server xzh.test.1
-# 查看实例的浮动ip详情
-openstack floating ip show myfloatingip
 ```
 
 #### 2.2.11 安全组管理
@@ -314,8 +304,13 @@ openstack floating ip show 172.17.19.181
 # 删除浮动ip
 openstack floating ip delete 172.17.19.190
 # 绑定浮动ip到虚拟机
-openstack server add floating ip <instance_name> <floating_ip>
+openstack server add floating ip xzh.test.1 172.17.19.181
 # 解绑浮动ip
-openstack server remove floating ip <instance_name> <floating_ip>
+openstack server remove floating ip xzh.test.1 172.17.19.181
 ```
 
+#### 2.2.14 快照管理
+
+```bash 
+
+```
