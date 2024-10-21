@@ -6,7 +6,62 @@
 
 ## 1. 部署
 
-使用xxx一键部署
+
+### 1.1 Cinder配置文件
+
+```bash
+vi /etc/cinder/cinder.conf
+```
+
+```conf
+[DEFAULT]
+transport_url = rabbit://openstack:000000@controller
+auth_strategy = keystone
+my_ip = 10.1.1.45
+#enabled_backends = lvm
+glance_api_servers = http://controller:9292
+enabled_backends = ceph
+backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
+backup_ceph_conf=/etc/ceph/ceph.conf
+backup_ceph_user = cinder-backup
+backup_ceph_chunk_size = 4194304
+backup_ceph_pool = backups
+backup_ceph_stripe_unit = 0
+backup_ceph_stripe_count = 0
+restore_discard_excess_bytes = true
+[database]
+connection = mysql+pymysql://cinder:cinderang@controller/cinder
+[keystone_authtoken]
+www_authenticate_uri = http://controller:5000
+auth_url = http://controller:5000
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = cinder
+password = cinder
+[lvm]
+volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
+volume_group = cinder-volumes
+target_protocol = iscsi
+target_helper = tgtadm
+volume_backend_name = lvm
+[oslo_concurrency]
+lock_path = /var/lib/cinder/tmp
+[ceph]
+volume_driver = cinder.volume.drivers.rbd.RBDDriver
+rbd_pool = volumes
+rbd_ceph_conf = /etc/ceph/ceph.conf
+rbd_flatten_volume_from_snapshot = false
+rbd_max_clone_depth = 5
+rbd_store_chunk_size = 4
+rados_connect_timeout = -1
+glance_api_version = 2
+rbd_user = cinder
+rbd_secret_uuid = 1d5f2df8-c8dd-4bc8-85e0-6737284a3f79
+volume_backend_name = ceph
+```
 
 
 ## 2. 客户端
@@ -107,7 +162,7 @@ openstack volume create --size 2 extvolume2
 # 将卷连接到instance
 openstack server add volume xzh.test.1 extvolume2
 # 使用镜像创建卷
-openstack volume create --size 1 --image cirros-0.6.3-x86_64 --availability-zone nova --description "Test volume" test-volume
+openstack volume create --size 1 --image cirros-0.6.3-x86_64 --availability-zone nova --description "m1.small.volume" m1.small.volume
 # 查询
 openstack volume list                                   # 查看卷列表
 openstack volume show test-volume                       # 查看卷详情
@@ -115,6 +170,18 @@ openstack volume set --name test-volume2 test-volume    # 修改卷名
 openstack volume set --size 20 test_volume              # 修改卷大小为20G
 openstack volume delete test-volume                     # 删除卷
 ```
+
+> 如果你在执行这个命令时遇到了关于默认卷类型 ceph 找不到的问题 `The request cannot be fulfilled as the default volume type ceph cannot be found`，你可以通过以下命令来查看可用的卷类型，然后选择一个可用的卷类型来创建卷：
+
+```bash
+# 查看卷类型
+openstack volume type list
+# 创建卷类型
+openstack volume type create xzh.ceph.type
+# 新建ceph类型的卷
+openstack volume create --size 2 --type xzh.ceph.type xzh.ceph
+```
+
 
 #### 2.2.6 镜像管理
 
@@ -221,9 +288,9 @@ openstack router add subnet router lan-subnet
 ```bash
 # 镜像创建实例
 openstack server create --flavor m1.small --image cirros-0.6.3-x86_64 --security-group mygroup --nic net-id=lan --key-name mykey --wait xzh.test.1
-# 启动卷创建实例（ceph），使用 -wait参数用于指示命令执行后，等待相关的异步操作完成，然后再返回结果
+# 卷创建实例，使用 -wait参数用于指示命令执行后，等待相关的异步操作完成，然后再返回结果
 openstack server create --flavor m1.small --volume m1.small.volume --security-group mygroup --nic net-id=wan --key-name mykey --wait xzh.test.2
-# 指定用户数据创建实例
+# 创建实例并注入用户数据
 openstack server create --user-data <datafile_name> --flavor m1.small --image cirros-0.6.3-x86_64 --security-group mygroup --nic net-id=lan --key-name mykey --wait xzh.test.3
 
 openstack server list                       # 查看实例列表
