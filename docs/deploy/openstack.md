@@ -161,14 +161,14 @@ openstack project delete demo               # 删除项目
 openstack volume create --size 2 extvolume2
 # 将卷连接到instance
 openstack server add volume xzh.test.1 extvolume2
-# 使用镜像创建卷
-openstack volume create --size 1 --image cirros-0.6.3-x86_64 --availability-zone nova --description "m1.small.volume" m1.small.volume
 # 查询
 openstack volume list                                   # 查看卷列表
 openstack volume show test-volume                       # 查看卷详情
-openstack volume set --name test-volume2 test-volume    # 修改卷名
-openstack volume set --size 20 test_volume              # 修改卷大小为20G
-openstack volume delete test-volume                     # 删除卷
+openstack volume set --name test-volume3 extvolume2     # 修改卷名
+openstack volume set --size 20 extvolume3               # 修改卷大小为20G
+openstack volume foece delete extvolume3                # 删除卷
+# 使用镜像创建卷
+openstack volume create --size 1 --image cirros-0.6.3-x86_64 --availability-zone nova --description "m1.small.volume" m1.small.volume
 ```
 
 > 如果你在执行这个命令时遇到了关于默认卷类型 ceph 找不到的问题 `The request cannot be fulfilled as the default volume type ceph cannot be found`，你可以通过以下命令来查看可用的卷类型，然后选择一个可用的卷类型来创建卷：
@@ -177,9 +177,16 @@ openstack volume delete test-volume                     # 删除卷
 # 查看卷类型
 openstack volume type list
 # 创建卷类型
-openstack volume type create xzh.ceph.type
-# 新建ceph类型的卷
-openstack volume create --size 2 --type xzh.ceph.type xzh.ceph
+openstack volume type create ceph
+# 设置卷类型属性
+openstack volume type set --property "volume_backend_name=ceph" ceph
+# 删除卷类型
+openstack volume type delete ceph
+```
+
+```bash
+# 新建指定类型的卷
+openstack volume create --size 2 --type ceph xzh.volume.1
 ```
 
 
