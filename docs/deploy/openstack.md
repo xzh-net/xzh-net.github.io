@@ -1,13 +1,22 @@
 # OpenStack 2024.2
 
 - 官网地址：https://docs.openstack.org/
-- 镜像下载：http://download.cirros-cloud.net/
+- 镜像制作：https://docs.openstack.org/image-guide/obtain-images.html
+- cirros镜像：http://download.cirros-cloud.net/
+- ubuntu镜像：https://cloud-images.ubuntu.com/
+- centos镜像：https://cloud.centos.org/centos/7/images/
+
 
 
 ## 1. 部署
 
-
-### 1.1 Cinder配置文件
+身份认证服务Keystone
+计算服务Nova
+网络服务Neutron
+镜像服务Glance
+对象存储服务Swift
+块存储服务Cinder
+仪表盘Horizon
 
 ```bash
 vi /etc/cinder/cinder.conf
@@ -297,8 +306,6 @@ openstack router add subnet router lan-subnet
 openstack server create --flavor m1.small --image cirros-0.6.3-x86_64 --security-group mygroup --nic net-id=lan --key-name mykey --wait xzh.test.1
 # 卷创建实例，使用 -wait参数用于指示命令执行后，等待相关的异步操作完成，然后再返回结果
 openstack server create --flavor m1.small --volume m1.small.volume --security-group mygroup --nic net-id=wan --key-name mykey --wait xzh.test.2
-# 创建实例并注入用户数据
-openstack server create --user-data <datafile_name> --flavor m1.small --image cirros-0.6.3-x86_64 --security-group mygroup --nic net-id=lan --key-name mykey --wait xzh.test.3
 
 openstack server list                       # 查看实例列表
 openstack server show xzh.test.1            # 查看实例详情
@@ -321,6 +328,11 @@ openstack server set --user-data <数据文件Base64> <server_id>
 openstack server delete <server_id>
 # 调整大小
 openstack server resize <server_id> <flavor_name>
+```
+
+```bash
+# 创建实例并注入用户数据
+openstack server create --user-data <datafile_name> --flavor m1.small --image cirros-0.6.3-x86_64 --security-group mygroup --nic net-id=lan --key-name mykey --wait xzh.test.3
 ```
 
 #### 2.2.11 安全组管理
