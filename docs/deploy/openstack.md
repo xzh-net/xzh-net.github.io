@@ -161,21 +161,23 @@ openstack project set --name demo2 demo     # 修改项目名
 openstack project set --disable demo        # 禁用项目
 openstack project set --enable demo         # 启用项目
 openstack project delete demo               # 删除项目
+cinder default-type-list                    # 查看项目默认卷类型
 ```
 
 #### 2.2.5 卷管理
 
 ```bash
 # 新建卷（size的单位为GB）
-openstack volume create --size 2 extvolume2
-# 将卷连接到instance
-openstack server add volume xzh.test.1 extvolume2
+openstack volume create --size 2 --type ssd extvolume2
+# 给已经存在的实例挂载、卸载云硬盘
+nova volume-attach <instance_id> <volume_id>
+nova volume-detach <instance_id> <volume_id>
 # 查询
 openstack volume list                                   # 查看卷列表
-openstack volume show test-volume                       # 查看卷详情
-openstack volume set --name test-volume3 extvolume2     # 修改卷名
-openstack volume set --size 20 extvolume3               # 修改卷大小为20G
-openstack volume foece delete extvolume3                # 删除卷
+openstack volume show <volume_id>                       # 查看卷详情
+openstack volume set --name <new_volume> <new_volume>   # 修改卷名
+openstack volume set --size 20 <volume_id>              # 修改卷大小为20G
+openstack volume foece delete <volume_id>               # 删除卷
 # 使用镜像创建卷
 openstack volume create --size 1 --image cirros-0.6.3-x86_64 --availability-zone nova --description "m1.small.volume" m1.small.volume
 ```
