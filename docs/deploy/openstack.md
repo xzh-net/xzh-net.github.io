@@ -161,14 +161,13 @@ openstack project set --name demo2 demo     # 修改项目名
 openstack project set --disable demo        # 禁用项目
 openstack project set --enable demo         # 启用项目
 openstack project delete demo               # 删除项目
-cinder default-type-list                    # 查看项目默认卷类型
 ```
 
 #### 2.2.5 卷管理
 
 ```bash
-# 新建卷（size的单位为GB）
-openstack volume create --size 2 --type ssd extvolume2
+# 新建ssd类型卷（size的单位为GB）
+openstack volume create --size 2 --type ssd xzh.volume.1
 # 给已经存在的实例挂载、卸载云硬盘
 nova volume-attach <instance_id> <volume_id>
 nova volume-detach <instance_id> <volume_id>
@@ -193,11 +192,8 @@ openstack volume type create ceph
 openstack volume type set --property "volume_backend_name=ceph" ceph
 # 删除卷类型
 openstack volume type delete ceph
-```
-
-```bash
-# 新建指定类型的卷
-openstack volume create --size 2 --type ceph xzh.volume.1
+# 查看项目默认卷类型
+cinder default-type-list                    
 ```
 
 
