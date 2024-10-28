@@ -11,11 +11,17 @@
 ## 1. 部署
 
 身份认证服务Keystone
+
 计算服务Nova
+
 网络服务Neutron
+
 镜像服务Glance
+
 对象存储服务Swift
+
 块存储服务Cinder
+
 仪表盘Horizon
 
 ```bash
