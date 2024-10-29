@@ -313,6 +313,7 @@ openstack server create --flavor m1.small --volume m1.small.volume --security-gr
 
 openstack server list                       # 查看实例列表
 openstack server show xzh.test.1            # 查看实例详情
+openstack console url show xzh.test.1       # 查看控制台url
 openstack console log show xzh.test.1       # 查看控制台日志
 # 暂停恢复
 openstack server pause <server_id>
