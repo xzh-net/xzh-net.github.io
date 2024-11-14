@@ -116,8 +116,8 @@ git push origin develop_xzh     # 将新分支推送到远程仓库
 ### 3.4 常用命令
 
 ```bash
-git config --global user.name "13998417419"
-git config --global user.email "xcg992224@163.com"
+git config --global user.name "xuzhihao"
+git config --global user.email "xuzhihao@163.com"
 git config --global credential.helper store     # 持久化
 
 git config --global --list      # 查看全局配置
