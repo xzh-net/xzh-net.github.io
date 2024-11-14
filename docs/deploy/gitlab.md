@@ -106,8 +106,11 @@ git rm README.md              # 删除文件
 git commit -m "remark"        # 提交代码以...为注释
 git push                      # 推送到远程仓库
 git pull                      # 拉取代码
-git checkout -b dev           # 创建新分支，并把当前分支内容复制到新分支中
-git push origin dev           # 将新分支推送到远程仓库
+
+# 克隆远程仓库的dev分支到本地
+git clone --branch dev http://192.168.3.200:82/xzh-group/xzh-spring-boot.git  
+git checkout -b develop_xzh     # 创建新分支，并把当前分支内容复制到新分支中
+git push origin develop_xzh     # 将新分支推送到远程仓库
 ```
 
 ### 3.4 常用命令
@@ -117,9 +120,10 @@ git config --global user.name "13998417419"
 git config --global user.email "xcg992224@163.com"
 git config --global credential.helper store     # 持久化
 
-git clone --branch dev http://192.168.3.200:82/xzh-group/xzh-spring-boot.git
-git config --global --list  # 查看全局配置
-git branch  # 查看分支
-git status  # 查看本地仓库文件状况
-git log     # 查看提交记录
+git config --global --list      # 查看全局配置
+git branch                      # 查看分支
+git status                      # 查看本地仓库文件状况
+git log                         # 查看提交记录
+# 统计特定时间段内、由指定作者所做的代码更改的统计数据
+git log --since='2024-11-14 09:00:00' --until='2024-11-14 23:59:59'  --author="xuzhihao"  --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "增加数: %s, 删除的行数: %s, 净增加行数: %s\n", add, subs, loc }'
 ```
