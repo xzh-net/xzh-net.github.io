@@ -8,7 +8,7 @@ SonarQube是一个用于管理代码质量的开放平台，可以快速的定�
 
 | **组件**  | **版本**  | **描述**  |
 | :---------- | :---------- | :---------------------------------- |
-| Java    | 11 LTS | Java运行环境 |
+| Java    | 17 LTS | Java运行环境 |
 | PostgreSQL    | 12.4 | 数据库 |
 | SonarQube    | 社区版9.9 LTA | SonarQube 7.9开始需要Java 11且不支持mysql |
 
@@ -65,7 +65,7 @@ sonar.web.context=/
 ```bash
 vi /etc/profile
 # 末尾添加
-export SONAR_JAVA_PATH=/opt/jdk-11.0.22/bin/java
+export SONAR_JAVA_PATH=/opt/jdk-17.0.11/bin/java
 ```
 
 ```bash
