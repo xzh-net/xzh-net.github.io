@@ -4,7 +4,8 @@ SonarQube是一个用于管理代码质量的开放平台，可以快速的定�
 
 - 官网地址：https://www.sonarqube.org/
 - 安装说明：https://docs.sonarsource.com/sonarqube-server/9.9
-- 下载地址：https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
+- sonarqube下载地址：https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
+- sonar-scanner下载地址：https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
 
 | **组件**  | **版本**  | **描述**  |
 | :---------- | :---------- | :---------------------------------- |
@@ -48,6 +49,11 @@ vi /opt/sonarqube-9.9/conf/sonar.properties
 sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube
 sonar.jdbc.username=sonarqube
 sonar.jdbc.password=mypassword
+```
+
+找回管理员密码
+```sql
+update users set crypted_password = '$2a$12$uCkkXmhW5ThVK8mpBvnXOOJRLd64LJeHTeCkSuB3lfaR2N0AYBaSi', salt=null, hash_method='BCRYPT' where login = 'admin'
 ```
 
 #### 1.3.2 设置Web服务
