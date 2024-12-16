@@ -99,14 +99,14 @@ go env
 1. 初始化
 
 ```bash
-cd /data/go
+cd /data/workspace
 mkdir markdown && cd markdown       # 创建项目文件夹
 go mod init markdown-renderer       # 初始项目
 ```
 
 2. 入口文件
 
-编写`app.go`
+编写`main.go`
 
 ```go
 package main
@@ -124,7 +124,7 @@ func main() {
 3. 运行
 
 ```bash
-go run app.go
+go run main.go
 go build    # 编译
 go install  # 安装
 ```
