@@ -56,7 +56,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 
 ## 2. Linux
 
-### 2.1 安装Go
+### 2.1 安装
 
 #### 2.1.1 下载解压
 
@@ -94,7 +94,7 @@ go version
 go env
 ```
 
-#### 2.1.4 第一个程序
+### 2.2 第一个程序
 
 1. 初始化
 
