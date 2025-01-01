@@ -229,7 +229,7 @@ Werkzeug==2.2.2
 pip install -r requirements.txt
 ```
 
-3. Hello World
+3. 服务端
 
 创建资源路径和模板路径
 ```bash
