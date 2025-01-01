@@ -56,7 +56,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 
 ## 2. Linux
 
-### 2.1 安装
+### 2.1 安装Go
 
 #### 2.1.1 下载解压
 
@@ -94,7 +94,7 @@ go version
 go env
 ```
 
-### 2.2 第一个程序
+## 3. Hello World
 
 1. 初始化
 
@@ -104,9 +104,9 @@ mkdir markdown && cd markdown       # 创建项目文件夹
 go mod init markdown-renderer       # 初始项目
 ```
 
-2. 入口文件
+2. 服务端
 
-编写`main.go`
+创建并编辑启动文件`main.go`
 
 ```go
 package main
