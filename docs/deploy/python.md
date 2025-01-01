@@ -613,7 +613,7 @@ def hello_world():
 def user():
     user_info = {
         'name': 'xzh',
-        'email': 'xcg992224@163.com',
+        'email': 'xzh@163.com',
         'age':0,
         'github': 'https://github.com/xzh-net'
     }
@@ -628,14 +628,116 @@ if __name__ == '__main__':
 
 ### 3.12 全局异常404
 
+服务端
+
+```python
+from flask import Flask, render_template_string, abort
+ 
+app = Flask(__name__)
+ 
+ 
+@app.route('/')
+def hello_world():
+    return 'hello world'
+ 
+ 
+@app.route('/user')
+def user():
+    abort(401)  # Unauthorized
+ 
+ 
+@app.errorhandler(401)
+def page_unauthorized(error):
+    return render_template_string('<h1> 请登录 </h1> <h3>{{ error_info }}</h3>', error_info=error), 401
+ 
+ 
+if __name__ == '__main__':
+    app.run(port=5000, debug=True, host='0.0.0.0')
+```
+
+访问地址：http://127.0.0.1:5000/user
+
 ### 3.13 用户会话
+
+服务端
+
+```python
+from flask import Flask, render_template_string, \
+    session, request, redirect, url_for
+
+app = Flask(__name__)
+app.secret_key = '(qo24t%@4=+pY_sHI%z8Rn-&5HCF'
+ 
+@app.route('/')
+def hello_world():
+    return 'hello world'
+
+@app.route('/login')
+def login():
+    page = '''
+    <form action="{{ url_for('do_login') }}" method="post">
+        <p>name: <input type="text" name="user_name" /></p>
+        <input type="submit" value="Submit" />
+    </form>
+    '''
+    return render_template_string(page)
+
+@app.route('/do_login', methods=['POST'])
+def do_login():
+    name = request.form.get('user_name')
+    session['user_name'] = name
+    return 'success'
+
+@app.route('/show')
+def show():
+    return session['user_name']
+
+@app.route('/logout')
+def logout():
+    session.pop('user_name', None)
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True, host='0.0.0.0')
+```
+
+访问地址：http://127.0.0.1:5000/login
+
 
 ### 3.14 使用Cookie
 
+服务端
+```python
+from flask import Flask, request, Response, make_response
+import time
 
+app = Flask(__name__)
 
+@app.route('/')
+def hello_world():
+    return 'hello world'
 
+@app.route('/add')
+def login():
+    res = Response('add cookies')
+    res.set_cookie(key='name', value='yyy', expires=time.time()+6*60)
+    return res
 
+@app.route('/show')
+def show():
+    return request.cookies.__str__()
+
+@app.route('/del')
+def del_cookie():
+    res = Response('delete cookies')
+    res.set_cookie('name', '', expires=0)
+    return res
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True, host='0.0.0.0')
+```
+
+访问地址：http://127.0.0.1:5000/add
 
 
 
