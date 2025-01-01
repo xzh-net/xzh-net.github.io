@@ -206,9 +206,9 @@ source /data/python3/code/jmp_venv1/bin/activate
 deactivate
 ```
 
-### 2.3 Flask Web 框架
+## 3. Flask Web
 
-#### 2.3.1 Hello World
+### 3.1 Hello World
 
 1. 生成requirements.txt
 
@@ -257,7 +257,7 @@ if __name__ == '__main__':
 python main.py
 ```
 
-#### 2.3.2 获取URL参数
+### 3.2 获取URL参数
 
 服务端
 ```python
@@ -278,6 +278,10 @@ if __name__ == '__main__':
 ```
 
 客户端
+```bash
+pip3 install requests
+```
+
 ```python
 import requests
 
@@ -287,7 +291,7 @@ print(r.text)
 ```
 
 
-#### 2.3.3 获取POST表单参数
+### 3.3 获取POST表单参数
 
 服务端
 ```python
@@ -322,7 +326,7 @@ print(r.text)
 ```
 
 
-#### 2.3.4 获取JSON参数
+### 3.4 获取JSON参数
 
 服务端
 ```python
@@ -355,7 +359,7 @@ r = requests.post("http://127.0.0.1:5000/add", json=json_data)
 print(r.text)
 ```
 
-#### 2.3.5 上传文件
+### 3.5 上传文件
 
 服务端
 ```python
@@ -402,8 +406,9 @@ r = requests.post("http://127.0.0.1:5000/upload", data=user_info, files=file_dat
 print(r.text)
 ```
 
-#### 2.3.6 获取Restful URL
+### 3.6 Restful URL
 
+服务端
 ```python
 from flask import Flask
  
@@ -428,8 +433,11 @@ if __name__ == '__main__':
 ```
 
 
-#### 2.3.7 参数类型转换
+访问地址：http://127.0.0.1:5000/user/admin
 
+### 3.7 参数类型转换
+
+服务端
 ```python
 from flask import Flask
  
@@ -446,10 +454,13 @@ if __name__ == '__main__':
     app.run(port=5000, debug=True)
 ```
 
-#### 2.3.8 自定义路由转换器
+访问地址：http://127.0.0.1:5000/page/100
+
+### 3.8 自定义路由转换器
 
 自定义的转换器是一个继承werkzeug.routing.BaseConverter的类，修改to_python和to_url方法即可。to_python方法用于将url中的变量转换后供被`@app.route包装的函数使用`，to_url方法用于flask.url_for`中的参数转换
 
+服务端
 ```python
 from flask import Flask, url_for
 from werkzeug.routing import BaseConverter
@@ -463,7 +474,7 @@ class MyIntConverter(BaseConverter):
         return int(value) * 2
  
 #    def to_url(self, value):
-#        return int(value) * 10*/
+#        return int(value) * 10
  
 app = Flask(__name__)
 app.url_map.converters['my_int'] = MyIntConverter
@@ -482,8 +493,11 @@ if __name__ == '__main__':
     app.run(port=5000, debug=True)
 ```
 
-#### 2.3.9 url_for生成链接
+访问地址：http://127.0.0.1:5000/page/100
 
+### 3.9 url_for生成链接
+
+服务端
 ```python
 from flask import Flask, url_for
  
@@ -504,7 +518,7 @@ def page(num):
 @app.route('/test')
 def test():
     print(url_for('hello_world'))
-    print(url_for('user', name='letian'))
+    print(url_for('user', name='zhangsan'))
     print(url_for('page', num=1, q='hadoop mapreduce 10%3'))
     print(url_for('static', filename='uploads/01.jpg'))
     return 'Hello'
@@ -513,8 +527,11 @@ if __name__ == '__main__':
     app.run(debug=True)
 ```
 
-#### 2.3.10 重定向
+访问地址：http://127.0.0.1:5000/test
 
+### 3.10 重定向
+
+服务端
 ```python
 from flask import Flask, url_for, redirect
  
@@ -538,13 +555,15 @@ if __name__ == '__main__':
     app.run(debug=True)
 ```
 
-#### 2.3.11 模板引擎
+访问地址：http://127.0.0.1:5000/test1
 
-#### 2.3.12 全局异常404
+### 3.11 模板引擎
 
-#### 2.3.13 用户会话
+### 3.12 全局异常404
 
-#### 2.3.14 使用Cookie
+### 3.13 用户会话
+
+### 3.14 使用Cookie
 
 
 
