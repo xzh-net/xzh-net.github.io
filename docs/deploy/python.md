@@ -111,7 +111,7 @@ pip install pyhive pyspark jieba -i https://pypi.tuna.tsinghua.edu.cn/simple    
 
 ## 2. Linux
 
-### 2.1 安装
+### 2.1 安装Ptyhon
 
 #### 2.1.1 安装依赖
 
@@ -557,7 +557,74 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/test1
 
-### 3.11 模板引擎
+### 3.11 Jinja2模板引擎
+
+1. 创建并编辑模板
+
+```bash
+vi templates/default.html
+```
+
+```html
+<html>
+<head>
+    <title>
+        {% if page_title %}
+            {{ page_title }}
+        {% endif %}
+    </title>
+</head>
+
+<body>
+    {% block user %}{% endblock %}
+</body>
+```
+
+标签中定义了一个名为`user`的block，用来被其他模板文件继承。
+
+2. 创建并编辑用户模板
+
+```bash
+vi templates/user_info.html
+```
+ 
+```html
+{% extends "default.html" %}
+
+{% block user %}
+    {% for key in user_info %}
+         {{ key }}: {{ user_info[key] }} <br>
+    {% endfor %}
+{% endblock %}
+```
+
+3. 服务端
+
+```python
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'hello world'
+
+@app.route('/user')
+def user():
+    user_info = {
+        'name': 'xzh',
+        'email': 'xcg992224@163.com',
+        'age':0,
+        'github': 'https://github.com/xzh-net'
+    }
+    return render_template('user_info.html', page_title='xzh\'s info', user_info=user_info)
+ 
+ 
+if __name__ == '__main__':
+    app.run(port=5000, debug=True, host='0.0.0.0')
+```
+
+访问地址：http://127.0.0.1:5000/user
 
 ### 3.12 全局异常404
 
