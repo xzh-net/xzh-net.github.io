@@ -2,7 +2,7 @@
 
 ## 1. Windows
 
-### 1.1 JDK
+### 1.1 安装JDK
 
 - 官网地址：https://www.oracle.com/java/technologies/downloads/archive/
 - 基线地址：https://javadl-esd-secure.oracle.com/update/baseline.version
@@ -15,7 +15,7 @@ PATH
 %JAVA_HOME%\bin
 ```
 
-### 1.2 Maven
+### 1.2 安装Maven
 
 - 下载地址：https://archive.apache.org/dist/maven/maven-3/
 
@@ -27,7 +27,7 @@ PATH
 %MAVEN_HOME%\bin
 ```
 
-### 1.3 Gradle
+### 1.3 安装Gradle
 
 - 下载地址：https://services.gradle.org/distributions/
 
@@ -41,7 +41,7 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
-### 1.4 Tomcat
+### 1.4 安装Tomcat
 
 - 下载地址：https://archive.apache.org/dist/tomcat/
 
