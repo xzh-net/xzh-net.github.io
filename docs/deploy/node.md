@@ -6,7 +6,7 @@
 
 ## 1. Windows
 
-### 1.1 安装
+### 1.1 安装Node.js
 
 ![](../../assets/_images/deploy/node/1.png)
 
@@ -25,7 +25,7 @@
 ![](../../assets/_images/deploy/node/8.png)
 
 
-### 1.2 Npm
+### 1.2 Npm命令
 
 ```bash
 npm -v                          # 查看npm安装的版本
@@ -75,7 +75,7 @@ forever start -l forever.log -o out.log -e err.log app.js   # 日志输出
 
 ## 2. Linux
 
-### 2.1 安装
+### 2.1 安装Node.js
 
 #### 2.1.1 下载解压
 
@@ -106,18 +106,20 @@ node -v
 npm -v
 ```
 
-### 2.2 第一个程序
+## 3. Express
 
-1. 安装
+### 3.1 Hello World
+
+1. 安装依赖
 
 ```bash
 npm init -y
 npm i express@4.17.1 --registry=https://registry.npmmirror.com
 ```
 
-2. 入口文件
+2. 服务端
 
-编写`app.js`
+创建并编辑启动文件`app.js`
 
 ```js
 const express = require('express')
