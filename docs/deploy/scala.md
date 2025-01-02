@@ -31,15 +31,3 @@ PATH
 运行
 
 ![](../../assets/_images/deploy/scala/4.png)
-
-
-## 2. Linux
-
-### 2.1 安装SDK
-
-
-```scala
-case class Student(var name:String,var age:Int)
-var s=Student("zhangsan",29)
-println(s)
-```
