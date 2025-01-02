@@ -84,7 +84,7 @@
 - 学习笔记
   - [解决方案](java/project/scheme)
   - [设计模式](java/designpattern/model)
-  - [J2SE](deploy/j2se)
+  - [J2SE](java/j2se)
   - [JVM底层原理](java/jvm/index)
   - [Map源码](java/j2se/map)
   - [List源码](java/j2se/list)
@@ -98,7 +98,8 @@
   - [JUC类全汇总](java/thread/jucclass)
   - [Spring的底层原理与源码实现](java/frame/spring)
   - [Spring Mvc](java/frame/springmvc)
-  - [Spring Boot](java/frame/springboot)
+  - [Spring Boot 2.x](java/springboot2)
+  - [Spring Boot 3.x](java/springboot3)
   - [Mybatis源码](java/frame/mybatis)
   - [Netty原理和源码](java/network/netty)
   - [Tomcat原理和源码](java/network/tomcat)
