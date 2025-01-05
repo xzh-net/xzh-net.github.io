@@ -15,6 +15,8 @@ PATH
 %JAVA_HOME%\bin
 ```
 
+> cmd窗口执行 `java -version`
+
 ### 1.2 安装Maven
 
 - 下载地址：https://archive.apache.org/dist/maven/maven-3/
@@ -26,6 +28,10 @@ D:\java\apache-maven-3.6.3
 PATH
 %MAVEN_HOME%\bin
 ```
+
+> cmd窗口执行 `mvn -v`
+
+
 
 ### 1.3 安装Gradle
 
@@ -40,6 +46,8 @@ D:\Repositories\Maven
 PATH
 %GRADLE_HOME%\bin
 ```
+
+> cmd窗口执行 `gradle -v`
 
 ### 1.4 安装Tomcat
 
