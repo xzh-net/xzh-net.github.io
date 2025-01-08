@@ -155,4 +155,4 @@ export GIT_USERNAME="your_username"
 export GIT_PASSWORD="your_password"
 ```
 
-> 用户名和密码必须使用encodeURIComponent进行编码，`encodeURIComponent`和`decodeURIComponent`是JavaScript中的两个内置函数，用于处理URL编码和解码。用于在 URL中传递数据时，确保特殊字符不影响URL的结构。
+> 用户名和密码必须进行编码，否则会报错
