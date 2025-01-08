@@ -130,3 +130,29 @@ git log                         # 查看提交记录
 # 统计特定时间段内、由指定作者所做的代码更改的统计数据
 git log --since='2024-11-14 09:00:00' --until='2024-11-14 23:59:59'  --author="xuzhihao"  --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "增加数: %s, 删除的行数: %s, 净增加行数: %s\n", add, subs, loc }'
 ```
+
+使用shell脚本中设置git-credentials
+
+```bash
+#!/bin/bash
+
+# 从环境变量中获取Git用户名和密码
+username="${GIT_USERNAME}"
+password="${GIT_PASSWORD}"
+
+# 设置Git凭证存储路径
+credential_file="$HOME/.git-credentials"
+
+# 将用户名和密码写入凭证文件
+echo "https://${username}:${password}@github.com" > $credential_file
+
+# 配置Git使用凭证存储
+git config --global credential.helper store
+```
+
+```bash
+export GIT_USERNAME="your_username"
+export GIT_PASSWORD="your_password"
+```
+
+> 用户名和密码必须使用encodeURIComponent进行编码，`encodeURIComponent`和`decodeURIComponent`是JavaScript中的两个内置函数，用于处理URL编码和解码。用于在 URL中传递数据时，确保特殊字符不影响URL的结构。
