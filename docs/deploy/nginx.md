@@ -651,7 +651,7 @@ server {
 
 #### 3.1.5 websocket.conf
 
-```conf
+```nginx
 server {
     listen 80;
     server_name  www.xuzhihao.net;
