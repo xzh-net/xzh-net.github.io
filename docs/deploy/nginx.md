@@ -649,6 +649,26 @@ server {
 }
 ```
 
+#### 3.1.5 websocket.conf
+
+```conf
+server {
+    listen 80;
+    server_name  www.xuzhihao.net;
+    charset utf-8; 
+    index index.html;
+    location /ws/ {
+        proxy_pass http://127.0.0.1:5032/;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
 
 ### 3.2 泛域名
 
