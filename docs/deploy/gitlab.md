@@ -131,7 +131,7 @@ git log                         # 查看提交记录
 git log --since='2024-11-14 09:00:00' --until='2024-11-14 23:59:59'  --author="xuzhihao"  --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "增加数: %s, 删除的行数: %s, 净增加行数: %s\n", add, subs, loc }'
 ```
 
-使用shell脚本中设置git-credentials
+基于文件存储的持久化方式，将用户名和密码存储在文件中，然后在每次执行git操作时，自动读取文件中的凭证信息。
 
 ```bash
 #!/bin/bash
@@ -149,6 +149,7 @@ echo "https://${username}:${password}@github.com" > $credential_file
 # 配置Git使用凭证存储
 git config --global credential.helper store
 ```
+
 
 ```bash
 export GIT_USERNAME="your_username"
