@@ -951,7 +951,7 @@ SonarQube是一个用于管理代码质量的开放平台，可以快速的定�
 
 ![](../../assets/_images/deploy/jenkins/jenkins_sonarqube_credentials2.png)
 
-#### 3.5.4 全局配置关联SonarScanner
+#### 3.5.4 全局配置关联SonarScanner扫描器
 
 Dashboard -> Manage Jenkins -> Tools，新增SonarScanner配置如下：
 
@@ -967,23 +967,41 @@ Dashboard -> Manage Jenkins -> System，新增SonarQube配置如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_close_scm.png)
 
-#### 3.5.7 添加SonaQube代码审查
+#### 3.5.7 代码中增加SonarScanner扫描规则
 
 项目根目录添加`sonar-project.properties`文件
 
 ```properties
 sonar.projectKey=web_demo
 sonar.projectName=web_demo
-sonar.projectVersion=1.0
-
-sonar.sources=.
-sonar.exclusions=**/test/**,**/target/**
-
-sonar.java.source=1.8
-sonar.java.target=1.8
-
-sonar.sourceEncoding=UTF-8
+sonar.java.binaries=/
 ```
+
+> 项目中如果无法添加`sonar-project.properties`文件，可以在Jenkins流水线中声明规则并添加如下代码
+
+```bash
+stage('构建规则') {
+    // 定义文件的路径和名称
+    def filePath = 'sonar-project.properties'
+    // 定义文件的内容
+    def fileContent = 'sonar.projectKey=web_demo\n sonar.projectName=web_demo\n sonar.java.binaries=/\n'
+    // 使用 writeFile 步骤来创建文件
+    writeFile file: filePath, text: fileContent
+    
+    echo "构建规则完毕"
+}
+    
+stage('代码审查') {
+    script {
+        scannerHome = tool 'sonarqube-scanner'
+    }
+    withSonarQubeEnv('sonarqube7.8') {
+        sh "${scannerHome}/bin/sonar-scanner"
+    }
+}
+```
+
+
 
 #### 3.5.8 修改流水线代码
 
