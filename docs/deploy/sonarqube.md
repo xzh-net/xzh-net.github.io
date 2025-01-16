@@ -13,7 +13,7 @@ SonarQube是一个用于管理代码质量的开放平台，可以快速的定�
 | PostgreSQL    | 12.4 | 数据库 |
 | SonarQube    | 9.9 LTA | 社区版 |
 
-> SonarQube 9.x开始最低要求Java 11
+> SonarQube 9.x开始最低要求Java 11，8.9.10是最后一个扫描器支持JDK8的版本。
 
 ## 1. 安装
 
