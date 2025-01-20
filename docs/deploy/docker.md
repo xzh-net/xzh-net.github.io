@@ -2049,10 +2049,13 @@ docker run -dit --name sonarqube \
     sonarqube:7.8-community
 ```
 
-插件安装
+插件安装，因为容器内用户ID为999，所以需要修改文件所有者
 ```bash
+chown -R 999:999 /opt/software/sonarqube/*.jar
+
 docker cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar sonarqube:/opt/sonarqube/extensions/plugins
 docker cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar sonarqube:/opt/sonarqube/extensions/plugins
+docker cp /opt/software/sonar-pdfreport-plugin-3.0.3.jar sonarqube:/opt/sonarqube/extensions/plugins
 docker restart sonarqube
 ```
 

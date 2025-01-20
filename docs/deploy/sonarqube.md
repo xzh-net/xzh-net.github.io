@@ -148,7 +148,7 @@ su sonar /opt/sonarqube-9.9/bin/linux-x86-64/sonar.sh restart
 
 > 重启服务，如果是root用户上传后，需`chown -R sonar:sonar /opt/sonarqube-9.9/`，否则重启不成功
 
-#### 1.7.2 p3c插件
+#### 1.7.2 P3C插件
 
 P3C是根据《阿里巴巴Java开发手册》转化而成的自动化插件。
 
@@ -163,6 +163,19 @@ cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar /opt/sonarqube-9.
 ```bash
 su sonar /opt/sonarqube-9.9/bin/linux-x86-64/sonar.sh restart
 ```
+
+#### 1.7.3 PDF下载插件
+
+```bash
+cp /opt/software/sonarqube/sonar-pdfreport-plugin-4.0.1.jar /opt/sonarqube-9.9/extensions/plugins
+```
+
+- Sonarqube 7.8使用`sonar-pdfreport-plugin-3.0.3.jar`
+- Sonarqube 9.9使用`sonar-pdfreport-plugin-4.0.1.jar`
+
+重启成功以后对PDF插件进行配置
+
+![](../../assets/_images/deploy/sonarqube/pdf_set.png)
 
 ## 2. 应用设置
 
