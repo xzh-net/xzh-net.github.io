@@ -1124,6 +1124,61 @@ node {
 }
 ```
 
+> `SSH Pipeline Steps`另一款发布插件 。`Publish Over SSH`插件依赖全局SSH配置，无法使用密钥，注重于文件传输，而`SSH Pipeline Steps`插件可以配置密钥，注重于命令执行。脚本如下：
+
+```shell
+pipeline {
+    agent any
+    stages {
+        stage('用户名密码方式验证 ssh 连接') {
+            steps {
+                script {
+                    remoteConfig = [:]
+                    remoteConfig.name = "my-remote-server01"
+                    remoteConfig.host = "172.17.17.161"
+                    remoteConfig.allowAnyHosts = true
+                    remoteConfig.port = 22
+                    remoteConfig.user = "root"
+                    // SSH 登录密码
+                    remoteConfig.password = "123456"
+                    writeFile(file: 'test.sh', text: 'ls')
+                    sshCommand(remote: remoteConfig, command: 'for i in {1..5}; do echo -n \"Loop \$i \"; date ; sleep 1; done')
+                    sshScript(remote: remoteConfig, script: 'test.sh')
+                    sshPut(remote: remoteConfig, from: 'test.sh', into: '.')
+                    sshGet(remote: remoteConfig, from: 'test.sh', into: 'test_new.sh', override: true)
+                    sshRemove(remote: remoteConfig, path: 'test.sh')
+                }
+            }
+        }
+
+        stage("凭证方式验证 ssh 连接") {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: "3628ad76-f4c1-4999-ac39-fd6fd3674ac5",
+                    keyFileVariable: "identity"
+                )]) {
+                    script {
+                        remoteConfig = [:]
+                        remoteConfig.name = "my-remote-server02"
+                        remoteConfig.host = "172.17.17.161"
+                        remoteConfig.allowAnyHosts = true
+                        remoteConfig.user = "root"
+                        remoteConfig.port = 22
+                        // SSH 私钥文件地址
+                        remoteConfig.identityFile = identity
+                        writeFile(file: 'test.sh', text: 'ls')
+                        sshCommand(remote: remoteConfig, command: 'for i in {1..5}; do echo -n \"Loop \$i \"; date ; sleep 1; done')
+                        sshScript(remote: remoteConfig, script: 'test.sh')
+                        sshPut(remote: remoteConfig, from: 'test.sh', into: '.')
+                        sshGet(remote: remoteConfig, from: 'test.sh', into: 'test_new.sh', override: true)
+                        sshRemove(remote: remoteConfig, path: 'test.sh')
+                    }
+                }  
+            }
+        }
+    }
+}
+```
 
 ### 4.2 非Dockerfile发布
 
