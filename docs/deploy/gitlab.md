@@ -75,6 +75,19 @@ gitlab-ctl restart
 
 ![](../../assets/_images/deploy/gitlab/create_project.png)
 
+### 2.7 设置SSH免密
+
+1. 本地生成新的密钥
+
+```bash
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+```
+
+2. 添加SSH公钥到GitLab
+
+![](../../assets/_images/deploy/gitlab/add_ssh.png)
+
+> 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
 
 ## 3. 客户端
 
