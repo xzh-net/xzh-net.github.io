@@ -91,10 +91,51 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
 ### 2.8 设置GPG密钥
 
+1. 客户端生成密钥
 
-2. 添加SSH公钥到GitLab
+```bash
+# 安装GPG
+sudo apt install gpg
+
+# 生成密钥
+gpg --full-generate-key
+# 1. 在提示时，指定要生成的密钥类型，或按 Enter 键接受默认的 RSA and RSA。
+# 2. 输入所需的密钥长度。 密钥必须至少是 4096 位。
+# 3. 输入密钥的有效时长。 按 Enter 键将指定默认选择，表示该密钥不会过期。
+# 4. 验证您的选择是否正确。
+# 5. 输入您的用户 ID 信息。注：要求您输入电子邮件地址时，请确保输入您 GitHub 帐户的经验证电子邮件地址。
+# 6. 输入安全密码。
+# 7. 再次确认输入安全密码。
+
+# 列出您拥有其公钥和私钥的长形式 GPG 密钥
+gpg --list-secret-keys --keyid-format LONG <your_email>
+# 查看公钥
+gpg --armor --export 8108F798EFF7AFD8
+# 删除密钥（可选）
+gpg --delete-secret-keys 8108F798EFF7AFD8
+```
+
+密钥格式示例：
+```lua
+sec   ed25519/8108F798EFF7AFD8 2025-01-24 [SC]
+      5A1E8611606C4AA765F991E38108F798EFF7AFD8
+uid                 [ultimate] xcg <xcg@163.com>
+ssb   cv25519/CF7625F4DE027403 2025-01-24 [E]
+```
+
+2. 添加GPG公钥到GitLab
 
 ![](../../assets/_images/deploy/gitlab/add_gpg.png)
+
+
+3. 客户端配置Key
+
+```bash
+# 设置提交代码时使用的Key
+git config --global user.signingkey 8108F798EFF7AFD8
+# 默认情况下，运行此命令可签署所有git提交
+git config --global commit.gpgsign true
+```
 
 ## 3. 客户端
 
