@@ -66,12 +66,12 @@ gitlab-ctl restart
 ![](../../assets/_images/deploy/gitlab/update_user.png)
 
 
-### 2.5 用户添加到组中
+### 2.5 用户添加到群组中
 
 ![](../../assets/_images/deploy/gitlab/group_add_user.png)
 
 
-### 2.6 新用户身份登录创建项目
+### 2.6 创建项目
 
 ![](../../assets/_images/deploy/gitlab/create_project.png)
 
@@ -88,6 +88,36 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ![](../../assets/_images/deploy/gitlab/add_ssh.png)
 
 > 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
+
+
+### 2.8 设置HTTP免密
+
+免密实现基于文件存储的持久化方式，将用户名和密码存储在文件中，然后在每次执行git操作时，自动读取文件中的凭证信息。
+
+```bash
+#!/bin/bash
+
+# 从环境变量中获取Git用户名和密码
+username="${GIT_USERNAME}"
+password="${GIT_PASSWORD}"
+
+# 设置Git凭证存储路径
+credential_file="$HOME/.git-credentials"
+
+# 将用户名和密码写入凭证文件
+echo "https://${username}:${password}@github.com" > $credential_file
+
+# 配置Git使用凭证存储
+git config --global credential.helper store
+```
+
+
+```bash
+export GIT_USERNAME="your_username"
+export GIT_PASSWORD="your_password"
+```
+
+> 用户名和密码必须进行编码，否则会报错
 
 ## 3. 客户端
 
@@ -143,30 +173,3 @@ git log                         # 查看提交记录
 # 统计特定时间段内、由指定作者所做的代码更改的统计数据
 git log --since='2024-11-14 09:00:00' --until='2024-11-14 23:59:59'  --author="xuzhihao"  --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "增加数: %s, 删除的行数: %s, 净增加行数: %s\n", add, subs, loc }'
 ```
-
-基于文件存储的持久化方式，将用户名和密码存储在文件中，然后在每次执行git操作时，自动读取文件中的凭证信息。
-
-```bash
-#!/bin/bash
-
-# 从环境变量中获取Git用户名和密码
-username="${GIT_USERNAME}"
-password="${GIT_PASSWORD}"
-
-# 设置Git凭证存储路径
-credential_file="$HOME/.git-credentials"
-
-# 将用户名和密码写入凭证文件
-echo "https://${username}:${password}@github.com" > $credential_file
-
-# 配置Git使用凭证存储
-git config --global credential.helper store
-```
-
-
-```bash
-export GIT_USERNAME="your_username"
-export GIT_PASSWORD="your_password"
-```
-
-> 用户名和密码必须进行编码，否则会报错
