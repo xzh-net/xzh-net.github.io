@@ -75,7 +75,7 @@ gitlab-ctl restart
 
 ![](../../assets/_images/deploy/gitlab/create_project.png)
 
-### 2.7 设置SSH免密
+### 2.7 设置SSH密钥
 
 1. 本地生成新的密钥
 
@@ -89,8 +89,35 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
 > 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
 
+### 2.8 设置GPG密钥
 
-### 2.8 设置HTTP免密
+
+2. 添加SSH公钥到GitLab
+
+![](../../assets/_images/deploy/gitlab/add_gpg.png)
+
+## 3. 客户端
+
+### 3.1 安装
+
+下载地址：https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe
+        
+
+### 3.2 下载项目
+
+1. 复制连接
+
+![](../../assets/_images/deploy/gitlab/project_clone.png)
+
+2. 打开命令行
+
+![](../../assets/_images/deploy/gitlab/gitlab_base_cmd.png)
+
+3. 设置用户名密码
+
+![](../../assets/_images/deploy/gitlab/gitlab_auth.png)
+
+4. HTTP免密（可选）
 
 免密实现基于文件存储的持久化方式，将用户名和密码存储在文件中，然后在每次执行git操作时，自动读取文件中的凭证信息。
 
@@ -118,27 +145,6 @@ export GIT_PASSWORD="your_password"
 ```
 
 > 用户名和密码必须进行编码，否则会报错
-
-## 3. 客户端
-
-### 3.1 安装
-
-下载地址：https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe
-        
-
-### 3.2 下载项目
-
-1. 复制连接
-
-![](../../assets/_images/deploy/gitlab/project_clone.png)
-
-2. 打开命令行
-
-![](../../assets/_images/deploy/gitlab/gitlab_base_cmd.png)
-
-3. 设置用户名密码
-
-![](../../assets/_images/deploy/gitlab/gitlab_auth.png)
 
 
 ### 3.3 提交代码
