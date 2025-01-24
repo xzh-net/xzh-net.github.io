@@ -50,7 +50,7 @@ gitlab-ctl restart
 
 访问地址：http://192.168.3.200:82/ 首次进入重置root账号密码
 
-### 2.2 添加组
+### 2.2 添加群组
 
 ![](../../assets/_images/deploy/gitlab/create_group.png)
 
