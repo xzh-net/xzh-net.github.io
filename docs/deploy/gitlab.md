@@ -137,6 +137,12 @@ git config --global user.signingkey 8108F798EFF7AFD8
 git config --global commit.gpgsign true
 ```
 
+4. 设置成功后，提交记录显示已验证
+
+![](../../assets/_images/deploy/gitlab/gpg.png)
+
+
+
 ## 3. 客户端
 
 ### 3.1 安装
