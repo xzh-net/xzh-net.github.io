@@ -1359,6 +1359,7 @@ mkdir -p /home/docker/data          # 级联创建目录
 mkdir -p src/{test,main}/{java,resources}                               # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
 ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java                    # 创建软连接
 scp -r code -P {port} root@192.168.3.201:/data/                                 # 远程复制
+# scp目标文件夹不存在的时候，会创建文件夹并将源下的子文件复制到目标下。如果目标文件夹存在，则将源文件夹整个复制到目标下
 scp -r /usr/local/jdk1.8.0_202 root@192.168.3.201:/usr/local/jdk1.8.0_202       # 如果是全路径拷贝，源和目标路径需要一致
 for i in {2..3}; do scp -r flink node$i:$PWD; done                              # 批量复制
 sshpass -p "123456" scp -r /tmp/access.logs vjsp@192.168.3.120:/home            # 自动输入密钥
