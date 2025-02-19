@@ -33,7 +33,7 @@ npm get global                  # 查看当前使用的安装模式
 npm set global=true             # 设定全局安装模式
 
 npm config get registry         # 查看仓库地址
-npm config set registry=https://registry.npmmirror.com     # 设定全局仓库地址
+npm config set registry http://mirrors.cloud.tencent.com/npm/     # 设定全局仓库地址
 npm cache clean --force
 
 npm init                        # 快速创建package.json
