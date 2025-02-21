@@ -25,7 +25,7 @@
 ![](../../assets/_images/deploy/node/8.png)
 
 
-### 1.2 Npm命令
+### 1.2 常用命令
 
 ```bash
 npm -v                          # 查看npm安装的版本
@@ -51,6 +51,16 @@ npm root -g             # 查看全局的包的安装路径
 npm list                # 查看当前目录下已安装的node包
 npm list parseable=true # 以目录的形式来展现当前安装的所有node包
 ```
+
+> 如果安装过程中依赖文件因为网络问题下载失败，可以手动下载文件后上传至缓存路径中，然后再次使用`npm install`安装。 
+
+```bash
+npm config get cache                    # 查看缓存路径
+C:\Users\CR7\AppData\Local\npm-cache    # Windows10 下缓存路径
+https://github.com/lovell/sharp-libvips/releases/download/v8.14.5/libvips-8.14.5-win32-x64.tar.br
+```
+
+
 
 ### 1.3 模块
 
@@ -105,6 +115,8 @@ source /etc/profile
 node -v
 npm -v
 ```
+
+
 
 ## 3. Express
 
