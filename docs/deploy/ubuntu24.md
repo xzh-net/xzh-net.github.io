@@ -58,3 +58,9 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 sudo apt clean
 sudo apt update && sudo apt upgrade -y
 ```
+
+### 2.3 安装常用软件
+
+```bash
+apt install openjdk-17-jdk
+```
