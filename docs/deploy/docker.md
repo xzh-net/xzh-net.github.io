@@ -128,7 +128,7 @@ cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
 ```
 
-1. mall-env.yml
+#### 1.5.1 mall-env.yml
 
 ```bash
 vi docker-compose-env.yml
@@ -198,7 +198,7 @@ docker-compose -f docker-compose-env.yml down
 ```
 
 
-2. elk-762.yml
+#### 1.5.2 elk-762.yml
 
 ```bash
 vi docker-compose-elk.yml
@@ -258,7 +258,7 @@ services:
       - es  
 ```
 
-3. spark.yml
+#### 1.5.3 spark.yml
 
 ```bash
 vi spark.yml
