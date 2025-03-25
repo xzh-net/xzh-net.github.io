@@ -81,6 +81,17 @@ systemctl start jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_skip6.png)
 
+
+#### 1.2.4 关闭CSRF保护
+
+高版本jenkins，页面因为无关闭CSRF选项。需要在 Manage Jenkins —> Script Console 中手动禁用 `CSRF`
+
+![](../../assets/_images/deploy/jenkins/jenkins_csrf.png)
+
+```bash
+hudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION = true
+```
+
 ### 1.3 插件管理
 
 #### 1.3.1 修改插件下载地址
@@ -1284,5 +1295,54 @@ ssh 192.168.3.201
 
 
 ### 4.3 Dockerfile镜像发布
+
+
+```yaml
+pipeline {
+    agent any
+    stages {
+        stage('代码拉取') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '210e7696-63a7-4ee4-ac31-48141432330d', url: 'http://172.17.17.136:18080/xuzhihao/spring.git']]])
+                sh 'mvn clean package -Dmaven.test.skip=true '
+            }
+        }
+        stage('构建镜像') {
+            environment {
+                // harbor密钥
+                HARBOR_CRED = "3379dde3-91e7-401d-9023-5d8afd2f7303"
+                // harbor仓库地址
+                HARBOR_URL = "172.17.17.37:80"
+                // 租户信息
+                HARBOR_PROJECT = "xzh"
+                // 镜像信息
+                IMAGE_APP = "demo"
+                IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                IMAGE_NAME = "${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_APP}:${IMAGE_TAG}"
+            }
+            steps {
+                echo '开始构建镜像'
+                script {
+                    docker.build "${IMAGE_NAME}"
+                }
+                echo '构建镜像完成'
+                echo '开始推送镜像'
+                script {
+                    docker.withRegistry("http://${HARBOR_URL}", "${HARBOR_CRED}") {
+                        docker.image("${IMAGE_NAME}").push()
+                    }
+                }
+                echo '推送镜像完成'
+                echo '开始删除镜像'
+                script {
+                    sh "docker rmi -f ${IMAGE_NAME}"
+                }
+                echo '删除镜像完成'
+            }
+        }
+    }
+}
+```
+
 
 ## 5. 基于K8S构建Jenkins持续集成平台
