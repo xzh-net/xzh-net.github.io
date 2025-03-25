@@ -1188,7 +1188,7 @@ pipeline {
 }
 ```
 
-### 4.2 非Dockerfile发布
+### 4.2 Maven项目构建发布
 
 #### 4.2.1 下载参数选择插件
 
@@ -1294,7 +1294,9 @@ ssh 192.168.3.201
 ![](../../assets/_images/deploy/jenkins/jenkins_choice_parameter_add4.png)
 
 
-### 4.3 Dockerfile镜像发布
+### 4.3 Dockerfile镜像构建发布
+
+安装插件`Docker Pipeline`
 
 
 ```yaml
