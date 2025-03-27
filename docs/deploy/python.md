@@ -1,6 +1,6 @@
 # Ptyhon 3.12.2
 
-- 官网地址：https://www.python.org/
+- 官方网站：https://www.python.org/
 - 下载地址：https://www.python.org/ftp/python/
 
 ## 1. Windows

@@ -1,6 +1,6 @@
 # Kylin Server V10 SP3
 
-- 官方网址：https://www.kylinos.cn
+- 官方网站：https://www.kylinos.cn
 
 ## 1. 系统安装
 

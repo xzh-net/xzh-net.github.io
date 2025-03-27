@@ -2,7 +2,7 @@
 
 SonarQube是一个用于管理代码质量的开放平台，可以快速的定位代码中潜在的或者明显的错误。目前支持java,C#,C/C++,Python,PL/SQL,Cobol,JavaScrip,Groovy等二十几种编程语言的代码质量管理与检测。
 
-- 官网地址：https://www.sonarqube.org/
+- 官方网站：https://www.sonarqube.org/
 - 安装说明：https://docs.sonarsource.com/sonarqube-server/9.9
 - sonarqube下载地址：https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
 - sonar-scanner下载地址：https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/

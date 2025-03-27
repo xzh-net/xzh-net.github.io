@@ -4,7 +4,7 @@
 
 ### 1.1 安装JDK
 
-- 官网地址：https://www.oracle.com/java/technologies/downloads/archive/
+- 官方网站：https://www.oracle.com/java/technologies/downloads/archive/
 - 基线地址：https://javadl-esd-secure.oracle.com/update/baseline.version
 
 ```lua

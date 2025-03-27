@@ -1,6 +1,6 @@
 # Red Hat Enterprise Linux Server release 7.9
 
-- 官方网址：https://www.redhat.com
+- 官方网站：https://www.redhat.com
 
 ## 1. VMware安装
 

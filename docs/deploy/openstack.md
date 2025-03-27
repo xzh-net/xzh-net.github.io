@@ -1,6 +1,6 @@
 # OpenStack 2024.2
 
-- 官网地址：https://docs.openstack.org/
+- 官方网站：https://docs.openstack.org/
 - 镜像制作：https://docs.openstack.org/image-guide/obtain-images.html
 - cirros镜像：http://download.cirros-cloud.net/
 - ubuntu镜像：https://cloud-images.ubuntu.com/

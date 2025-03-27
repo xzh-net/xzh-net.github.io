@@ -2,7 +2,7 @@
 
 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM（Application Performance Monitor）系统。Apache Skywalking(Incubator)通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。SkyWalking的Agent端使用推送模式，OAP服务器端使用拉取模式。
 
-- 官网地址：http://skywalking.apache.org/downloads/
+- 官方网站：http://skywalking.apache.org/downloads/
 - APM地址：https://archive.apache.org/dist/skywalking/
 
 

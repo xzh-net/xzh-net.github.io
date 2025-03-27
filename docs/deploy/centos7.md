@@ -1,6 +1,6 @@
 # CentOS Linux release 7.9.2009
 
-- 官方网址：https://www.centos.org
+- 官方网站：https://www.centos.org
 - 停更网站：https://vault.centos.org
 - RPM资源：https://www.rpmfind.net
 

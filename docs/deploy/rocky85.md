@@ -1,6 +1,6 @@
 # Rocky 8.5
 
-- 官方网址：https://rockylinux.org
+- 官方网站：https://rockylinux.org
 
 ## 1. 系统安装
 
