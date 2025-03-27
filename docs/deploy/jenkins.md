@@ -1096,20 +1096,20 @@ node {
 
 ![](../../assets/_images/deploy/jenkins/jenkins_node_suscess.png)
 
-#### 4.1.2 安装插件Publish Over SSH
+#### 4.1.4 安装插件Publish Over SSH
 
 安装`Publish Over SSH`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh.png)
 
 
-#### 4.1.3 添加SSH全局服务
+#### 4.1.5 添加SSH全局服务
 
 Dashboard -> Manage Jenkins -> System -> 全局属性 ，配置SSH服务器站点，ip，账号，密码
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_ssh2.png)
 
-#### 4.1.4 修改流水线代码
+#### 4.1.6 修改流水线代码
 
 增加了`项目部署`的内容，脚本内容可以使用片段生成器生成。
 
@@ -1133,7 +1133,7 @@ node {
 }
 ```
 
-#### 4.1.2 安装插件SSH Pipeline Steps
+#### 4.1.7 安装插件SSH Pipeline Steps
 
 > `SSH Pipeline Steps`另一款发布插件 。`Publish Over SSH`插件依赖全局SSH配置，无法使用密钥，注重于文件传输，而`SSH Pipeline Steps`插件可以配置密钥，注重于命令执行。脚本如下：
 
