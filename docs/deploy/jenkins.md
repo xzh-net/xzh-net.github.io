@@ -3,6 +3,7 @@
 Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工具，用于监控持续重复的工作，旨在提供一个开放易用的软件平台，使软件项目可以进行持续集成
 
 下载地址：https://get.jenkins.io/redhat-stable/
+官方网站：
 
 ## 1. 环境配置
 
@@ -1095,7 +1096,7 @@ node {
 
 ![](../../assets/_images/deploy/jenkins/jenkins_node_suscess.png)
 
-#### 4.1.2 下载发布插件
+#### 4.1.2 安装插件Publish Over SSH
 
 安装`Publish Over SSH`插件
 
@@ -1131,6 +1132,8 @@ node {
 
 }
 ```
+
+#### 4.1.2 安装插件SSH Pipeline Steps
 
 > `SSH Pipeline Steps`另一款发布插件 。`Publish Over SSH`插件依赖全局SSH配置，无法使用密钥，注重于文件传输，而`SSH Pipeline Steps`插件可以配置密钥，注重于命令执行。脚本如下：
 
@@ -1187,6 +1190,24 @@ pipeline {
     }
 }
 ```
+
+> 认证机制：Jenkins需要提供的能匹配目标机器上某个用户公钥的私钥，该用户对应的公钥在`~/.ssh/authorized_keys`文件中存放
+
+总结：
+- 私钥来源：目标机器上对应用户的私钥（如 ~/.ssh/id_rsa）。
+- 公钥位置：目标机器的 ~/.ssh/authorized_keys中必须有对应的公钥。
+
+目标机器生成密钥对
+```bash
+ssh-keygen -t rsa -f ~/.ssh/jenkins_agent_key
+```
+
+将公钥添加到目标机器的`authorized_keys`文件中
+```bash
+cat ~/.ssh/jenkins_agent_key.pub >> ~/.ssh/authorized_keys
+```
+
+Jenkins配置Credentials，选择`SSH Username with private key`，将目标机器私钥粘贴到`Enter directly`中，保存即可。
 
 ### 4.2 Maven项目构建发布
 
@@ -1262,7 +1283,9 @@ node {
 }
 ```
 
-#### 4.2.3 免密设置
+#### 4.2.3 密钥设置
+
+> jenkins服务器需要免密登录到目标服务器
 
 1. 获取jenkins服务器公钥
 
