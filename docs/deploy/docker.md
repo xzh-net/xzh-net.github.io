@@ -393,10 +393,11 @@ docker run -it -v /[local_path]|pgdata:/[container_path] [imageid] /bin/bash   #
 
 ```bash
 docker images                   # 查看镜像
-docker history                  # 查看构建历史
-docker rmi [imageid]                                                    # 删除指定镜像
-docker rmi $(docker images | grep "none" | awk '{print $3}')            # 删除none的镜像
-docker rmi $(docker images -qa)                                         # 删除所有镜像
+docker system prune -a -f       # 删除虚悬镜像
+docker history [imageid]        # 查看构建历史
+docker rmi [imageid]            # 删除指定镜像
+docker rmi $(docker images | grep "none" | awk '{print $3}')    # 删除none的镜像
+docker rmi $(docker images -qa)                                 # 删除所有镜像
 docker save -o logstash_7.6.2.tar logstash:7.6.2                # 镜像备份
 docker load -i logstash_7.6.2.tar                               # 镜像导入
 docker tag  serv:1.0 192.168.3.200/xzh/serv:1.1                 # 镜像标记
