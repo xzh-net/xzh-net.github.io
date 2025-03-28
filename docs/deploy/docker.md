@@ -393,8 +393,8 @@ docker run -it -v /[local_path]|pgdata:/[container_path] [imageid] /bin/bash   #
 
 ```bash
 docker images                   # 查看镜像
-docker system prune -a -f       # 删除虚悬镜像
-docker history [imageid]        # 查看构建历史
+docker history [imageid]        # 查看镜像构建历史
+docker system prune -a -f       # 永久删除镜像
 docker rmi [imageid]            # 删除指定镜像
 docker rmi $(docker images | grep "none" | awk '{print $3}')    # 删除none的镜像
 docker rmi $(docker images -qa)                                 # 删除所有镜像
