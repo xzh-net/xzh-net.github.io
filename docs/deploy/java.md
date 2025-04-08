@@ -20,6 +20,7 @@ PATH
 ### 1.2 安装Maven
 
 - 下载地址：https://archive.apache.org/dist/maven/maven-3/
+- 版本对应：http://maven.apache.org/docs/history.html
 
 ```lua
 MAVEN_HOME
@@ -154,7 +155,7 @@ Tomcat针对manager内置了6个角色，分别为 admin-gui , admin-script , ma
 
 ### 2.1 安装JDK
 
-Oracle最后一个商用免费版本
+8u202是jdk1.8最后一个免费商用版本
 
 ```bash
 cd /opt/software
@@ -169,6 +170,9 @@ source /etc/profile   # 配置生效
 scp /etc/profile root@node02:/etc/
 scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 ```
+
+> `.bashrc`和`.profile`都可以解决非root用户下配置环境变量。区别在于：`.bashrc`每次打开‌非登录shell‌（如新终端窗口、标签页）时都会执行‌，`.profile`仅在用户通过‌登录shell‌（如SSH登录、终端登录）时执行一次‌。
+
 
 ### 2.2 安装Maven
 
