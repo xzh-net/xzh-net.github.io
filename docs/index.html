@@ -6,25 +6,39 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Description">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <!-- 设置浏览器图标 -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <!-- 默认主题 -->
   <link rel="stylesheet" href="./lib/docsify/lib/themes/vue.css">
 </head>
 <body>
-  <div id="app"></div>
+  <!-- 定义加载时候的动作 -->
+  <div id="app">加载中...</div>
   <script>
     window.$docsify = {
+      // 项目名称
       name: '',
+      // 仓库地址，点击右上角的Github猫头像会跳转到此地址
       repo: 'https://github.com/xzh-net/xzh-net.github.io',
-      loadNavbar: true,//右上菜单
-      loadSidebar: true,//目录
-      coverpage: true,//封面
+      // 侧边栏支持，默认加载的是项目根目录下的_sidebar.md文件
+      loadSidebar: true,
+      // 导航栏支持，默认加载的是项目根目录下的_navbar.md文件
+      loadNavbar: true,
+      // 封面支持，默认加载的是项目根目录下的_coverpage.md文件
+      coverpage: true,
+      // 自动滚动到顶部
       auto2top: true,
+      // 最大支持渲染的标题层级
       maxLevel: 4,
-      subMaxLevel: 3,
+      // 自定义侧边栏后默认不会再生成目录，设置生成目录的最大层级（建议配置为2-4）
+      subMaxLevel: 4,
+      // 小屏设备下合并导航栏到侧边栏
       mergeNavbar: true,
+      /* 搜索相关设置 */
       search: {
         placeholder: '搜索',
         noData: '找不到结果!',
-        depth: 3
+        depth: 4
       },
       alias: {
         '/.*/_sidebar.md': '/_sidebar.md',//防止意外回退
@@ -38,7 +52,7 @@
             '</a>'
           ].join('');
           var footer = [
-            '<a href="#" target="_blank" style="color: inherit; text-decoration: none;">Copyright © 2013-2023 xuzhihao.net All Rights Reserved.</a>'            
+            '<a href="#" target="_blank" style="color: inherit; text-decoration: none;">Copyright © 2013-2025 xuzhihao.net All Rights Reserved.</a>'            
           ].join('');
           hook.afterEach(function (html) {
             var isReadme = window.location.href.indexOf("README");
@@ -52,13 +66,19 @@
       ]
     }
   </script>
+  <!-- docsify的js依赖 -->
   <script src="./lib/docsify/lib/docsify.min.js"></script>
   
+  <!-- 搜索 -->
   <script src="./lib/docsify/lib/plugins/search.min.js"></script>
+  <!-- 看图 -->
   <script src="./lib/docsify/lib/plugins/zoom-image.min.js"></script>
+  <!-- 分页 -->
   <script src="./lib/docsify/lib/plugins/docsify-pagination.min.js"></script>
+  <!-- 复制 -->
   <script src="./lib/docsify/lib/plugins/docsify-copy-code.min.js"></script>
 
+  <!-- 语法高亮 -->
   <script src="./lib/prismjs/components/prism-bash.min.js"></script>
   <script src="./lib/prismjs/components/prism-java.min.js"></script>
   <script src="./lib/prismjs/components/prism-sql.min.js"></script>
