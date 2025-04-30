@@ -56,9 +56,7 @@
 
 ## 2. 软件工具
 
-### 2.1 VirtualBox
-
-#### 2.1.1 修改UUID
+### 2.1 VirtualBox重置UUID
 
 ```bash
 cd C:\Program Files\Oracle\VirtualBox
@@ -179,3 +177,9 @@ mysql -uroot -p123456
 net stop mysql
 mysqld -remove mysql
 ```
+
+### 2.3 Notepad设置主题
+
+设置 `->` 语言格式设置
+
+![](../../assets/_images/deploy/win10/notepad.png)
