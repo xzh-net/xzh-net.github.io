@@ -376,6 +376,7 @@ docker network ls                                       # 查看网络
 docker network create -d bridge my-bridge               # 创建一个连接方式是bridge网桥
 docker inspect my-bridge                                # 查看my-bridge网络里面的容器
 docker network connect my-bridage [containerid]         # 手动将某个容器加入网桥
+docker port [containerid]                               # 查看容器端口映射关系
 docker run --name mynginx2 --network my-bridge -p 8080:80 -d nginx:latest   # 创建容器时添加到指定网桥中
 ```
 
@@ -445,6 +446,7 @@ docker restart [containerid]
 docker kill [containerid]
 docker stop [containerid]
 docker exec -it [containerid] /bin/bash
+docker top [containerid]
 
 docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]    # 查看容器ip地址
 docker inspect nodered | grep Mounts -A 20                                  # 查看容器映射目录
