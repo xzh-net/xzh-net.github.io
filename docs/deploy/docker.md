@@ -1112,6 +1112,23 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 > 2.新版本 Docker 镜像中数据库默认用户名/密码为 SYSDBA/SYSDBA001  
 
 
+#### SQLite-Web
+
+创建目录，将`webui.db`文件拷贝到目录中
+
+```bash
+mkdir /data/sqlite-web/
+```
+
+```bash
+docker run -it --rm \
+  -p 8080:8080 \
+  -v  /data/sqlite-web/:/data \
+  -e SQLITE_DATABASE=webui.db \
+  coleifer/sqlite-web:latest
+```
+
+
 ### 4.3 缓存
 
 #### Memcached 1.6.12
