@@ -1748,7 +1748,7 @@ appname=user-center.jar
 PIDS=$(ps -ef|grep ${appname} | grep -v grep | awk '{print $2}')
 
 start(){
-    JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -Xmn2g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
+    JAVA_OPT="${JAVA_OPT} -server -Xms4g -Xmx4g -Xmn2g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -Xverify:none -Djava.awt.headless=true"
     nohup java ${JAVA_OPT} -jar ${appname} > nohup.out 2>&1 &
     echo "${appname} started"
 }
