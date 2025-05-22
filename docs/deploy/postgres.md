@@ -490,33 +490,170 @@ select * from pg_ls_waldir() order by modification desc;    -- 查看日志最�
 ```
 
 
-### 3.4 备份恢复
+### 3.4 数据备份
 
 #### 3.4.1 逻辑备份
 
+1. pg_dump 
 
-1. 文本
+导出为SQL文件（明文格式），排除权限和所有者信息，只导出表结构及数据
+```bash
+pg_dump -h 127.0.0.1 -U postgres -p 5432  --no-owner --no-privileges user_center -f user_center.dmp
+```
+
+导出为包含列名的插入语句，保证数据的一致性和完整性
+```bash
+# 导出多表使用-t tb1 -t tb2
+pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_client_details --column-inserts -f oauth_client_details.sql    
+psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql
+```
+
+导出为tar格式的备份文件（二进制格式）
+```bash
+pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Ft -f oauth_center.tar
+pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar
+```
+
+导出为自定义格式（支持压缩和并行恢复）
+```bash
+pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup
+pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup
+```
+
+> pg_dump 详细参数
+
+```lua
+General options:
+  -f, --file=FILENAME          output file or directory name
+  -F, --format=c|d|t|p         output file format (custom, directory, tar,
+                               plain text (default))
+  -j, --jobs=NUM               use this many parallel jobs to dump
+  -v, --verbose                verbose mode
+  -V, --version                output version information, then exit
+  -Z, --compress=0-9           compression level for compressed formats
+  --lock-wait-timeout=TIMEOUT  fail after waiting TIMEOUT for a table lock
+  --no-sync                    do not wait for changes to be written safely to disk
+  -?, --help                   show this help, then exit
+
+Options controlling the output content:
+  -a, --data-only              dump only the data, not the schema
+  -b, --blobs                  include large objects in dump
+  -B, --no-blobs               exclude large objects in dump
+  -c, --clean                  clean (drop) database objects before recreating
+  -C, --create                 include commands to create database in dump
+  -E, --encoding=ENCODING      dump the data in encoding ENCODING
+  -n, --schema=PATTERN         dump the specified schema(s) only
+  -N, --exclude-schema=PATTERN do NOT dump the specified schema(s)
+  -O, --no-owner               skip restoration of object ownership in
+                               plain-text format
+  -s, --schema-only            dump only the schema, no data
+  -S, --superuser=NAME         superuser user name to use in plain-text format
+  -t, --table=PATTERN          dump the specified table(s) only
+  -T, --exclude-table=PATTERN  do NOT dump the specified table(s)
+  -x, --no-privileges          do not dump privileges (grant/revoke)
+  --binary-upgrade             for use by upgrade utilities only
+  --column-inserts             dump data as INSERT commands with column names
+  --disable-dollar-quoting     disable dollar quoting, use SQL standard quoting
+  --disable-triggers           disable triggers during data-only restore
+  --enable-row-security        enable row security (dump only content user has
+                               access to)
+  --exclude-table-data=PATTERN do NOT dump data for the specified table(s)
+  --extra-float-digits=NUM     override default setting for extra_float_digits
+  --if-exists                  use IF EXISTS when dropping objects
+  --inserts                    dump data as INSERT commands, rather than COPY
+  --load-via-partition-root    load partitions via the root table
+  --no-comments                do not dump comments
+  --no-publications            do not dump publications
+  --no-security-labels         do not dump security label assignments
+  --no-subscriptions           do not dump subscriptions
+  --no-synchronized-snapshots  do not use synchronized snapshots in parallel jobs
+  --no-tablespaces             do not dump tablespace assignments
+  --no-unlogged-table-data     do not dump unlogged table data
+  --on-conflict-do-nothing     add ON CONFLICT DO NOTHING to INSERT commands
+  --quote-all-identifiers      quote all identifiers, even if not key words
+  --rows-per-insert=NROWS      number of rows per INSERT; implies --inserts
+  --section=SECTION            dump named section (pre-data, data, or post-data)
+  --serializable-deferrable    wait until the dump can run without anomalies
+  --snapshot=SNAPSHOT          use given snapshot for the dump
+  --strict-names               require table and/or schema include patterns to
+                               match at least one entity each
+  --use-set-session-authorization
+                               use SET SESSION AUTHORIZATION commands instead of
+                               ALTER OWNER commands to set ownership
+
+Connection options:
+  -d, --dbname=DBNAME      database to dump
+  -h, --host=HOSTNAME      database server host or socket directory
+  -p, --port=PORT          database server port number
+  -U, --username=NAME      connect as specified database user
+  -w, --no-password        never prompt for password
+  -W, --password           force password prompt (should happen automatically)
+  --role=ROLENAME          do SET ROLE before dump
+```
+
+2. pg_dumpall
+
+导出所有数据库 + 全局对象（角色、表空间等），生成SQL脚本，全集群备份（适合小规模环境），但可能锁住全局对象，影响性能。不支持导出SQL文件以外的其他格式，如CSV、JSON等（-v或--verbose选项可以开启详细模式）
 
 ```bash
-pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_client_details --column-inserts -f oauth_client_details.sql    # 导出多表使用-t tb1 -t tb2
-psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql   # 恢复
-# pg_dumpall不支持导出SQL文件以外的其他格式
 pg_dumpall -h localhost -U postgres -p 5432 -v -f all.sql
 psql -h localhost -U postgres -p 5432 -f all.sql
 ```
 
-2. tar格式
+> pg_dumpall 详细参数
 
-```bash
-pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Ft -f oauth_center.tar    # 备份
-pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar     # 恢复
-```
+```lua
+General options:
+  -f, --file=FILENAME          output file name
+  -v, --verbose                verbose mode
+  -V, --version                output version information, then exit
+  --lock-wait-timeout=TIMEOUT  fail after waiting TIMEOUT for a table lock
+  -?, --help                   show this help, then exit
 
-3. 自定义格式
+Options controlling the output content:
+  -a, --data-only              dump only the data, not the schema
+  -c, --clean                  clean (drop) databases before recreating
+  -E, --encoding=ENCODING      dump the data in encoding ENCODING
+  -g, --globals-only           dump only global objects, no databases
+  -O, --no-owner               skip restoration of object ownership
+  -r, --roles-only             dump only roles, no databases or tablespaces
+  -s, --schema-only            dump only the schema, no data
+  -S, --superuser=NAME         superuser user name to use in the dump
+  -t, --tablespaces-only       dump only tablespaces, no databases or roles
+  -x, --no-privileges          do not dump privileges (grant/revoke)
+  --binary-upgrade             for use by upgrade utilities only
+  --column-inserts             dump data as INSERT commands with column names
+  --disable-dollar-quoting     disable dollar quoting, use SQL standard quoting
+  --disable-triggers           disable triggers during data-only restore
+  --exclude-database=PATTERN   exclude databases whose name matches PATTERN
+  --extra-float-digits=NUM     override default setting for extra_float_digits
+  --if-exists                  use IF EXISTS when dropping objects
+  --inserts                    dump data as INSERT commands, rather than COPY
+  --load-via-partition-root    load partitions via the root table
+  --no-comments                do not dump comments
+  --no-publications            do not dump publications
+  --no-role-passwords          do not dump passwords for roles
+  --no-security-labels         do not dump security label assignments
+  --no-subscriptions           do not dump subscriptions
+  --no-sync                    do not wait for changes to be written safely to disk
+  --no-tablespaces             do not dump tablespace assignments
+  --no-unlogged-table-data     do not dump unlogged table data
+  --on-conflict-do-nothing     add ON CONFLICT DO NOTHING to INSERT commands
+  --quote-all-identifiers      quote all identifiers, even if not key words
+  --rows-per-insert=NROWS      number of rows per INSERT; implies --inserts
+  --use-set-session-authorization
+                               use SET SESSION AUTHORIZATION commands instead of
+                               ALTER OWNER commands to set ownership
 
-```bash
-pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup # 备份
-pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup  # 恢复
+Connection options:
+  -d, --dbname=CONNSTR     connect using connection string
+  -h, --host=HOSTNAME      database server host or socket directory
+  -l, --database=DBNAME    alternative default database
+  -p, --port=PORT          database server port number
+  -U, --username=NAME      connect as specified database user
+  -w, --no-password        never prompt for password
+  -W, --password           force password prompt (should happen automatically)
+  --role=ROLENAME          do SET ROLE before dump
 ```
 
 #### 3.4.2 物理备份
