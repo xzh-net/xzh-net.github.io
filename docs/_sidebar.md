@@ -115,4 +115,4 @@
 
 - 游戏
   - [The Legend of Mir 2](game/mir2)
-  - [THE EVIL'S ILLUSION](game/ei3)
+  - [The Evil's Illusion](game/ei3)
