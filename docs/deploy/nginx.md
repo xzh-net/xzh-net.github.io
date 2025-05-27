@@ -438,9 +438,11 @@ events {
 http {
     include mime.types;
     default_type application/octet-stream;
-    log_format access '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    log_format main '$host - $server_addr $remote_addr - $remote_user [$time_local] "$request" '
+                '$status $body_bytes_sent "$http_referer" '
+                '"$http_user_agent" $http_x_forwarded_for $proxy_add_x_forwarded_for $http_x_real_ip  $upstream_addr $upstream_status $upstream_response_time';
+    
     map $time_iso8601 $logdate {
         '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
         default    'date-not-found';
@@ -468,9 +470,9 @@ http {
     client_body_in_single_buffer off;       # 默认关闭，开启优化读取$request_body变量时涉及的I/O操作
     # 代理区处理-响应缓冲区
     proxy_buffering on;                     # 开启响应缓冲区
-    proxy_buffers 8 8k;                     # 代理缓冲区空间，每个worker进程可以使用8个大小为8k的缓冲区
-    proxy_buffer_size 8k;                   # 单个代理缓冲区空间
-    proxy_busy_buffers_size 8k;             # 设置标注“client-ready”缓冲区的最大尺寸
+    proxy_buffers 16 1024k;                 # 代理缓冲区空间，每个worker进程可以使用16个大小为1024k的缓冲区
+    proxy_buffer_size 1024k;                # 单个代理缓冲区空间
+    proxy_busy_buffers_size 1024k;          # 设置标注“client-ready”缓冲区的最大尺寸
     proxy_max_temp_file_size 1024k;         # 当proxy_buffers放不下后端服务器的响应内容时，写入临时文件
     proxy_temp_file_write_size 64k;         # 当缓存被代理的服务器响应到临时文件时文件写入速度
     proxy_headers_hash_max_size 51200;      # 存放http报文头的哈希表容量上限，默认为512个字符。
