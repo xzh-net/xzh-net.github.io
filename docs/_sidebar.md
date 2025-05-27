@@ -113,6 +113,6 @@
   - [Oracle](java/database/oracle)
   - [ShardingSphere](java/database/shardingsphere)
 
-- 游戏
-  - [The Legend of Mir 2](game/mir2)
-  - [The Evil's Illusion](game/ei3)
+- 其他
+  - [热血传奇](game/mir2)
+  - [恶魔的幻影](game/ei3)
