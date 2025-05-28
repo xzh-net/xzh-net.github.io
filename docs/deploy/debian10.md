@@ -94,7 +94,7 @@
 sudo passwd root
 ```
 
-### 2.2 手动配置IP地址
+### 2.2 配置静态IP地址
 
 ```bash
 ip addr

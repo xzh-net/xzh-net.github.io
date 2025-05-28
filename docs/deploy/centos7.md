@@ -1867,7 +1867,7 @@ $JAVA ${JAVA_OPT} $@
 
 ## 3. 初始化
 
-### 3.1 手动配置IP地址
+### 3.1 配置静态IP地址
 
 ```bash
 vi /etc/hosts

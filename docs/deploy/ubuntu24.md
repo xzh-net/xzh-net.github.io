@@ -7,7 +7,7 @@
 
 ## 2. 初始化
 
-### 2.1 手动配置IP地址
+### 2.1 配置静态IP地址
 
 ```bash
 vi /etc/netplan/50-cloud-init.yaml
