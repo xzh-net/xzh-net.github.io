@@ -125,7 +125,7 @@ kvm-ok
 sudo passwd root
 ```
 
-### 2.2 手动配置IP地址
+### 2.2 配置静态IP地址
 
 ```bash
 vi /etc/netplan/00-installer-config.yaml
@@ -218,6 +218,12 @@ apt update      # 更新apt
 apt upgrade     # 更新系统
 ```
 
+添加自定义软件源，并设置授信
+
+```bash
+echo -e "deb [trusted=yes] http://192.168.2.10 jammy main" >/etc/apt/sources.list && apt clean && apt update -y;
+```
+
 ### 2.6 删除自带的工具
 
 ```bash
@@ -235,6 +241,7 @@ sudo apt install -f && sudo apt autoremove
 
 ```bash
 apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping
+dpkg -i jdk-17.0.13_linux-x64_bin.deb
 ```
 
 ### 2.8 设置代理
