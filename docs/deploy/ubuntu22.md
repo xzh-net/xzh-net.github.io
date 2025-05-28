@@ -241,7 +241,10 @@ sudo apt install -f && sudo apt autoremove
 
 ```bash
 apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping
-dpkg -i jdk-17.0.13_linux-x64_bin.deb
+
+dpkg -i jenkins_2.426.3_all.deb
+dpkg --list | grep jenkins
+dpkg -r jenkins
 ```
 
 ### 2.8 设置代理

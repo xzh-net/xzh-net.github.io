@@ -40,6 +40,13 @@ rpm -e --nodeps jenkins-2.426.1-1.1.noarch
 find / -iname jenkins | xargs -n 1000 rm -rf
 ```
 
+> 在Ubuntu 22.04上安装Jenkins时可能遇到 `Fontconfig head is null` 错误，通常是由于系统缺少必要的字体或字体配置问题导致的，  可以通过以下步骤解决：
+
+```bash
+sudo apt-get install -y fonts-dejavu-core fonts-freefont-ttf
+sudo apt-get install -y fontconfig
+```
+
 #### 1.2.2 修改配置
 
 ```bash
@@ -96,57 +103,21 @@ hudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION = tr
 以上是临时关闭，重启后失效。永久关闭，需要修改配置文件。
 
 ```bash
-vim /usr/bin/jenkins
+vi /usr/lib/systemd/system/jenkins.service
 ```
 
-找到启动参数，添加`-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true`
+找到`Environment`参数，添加`-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true`
 
 ```conf
-main() {
-    if [ -n "${JENKINS_HOME}" ]; then
-            [ -d "${JENKINS_HOME}" ] || die "${JENKINS_HOME} is not a directory"
-    fi
-    [ -f "${JENKINS_WAR}" ] || die "${JENKINS_WAR} is not a file"
-
-    infer_java_cmd || die 'failed to find a valid Java installation'
-
-    infer_jenkins_opts
-
-    java_opts_tmp="${JAVA_OPTS}"
-    unset JAVA_OPTS
-    unset JENKINS_DEBUG_LEVEL
-    unset JENKINS_ENABLE_ACCESS_LOG
-    unset JENKINS_HTTP2_LISTEN_ADDRESS
-    unset JENKINS_HTTP2_PORT
-    unset JENKINS_HTTPS_KEYSTORE
-    unset JENKINS_HTTPS_KEYSTORE_PASSWORD
-    unset JENKINS_HTTPS_LISTEN_ADDRESS
-    unset JENKINS_HTTPS_PORT
-    java_cmd="${JENKINS_JAVA_CMD}"
-    unset JENKINS_JAVA_CMD
-    unset JENKINS_LISTEN_ADDRESS
-    unset JENKINS_LOG
-    unset JENKINS_OPTS
-    unset JENKINS_PORT
-    unset JENKINS_PREFIX
-    jenkins_war_tmp="${JENKINS_WAR}"
-    unset JENKINS_WAR
-    unset JENKINS_WEBROOT
-    eval exec \
-            "${java_cmd}" \
-            ${java_opts_tmp} \
-            -jar "-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true" "${jenkins_war_tmp}" \
-            ${inferred_jenkins_opts}
-}
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"
 ```
 
 重启服务
 
 ```bash
+systemctl daemon-reload
 systemctl restart jenkins
 ```
-
-
 
 ### 1.3 插件管理
 
