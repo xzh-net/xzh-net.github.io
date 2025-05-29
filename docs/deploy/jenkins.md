@@ -40,7 +40,7 @@ rpm -e --nodeps jenkins-2.426.1-1.1.noarch
 find / -iname jenkins | xargs -n 1000 rm -rf
 ```
 
-> 在Ubuntu 22.04上安装Jenkins时可能遇到 `Fontconfig head is null` 错误，通常是由于系统缺少必要的字体或字体配置问题导致的，  可以通过以下步骤解决：
+> 在Ubuntu 22.04上安装Jenkins时可能遇到 `Fontconfig head is null` 或者 `Could not execute systemctl：at /usr/bin/deb-systemd-invoke`，通常是由于系统缺少必要的字体或字体配置问题导致的，可以通过以下步骤解决：
 
 ```bash
 sudo apt-get install -y fonts-dejavu-core fonts-freefont-ttf
@@ -49,15 +49,36 @@ sudo apt-get install -y fontconfig
 
 #### 1.2.2 修改配置
 
+1. 修改启动用户
+
+生产环境不建议修改，会导致安全问题
+
 ```bash
 vim /usr/lib/systemd/system/jenkins.service
 ```
 
-设置启动用户组
-
 ```conf
 User=root
 Group=root
+```
+
+2. 关闭csrf保护
+
+```bash
+vi /usr/lib/systemd/system/jenkins.service
+```
+
+找到`JAVA_OPTS`参数，添加`-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true`
+
+```conf
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"
+```
+
+重启服务
+
+```bash
+systemctl daemon-reload
+systemctl restart jenkins
 ```
 
 #### 1.2.3 启动服务
@@ -89,35 +110,6 @@ systemctl start jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_skip6.png)
 
-
-#### 1.2.4 关闭CSRF保护
-
-高版本jenkins，页面因为无关闭CSRF选项。需要在 Manage Jenkins —> Script Console 中手动禁用 `CSRF`
-
-![](../../assets/_images/deploy/jenkins/jenkins_csrf.png)
-
-```bash
-hudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION = true
-```
-
-以上是临时关闭，重启后失效。永久关闭，需要修改配置文件。
-
-```bash
-vi /usr/lib/systemd/system/jenkins.service
-```
-
-找到`Environment`参数，添加`-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true`
-
-```conf
-Environment="JAVA_OPTS=-Djava.awt.headless=true -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"
-```
-
-重启服务
-
-```bash
-systemctl daemon-reload
-systemctl restart jenkins
-```
 
 ### 1.3 插件管理
 
