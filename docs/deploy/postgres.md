@@ -498,14 +498,14 @@ select * from pg_ls_waldir() order by modification desc;    -- 查看日志最�
 
 导出为SQL文件（明文格式），排除权限和所有者信息，只导出表结构及数据
 ```bash
-pg_dump -h 127.0.0.1 -U postgres -p 5432  --no-owner --no-privileges oauth_client_details -f oauth_client_details.sql
+pg_dump -h 127.0.0.1 -U postgres -p 5432  --no-owner --no-privileges oauth_center -f oauth_center.sql
 ```
 
 导出为包含列名的插入语句，保证数据的一致性和完整性
 ```bash
 # 导出多表使用-t tb1 -t tb2
-pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_client_details --column-inserts -f oauth_client_details.sql    
-psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_client_details.sql
+pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_center --column-inserts -f oauth_center.sql    
+psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_center.sql
 ```
 
 导出为tar格式的备份文件（二进制格式）
