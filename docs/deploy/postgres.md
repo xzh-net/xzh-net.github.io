@@ -516,8 +516,8 @@ pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar
 
 导出为自定义格式（支持压缩和并行恢复）
 ```bash
-pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.backup
-pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.backup
+pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.dmp
+pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.dmp
 ```
 
 > pg_dump 详细参数
