@@ -498,7 +498,7 @@ select * from pg_ls_waldir() order by modification desc;    -- 查看日志最�
 
 导出为SQL文件（明文格式），排除权限和所有者信息，只导出表结构及数据
 ```bash
-pg_dump -h 127.0.0.1 -U postgres -p 5432  --no-owner --no-privileges user_center -f user_center.dmp
+pg_dump -h 127.0.0.1 -U postgres -p 5432  --no-owner --no-privileges oauth_client_details -f oauth_client_details.sql
 ```
 
 导出为包含列名的插入语句，保证数据的一致性和完整性
