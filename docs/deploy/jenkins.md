@@ -57,8 +57,8 @@ vim /usr/lib/systemd/system/jenkins.service
 ```
 
 ```conf
-User=root
-Group=root
+User=jenkins
+Group=jenkins
 ```
 
 2. 关闭csrf保护
@@ -79,6 +79,27 @@ Environment="JAVA_OPTS=-Djava.awt.headless=true -Dhudson.security.csrf.GlobalCru
 systemctl daemon-reload
 systemctl restart jenkins
 ```
+
+3. 关闭更新中心，跳过签名验证
+
+离线安装的时候，需要关闭更新中心，跳过签名验证，否则会报错
+
+```bash
+vi /usr/lib/systemd/system/jenkins.service
+```
+
+找到`JAVA_OPTS`参数，追加以下内容
+```conf
+-Dhudson.model.UpdateCenter.never=true -Dhudson.model.DownloadService.noSignatureCheck=true
+```
+
+重启服务
+
+```bash
+systemctl daemon-reload
+systemctl restart jenkins
+```
+
 
 #### 1.2.3 启动服务
 
