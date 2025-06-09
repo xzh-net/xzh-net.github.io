@@ -1972,8 +1972,8 @@ user.save!
 #### Nexus3 3.36
 
 ```bash
-mkdir -p /home/mvn/nexus-data  && chown -R 200 /home/mvn/nexus-data
-docker run -d -p 8081:8081 --name nexus -v /home/mvn/nexus-data:/nexus-data sonatype/nexus3:3.36.0
+mkdir -p /data/nexus && chown -R 200 /data/nexus
+docker run -d -p 8081:8081 --name nexus -v /data/nexus:/nexus-data sonatype/nexus3:3.36.0
 ```
 
 #### Harbor 2.0.1
