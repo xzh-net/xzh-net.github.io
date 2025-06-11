@@ -1010,6 +1010,23 @@ location /console {
 }
 ```
 
+### 3.12 非root启动
+
+root用户执行以下命令
+
+```bash
+chown -R user:user /usr/local/nginx/
+setcap cap_net_bind_service=+eip /usr/local/nginx/sbin/nginx
+getcap /usr/local/nginx/sbin/nginx
+```
+
+user用户执行以下命令
+
+```bash
+/usr/local/nginx/sbin/nginx
+```
+
+
 ## 4. 证书
 
 ### 4.1 openssl自签名
