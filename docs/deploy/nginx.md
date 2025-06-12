@@ -174,7 +174,7 @@ location /nstatus {
 ```bash
 mv /opt/software/ngx_http_proxy_connect_module /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module
 cd /opt/software/nginx-1.22.1
-# 打补丁
+# 应用补丁（根据 Nginx 版本选择补丁文件，https://github.com/chobits/ngx_http_proxy_connect_module#install）
 patch -p1 < /opt/software/nginx-1.22.1/modules/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_102101.patch
 # 编译
 ./configure --prefix=/usr/local/nginx --pid-path=/usr/local/nginx/logs/nginx.pid \
