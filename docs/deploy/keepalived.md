@@ -30,32 +30,36 @@ vi /etc/keepalived/keepalived.conf
 
 ```conf
 global_defs {
-    router_id node166;          # 访问到主机，本机的hostname，需要修改
+    router_id ng-01-201;                        # 主机组标识+IP地址
 }
 
 vrrp_script chk_nginx {
-    script "/etc/keepalived/nginx_check.sh" # 检测脚本位置
-    interval 2                              # 检测脚本执行的间隔,秒
+    script "/etc/keepalived/nginx_check.sh"     # 检测脚本位置
+    interval 10                                 # 检测脚本执行的间隔,秒
     weight -20
 }
 
 vrrp_instance VI_1 {
-    state MASTER                # 备份服务器上将 MASTER 改为 BACKUP
+    state MASTER                # 抢占模式： MASTER ，非抢占模式： BACKUP
     interface enp0s3            # 网卡名称
-    virtual_router_id 166       # 主、备机的 virtual_router_id 必须相同
+    virtual_router_id 201       # 主、备机的 virtual_router_id 必须相同
     priority 100                # 主、备机取不同的优先级，主机值较大，备份机值较小，一般主100从90
     advert_int 1                # 主、备每隔1秒发送心跳
-    nopreempt                   # 非抢占模式
+    nopreempt                   # 非抢占模式，没有主从之分，state全部未BACKUP
     authentication {
         auth_type PASS
         auth_pass 1111
     }
-
+    # 多网卡下指定广播地址，减少报错和冲突
+    unicast_src_ip 192.168.1.31     # 当前主机的IP地址
+    unicast_peer {                  # 其他主机的IP地址
+        192.168.1.32
+    }
     track_script {
         chk_nginx
     }
     virtual_ipaddress {
-        172.17.17.168
+        192.168.1.201/24
     }
 }
 ```
@@ -68,31 +72,35 @@ tail -f /var/log/messages
 ip a
 ```
 
+测试vip是否生效
+
 ```bash
-curl http://172.17.17.168
+curl http://192.168.1.201
 ```
 
-## 2. 高可用
+## 2. 配置示例
 
 ### 2.1 nginx
+
+这是一个非抢占模式的配置，当主节点宕机后，备份节点会接管vip，但不会自动切换回主节点。
 
 #### 2.1.1 主节点
 
 ```conf
 global_defs {
-    router_id node166;
+    router_id ng-01-201;
 }
 
 vrrp_script chk_nginx {
     script "/etc/keepalived/nginx_check.sh"
-    interval 2
+    interval 10
     weight -20
 }
 
 vrrp_instance VI_1 {
-    state MASTER
-    interface enp0s3
-    virtual_router_id 166
+    state BACKUP
+    interface ens3
+    virtual_router_id 201
     priority 100
     advert_int 1
     nopreempt
@@ -100,12 +108,16 @@ vrrp_instance VI_1 {
         auth_type PASS
         auth_pass 1111
     }
-    
+    # 多网卡下指定广播地址，减少报错和冲突
+    unicast_src_ip 192.168.1.31
+    unicast_peer {
+        192.168.1.32
+    }
     track_script {
         chk_nginx
     }
     virtual_ipaddress {
-        172.17.17.168
+        192.168.1.201/24
     }
 }
 ```
@@ -114,30 +126,36 @@ vrrp_instance VI_1 {
 
 ```conf
 global_defs {
-    router_id node167
+    router_id ng-01-201;
 }
 
 vrrp_script chk_nginx {
     script "/etc/keepalived/nginx_check.sh"
-    interval 2
+    interval 10
     weight -20
 }
 
 vrrp_instance VI_1 {
     state BACKUP
-    interface enp0s3
-    virtual_router_id 166
-    priority 90
+    interface ens3
+    virtual_router_id 201
+    priority 100
     advert_int 1
+    nopreempt
     authentication {
         auth_type PASS
         auth_pass 1111
+    }
+    # 多网卡下指定广播地址，减少报错和冲突
+    unicast_src_ip 192.168.1.32
+    unicast_peer {
+        192.168.1.31
     }
     track_script {
         chk_nginx
     }
     virtual_ipaddress {
-         172.17.17.168
+        192.168.1.201/24
     }
 }
 ```
