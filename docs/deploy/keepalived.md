@@ -167,15 +167,16 @@ vrrp_instance VI_1 {
 
 ```bash
 #!/bin/bash
-A=`ps -C nginx –no-header |wc -l`
-if [ $A -eq 0 ];then
-    /usr/local/nginx/sbin/nginx
+count=`ps -C nginx –no-header |wc -l`
+if [ $count -eq 0 ]; then
+    su - nginx lc "/usr/local/nginx/sbin/nginx"
     sleep 2
-    if [ `ps -C nginx --no-header |wc -l` -eq 0 ];then
-        killall keepalived
+    if [ $count -eq 0 ]; then
+        exit 1;
     fi
+else
+    exit 0;
 fi
-
 ```
 
 ```bash
