@@ -176,20 +176,20 @@ scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 
 ### 2.2 安装Maven
 
-1. 上传解压
+#### 2.2.1 上传解压
 
 ```bash
 cd /opt/software
 tar -zxf apache-maven-3.6.3-bin.tar.gz -C /opt    # 解压
 ```
 
-2. 配置环境变量
+#### 2.2.2 配置环境变量
 
 ```bash
 vim /etc/profile
 # 添加
 export MAVEN_HOME=/opt/apache-maven-3.6.3
-export MAVEN_OPTS="-Xms4096m -Xmx4096m"
+export MAVEN_OPTS="-Xms1024m -Xmx1024m"
 export PATH=$PATH:$MAVEN_HOME/bin
 
 # 生效
@@ -197,7 +197,7 @@ source /etc/profile
 mvn -v
 ```
 
-3. 配置仓库
+#### 2.2.3 更换默认仓库源
 
 ```bash
 vim /opt/apache-maven-3.6.3/conf/settings.xml
@@ -228,4 +228,49 @@ vim /opt/apache-maven-3.6.3/conf/settings.xml
         <url>http://repo2.maven.org/maven2/</url>
     </mirror>
 </mirrors>
+```
+
+#### 2.2.4 配置代理 
+
+> 构建环境无法连接互联网，需要借助Nginx正向代理实现依赖下载
+
+maven代理配置
+
+```xml
+<proxies>
+    <proxy>
+        <id>nginx-proxy</id>
+        <active>true</active>
+        <protocol>http</protocol>
+        <host>192.168.1.100</host>
+        <port>3182</port>
+        <username></username>
+        <password></password>
+        <nonProxyHosts>www.google.com|*.example.com</nonProxyHosts>
+    </proxy>
+</proxies>
+```
+
+nginx正向代理配置
+
+```conf
+server {
+    listen 3182;
+    resolver 114.114.114.114;
+    proxy_connect;
+    proxy_connect_allow            443 80;
+    proxy_connect_connect_timeout  10s;
+    proxy_connect_read_timeout     10s;
+    proxy_connect_send_timeout     10s;
+    access_log logs/access_proxy_$logdate.log access;
+    location / {
+        proxy_pass $scheme://$host$request_uri;
+    }
+}
+```
+
+执行以下命令后，通过nginx日志可以看到依赖包已经通过nginx代理下载到本地。
+
+```bash
+mvn dependency:get -Dartifact=org.apache.commons:commons-lang3:3.12.0
 ```
