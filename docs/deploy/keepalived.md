@@ -167,7 +167,7 @@ vrrp_instance VI_1 {
 
 ```bash
 #!/bin/bash
-count=`ps -C nginx –no-header |wc -l`
+count=`ps -C nginx --no-header | wc -l`
 if [ $count -eq 0 ]; then
     su - nginx lc "/usr/local/nginx/sbin/nginx"
     sleep 2
