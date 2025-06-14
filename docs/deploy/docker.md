@@ -401,7 +401,6 @@ docker rmi $(docker images | grep "none" | awk '{print $3}')    # 删除none的�
 docker rmi $(docker images -qa)                                 # 删除所有镜像
 docker save -o logstash_7.6.2.tar logstash:7.6.2                # 镜像备份
 docker load -i logstash_7.6.2.tar                               # 镜像导入
-docker tag  serv:1.0 192.168.3.200/xzh/serv:1.1                 # 镜像标记
 docker image inspect minio/minio:latest|grep  -i version        # 查看已下载镜像版本
 # 镜像分析
 docker stats [containerid]                              # 监控指定容器
@@ -468,6 +467,16 @@ docker cp /etc/localtime [containerid]:/etc/        # 将主机时间到容器
 docker cp [local_path] rabbitmq:/[container_path]/  # 将主机文件copy至rabbitmq容器
 docker cp [local_path] rabbitmq:/[container_path]   # 将主机文件copy至rabbitmq容器，目录重命名为[container_path]（注意与非重命名copy的区别）
 ```
+
+### 2.6 仓库
+
+```bash
+docker login -u admin -p 123456 172.17.17.37:80
+docker login -u admin -p 123456 https://harbor.xuzhihao.net         # 登录
+docker tag nginx:latest harbor.xuzhihao.net/xuzhihao/nginx:1.27     # 镜像标记
+docker push harbor.xuzhihao.net/xuzhihao/nginx:1.27                 # 推送镜像
+```
+
 
 ## 3. 构建
 
@@ -1978,12 +1987,13 @@ docker run -d -p 8081:8081 --name nexus -v /data/nexus:/nexus-data sonatype/nexu
 
 #### Harbor 2.0.1
 
+下载地址：https://github.com/goharbor/harbor/releases/download/v2.0.1/harbor-offline-installer-v2.0.1.tgz
+
 1. 上传解压
 
 ```shell
 mkdir /opt/softwarte
-wget https://github.com/goharbor/harbor/releases/download/v2.0.1/harbor-offline-installer-v2.0.1.tgz
-tar xf harbor-offline-installer-v2.0.1.tgz -C /opt/
+tar -zxvf harbor-offline-installer-v2.0.1.tgz -C /opt/
 ```
 
 
@@ -1995,40 +2005,40 @@ cp harbor.yml.tmpl harbor.yml
 vi harbor.yml
 ```
 
+配置以下参数，因为外层使用nginx，内部请求都走80端口
+
 ```yml
-#修改配置文件(如果不用https就注释掉https的几项，我是用的http就注释掉了https的，其他几项修改为自己的信息)
-···
 hostname: 192.168.3.200
-···
-# http related config
 http:
-  # port for http, default is 80. If https enabled, this port will redirect to https port
-  port: 88
-···
-# https related config
-#https:
-  # https port for harbor, default is 443
-  #port: 443
-  # The path of cert and key files for nginx
-  #certificate: /your/certificate/path
-  #private_key: /your/private/key/path
-····
+  port: 80
 harbor_admin_password: Harbor12345
-···
-data_volume: /data
-···
+data_volume: /data/harbor/data/
 ```
+
+如果部署在公网需要设置`hostname`为公网IP或域名，`external_url`为公网域名
+
+```yml
+hostname: harbor.xuzhihao.net
+http:
+  port: 80
+external_url: https://harbor.xuzhihao.net
+harbor_admin_password: Harbor12345
+data_volume: /data/harbor/data/
+```
+
 
 3. 安装
 
 ```bash
 ./install.sh 
 docker-compose up -d    # 启动
-docker-compose stop     # 停止
-docker-compose restart  # 重新启动
+docker-compose down     # 停止
+./prepare               # 如果修改了配置文件需执行
 ```
 
 默认账户密码：admin/Harbor12345
+
+> 搭建私有仓库，通过IP访问需要在客户端配置`/etc/docker/daemon.json`和`insecure-registries`，如果使用域名访问，并配置了证书，客户端可以直接访问。
 
 
 #### SonarQube 7.8
