@@ -44,7 +44,7 @@
   - [Kubernetes](deploy/kubernetes)
   - [Istio](deploy/istio)
   - [OpenStack](deploy/openstack)
-  - [Nexus](deploy/nexus)
+  - [Nexus3](deploy/nexus)
   - [Gitlab](deploy/gitlab)
   - [SonarQube](deploy/sonarqube)
   - [Jenkins](deploy/jenkins)
