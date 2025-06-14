@@ -2050,7 +2050,7 @@ docker-compose down     # 停止
 ./prepare               # 如果修改了配置文件需执行
 ```
 
-默认账户密码：admin/Harbor12345
+帐号：admin，密码：Harbor12345
 
 > 搭建私有仓库，通过IP访问需要在客户端配置`/etc/docker/daemon.json`和`insecure-registries`，如果使用域名访问，并配置了证书，客户端可以直接访问。
 
