@@ -477,6 +477,20 @@ docker tag nginx:latest harbor.xuzhihao.net/xuzhihao/nginx:1.27     # 镜像标�
 docker push harbor.xuzhihao.net/xuzhihao/nginx:1.27                 # 推送镜像
 ```
 
+> 推送镜像提示`unknown blob`报错，由于nginx在代理的时候设置上传文件大小，需要修改nginx配置文件`client_max_body_size 0;`，如果是多级代理，需要修改所有代理的配置文件，同时在1级代理上设置重定向响应头。
+
+```conf
+client_max_body_size 0;
+
+location / {
+        proxy_pass http://10.172.0.39/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect http:// https://;
+    }
+```
 
 ## 3. 构建
 
