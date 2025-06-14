@@ -24,8 +24,8 @@ Nexus仓库类型
 - `proxy`：代理仓库，它们被用来代理远程的公共仓库，如maven中央仓库。
 - `group`：仓库组，用来合并多个hosted/proxy仓库，当你的项目希望在多个repository使用资源时就不需要多次引用了，只需要引用一个group即可。
 
-![](../../assets/_images/deploy/nexus3/repository_types.png)
 
+![](../../assets/_images/deploy/nexus3/repository_list.png)
 
 ## 1. 安装
 
@@ -42,43 +42,53 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 
 ### 2.1 创建存储
 
-![](../../assets/_images/deploy/nexus3/create_blob.png)
+文件类型选择`File`，路径选择`/nexus-data`
 
-![](../../assets/_images/deploy/nexus3/blob_list.png)
+![](../../assets/_images/deploy/nexus3/create_store1.png)
 
-### 2.2 三方混合托管库
+![](../../assets/_images/deploy/nexus3/create_store2.png)
 
-![](../../assets/_images/deploy/nexus3/repository_list.png)
+![](../../assets/_images/deploy/nexus3/create_store3.png)
 
-![](../../assets/_images/deploy/nexus3/hosted_repository.png)
+### 2.2 创建三方混合库
 
-![](../../assets/_images/deploy/nexus3/hosted_mixed.png)
+![](../../assets/_images/deploy/nexus3/create_hosted1.png)
 
-### 2.3 二方发布托管库
+![](../../assets/_images/deploy/nexus3/create_hosted2.png)
 
-![](../../assets/_images/deploy/nexus3/hosted_releases.png)
+![](../../assets/_images/deploy/nexus3/create_hosted3.png)
 
-### 2.4 二方快照托管库
+### 2.3 创建二方发布库
 
-![](../../assets/_images/deploy/nexus3/hosted_snapshots.png)
+![](../../assets/_images/deploy/nexus3/create_hosted4.png)
 
-Hosted选项
-- Allow redeploy：允许同一个版本号下重复提交代码, nexus以时间区分
-- Disable redeploy：不允许同一个版本号下重复提交代码
-- Read-Only：不允许提交任何版本
-- 原生的maven-releases库是Disable redeploy设置， maven-snapshots是Allow redeploy。
+### 2.4 创建二方快照库
 
-### 2.5 代理仓库
+![](../../assets/_images/deploy/nexus3/create_hosted5.png)
 
-![](../../assets/_images/deploy/nexus3/proxy_repository.png)
+### 2.5 创建代理仓库
 
-![](../../assets/_images/deploy/nexus3/proxy_public.png)
+![](../../assets/_images/deploy/nexus3/create_proxy1.png)
+
+![](../../assets/_images/deploy/nexus3/create_proxy2.png)
 
 > 阿里云的maven中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
 
 ### 2.6 创建仓库组
 
-![](../../assets/_images/deploy/nexus3/group_repository.png)
+![](../../assets/_images/deploy/nexus3/create_group1.png)
+
+![](../../assets/_images/deploy/nexus3/create_group2.png)
+
+Hosted安全策略:
+
+`Allow Redeploy` 允许重新部署应用程序。开发人员可以对应用程序进行修改、更改配置或更新代码，并将这些更改重新部署到运行中的应用程序中。重新部署通常在开发和测试环境中使用，以验证和应用修改的效果。
+
+`Disable Redeploy` 禁用重新部署功能，阻止在应用程序运行时修改代码或更改配置。这通常用于生产环境，以确保系统的稳定性和安全性。禁用重新部署功能可以减少意外错误的风险，并提高应用程序的性能和安全性。
+
+`Read-only` 只读模式，即应用程序或系统处于一种状态，其中任何用户或进程都无法对其进行修改或写入操作。在只读模式下，数据和配置文件是不可编辑的，只能进行读取或查询。
+
+`Deploy by Replication Only` 仅通过复制机制进行部署。在这种部署方式下，多个节点具有相同的应用程序代码、配置和数据副本，每个节点都可以独立地提供服务。当一个节点失效时，其他节点可以接管其功能，以确保系统的可用性和稳定性。
 
 
 ## 3. 客户端
