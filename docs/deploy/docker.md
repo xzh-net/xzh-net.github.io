@@ -2029,6 +2029,8 @@ harbor_admin_password: Harbor12345
 data_volume: /data/harbor/data/
 ```
 
+3. 公网配置（可选）
+
 如果部署在公网需要设置`hostname`为公网IP或域名，`external_url`为公网域名
 
 ```yml
@@ -2040,8 +2042,14 @@ harbor_admin_password: Harbor12345
 data_volume: /data/harbor/data/
 ```
 
+验证公网配置是否生效，观察是否返回正确的获取token地址，并且可以拿到token
 
-3. 安装
+```bash
+curl -k -I https://harbor.xuzhihao.net/v2/
+curl -u "admin:12345678" -k "https://harbor.xuzhihao.net/service/token?account=admin&service=harbor-registry&scope=registry:catalog:*"
+```
+
+4. 安装
 
 ```bash
 ./install.sh 
