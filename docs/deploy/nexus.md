@@ -38,7 +38,7 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 使用默认管理员身份登录，帐号：**admin**，密码：`cat /nexus-data/admin.password`
 
 
-## 2. 配置
+## 2. 服务端配置
 
 ### 2.1 创建存储
 
@@ -80,7 +80,10 @@ Hosted选项
 
 ![](../../assets/_images/deploy/nexus3/group_repository.png)
 
-### 2.7 客户端Maven配置
+
+## 3. 客户端
+
+### 3.1 修改配置
 
 修改Maven的settings.xml文件，加入认证机制
 
@@ -119,17 +122,18 @@ Hosted选项
   </mirrors>
 ```
 
-### 2.8 命令上传三方jar包
+### 3.2 手动上传
 
-```
+```bash
 mvn install:install-file -Dfile=D:\paoding-analysis.jar -DgroupId=net.paoding -DartifactId=paoding-analysis -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true 
 mvn install:install-file -Dfile=D:\ojdbc6.jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=10.2.0.5.0 -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true  
 mvn install:install-file -Dfile=D:/iTextAsian.jar -DgroupId=com.lowagie -DartifactId=itextasian -Dversion=1.0 -Dpackaging=jar 
 mvn install:install-file -Dfile=D:/tools.jar -DgroupId=com.sun2 -DartifactId=tools -Dversion=1.6.0 -Dpackaging=jar
+# 指定远程仓库地址
 mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversion=2.3.0.RELEASE -Dpackaging=jar -Dfile=spring-boot-email-2.3.0.RELEASE.jar -Durl=http://172.17.17.200:8081/repository/xzh-hosted/ -DrepositoryId=xzh-hosted
 ```
 
-指令说明
+参数说明
 - -DgroupId：jar的groupId
 - -DartifactId：jar的artifactId
 - -Dversion：jar的版本
@@ -140,9 +144,9 @@ mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversio
 - -DrepositoryId：仓库名称
 
 
-### 2.9 Idea上传至私有库
+### 2.9 开发工具上传
 
-pom文件添加本地仓库的配置
+使用IntelliJ IDEA上传至私有库，在pom文件添加本地仓库的配置
 
 ```xml
 <!-- 配置资源上传的仓库地址，与settings.xml中  -->
