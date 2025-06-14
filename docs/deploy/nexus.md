@@ -38,7 +38,7 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 使用默认管理员身份登录，帐号：**admin**，密码：`cat /nexus-data/admin.password`
 
 
-## 2. 服务端配置
+## 2. 服务端
 
 ### 2.1 创建存储
 
@@ -90,6 +90,11 @@ Hosted安全策略:
 
 `Deploy by Replication Only` 仅通过复制机制进行部署。在这种部署方式下，多个节点具有相同的应用程序代码、配置和数据副本，每个节点都可以独立地提供服务。当一个节点失效时，其他节点可以接管其功能，以确保系统的可用性和稳定性。
 
+### 2.7 设置代理（可选）
+
+当服务器部署在内网的时候，如果需要访问外网，可以依赖nginx正向代理，将请求转发到外网，再由外网访问maven中央仓库，最后将结果返回给服务器。
+
+![](../../assets/_images/deploy/nexus3/http_proxy.png)
 
 ## 3. 客户端
 
