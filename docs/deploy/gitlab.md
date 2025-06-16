@@ -30,17 +30,51 @@ rpm -i gitlab-ce-12.4.2-ce.0.el7.x86_64.rpm --force --nodeps
 
 ### 1.4 修改配置
 
+1. 修改IP地址和端口
+
 ```bash
 vi /etc/gitlab/gitlab.rb
 # 修改内容
-external_url 'http://192.168.3.200:82'
-nginx['listen_port'] = 82
+external_url 'http://192.168.3.200'
+nginx['listen_port'] = 80
 ```
+
+2. 域名访问（可选）
+
+开启SSL，程序自动监听443端口
+
+```bash
+vi /etc/gitlab/gitlab.rb
+# 修改内容
+external_url 'https://git.xuzhihao.net'
+nginx['ssl_certificate'] = "/etc/gitlab/ssl/git.xuzhihao.net.crt"
+nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/git.xuzhihao.net.key"
+```
+
+如果使用Nginx做为一级代理，只需要将域名映射到本机的443端口即可
+
+```conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name git.xuzhihao.net;
+    charset utf-8;
+
+    location / {
+      proxy_pass https://192.168.3.200/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
 
 ### 1.5 启动服务
 
 ```bash
-gitlab-ctl reconfigure  # 重载配置及启动gitlab
+gitlab-ctl reconfigure  # 每次修改配置需要执行
 gitlab-ctl restart
 ```
 
@@ -48,7 +82,7 @@ gitlab-ctl restart
 
 ### 2.1 系统登录
 
-访问地址：http://192.168.3.200:82/ 首次进入重置root账号密码
+访问地址：http://192.168.3.200 ，首次进入重置root账号密码
 
 ### 2.2 添加群组
 
@@ -204,7 +238,7 @@ git push                      # 推送到远程仓库
 git pull                      # 拉取代码
 
 # 克隆远程仓库的dev分支到本地
-git clone --branch dev http://192.168.3.200:82/xzh-group/xzh-spring-boot.git  
+git clone --branch dev http://192.168.3.200/xzh-group/xzh-spring-boot.git  
 git checkout -b develop_xzh     # 创建新分支，并把当前分支内容复制到新分支中
 git push origin develop_xzh     # 将新分支推送到远程仓库
 ```
