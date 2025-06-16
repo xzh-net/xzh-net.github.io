@@ -234,7 +234,7 @@ vim /opt/apache-maven-3.6.3/conf/settings.xml
 
 > 构建环境无法连接互联网，需要借助Nginx正向代理实现依赖下载
 
-maven代理配置
+Maven代理配置
 
 ```xml
 <proxies>
@@ -251,7 +251,7 @@ maven代理配置
 </proxies>
 ```
 
-nginx正向代理配置
+Nginx正向代理配置
 
 ```conf
 server {
