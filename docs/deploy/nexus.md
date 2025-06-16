@@ -144,7 +144,9 @@ mvn install:install-file -Dfile=D:\paoding-analysis.jar -DgroupId=net.paoding -D
 mvn install:install-file -Dfile=D:\ojdbc6.jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=10.2.0.5.0 -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true  
 mvn install:install-file -Dfile=D:/iTextAsian.jar -DgroupId=com.lowagie -DartifactId=itextasian -Dversion=1.0 -Dpackaging=jar 
 mvn install:install-file -Dfile=D:/tools.jar -DgroupId=com.sun2 -DartifactId=tools -Dversion=1.6.0 -Dpackaging=jar
-# 指定远程仓库地址
+# 指定远程仓库地址拉取
+mvn dependency:get -Dartifact=org.apache.commons:commons-lang3:3.12.0  -DremoteRepositories=http://maven.vjsp.cn/repository/maven-public/ 
+# 指定部署
 mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversion=2.3.0.RELEASE -Dpackaging=jar -Dfile=spring-boot-email-2.3.0.RELEASE.jar -Durl=http://172.17.17.200:8081/repository/xzh-hosted/ -DrepositoryId=xzh-hosted
 ```
 
