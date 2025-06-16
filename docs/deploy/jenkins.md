@@ -549,8 +549,8 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 ### 2.3 流水线项目
 
 - Pipeline 脚本是由 Groovy 语言实现的
-- Pipeline 支持两种语法：Declarative(声明式)和 Scripted Pipeline(脚本式)语法
-- Pipeline 也有两种创建方法：可以直接在 Jenkins 的 Web UI 界面中输入脚本；也可以通过创建一个 Jenkinsfile 脚本文件放入项目源码库中（一般我们都推荐在 Jenkins 中直接从源代码控制(SCM)中直接载入 Jenkinsfile Pipeline 这种方法）。
+- Pipeline 支持两种语法：Declarative Pipeline（声明式） 和 Scripted Pipeline（脚本式）
+- Pipeline 也有两种创建方法：可以直接在Jenkins的Web UI 界面中输入脚本；也可以通过创建一个Jenkinsfile脚本文件放入项目源码库中（一般我们都推荐在 Jenkins 中直接从源代码控制（SCM）中直接载入 Jenkinsfile Pipeline 这种方法）。
 
 
 #### 2.3.1 下载Pipeline插件
@@ -566,7 +566,7 @@ Jenkins本身无法实现远程部署到Tomcat的功能，需要安装`Deploy to
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline.png)
 
-1. Declarative 声明式快速入门
+1. Declarative Pipeline 声明式快速入门
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline1.png)
 
@@ -606,7 +606,7 @@ pipeline {
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline3.png)
 
 
-2. Scripted pipeline 脚本式快速入门
+2. Scripted Pipeline 脚本式快速入门
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_pipeline4.png)
 
