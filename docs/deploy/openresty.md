@@ -111,7 +111,7 @@ local red = redis:new()
 
 red:set_timeout(1000) -- 1 sec
 
-local ok, err = red:connect("192.168.2.201", 6379)
+local ok, err = red:connect("172.17.17.192", 16386)
 if not ok then
     ngx.say("failed to connect: ", err)
     return
@@ -131,27 +131,20 @@ elseif err then
     return
 end
 
-
-ok, err = red:set("xzh", "我们都是好孩子")
-if not ok then
-    ngx.say("failed to set xzh: ", err)
-    return
-end
-
-ngx.say("success: ", ok)
-
-local res, err = red:get("xzh")
+local headers = ngx.req.get_headers()
+-- 获取token
+local res, err = red:get(headers['token'])
 if not res then
-    ngx.say("failed to get xzh: ", err)
+    ngx.say("请登录")
     return
 end
 
 if res == ngx.null then
-    ngx.say("xzh not found.")
+    ngx.say("请登录.")
     return
 end
 
-ngx.say("xzh: ", res)
+ngx.say(res)
 
 -- 连接池大小是100个，并且设置最大的空闲时间是 10 秒
 local ok, err = red:set_keepalive(10000, 100)
