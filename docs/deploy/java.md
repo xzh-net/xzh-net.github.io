@@ -239,7 +239,7 @@ maven代理配置
 ```xml
 <proxies>
     <proxy>
-        <id>nginx-proxy</id>
+        <id>optional</id>
         <active>true</active>
         <protocol>http</protocol>
         <host>192.168.1.100</host>
