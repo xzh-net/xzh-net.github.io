@@ -135,12 +135,12 @@ local headers = ngx.req.get_headers()
 -- 获取token
 local res, err = red:get(headers['token'])
 if not res then
-    ngx.say("请登录")
+    ngx.say("用户不存在")
     return
 end
 
 if res == ngx.null then
-    ngx.say("请登录.")
+    ngx.say("会话过期，请登录")
     return
 end
 
