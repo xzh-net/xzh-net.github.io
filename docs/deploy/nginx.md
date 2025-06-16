@@ -672,7 +672,7 @@ server {
 }
 ```
 
-### 3.2 泛域名
+### 3.2 范域名
 
 ```nginx
 server {
@@ -1104,8 +1104,8 @@ acme.sh 会自动在域名上添加一条txt解析记录, 验证域名所有权�
 export Ali_Key="LTAI5tAGS2KAXbgF1yWib1U3"
 export Ali_Secret="xxxxxxxxxx"
 source ~/.bashrc
-~/.acme.sh/acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net   # 单证书
-~/.acme.sh/acme.sh --issue --dns dns_ali -d *.xuzhihao.net                    # 泛证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d xuzhihao.net -d test.xuzhihao.net       # 单证书
+~/.acme.sh/acme.sh --issue --dns dns_ali -d *.xuzhihao.net                          # 范证书
 ```
 
 #### 4.2.4 配置证书
