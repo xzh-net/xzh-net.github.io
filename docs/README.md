@@ -1,6 +1,4 @@
-CentOS 7的官方支持已于2024年6月30日正式结束。之后会使用Ubuntu 22.04做为基础环境。如没有特殊说明，旧的笔记默认使用CentOS 7.9.2009版本。
-
-2025年5月26日【改】
+部署环境默认操作系统使用CentOS 7.9.2009，由于CentOS 7的官方支持已于2024年6月30日正式结束，之后会使用Ubuntu 22.04做为基础环境。2025年5月26日
 
 1. Kubernetes资源 https://github.com/fungitive/kubernetes
 2.  虫洞栈学习 https://github.com/fuzhengwei/CodeGuide
