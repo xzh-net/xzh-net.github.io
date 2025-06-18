@@ -4,9 +4,9 @@ Twemproxy是Twitter开源的一个redis代理proxy，通过引入一个代理层
 
 - 下载地址：https://github.com/twitter/twemproxy/
 
-## 1. 安装
+## 1. 安装依赖
 
-### 1.1 安装autoconf
+### 1.1 编译autoconf
 
 ```bash
 cd /opt/software
@@ -41,7 +41,7 @@ rpm -ivh perl-Data-Dumper-2.145-3.el7.x86_64.rpm
 perl -v
 ```
 
-### 1.2 安装automake
+### 1.2 编译automake
 
 ```bash
 cd /opt/software
@@ -66,7 +66,7 @@ doc/automake-$(APIVERSION).1: $(automake_script) lib/Automake/Config.pm
         $(update_mans) automake-$(APIVERSION) --no-discard-stderr
 ```
 
-### 1.3 安装libtool
+### 1.3 编译libtool
 
 ```bash
 cd /opt/software
@@ -78,7 +78,7 @@ make && make install
 libtool --version
 ```
 
-### 1.4 安装Twemproxy
+## 2. 安装Twemproxy
 
 ```bash
 cd /opt/software
@@ -92,7 +92,8 @@ make && make install
 
 > 编译过程提示报错 `Can't locate Thread/Queue.pm in @INC`，需要安装依赖`yum install perl-Thread-Queue`
 
-### 1.5 配置Twemproxy
+### 2.1 修改配置
+
 
 ```bash
 cd /opt/software/twemproxy-0.5.0
@@ -115,7 +116,7 @@ alpha:
    - 192.168.2.201:6379:1
 ```
 
-### 1.6 启动服务
+### 2.2 启动服务
 
 设置环境变量
 
@@ -130,7 +131,7 @@ source /etc/profile
 /usr/local/twemproxy/sbin/nutcracker
 ```
 
-### 1.7 客户端测试
+## 3. 客户端测试
 
 ```bash
 redis-cli -h 192.168.2.201 -p 22121 -a 123456
