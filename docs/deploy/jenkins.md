@@ -1405,5 +1405,13 @@ pipeline {
 }
 ```
 
+> 非root用户启动服务，这个过程会出现 `/var/run/docker.sock: connect: permission denied` 没有权限的问题，需要将Jenkins用户加入Docker用户组
+
+```bash
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+id jenkins  # 检查输出中是否包含 "docker"
+```
+
 
 ## 5. 基于K8S构建Jenkins持续集成平台
