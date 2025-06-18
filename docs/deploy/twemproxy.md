@@ -104,16 +104,17 @@ vi nutcracker.yml
 
 ```yml
 alpha:
-  listen: 127.0.0.1:22121
-  hash: fnv1a_64
-  distribution: ketama
-  auto_eject_hosts: true
-  redis: true
-  redis_auth: 123456
-  server_retry_timeout: 2000
-  server_failure_limit: 1
+  listen: 127.0.0.1:22121       # 监听地址
+  hash: fnv1a_64                # hash算法
+  distribution: ketama          # 分片算法
+  auto_eject_hosts: true        # 是否自动摘除故障节点
+  redis: true                   # 后端使用redis协议
+  redis_auth: 123456            # 密码
+  server_connections: 10        # 每个后端实例创建的连接数
+  server_retry_timeout: 2000    # 故障节点重试时间（毫秒）
+  server_failure_limit: 1       # 节点失败次数阈值，超过后临时剔除（默认：2）。 
   servers:
-   - 192.168.2.201:6379:1
+    - 192.168.2.201:6379:1
 ```
 
 ### 2.2 启动服务
