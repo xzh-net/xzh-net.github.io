@@ -1,4 +1,4 @@
-# OpenResty 1.25
+# OpenResty 1.25.3.1
 
 - 官方网站：https://openresty.org
 
