@@ -180,7 +180,7 @@ fi
 ```
 
 ```bash
-chmod 755 /etc/keepalived/nginx_check.sh
+chmod +x /etc/keepalived/nginx_check.sh
 ```
 
 ### 2.2 haproxy
@@ -255,13 +255,15 @@ vrrp_instance VI_1 {
 
 ```shell
 #!/bin/bash
-COUNT=`ps -C haproxy --no-header |wc -l`
-if [ $COUNT -eq 0 ];then
+count=`ps -C haproxy --no-header |wc -l`
+if [ $count -eq 0 ];then
     /usr/local/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg
     sleep 2
-    if [ `ps -C haproxy --no-header |wc -l` -eq 0 ];then
-        killall keepalived
+    if [ $count -eq 0 ]; then
+        exit 1;
     fi
+else
+    exit 0;
 fi
 ```
 
