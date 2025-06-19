@@ -4,28 +4,26 @@
 
 ## 1. 安装
 
-### 1.1 编译安装
-
-#### 1.1.1 下载
+### 1.1 下载
 
 ```bash
 cd /opt/software
 wget http://nginx.org/download/nginx-1.22.1.tar.gz
 ```
 
-#### 1.1.2 安装依赖
+### 1.2 安装依赖
 
 ```bash
 yum install -y gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
 ```
 
-#### 1.1.3 添加用户
+### 1.3 添加用户
 
 ```bash
 useradd nginx -s /sbin/nologin -M
 ```
 
-#### 1.1.4 解压编译
+### 1.4 解压编译
 
 ```bash
 cd /opt/software 
@@ -43,7 +41,7 @@ cd nginx-1.22.1
 make && make install
 ```
 
-#### 1.1.5 设置环境变量
+### 1.5 设置环境变量
 
 ```bash
 vi /etc/profile
@@ -54,7 +52,7 @@ export PATH
 source /etc/profile
 ```
 
-#### 1.1.6 配置开机启动
+### 1.6 配置开机启动
 
 在`/usr/lib/systemd/system`目录下添加nginx.service
 
@@ -89,7 +87,7 @@ chmod 755 /usr/lib/systemd/system/nginx.service
 systemctl daemon-reload
 ```
 
-#### 1.1.7 启动服务
+### 1.7 启动服务
 
 ```bash
 nginx -V	# 查看版本
@@ -101,7 +99,7 @@ systemctl reload nginx    # 重新加载配置文件
 systemctl status nginx    # 查看状态
 ```
 
-#### 1.1.8 日志切割
+### 1.8 日志切割
 
 ```bash
 echo '/usr/local/nginx/logs/*.log {   # 可以指定多个路径
@@ -130,7 +128,7 @@ crontab -e
 
 ## 2. 模块
 
-### 2.1 http健康检查
+### 2.1 健康检查
 
 
 下载地址：https://github.com/yaoweibin/nginx_upstream_check_module
@@ -167,7 +165,7 @@ location /nstatus {
 }
 ```
 
-### 2.2 http代理
+### 2.2 正向代理
 
 下载地址：https://github.com/chobits/ngx_http_proxy_connect_module
 
@@ -207,7 +205,17 @@ server {
 }
 ```
 
+> 说明一下，有多个反向代理存在场景下，会遇到转义符失效的问题，这个问题本身和正向代理无关，但是使用到了`$request_uri`，解决办法推荐使用`$request_uri`保留原始URL
+
+```conf
+location / {
+    proxy_pass http://backend$request_uri;  # 直接传递原始请求URI
+    proxy_redirect off;
+}
+```
+
 配置代理服务器地址
+
 ```bash
 vi /etc/profile
 export http_proxy=192.168.3.114:3182    # 正向代理
@@ -230,7 +238,7 @@ curl -i https://openapi.alipay.com/gateway.do
 curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
 ```
 
-### 2.3 tcp代理
+### 2.3 TCP反向代理
 
 下载地址：https://github.com/yaoweibin/nginx_tcp_proxy_module
 
@@ -420,7 +428,7 @@ server {
 
 ## 3. 高级
 
-### 3.1 配置文件
+### 3.1 配置示例
 
 #### 3.1.1 nginx.conf
 
