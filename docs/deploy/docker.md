@@ -90,7 +90,7 @@ sudo mkdir -p /etc/docker
 ```
 
 ```bash
-sudo tee /etc/docker/daemon.json <<-'EOF'
+sudo tee /etc/docker/daemon.json <<EOF
 {
   "registry-mirrors": ["https://registry-1.docker.io"],
   "insecure-registries": ["192.168.2.100:88"],
