@@ -93,14 +93,14 @@ sudo mkdir -p /etc/docker
 sudo tee /etc/docker/daemon.json <<EOF
 {
   "registry-mirrors": ["https://registry-1.docker.io"],
-  "insecure-registries": ["192.168.2.100:88"],
+  "insecure-registries": ["192.168.2.100"],
   "exec-opts":["native.cgroupdriver=systemd"],
   "data-root": "/data/docker"
 }
 EOF
 ```
 
-#### 1.4.2 开启远程管理
+#### 1.4.2 开启远程管理（可选）
 
 允许你从远程机器上通过HTTP协议与Docker守护进程进行通信。但这是一个不安全的行为，生产环境不要使用。
 
@@ -124,7 +124,9 @@ mv /var/lib/docker /data
 
 ```bash
 sudo mkdir -p /etc/systemd/system/docker.service.d
+```
 
+```bash
 sudo tee /etc/systemd/system/docker.service.d/proxy.conf <<EOF
 [Service]
 Environment="HTTP_PROXY=http://172.30.0.13:3182"
@@ -2087,7 +2089,7 @@ docker-compose down     # 停止
 
 帐号：admin，密码：Harbor12345
 
-> 搭建私有仓库，通过IP访问需要在客户端配置`/etc/docker/daemon.json`和`insecure-registries`，如果使用域名访问，并配置了证书，客户端可以直接访问。
+> 通过IP访问私有仓库需要在客户端配置`/etc/docker/daemon.json`的`insecure-registries`，如果使用域名访问，并配置了证书，客户端可以直接访问。
 
 
 #### SonarQube 7.8
