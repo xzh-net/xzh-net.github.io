@@ -81,7 +81,9 @@ yum localinstall *.rpm
 
 ### 1.4 修改配置
 
-1. 配置镜像加速器、仓库地址、根目录
+#### 1.4.1 镜像加速器
+
+设置仓库地址、镜像存储路径
 
 ```bash 
 sudo mkdir -p /etc/docker
@@ -98,7 +100,9 @@ sudo tee /etc/docker/daemon.json <<-'EOF'
 EOF
 ```
 
-1. 开启Remote API
+#### 1.4.2 开启远程管理
+
+允许你从远程机器上通过HTTP协议与Docker守护进程进行通信。但这是一个不安全的行为，生产环境不要使用。
 
 ```bash
 vim /usr/lib/systemd/system/docker.service
@@ -106,20 +110,39 @@ vim /usr/lib/systemd/system/docker.service
 ExecStart=/usr/bin/dockerd  -H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock
 ```
 
-3. 非初始化安装后迁移镜像（可选）
+#### 1.4.3 迁移镜像（可选）
+
+非初始化安装后，docker默认的镜像存储路径是`/var/lib/docker`，如果磁盘空间不足，可以迁移到其他磁盘。
 
 ```bash
 mv /var/lib/docker /data
 ```
 
-4. 重启服务
+#### 1.4.4 配置代理（可选）
+
+本机无法连接互联网，需要配置Nginx正向代理下载镜像。
+
+```bash
+sudo mkdir -p /etc/systemd/system/docker.service.d
+
+sudo tee /etc/systemd/system/docker.service.d/proxy.conf <<EOF
+[Service]
+Environment="HTTP_PROXY=http://172.30.0.13:3182"
+Environment="HTTPS_PROXY=http://172.30.0.13:3182"
+Environment="NO_PROXY=localhost,127.0.0.1,.internal.domain"
+EOF
+```
+
+重启服务
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
 
-### 1.5 安装docker-compose
+### 1.5 docker-compose
+
+#### 1.5.1 安装
 
 ```bash
 curl -L https://github.com/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
@@ -128,7 +151,9 @@ cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
 ```
 
-#### 1.5.1 mall-env.yml
+#### 1.5.2 文件示例
+
+1. mall-env.yml
 
 ```bash
 vi docker-compose-env.yml
@@ -198,7 +223,7 @@ docker-compose -f docker-compose-env.yml down
 ```
 
 
-#### 1.5.2 elk-762.yml
+2. elk-762.yml
 
 ```bash
 vi docker-compose-elk.yml
@@ -258,7 +283,7 @@ services:
       - es  
 ```
 
-#### 1.5.3 spark.yml
+3. spark.yml
 
 ```bash
 vi spark.yml
@@ -341,7 +366,7 @@ yum remove docker \
            docker-engine
 ```
 
-2. rpm包查找卸载
+2. RPM包查找卸载
 
 ```bash
 rpm -qa docker | xargs rpm -e 
@@ -366,7 +391,9 @@ docker info                 # 查看docker信息
 docker --help               # 查看docker帮助
 docker info | grep Cgroup   # 查看驱动
 docker system df            # 查看占用的磁盘空间
-docker info | grep "Docker Root Dir"  # 查看镜像位置
+docker info | grep "Docker Root Dir"    # 查看镜像位置
+docker info | grep -i proxy             # 查看代理
+
 ```
 
 ### 2.2 网络
