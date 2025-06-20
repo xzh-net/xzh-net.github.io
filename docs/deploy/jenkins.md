@@ -1413,5 +1413,46 @@ sudo systemctl restart jenkins
 id jenkins  # 检查输出中是否包含 "docker"
 ```
 
+### 4.4 S3对象存储上传
+
+前面的发布过程我们使用了`Publish Over SSH`和`SSH Pipeline Steps`，两者区别在于一个偏向文件发布，一个是远程命令的执行。而S3对象存储上传则偏向于文件发布，可以理解为将文件上传到S3对象存储中，然后通过S3对象存储的URL进行访问。
+
+上传的前提是确保Jenkins节点已安装`awscli`，或者将安装命令集成到流水线脚本中
+
+```conf
+pipeline {
+    agent any
+
+    environment {
+        // 从 Jenkins 凭据获取 MinIO 密钥
+        AWS_ACCESS_KEY_ID     = credentials('d6a5f62d-2a05-44a4-9499-a934952d1fe8')
+        AWS_SECRET_ACCESS_KEY = credentials('79724692-7f3c-4ef9-8763-7f556575eca7')
+        AWS_DEFAULT_REGION    = '' 
+        MINIO_ENDPOINT        = 'http://172.17.17.160:9000'
+        BUCKET_NAME           = 'test'
+    }
+
+    stages {
+        stage('Upload to MinIO') {
+            steps {
+                script {
+                    // 使用 AWS CLI 上传文件（注意 --endpoint-url 参数）
+                    sh """
+                        if ! command -v aws &> /dev/null; then
+                            echo "Installing AWS CLI..."
+                            sudo apt update && sudo apt install -y awscli
+                        fi
+
+                        aws s3 cp a.txt s3://${BUCKET_NAME}/ \
+                          --endpoint-url ${MINIO_ENDPOINT} \
+                          --no-verify-ssl  # 如果使用自签名证书需添加此参数
+                    """
+                }
+            }
+        }
+    }
+}
+```
+
 
 ## 5. 基于K8S构建Jenkins持续集成平台
