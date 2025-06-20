@@ -1347,14 +1347,31 @@ fdfs_test /etc/fdfs/client.conf upload index.html
 
 #### MinIO
 
+2025年6月19日：当前最新版`RELEASE.2025-05-24T17-08-30Z`界面发生变更没有设置功能，历史版本请使用`RELEASE.2024-10-29T16-01-48Z`
+
 ```bash
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   -v /data/minio/data:/data \
   -v /data/minio/config:/root/.minio \
-  minio/minio server /data --console-address ":9001"
+  minio/minio:RELEASE.2024-10-29T16-01-48Z
+  server /data 
+  --console-address ":9001"
 ```
 
-访问地址：http://192.168.2.100:9001/ ，账户密码：minioadmin/minioadmin
+访问地址：http://192.168.2.100:9001  ，帐号/密码：minioadmin
+
+客户端调用
+
+```bash
+# 安装
+sudo apt-get update
+sudo apt-get install awscli
+# 配置
+aws configure
+# 上传
+aws --endpoint-url http://172.17.17.160:9000 s3 cp test.sh s3://test/
+```
+
 
 #### Hadoop 2.7.1
 
