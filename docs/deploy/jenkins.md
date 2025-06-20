@@ -1245,6 +1245,31 @@ cat ~/.ssh/jenkins_agent_key.pub >> ~/.ssh/authorized_keys
 
 Jenkins配置Credentials，选择`SSH Username with private key`，将目标机器私钥粘贴到`Enter directly`中，保存即可。
 
+
+**SSH登录流程**
+
+```
+1. 客户端发起连接请求
+2. 服务器发送挑战（Challenge），生成一个随机字符串（挑战码），用客户端预埋的公钥加密，发送给客户端
+3. 客户端解密挑战，用本地的私钥解密挑战码，得到原始字符串
+4. 客户端签名并返回，将解密后的字符串与会话ID合并，用私钥生成数字签名，发送回服务器
+5. 服务器验证签名，服务器用预存的公钥（authorized_keys中）验证签名，有效直接通过，无效拒绝连接
+```
+
+![](../../assets/_images/deploy/jenkins/ssh.png)
+
+安全性对比
+
+Jenkins凭据方案优势：
+- 隔离性：私钥不直接暴露在Jenkins服务器的文件系统中，降低被其他进程窃取的风险。
+- 集中管理：密钥轮换、吊销可通过Jenkins统一操作，无需登录服务器。
+- 审计日志：Jenkins记录凭据使用记录（如流水线执行日志）。
+- 加密存储：Jenkins Master对凭据加密存储（如使用Credentials Plugin + Vault）。
+
+传统免密登录风险：
+- 服务器文件泄露：若攻击者获取Jenkins服务器的SSH访问权限，可能窃取~/.ssh/id_rsa。
+- 权限扩散：所有使用同一系统用户的Jenkins任务共享密钥，无法隔离权限。
+
 ### 4.2 Maven项目构建发布
 
 #### 4.2.1 下载参数选择插件
