@@ -328,7 +328,7 @@ server {
 
 > 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
 
-#### 2.4.4 md预览
+#### 2.4.4 MD预览
 
 ```nginx
 server {
