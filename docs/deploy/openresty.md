@@ -98,7 +98,7 @@ curl -H "Content-Type: application/json" -X POST -d '{"id": "001", "name":"张�
 ```
 
 
-#### 1.4.3 操作redis
+#### 1.4.3 操作Redis
 
 将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
 
@@ -152,6 +152,81 @@ if not ok then
     ngx.say("failed to set keepalive: ", err)
     return
 end
+```
+
+#### 1.4.4 探测网站状态
+
+使用OpenResty原生支持的lua-resty-http库
+
+```bash
+wget https://github.com/ledgetech/lua-resty-http/archive/refs/tags/v0.17.2.tar.gz
+tar -zxvf lua-resty-http-0.17.2.tar.gz
+sudo cp -r lua-resty-http-0.17.2/lib/resty /usr/local/openresty/lualib/
+```
+
+```conf
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name _;
+    
+    location /check_health {
+        default_type 'text/html';
+        add_header Content-Type 'text/html; charset=utf-8';
+        content_by_lua_file conf/conf.d/check_health.lua;
+    }
+}
+```
+
+```lua
+local http = require "resty.http"
+local url = ngx.var.arg_url  -- 默认检测网站
+
+-- 创建 HTTP 客户端
+local client = http.new()
+client:set_timeout(5000)  -- 设置超时(毫秒)
+
+-- 发送请求
+local res, err = client:request_uri(url, {
+    method = "GET",
+    headers = { ["User-Agent"] = "Mozilla/5.0" },
+    ssl_verify = false  -- 跳过 HTTPS 证书验证
+})
+
+-- 处理结果
+if not res then
+    ngx.say(err)
+    ngx.exit(500)
+end
+
+-- 检查状态码
+if res.status == 200 then
+    ngx.say(200)
+else
+    ngx.say(res.status)
+end
+```
+
+测试验证
+```bash
+# 测试正常网站
+curl "http://172.17.17.160/check_health?url=https://maven.aliyun.com"
+# 测试无效域名
+curl "http://172.17.17.160/check_health?url=https://invalid-domain-xxxxxxxx.com"
+# 测试超时网站，IP不可达
+curl "http://172.17.17.160/check_health??url=http://10.255.255.1"
+```
+
+> 出现错误信息`no resolver defined to resolve`和`could not be resolved (110: Operation timed out)`，是因为没有配置DNS解析服务器和设置超时时间。
+
+在http块内添加以下配置：
+```conf
+# 核心 DNS 配置（必须）
+resolver 114.114.114.114 valid=30s;
+resolver_timeout 5s;
+# 共享内存用于 DNS 缓存
+lua_shared_dict dns_cache 5m;
 ```
 
 ## 2. 模块
