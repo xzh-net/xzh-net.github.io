@@ -31,7 +31,7 @@ source /etc/profile
 
 ### 1.4 入门案例
 
-#### 1.4.1 hello World
+#### 1.4.1 Hello World
 
 ```bash
 cd /usr/local/openresty/nginx/conf
@@ -61,7 +61,7 @@ ngx.say("hello World");
 ```
 
 
-#### 1.4.2 获取http请求信息
+#### 1.4.2 获取Http请求信息
 
 ```lua
 -- 获取get请求参数
@@ -100,10 +100,9 @@ curl -H "Content-Type: application/json" -X POST -d '{"id": "001", "name":"张�
 
 #### 1.4.3 操作Redis
 
-将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
-
 下载地址：https://openresty.org/en/lua-resty-redis-library.html
 
+解压后将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
 
 ```lua
 local redis = require "resty.redis"
@@ -156,13 +155,15 @@ end
 
 #### 1.4.4 探测网站状态
 
-使用OpenResty原生支持的lua-resty-http库
+下载并安装`lua-resty-http`库
 
 ```bash
 wget https://github.com/ledgetech/lua-resty-http/archive/refs/tags/v0.17.2.tar.gz
 tar -zxvf lua-resty-http-0.17.2.tar.gz
 sudo cp -r lua-resty-http-0.17.2/lib/resty /usr/local/openresty/lualib/
 ```
+
+Nginx配置
 
 ```conf
 server {
@@ -179,9 +180,11 @@ server {
 }
 ```
 
+lua脚本内容
+
 ```lua
 local http = require "resty.http"
-local url = ngx.var.arg_url  -- 默认检测网站
+local url = ngx.var.arg_url  -- 获取url参数
 
 -- 创建 HTTP 客户端
 local client = http.new()
@@ -220,7 +223,8 @@ curl "http://172.17.17.160/check_health??url=http://10.255.255.1"
 
 > 出现错误信息`no resolver defined to resolve`和`could not be resolved (110: Operation timed out)`，是因为没有配置DNS解析服务器和设置超时时间。
 
-在http块内添加以下配置：
+在Nginx配置文件中Http块内添加以下配置
+
 ```conf
 # 核心 DNS 配置（必须）
 resolver 114.114.114.114 valid=30s;
