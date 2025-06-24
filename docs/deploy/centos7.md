@@ -1869,12 +1869,14 @@ $JAVA ${JAVA_OPT} $@
 
 ### 3.1 配置静态IP地址
 
+设置主机名称
 ```bash
-vi /etc/hosts
-vi /etc/resolv.conf  nameserver 192.168.0.1    # 修改DNS
-vi /etc/sysconfig/network-scripts/ifcfg-enp0s3 # 修改IP
-vi /etc/sysconfig/network                      # 修改网关 GATEWAY=192.168.3.1
-hostnamectl set-hostname xzh                   # 修改主机名
+hostnamectl set-hostname web01
+```
+
+设置IP地址
+```bash
+vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 ```
 
 ```conf
@@ -1900,23 +1902,31 @@ GATEWAY=192.168.3.1
 DNS1=114.114.114.114
 ```
 
+重启服务
+
 ```
 systemctl restart network
 ```
 
 ### 3.2 ssh配置
 
+
 ```bash
 vi /etc/ssh/sshd_config
+```
 
+```conf
 # 配置文件
 Port 22
 ListenAddress 0.0.0.0
 ListenAddress ::
 PermitRootLogin yes # 允许远程登录
 PasswordAuthentication yes  # 开启用户名和密码来验证
+```
 
-# 重启
+重启服务
+
+```bash
 service sshd start
 systemctl enable sshd
 ```
