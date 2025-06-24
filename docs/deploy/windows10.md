@@ -178,8 +178,12 @@ net stop mysql
 mysqld -remove mysql
 ```
 
-### 2.3 Notepad设置主题
+### 2.3 Notepad主题
 
 设置 `->` 语言格式设置
 
 ![](../../assets/_images/deploy/win10/notepad.png)
+
+### 2.4 Xshell隧道
+
+![](../../assets/_images/deploy/win10/xshell.png)
