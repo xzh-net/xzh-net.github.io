@@ -2,6 +2,7 @@
 #  Node.js 14.16.0
 
 - 网站地址：https://nodejs.org/
+- 下载地址：https://nodejs.org/download/release/
 - Npm仓库: https://www.npmjs.com/
 
 ## 1. Windows
@@ -46,10 +47,10 @@ npm outdated                    # 检查包是否已经过时
 npm update express              # 更新模块
 npm uninstall express           # 卸载模块
 
-npm root                # 查看当前包的安装路径
-npm root -g             # 查看全局的包的安装路径
-npm list                # 查看当前目录下已安装的node包
-npm list parseable=true # 以目录的形式来展现当前安装的所有node包
+npm root                        # 查看当前包的安装路径
+npm root -g                     # 查看全局的包的安装路径
+npm list                        # 查看当前目录下已安装的node包
+npm list parseable=true         # 以目录的形式来展现当前安装的所有node包
 ```
 
 > 如果安装过程中依赖文件因为网络问题下载失败，可以手动下载文件后上传至缓存路径中，然后再次使用`npm install`安装。 
