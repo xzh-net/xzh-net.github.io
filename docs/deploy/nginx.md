@@ -780,20 +780,21 @@ server {
 ### 3.5 跨域
 
 ```nginx
-location /getUser {
+location /user {
+    default_type application/json;
     add_header Content-Type 'text/html; charset=utf-8';
     add_header Access-Control-Allow-Origin *;
     add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
+    if ( $request_method !~* GET ) {
+        return 403;
+    }
     if ( $query_string ~* ^(.*)v=1.0$ ) {
         return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
     }
     if ( $query_string ~* ^(.*)v=2.0$ ) {
         return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
     }
-    if ( $request_method !~* POST ) {
-        return 403;
-    }
-    return 200 $time_local;
+    return 200 "你好，当前时间：$time_local";
 }
 ```
 
