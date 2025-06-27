@@ -781,7 +781,6 @@ server {
 
 ```nginx
 location /getUser {
-    default_type application/json;
     add_header Content-Type 'text/html; charset=utf-8';
     add_header Access-Control-Allow-Origin *;
     add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
