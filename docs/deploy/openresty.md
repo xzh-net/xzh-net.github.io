@@ -134,7 +134,7 @@ local headers = ngx.req.get_headers()
 -- 获取token
 local res, err = red:get(headers['token'])
 if not res then
-    ngx.say("用户不存在")
+    ngx.say("系统错误，请重试")
     return
 end
 
