@@ -788,13 +788,13 @@ location /user {
     if ( $request_method !~* GET ) {
         return 403;
     }
-    if ( $query_string ~* ^(.*)v=1.0$ ) {
+    if ( $query_string ~* ^(.*)name=zhangsan$ ) {
         return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
     }
-    if ( $query_string ~* ^(.*)v=2.0$ ) {
+    if ( $query_string ~* ^(.*)name=lisi$ ) {
         return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
     }
-    return 200 "你好，当前时间：$time_local";
+    return 200 "没有找到用户";
 }
 ```
 
