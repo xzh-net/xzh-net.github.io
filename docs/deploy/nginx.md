@@ -794,7 +794,7 @@ location /user {
     if ( $query_string ~* ^(.*)name=lisi$ ) {
         return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
     }
-    return 200 "没有找到用户";
+    return 200 "没有找到用户，当前时间：$time_local";
 }
 ```
 
