@@ -297,7 +297,7 @@ lua_shared_dict dns_cache 5m;
 
 ## 2. 模块
 
-1. `init_by_lua*`
+### 2.1 init_by_lua*
 
 该指令在每次Nginx重新加载配置时执行，可以用来完成一些耗时模块的加载，或者初始化一些全局配置。
 
@@ -309,23 +309,49 @@ init_by_lua_block{
 }
 ```
 
-2. `init_worker_by_lua*`
+### 2.2 init_worker_by_lua*
 
 该指令用于启动一些定时任务，如心跳检查、定时拉取服务器配置等。
 
-3. `set_by_lua*`
+### 2.3 set_by_lua*
 
 该指令只要用来做变量赋值，这个指令一次只能返回一个值，并将结果赋值给Nginx中指定的变量。
 
-4. `rewrite_by_lua*`
+### 2.4 rewrite_by_lua*
 
 该指令用于执行内部URL重写或者外部重定向，典型的如伪静态化URL重写，本阶段在rewrite处理阶段的最后默认执行。
 
-5. `access_by_lua*`
+### 2.5 access_by_lua*
 
-该指令用于访问控制。例如，如果只允许内网IP访问。
+该指令用于访问控制、请求过滤、预处理等，不允许使用`ngx.say`和`ngx.print`。
 
-6. `content_by_lua*`
+```lua
+access_by_lua_block {
+    -- 检查用户是否登录（示例逻辑）
+    local cookie = ngx.var.http_cookie
+    local auth_token
+
+    if cookie then
+        -- 使用正则表达式匹配auth_token
+        local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
+        if m then
+            auth_token = m[1]
+        end
+    end
+
+    -- 如果未找到token，重定向到登录页面
+    if not auth_token then
+        -- 跳转到登录页面，保留原始请求URL用于登录后跳回
+        local from_uri = ngx.var.request_uri
+        local login_url = "/login?from=" .. ngx.escape_uri(from_uri)
+        
+        -- 执行302重定向
+        return ngx.redirect(login_url)
+    end
+}
+```
+
+### 2.6 content_by_lua*
 
 该指令是应用最多的指令，大部分任务是在这个阶段完成的，其他的过程往往为这个阶段准备数据，正式处理基本都在本阶段。
 
@@ -386,23 +412,23 @@ location / {
 }
 ```
 
-7. `header_filter_by_lua*`
+### 2.7 header_filter_by_lua*
 
 该指令用于设置应答消息的头部信息。
 
-8. `body_filter_by_lua*`
+### 2.8 body_filter_by_lua*
 
 该指令是对响应数据进行过滤，如截断、替换。
 
-9. `log_by_lua*`
+### 2.9 log_by_lua*`
 
 该指令用于在log请求处理阶段，用Lua代码处理日志，但并不替换原有log处理。
 
-10. `balancer_by_lua*`
+### 2.10 balancer_by_lua*
 
 该指令主要的作用是用来实现上游服务器的负载均衡器算法
 
-11. `ssl_certificate_by_*`
+### 2.11 ssl_certificate_by_*
 
 该指令作用在Nginx和下游服务开始一个SSL握手操作时将允许本配置项的Lua代码。
 
