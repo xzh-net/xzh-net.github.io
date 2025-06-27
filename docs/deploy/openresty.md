@@ -61,7 +61,7 @@ ngx.say("hello World");
 ```
 
 
-#### 1.4.2 获取Http请求信息
+#### 1.4.2 读取请求参数
 
 ```lua
 -- 获取get请求参数
@@ -100,23 +100,92 @@ curl -H "Content-Type: application/json" -X POST -d '{"id": "001", "name":"张�
 
 #### 1.4.3 操作Redis
 
-下载地址：https://openresty.org/en/lua-resty-redis-library.html
+下载客户端：https://openresty.org/en/lua-resty-redis-library.html
 
-解压后将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
+解压后将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下。业务场景：读取cookie中指定名称字段获取凭证，再调用redis查询用户信息
+
+
+```nginx
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  logs/access.log  main;
+    sendfile        on; 
+    keepalive_timeout  65;
+    server {
+        listen       80;
+        server_name  localhost;
+        charset utf-8;
+		location / {
+			add_header Content-Type 'text/html; charset=utf-8';
+            return 200 "你好，当前时间：$time_local";
+        }
+		
+		# 登录页面 - 设置Cookie
+		location /login {
+			default_type 'text/html';
+            content_by_lua_block {
+                local token = "zhangsan" 
+                ngx.header["Set-Cookie"] = "auth_token=" .. token .. "; Path=/; HttpOnly"
+                ngx.say("登录成功，已设置凭证")
+            }
+        }
+		
+		# 获取用户 - 需要验证token
+		location /current {
+			default_type 'text/html';
+			content_by_lua_file conf.d/user.lua;
+		}
+		
+		# 登出 - 清除Cookie
+        location /logout {
+			default_type 'text/html';
+            content_by_lua_block {
+                ngx.header["Set-Cookie"] = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+                ngx.say("登出成功，已清除凭证")
+            }
+        }
+    }
+}
+```
 
 ```lua
+-- 从Cookie中提取auth_token
+local cookie = ngx.var.http_cookie
+local auth_token
+
+if cookie then
+	-- 使用正则表达式匹配auth_token
+	local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
+	if m then
+		auth_token = m[1]
+	end
+end
+
+-- 如果未找到token，返回401错误
+if not auth_token then
+	ngx.status = ngx.HTTP_UNAUTHORIZED
+	ngx.say("没有凭证，请登录")
+	return ngx.exit(401)
+end
+
+ngx.say(auth_token)
+
 local redis = require "resty.redis"
 local red = redis:new()
-
-red:set_timeout(1000) -- 1 sec
+red:set_timeout(1000)   -- 设置超时时间
 
 local ok, err = red:connect("172.17.17.192", 16386)
+red:select(1)           -- 选择数据库1
 if not ok then
     ngx.say("failed to connect: ", err)
     return
 end
 
--- 这里是 auth 的调用过程
+-- 这里是 auth_token 的验证过程
 local count
 count, err = red:get_reused_times()
 if 0 == count then
@@ -130,27 +199,20 @@ elseif err then
     return
 end
 
-local headers = ngx.req.get_headers()
 -- 获取token
-local res, err = red:get(headers['token'])
+local res, err = red:get(auth_token)
 if not res then
     ngx.say("系统错误，请重试")
+	red:set_keepalive(10000, 100)
     return
 end
 
 if res == ngx.null then
     ngx.say("会话过期，请登录")
+	red:set_keepalive(10000, 100)
     return
 end
-
-ngx.say(res)
-
--- 连接池大小是100个，并且设置最大的空闲时间是 10 秒
-local ok, err = red:set_keepalive(10000, 100)
-if not ok then
-    ngx.say("failed to set keepalive: ", err)
-    return
-end
+ngx.say("验证成功")
 ```
 
 #### 1.4.4 探测网站状态
