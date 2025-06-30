@@ -157,6 +157,26 @@ netplan apply
 chmod 600 /etc/netplan/00-installer-config.yaml
 ```
 
+> OpenStack问题：在OpenStack节点重启后，其虚拟网络接口（网卡）在宿主机层面被重新创建，导致其内核设备名称发生变化
+
+找出网卡的MAC地址，并修改配置文件中的`match`字段
+
+```bash
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    my-static-interface:
+      match:
+        macaddress: fa:16:3e:ea:68:e4
+      set-name: ens8
+      addresses: [192.168.1.111/22]
+      routes:
+        - to: default
+          via: 192.168.0.1  # 替换为你的网关IP
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1]  # 替换为你的DNS服务器
+```
 
 ### 2.3 ssh配置
 
