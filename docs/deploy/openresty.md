@@ -151,6 +151,23 @@ curl -X POST -H "Content-Type: application/json" -d '{"username":"zhangsan", "pa
 
 #### 1.4.4 获取请求头
 
+获取指定头
+
+```lua
+location /headers {
+    content_by_lua_block {
+        -- 直接获取指定头信息（下划线代替连字符）
+        local content_type = ngx.var.http_content_type
+        local auth_token = ngx.var.http_authorization
+        
+        ngx.say("Content-Type: ", content_type or "nil")
+        ngx.say("Authorization: ", auth_token or "nil")
+    }
+}
+```
+
+获取所有头
+
 ```lua
 location /headers {
     content_by_lua_block {
@@ -168,18 +185,7 @@ location /headers {
 }
 ```
 
-```lua
-location /headers {
-    content_by_lua_block {
-        -- 直接获取特定头信息（下划线代替连字符）
-        local content_type = ngx.var.http_content_type
-        local auth_token = ngx.var.http_authorization
-        
-        ngx.say("Content-Type: ", content_type or "nil")
-        ngx.say("Authorization: ", auth_token or "nil")
-    }
-}
-```
+
 
 #### 1.4.5 获取Cookie
 
