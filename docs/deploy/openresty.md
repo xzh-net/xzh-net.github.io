@@ -61,44 +61,149 @@ ngx.say("hello World");
 ```
 
 
-#### 1.4.2 读取请求参数
+#### 1.4.2 获取URL查询参数
+
+
+获取单个参数
 
 ```lua
--- 获取get请求参数
-local arg = ngx.req.get_uri_args()
-for k,v in pairs(arg) do
-    ngx.say("[get] key:", k, " v:", v)
-    ngx.say("<br>")
-end
-
--- 获取post请求参数
-ngx.req.read_body()
-local arg = ngx.req.get_post_args()
-for k,v in pairs(arg) do
-    ngx.say("[post] key:", k, " v:", v)
-    ngx.say("<br>")
-end
-
--- 获取header
-local headers = ngx.req.get_headers()
-for k,v in pairs(headers) do
-    ngx.say("[header] name:", k, " v:", v)
-    ngx.say("<br>")
-end
-
--- 获取body信息
-ngx.req.read_body()
-local data = ngx.req.get_body_data()
-ngx.say(data)
+location /api {
+    content_by_lua_block {
+        local param1 = ngx.var.arg_param1  -- 获取?param1=value 中的值
+        local param2 = ngx.var.arg_param2
+        ngx.say("param1:", param1)
+        ngx.say("param2:", param2)
+    }
+}
 ```
 
+测试地址：http://127.0.0.1/api?param1=zhangsan&param2=29
+
+
+遍历所有参数
+
+```lua
+location /api {
+    content_by_lua_block {
+        local args = ngx.req.get_uri_args()  -- 返回 Lua 表
+        for key, val in pairs(args) do
+            if type(val) == "table" then
+                ngx.say(key, ":", table.concat(val, ","))  -- 处理多值参数
+            else
+                ngx.say(key, ":", val)
+            end
+        end
+    }
+}
+```
+
+测试地址：http://127.0.0.1/api?name=zhangsan&age=29&address=beijing,shanghai
+
+
+
+#### 1.4.3 获取POST请求体参数
+
+表单数据（application/x-www-form-urlencoded）
+
+```lua
+location /login {
+    content_by_lua_block {
+        ngx.req.read_body()  -- 必须先读取请求体
+        local post_args = ngx.req.get_post_args()  -- 解析为 Lua 表
+
+        -- 遍历参数
+        for key, val in pairs(post_args) do
+            ngx.say(key, ":", val)
+        end
+    }
+}
+```
+
+测试
 
 ```bash
-curl -H "Content-Type: application/json" -X POST -d '{"id": "001", "name":"张三", "phone":"13099999999"}'  http://192.168.2.201
+curl -X POST -d "username=zhangsan" -d "password=123456" http://127.0.0.1:8080/submit
+```
+
+JSON 数据 (application/json)
+
+
+```lua
+location /json {
+    content_by_lua_block {
+        ngx.req.read_body()
+        local json_str = ngx.req.get_body_data()  -- 获取原始 JSON 字符串
+        local cjson = require "cjson"
+        local data = cjson.decode(json_str)  -- 解析为 Lua 表
+
+        ngx.say("username:", data.username)
+        ngx.say("password:", data.password)
+    }
+}
+```
+
+测试
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"username":"zhangsan", "password":123456}'  http://127.0.0.1:8080/json
 ```
 
 
-#### 1.4.3 操作Redis
+#### 1.4.4 获取请求头
+
+```lua
+location /headers {
+    content_by_lua_block {
+        local headers = ngx.req.get_headers()  -- 获取所有请求头
+        
+        -- 遍历所有头信息
+        for key, value in pairs(headers) do
+            ngx.say(key, ":", value)
+        end
+        
+        -- 获取特定头信息（不区分大小写）
+        local user_agent = headers["User-Agent"] or headers["user-agent"]
+        ngx.say("\nUser-Agent: ", user_agent)
+    }
+}
+```
+
+```lua
+location /headers {
+    content_by_lua_block {
+        -- 直接获取特定头信息（下划线代替连字符）
+        local content_type = ngx.var.http_content_type
+        local auth_token = ngx.var.http_authorization
+        
+        ngx.say("Content-Type: ", content_type or "nil")
+        ngx.say("Authorization: ", auth_token or "nil")
+    }
+}
+```
+
+#### 1.4.5 获取Cookie
+
+```lua
+location /cookie {
+    content_by_lua_block {
+        local cookie = ngx.var.http_cookie
+        local auth_token
+
+        if cookie then
+            -- 使用正则表达式匹配auth_token
+            local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
+            if m then
+                auth_token = m[1]
+            end
+        end
+        ngx.say("cookie: ", cookie or "nil")
+        ngx.say("auth_token: ", auth_token or "nil")
+    }
+}
+```
+
+
+#### 1.4.6 操作Redis
 
 下载客户端：https://openresty.org/en/lua-resty-redis-library.html
 
@@ -215,7 +320,7 @@ end
 ngx.say("验证成功")
 ```
 
-#### 1.4.4 探测网站状态
+#### 1.4.7 探测网站状态
 
 下载并安装`lua-resty-http`库
 
