@@ -266,7 +266,7 @@ http {
                 ngx.say("登出成功，已清除凭证")
             }
         }
-
+        
         # 获取用户 - 需要验证token
         location = /current {
             default_type 'text/html';
@@ -297,65 +297,110 @@ http {
 
 ```lua
 -- 从Cookie中提取auth_token
-local cookie = ngx.var.http_cookie
-local auth_token
-
-if cookie then
-	-- 使用正则表达式匹配auth_token
-	local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
-	if m then
-		auth_token = m[1]
-	end
+local function extract_auth_token()
+    local cookie = ngx.var.http_cookie
+    if not cookie then
+        return nil
+    end
+    
+    local m = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")  
+    return m and m[1] or nil
 end
 
--- 如果未找到token，返回401错误
-if not auth_token then
-	ngx.status = ngx.HTTP_UNAUTHORIZED
-	ngx.say("没有凭证，请登录")
-	return ngx.exit(401)
+-- 获取Redis配置
+local function get_redis_config()
+    return {
+        -- 哨兵配置
+        sentinels = {
+            { host = "172.17.17.161", port = 26379 },
+            { host = "172.17.17.161", port = 26380 },
+            { host = "172.17.17.161", port = 26381 },
+        },
+        -- 主节点名称
+        master_name = "mymaster",
+        -- 连接参数
+        connect_timeout = 1000,  -- 1秒
+        send_timeout = 1000,     -- 1秒
+        read_timeout = 1000,     -- 1秒
+        -- 认证
+        password = "123456",
+        -- 数据库
+        db = 15,
+    }
 end
 
-ngx.say(auth_token)
-
-local redis = require "resty.redis"
-local red = redis:new()
-red:set_timeout(1000)   -- 设置超时时间
-
-local ok, err = red:connect("172.17.17.192", 16386)
-red:select(1)           -- 选择数据库1
-if not ok then
-    ngx.say("failed to connect: ", err)
-    return
+-- 创建Redis连接
+local function connect_redis()
+    local redis_connector = require "resty.redis.connector"
+    local config = get_redis_config()
+    
+    local connector, err = redis_connector.new(config)
+    if not connector then
+        ngx.log(ngx.ERR, "Redis创建失败: ", err)
+        return nil, err
+    end
+    
+    local redis, err = connector:connect()
+    if not redis then
+        ngx.log(ngx.ERR, "Redis连接失败: ", err)
+        return nil, err
+    end
+    
+    return redis
 end
 
--- 这里是 auth_token 的验证过程
-local count
-count, err = red:get_reused_times()
-if 0 == count then
-    ok, err = red:auth("123456")
-    if not ok then
-        ngx.say("failed to auth: ", err)
+-- 释放Redis连接
+local function close_redis(redis)
+    if not redis then
         return
     end
-elseif err then
-    ngx.say("failed to get reused times: ", err)
-    return
+    
+    local ok, err = redis:set_keepalive(10000, 100)
+    if not ok then
+        ngx.log(ngx.ERR, "释放Redis连接失败: ", err)
+    end
 end
 
--- 获取token
-local res, err = red:get(auth_token)
-if not res then
-    ngx.say("系统错误，请重试")
-	red:set_keepalive(10000, 100)
-    return
+-- 主流程
+local auth_token = extract_auth_token()
+if not auth_token then
+    return ngx.redirect("http://auth.vjsp.cn")
 end
 
-if res == ngx.null then
-    ngx.say("会话过期，请登录")
-	red:set_keepalive(10000, 100)
-    return
+local redis, err = connect_redis()
+if not redis then
+    return ngx.redirect("http://www.vjsp.cn/500")
 end
-ngx.say("验证成功")
+
+-- 使用pcall捕获可能的运行时错误
+local ok, err = pcall(function()
+    local res, query_err = redis:get(auth_token)
+    if query_err then
+        ngx.log(ngx.ERR, "Redis查询失败: ", query_err)
+        error("redis_query_error")
+    end
+    
+    if res == ngx.null then
+        error("token_not_found")
+    end
+    
+    -- 这里可以添加对查询结果的进一步处理
+    -- 例如: ngx.ctx.user_info = cjson.decode(res)
+end)
+
+-- 确保连接被释放
+close_redis(redis)
+
+if not ok then
+    if err == "token_not_found" then
+        return ngx.redirect("http://auth.vjsp.cn")
+    elseif err == "redis_query_error" then
+        return ngx.redirect("http://www.vjsp.cn/500")
+    else
+        ngx.log(ngx.ERR, "未知错误: ", err)
+        return ngx.redirect("http://www.vjsp.cn/500")
+    end
+end
 ```
 
 
@@ -363,66 +408,112 @@ ngx.say("验证成功")
 
 ```lua
 -- 从Cookie中提取auth_token
-local cookie = ngx.var.http_cookie
-local auth_token
-
-if cookie then
-    -- 使用正则表达式匹配auth_token
-    local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
-    if m then
-        auth_token = m[1]
+local function extract_auth_token()
+    local cookie = ngx.var.http_cookie
+    if not cookie then
+        return nil
     end
+    
+    local m = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
+    return m and m[1] or nil
 end
 
--- 如果未找到token，返回401错误
-if not auth_token then
-    ngx.status = ngx.HTTP_UNAUTHORIZED
-    ngx.say("没有凭证")
-    return ngx.exit(401)
-end
-
-ngx.say(auth_token)
-
-local redis = require "resty.redis"
-local red = redis:new()
-red:set_timeout(1000)   -- 设置超时时间
-
-local ok, err = red:connect("172.17.17.161", 6379)
-red:select(1)           -- 选择数据库1
-if not ok then
-    ngx.say("连接失败:", err)
-    return
-end
-
--- 这里是 auth_token 的验证过程
-local count
-count, err = red:get_reused_times()
-if 0 == count then
-    ok, err = red:auth("123456")
+-- Redis连接和操作封装
+local function get_redis_connection()
+    local redis = require "resty.redis"
+    local red = redis:new()
+    
+    red:set_timeout(1000)  -- 1秒超时
+    
+    -- 连接Redis
+    local ok, err = red:connect("172.17.17.161", 6379)
     if not ok then
-        ngx.say("认证失败: ", err)
+        ngx.log(ngx.ERR, "Redis连接失败: ", err)
+        return nil, err
+    end
+    
+    -- 检查连接复用状态
+    local reused, err = red:get_reused_times()
+    if err then
+        ngx.log(ngx.ERR, "获取连接复用状态失败: ", err)
+        red:close()  -- 无法确定状态，直接关闭
+        return nil, err
+    end
+    
+    -- 全新连接需要认证
+    if reused == 0 then
+        local auth_ok, auth_err = red:auth("123456")
+        if not auth_ok then
+            ngx.log(ngx.ERR, "Redis认证失败: ", auth_err)
+            red:close()
+            return nil, auth_err
+        end
+    end
+    
+    -- 选择数据库
+    local ok, err = red:select(1)
+    if not ok then
+        ngx.log(ngx.ERR, "Redis选择数据库失败: ", err)
+        red:close()
+        return nil, err
+    end
+    
+    return red, nil
+end
+
+-- 释放Redis连接
+local function close_redis(red)
+    if not red then
         return
     end
-elseif err then
-    ngx.say("连接池异常:", err)
-    return
+    
+    -- 尝试放回连接池
+    local ok, err = red:set_keepalive(10000, 100)
+    if not ok then
+        ngx.log(ngx.ERR, "释放Redis连接失败: ", err)
+        -- 连接池失败，直接关闭
+        red:close()
+    end
 end
 
--- 获取token
-local res, err = red:get(auth_token)
-if not res then
+-- 主逻辑
+local auth_token = extract_auth_token()
+if not auth_token then
+    ngx.status = ngx.HTTP_UNAUTHORIZED
+    ngx.header.content_type = "text/plain"
+    ngx.say("没有凭证")
+    return ngx.exit(ngx.HTTP_UNAUTHORIZED)
+end
+
+-- 获取Redis连接
+local red, err = get_redis_connection()
+if not red then
+    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
     ngx.say("系统错误")
-    red:set_keepalive(10000, 100)
-    return
+    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
 
+-- 查询Token
+local res, err = red:get(auth_token)
+if err then
+    ngx.log(ngx.ERR, "Redis查询失败: ", err)
+    close_redis(red)
+    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+    ngx.say("系统错误")
+    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+end
+
+-- 处理查询结果
 if res == ngx.null then
+    close_redis(red)
+    ngx.status = ngx.HTTP_UNAUTHORIZED
     ngx.say("凭证过期")
-    red:set_keepalive(10000, 100)
-    return
+    return ngx.exit(ngx.HTTP_UNAUTHORIZED)
 end
 
+-- 成功返回结果
 ngx.say(res)
+close_redis(red)
 ```
 
 #### 1.4.7 探测网站状态
