@@ -543,7 +543,7 @@ server {
 }
 ```
 
-lua脚本内容
+创建`check_health.lua`文件
 
 ```lua
 local http = require "resty.http"
