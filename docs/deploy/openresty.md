@@ -248,7 +248,7 @@ http {
 		# 获取用户 - 需要验证token
 		location /current {
 			default_type 'text/html';
-			content_by_lua_file conf.d/user.lua;
+			content_by_lua_file conf.d/auth.lua;
 		}
 		
 		# 登出 - 清除Cookie
@@ -262,6 +262,8 @@ http {
     }
 }
 ```
+
+创建`auth.lua`文件
 
 ```lua
 -- 从Cookie中提取auth_token
@@ -324,6 +326,16 @@ if res == ngx.null then
     return
 end
 ngx.say("验证成功")
+```
+
+> 如果希望拦截所有请求，满足条件继续转发到代理地址，不满足统一返回异常信息，此场景需要使用`access_by_lua_block`指令
+
+```nginx
+location / {
+    default_type 'text/html';
+    access_by_lua_file conf.d/auth.lua;
+    proxy_pass http://192.168.1.1:8080/;
+}
 ```
 
 #### 1.4.7 探测网站状态
