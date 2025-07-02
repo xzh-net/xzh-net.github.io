@@ -213,13 +213,16 @@ location /cookie {
 
 下载客户端：https://openresty.org/en/lua-resty-redis-library.html
 
-解压后将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下。业务场景：读取cookie中指定名称字段获取凭证，再调用redis查询用户信息
+解压后将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下。
+
+业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了单机模式`。
 
 
 ```nginx
 http {
     include       mime.types;
     default_type  application/octet-stream;
+
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
@@ -227,37 +230,64 @@ http {
     sendfile        on; 
     keepalive_timeout  65;
     server {
-        listen       80;
-        server_name  localhost;
+        listen 80;
         charset utf-8;
-		location / {
-			add_header Content-Type 'text/html; charset=utf-8';
-            return 200 "你好，当前时间：$time_local";
+        
+        # 拦截所有请求地址
+        location ~ ^/(.*) {
+            default_type 'text/html';
+            access_by_lua_file conf.d/auth.lua;
+            
+            proxy_pass http://172.17.17.165:8080/$1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            
+            proxy_hide_header Content-Type;
+            proxy_hide_header Content-Disposition;
+            add_header Content-Type "text/html; charset=utf-8";
         }
-		
-		# 登录页面 - 设置Cookie
-		location /login {
-			default_type 'text/html';
+
+        # 登录页面 - 设置Cookie
+        location = /login {
+            default_type 'text/html';
             content_by_lua_block {
                 local token = "zhangsan" 
                 ngx.header["Set-Cookie"] = "auth_token=" .. token .. "; Path=/; HttpOnly"
                 ngx.say("登录成功，已设置凭证")
             }
         }
-		
-		# 获取用户 - 需要验证token
-		location /current {
-			default_type 'text/html';
-			content_by_lua_file conf.d/auth.lua;
-		}
-		
-		# 登出 - 清除Cookie
-        location /logout {
-			default_type 'text/html';
+
+        # 登出 - 清除Cookie
+        location = /logout {
+            default_type 'text/html';
             content_by_lua_block {
                 ngx.header["Set-Cookie"] = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
                 ngx.say("登出成功，已清除凭证")
             }
+        }
+
+        # 获取用户 - 需要验证token
+        location = /current {
+            default_type 'text/html';
+            content_by_lua_file conf.d/current.lua;
+        }
+    }
+
+    server {
+        listen 8080;
+        charset utf-8;
+        location / {
+            add_header Content-Type 'text/html; charset=utf-8';
+            return 200 "首页";
+        }
+        location /aaa {
+            add_header Content-Type 'text/html; charset=utf-8';
+            return 200 "aaa";
+        }
+        location /bbb {
+            add_header Content-Type 'text/html; charset=utf-8';
+            return 200 "bbb";
         }
     }
 }
@@ -328,14 +358,71 @@ end
 ngx.say("验证成功")
 ```
 
-> 如果希望拦截所有请求，满足条件继续转发到代理地址，不满足统一返回异常信息，此场景需要使用`access_by_lua_block`指令
 
-```nginx
-location / {
-    default_type 'text/html';
-    access_by_lua_file conf.d/auth.lua;
-    proxy_pass http://192.168.1.1:8080/;
-}
+创建`current.lua`文件
+
+```lua
+-- 从Cookie中提取auth_token
+local cookie = ngx.var.http_cookie
+local auth_token
+
+if cookie then
+    -- 使用正则表达式匹配auth_token
+    local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
+    if m then
+        auth_token = m[1]
+    end
+end
+
+-- 如果未找到token，返回401错误
+if not auth_token then
+    ngx.status = ngx.HTTP_UNAUTHORIZED
+    ngx.say("没有凭证")
+    return ngx.exit(401)
+end
+
+ngx.say(auth_token)
+
+local redis = require "resty.redis"
+local red = redis:new()
+red:set_timeout(1000)   -- 设置超时时间
+
+local ok, err = red:connect("172.17.17.161", 6379)
+red:select(1)           -- 选择数据库1
+if not ok then
+    ngx.say("连接失败:", err)
+    return
+end
+
+-- 这里是 auth_token 的验证过程
+local count
+count, err = red:get_reused_times()
+if 0 == count then
+    ok, err = red:auth("123456")
+    if not ok then
+        ngx.say("认证失败: ", err)
+        return
+    end
+elseif err then
+    ngx.say("连接池异常:", err)
+    return
+end
+
+-- 获取token
+local res, err = red:get(auth_token)
+if not res then
+    ngx.say("系统错误")
+    red:set_keepalive(10000, 100)
+    return
+end
+
+if res == ngx.null then
+    ngx.say("凭证过期")
+    red:set_keepalive(10000, 100)
+    return
+end
+
+ngx.say(res)
 ```
 
 #### 1.4.7 探测网站状态
