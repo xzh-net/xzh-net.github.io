@@ -896,7 +896,7 @@ ENV PATH $PATH:$MAVEN_HOME/bin
 WORKDIR /data/workspace
 # 安装webide并配置
 ENV PATH "/root/.local/bin:${PATH}"
-RUN curl -fsSL https://poc.dev.vjsp.cn/install.sh | sh -s -- --method standalone &&\
+RUN curl -fsSL https://poc.dev.xuzhihao.net/install.sh | sh -s -- --method standalone &&\
     code-server --install-extension redhat.vscode-yaml &&\
     echo done
 # 默认配置

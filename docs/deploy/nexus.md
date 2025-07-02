@@ -149,7 +149,7 @@ mvn install:install-file -Dfile=D:/tools.jar -DgroupId=com.sun2 -DartifactId=too
 指定地址拉取
 
 ```bash
-mvn dependency:get -Dartifact=org.apache.commons:commons-lang3:3.12.0  -DremoteRepositories=http://maven.vjsp.cn/repository/maven-public/ 
+mvn dependency:get -Dartifact=org.apache.commons:commons-lang3:3.12.0  -DremoteRepositories=http://maven.xuzhihao.net/repository/maven-public/ 
 ```
 
 指定仓库部署

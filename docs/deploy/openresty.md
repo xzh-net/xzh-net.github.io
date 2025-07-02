@@ -364,12 +364,12 @@ end
 -- 主流程
 local auth_token = extract_auth_token()
 if not auth_token then
-    return ngx.redirect("http://auth.vjsp.cn")
+    return ngx.redirect("http://www.xuzhihao.net")
 end
 
 local redis, err = connect_redis()
 if not redis then
-    return ngx.redirect("http://www.vjsp.cn/500")
+    return ngx.redirect("http://www.xuzhihao.net/500")
 end
 
 -- 使用pcall捕获可能的运行时错误
@@ -393,12 +393,12 @@ close_redis(redis)
 
 if not ok then
     if err == "token_not_found" then
-        return ngx.redirect("http://auth.vjsp.cn")
+        return ngx.redirect("http://www.xuzhihao.net")
     elseif err == "redis_query_error" then
-        return ngx.redirect("http://www.vjsp.cn/500")
+        return ngx.redirect("http://www.xuzhihao.net/500")
     else
         ngx.log(ngx.ERR, "未知错误: ", err)
-        return ngx.redirect("http://www.vjsp.cn/500")
+        return ngx.redirect("http://www.xuzhihao.net/500")
     end
 end
 ```
