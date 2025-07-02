@@ -1199,7 +1199,7 @@ ServerName localhost:80
 service apache2 restart
 ```
 
-#### Redis 5
+#### Redis 5 单机
 
 下载镜像
 
@@ -1228,6 +1228,89 @@ prometheus监控
 ```bash
 docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:v1.28.0 --redis.addr redis://172.17.17.191:16379 --redis.password 'redis16379'
 ```
+
+#### Redis 7 1主2从3哨兵
+
+创建文件夹
+
+```bash
+mkdir /data/redis -p
+```
+
+创建哨兵配置
+```bash
+vi /data/redis/sentinel1.conf
+
+# 所有IP修改为宿主机
+sentinel monitor mymaster 172.17.17.161 6379 2
+sentinel down-after-milliseconds mymaster 60000
+sentinel failover-timeout mymaster 180000
+sentinel parallel-syncs mymaster 1
+```
+
+复制3份
+```bash
+cp /data/redis/sentinel1.conf /data/redis/sentinel2.conf
+cp /data/redis/sentinel1.conf /data/redis/sentinel3.conf
+```
+
+创建compose文件
+```bash
+vi docker-compose.yml
+```
+
+```yaml
+version: "3"
+services:
+  master:
+    image: redis:7.0.4
+    container_name: redis-master
+    command: redis-server --requirepass "123456" --slave-announce-ip 172.17.17.161 --slave-announce-port 6379
+    ports:
+      - 6379:6379
+  slave1:
+    image: redis:7.0.4
+    container_name: redis-slave-1
+    ports:
+      - 6380:6379
+    command: redis-server --requirepass "123456" --slaveof redis-master 6379 --slave-announce-ip 172.17.17.161 --slave-announce-port 6380
+  slave2:
+    image: redis:7.0.4
+    container_name: redis-slave-2
+    ports:
+      - 6381:6379
+    command: redis-server --requirepass "123456" --slaveof redis-master 6379 --slave-announce-ip 172.17.17.161 --slave-announce-port 6381
+
+  sentinel1:
+    image: redis:7.0.4
+    container_name: redis-sentinel-1
+    ports:
+      - 26379:26379
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - /data/redis/sentinel1.conf:/usr/local/etc/redis/sentinel.conf
+  sentinel2:
+    image: redis:7.0.4
+    container_name: redis-sentinel-2
+    ports:
+    - 26380:26379
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - /data/redis/sentinel2.conf:/usr/local/etc/redis/sentinel.conf
+  sentinel3:
+    image: redis:7.0.4
+    container_name: redis-sentinel-3
+    ports:
+      - 26381:26379
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - /data/redis/sentinel3.conf:/usr/local/etc/redis/sentinel.conf
+```
+
+```bash
+docker-compose up -d
+```
+
 
 #### MongoDB 4.4.6
 
