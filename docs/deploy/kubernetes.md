@@ -319,7 +319,7 @@ kubectl get nodes
 kubernetes支持多种网络插件，比如flannel、calico、canal等等，任选一种使用即可，本次选择flannel
 
 - 下载地址：https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-- 百度网盘：/Kubernetes 1.17.4/flannel
+- 网盘：/Kubernetes 1.17.4/flannel
 
 ```bash
 kubectl apply -f kube-flannel.yml   # 安装插件
@@ -1640,7 +1640,7 @@ Ingress公开了从集群外部到集群内服务的HTTP和HTTPS路由。流量�
 - 下载地址：
   - https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
   - https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
-- 百度网盘：/Kubernetes 1.17.4/ingress
+- 网盘：/Kubernetes 1.17.4/ingress
 
 
 安装部署
