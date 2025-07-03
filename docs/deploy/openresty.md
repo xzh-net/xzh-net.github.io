@@ -234,18 +234,13 @@ http {
         charset utf-8;
         
         # 拦截所有请求地址
-        location ~ ^/(.*) {
-            default_type 'text/html';
+        location / {
             access_by_lua_file conf.d/auth.lua;
-            
-            proxy_pass http://172.17.17.165:8080/$1;
+            proxy_pass http://172.17.17.165:8080/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            
-            proxy_hide_header Content-Type;
-            proxy_hide_header Content-Disposition;
-            add_header Content-Type "text/html; charset=utf-8";
+			add_header Content-Type "text/html; charset=utf-8";
         }
 
         # 登录页面 - 设置Cookie
