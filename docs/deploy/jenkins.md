@@ -8,7 +8,7 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 
 | **名称**  | **IP地址**  | **安装的软件**  |
 | :---------- | :---------- | :---------------------------------- |
-| 代码托管服务器    | 172.17.17.196 | Gitlab-12.4.2 |
+| 代码托管服务器    | 172.17.17.136 | Gitlab-12.4.2 |
 | 持续集成服务器    | 172.17.17.200 | Jenkins-2.426，JDK17，Maven3.6.3，Git，SonarQube |
 | 应用测试服务器    | 172.17.17.196 | JDK8，Tomcat8.5.100 |
 
@@ -640,7 +640,7 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.136/xzh-group/xzh-spring-boot.git']]])
          }
       }
    }
@@ -656,7 +656,7 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.136/xzh-group/xzh-spring-boot.git']]])
          }
       }
       stage('编译构建') {
@@ -677,7 +677,7 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.136/xzh-group/xzh-spring-boot.git']]])
          }
       }
       stage('编译构建') {
@@ -713,7 +713,7 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.136/xzh-group/xzh-spring-boot.git']]])
          }
       }
       stage('编译构建') {
@@ -953,7 +953,7 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.136/xzh-group/xzh-spring-boot.git']]])
          }
       }
       stage('编译构建') {
@@ -1059,7 +1059,7 @@ pipeline {
    stages {
       stage('代码拉取') {
          steps {
-            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.196:222/xzh-group/xzh-spring-boot.git']]])
+            checkout([$class: 'GitSCM', branches: [[name: '*/${branch}']], extensions: [], userRemoteConfigs: [[credentialsId: '4cba62e6-1a9f-4664-97f9-0f814dc728c9', url: 'ssh://git@172.17.17.136/xzh-group/xzh-spring-boot.git']]])
          }
       }
       stage('代码审查') {
@@ -1389,7 +1389,7 @@ pipeline {
     stages {
         stage('代码拉取') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '210e7696-63a7-4ee4-ac31-48141432330d', url: 'http://172.17.17.136:18080/xuzhihao/spring.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '210e7696-63a7-4ee4-ac31-48141432330d', url: 'http://172.17.17.136/xuzhihao/spring.git']]])
                 sh 'mvn clean package -Dmaven.test.skip=true '
             }
         }
