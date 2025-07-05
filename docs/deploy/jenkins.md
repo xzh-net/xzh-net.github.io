@@ -12,13 +12,9 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 | 持续集成服务器    | 172.17.17.200 | Jenkins-2.426，JDK17，Maven3.6.3，Git，SonarQube |
 | 应用测试服务器    | 172.17.17.196 | JDK8，Tomcat8.5.100 |
 
-### 1.1 Gitlab安装
+### 1.1 Jenkins安装
 
-[Gitlab](deploy/gitlab)
-
-### 1.2 Jenkins安装
-
-#### 1.2.1 下载安装
+#### 1.1.1 下载安装
 
 ```bash
 # 安装依赖
@@ -46,7 +42,7 @@ sudo apt-get install -y fonts-dejavu-core fonts-freefont-ttf
 sudo apt-get install -y fontconfig
 ```
 
-#### 1.2.2 修改配置
+#### 1.1.2 修改配置
 
 1. 修改启动用户
 
@@ -101,7 +97,7 @@ systemctl restart jenkins
 ```
 
 
-#### 1.2.3 启动服务
+#### 1.1.3 启动服务
 
 ```bash
 systemctl daemon-reload
@@ -131,9 +127,9 @@ systemctl start jenkins
 ![](../../assets/_images/deploy/jenkins/jenkins_skip6.png)
 
 
-### 1.3 插件管理
+### 1.2 插件管理
 
-#### 1.3.1 修改插件下载地址
+#### 1.2.1 修改插件下载地址
 
 Dashboard -> Manage Jenkins -> Plugins，点击`Advanced settings`，将`Update Site`地址改为`https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json`
 
@@ -150,7 +146,7 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 
 重启服务：http://172.17.17.200:8888/restart
 
-#### 1.3.2 下载中文汉化插件
+#### 1.2.2 下载中文汉化插件
 
 安装`Localization: Chinese (Simplified)`插件
 
@@ -159,7 +155,7 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_chinese.png)
 
 
-#### 1.3.3 插件安装方式（可选）
+#### 1.2.3 插件安装方式（可选）
 
 1. 在线安装
 
@@ -191,9 +187,9 @@ tar -zxvf /opt/jenkins/plugins.tar.gz -C /var/lib/jenkins/
 ```
 
 
-### 1.4 权限管理
+### 1.3 权限管理
 
-#### 1.4.1 忘记密码
+#### 1.3.1 忘记密码
 
 编辑config.xml文件，替换passwordHash行的内容123456
 
@@ -203,7 +199,7 @@ vim /var/lib/jenkins/users/admin_1679382529066310837/config.xml
 systemctl restart jenkins
 ```
 
-#### 1.4.2 关闭安全功能
+#### 1.3.2 关闭安全功能
 
 ```bash
 vim /var/lib/jenkins/config.xml
@@ -211,13 +207,13 @@ vim /var/lib/jenkins/config.xml
 systemctl restart jenkins
 ```
 
-#### 1.4.3 下载权限插件
+#### 1.3.3 下载权限插件
 
 安装`Role-based Authorization Strategy`插件
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_role.png)
 
-#### 1.4.4 开启权限全局安全配置
+#### 1.3.4 开启权限全局安全配置
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set.png)
 
@@ -225,7 +221,7 @@ systemctl restart jenkins
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_set2.png)
 
-#### 1.4.5 创建角色
+#### 1.3.5 创建角色
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_role.png)
 
@@ -240,28 +236,28 @@ missing the Overall/Read permission
 
 ![](../../assets/_images/deploy/jenkins/jenkins_role2.png)
 
-#### 1.4.6 创建用户
+#### 1.3.6 创建用户
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user.png)
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user2.png)
 
-#### 1.4.7 用户角色绑定
+#### 1.3.7 用户角色绑定
 
 系统管理页面进入Manage and Assign Roles，点击Assign Roles，绑定规则如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_create_user3.png)
 
-#### 1.4.8 创建项目测试权限
+#### 1.3.8 创建项目测试权限
 
 以admin管理员账户创建两个项目，分别为xuzhihao01和xzh01,zhangsan只能看到xuzhihao01，lisi只能看到xzh01
 
 
-### 1.5 凭证管理
+### 1.4 凭证管理
 
 凭据可以用来存储需要密文保护的数据库密码、Gitlab密码信息、Docker私有仓库密码等，以便Jenkins可以和这些第三方的应用进行交互
 
-#### 1.5.1 下载凭证插件
+#### 1.4.1 下载凭证插件
 
 安装`Credentials Binding`插件
 
@@ -285,7 +281,7 @@ missing the Overall/Read permission
 常用的凭证类型有：`Username with password（用户密码）`和`SSH Username with private key（SSH密钥）`
 
 
-#### 1.5.2 下载Git插件
+#### 1.4.2 下载Git插件
 
 安装`Git`插件
 
@@ -298,7 +294,7 @@ yum install git -y  # 安装
 git --version       # 查看版本
 ```
 
-#### 1.5.3 用户密码类型凭证
+#### 1.4.3 用户密码类型凭证
 
 创建凭证
 
@@ -328,7 +324,7 @@ git --version       # 查看版本
 
 查看/var/lib/jenkins/workspace/，发现已经从Gitlab成功拉取了代码到Jenkins中。
 
-#### 1.5.4 SSH密钥类型凭证
+#### 1.4.4 SSH密钥类型凭证
 
 ![](../../assets/_images/deploy/jenkins/jenkins_ssh_rsa.png)
 
@@ -360,9 +356,9 @@ ssh-keygen -t rsa
 git ls-remote -h git@git.xxx.cn:root/website.git HEAD
 ```
 
-### 1.6 Maven安装和配置
+### 1.5 Maven安装和配置
 
-#### 1.6.1 Maven安装
+#### 1.5.1 Maven安装
 
 上传`apache-maven-3.6.3-bin.tar.gz`到Jenkins服务器
 
@@ -379,7 +375,7 @@ source /etc/profile                   # 配置生效
 mvn -v                                # 查找Maven版本
 ```
 
-#### 1.6.2 全局配置关联JDK和Maven
+#### 1.5.2 全局配置关联JDK和Maven
 
 Dashboard -> Manage Jenkins -> Tools，新增JDK和Maven配置如下：
 
@@ -387,14 +383,14 @@ Dashboard -> Manage Jenkins -> Tools，新增JDK和Maven配置如下：
 
 ![](../../assets/_images/deploy/jenkins/jenkins_maven.png)
 
-#### 1.6.3 添加Jenkins全局变量
+#### 1.5.3 添加Jenkins全局变量
 
 Dashboard -> Manage Jenkins -> System - >全局属性 ，添加三个全局变量`JAVA_HOME`、`M2_HOME`、`PATH+EXTRA`
 
 ![](../../assets/_images/deploy/jenkins/jenkins_env.png)
 
 
-#### 1.6.4 修改Maven配置文件
+#### 1.5.4 修改Maven配置文件
 
 ```bash
 mkdir /opt/repository # 仓库目录
@@ -417,7 +413,7 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 </mirrors>
 ```
 
-#### 1.6.5 测试Maven是否配置成功
+#### 1.5.5 测试Maven是否配置成功
 
 使用之前的测试项目->配置->构建步骤->增加构建步骤->Execute Shell
 
@@ -430,9 +426,9 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 > 输入命令：mvn clean package
 
 
-### 1.7 Tomcat安装和配置
+### 1.6 Tomcat安装和配置
 
-#### 1.7.1 安装Tomcat8.5
+#### 1.6.1 安装Tomcat8.5
 
 上传`apache-tomcat-8.5.100.tar.gz`到应用服务器
 
