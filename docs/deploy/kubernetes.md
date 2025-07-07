@@ -333,75 +333,45 @@ kubectl describe pod coredns-6955765f44-c6fr2 -n kube-system  # 如果容器报�
 
 #### 1.7.2 Calico
 
-待补充
+安装待补充。要使用网络策略，必须使用支持NetworkPolicy的网络解决方案。(Flannel不支持NetworkPolicy)，下面是几种常见的策略和配置，可以参考
 
-#### 1.7.3 网络策略
-
-要使用网络策略，你必须使用支持 NetworkPolicy 的网络解决方案。(Flannel不支持 NetworkPolicy，所以使用 flannel 网络插件是不会隔离pod的)
-
-- podSelector: 用于定义这个NetworkPolicy适用于哪些Pod。如果其值为空，则表示适用于所有此namespace下的Pod
-- policyTypes: 包含两个可选值：用于控制进入流量的Ingress和控制出口流量的Egress
-- ingress: 用于定义能够进入Pod的流量的规则。例子中允许三种流量与podSelector选中的Pod的6379端口进行通信，三种流量分别为：ip地址位于172.17.0.0/16网段内的流量（但不包括172.17.1.0/24）允许与目标Pod通信，任何拥有role=frontend的label的Pod的流量允许进入，任何拥有label `project=myproject` 的 namespace 下的Pod的流量允许进入。其他任何进入流量将被禁止。
-- egress: 用于定义允许的出口流量。上面的例子中表示podSelector选中的Pod能够向10.0.0.0/24的5978端口发送TCP请求。其他任何TCP出流量都将被禁止。
-
-1. 默认拒绝所有Pod间的入流量
+在dev命名空间中，对所有Pod执行禁止入站和出战规则，这是完全隔离的网络安全环境，通常用作基础安全层，后续叠加更精细的规则来开放必要的通信路径。
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all-inbound
+  name: default-deny-all
   namespace: dev
 spec:
   podSelector: {}
   policyTypes:
   - Ingress
+  ingress: []   # 入站规则为空，表示拒绝所有入站访问
+  - Egress
+  egress: []    # 出站规则为空，表示拒绝所有出站访问
 ```
 
-2. 默认拒绝所有Pod间的出流量
+在dev命名空间中，允许所有Pod间的出流量和入流量，此策略完全禁用网络安全隔离，多用于测试环境临时使用。
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all-outbound
+  name: default-allow-all
   namespace: dev
 spec:
   podSelector: {}
   policyTypes:
+  - Ingress
   - Egress
-```
-
-3. 默认允许所有Pod间的入流量
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-allow-all-inbound
-  namespace: dev
-spec:
-  podSelector: {}
   ingress:
-  - {}
-```
-
-
-4. 默认允许所有Pod间的出流量
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-allow-all-outbound
-  namespace: dev
-spec:
-  podSelector: {}
+  - {}  # 允许所有入站
   egress:
-  - {}
+  - {}  # 允许所有出站
 ```
 
-5. 允许`哪些(北京的)`Pod被`哪些（来自dalian）`Pod入流量
+允许`beijing`pod被`dalian`访问
 
 ```yaml
 kind: NetworkPolicy
@@ -420,7 +390,7 @@ spec:
           app: app-pod-dalian
 ```
 
-6. 允许来自指定命名空间访问
+允许带有`env=test`标签的命名空间中所有pod访问dev空间下所有pod
 
 ```yaml
 akind: NetworkPolicy
@@ -438,7 +408,12 @@ spec:
           env: test
 ```
 
-7. 综合示例
+综合案例，作用于dev命名空间中所有带有标签`role=redis`的Pod，与其6379端口进行通信，需要满足以下条件：
+  - 【入】允许IP地址位于172.17.0.0/16网段内的流量（但不包括172.17.1.0/24）
+  - 【入】允许带有`platform=cloud`标签的命名空间中所有流量
+  - 【入】允许带有`role=frontend`标签的Pod流量
+  - 【出】允许访问10.0.0.0/24网段内的所有流量
+  - 【出】只能访问目标端口的5432
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -449,7 +424,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      role: db
+      role: redis
   policyTypes:
   - Ingress
   - Egress
@@ -461,7 +436,7 @@ spec:
         - 172.17.1.0/24
     - namespaceSelector:
         matchLabels:
-          project: myproject
+          platform: cloud
     - podSelector:
         matchLabels:
           role: frontend
@@ -474,7 +449,7 @@ spec:
         cidr: 10.0.0.0/24
     ports:
     - protocol: TCP
-      port: 5978
+      port: 5432
 ```
 
 ### 1.8 部署测试
@@ -553,6 +528,10 @@ kubectl label pod nginx version=2.0 -n dev --overwrite    # 更新标签
 kubectl get pod nginx  -n dev --show-labels               # 查看标签
 kubectl get pod -n dev -l version=2.0  --show-labels      # 筛选标签
 kubectl label pod nginx-pod version- -n dev               # 删除标签
+
+kubectl get node k8s-node01 --show-labels                 # 查看节点标签
+kubectl label nodes k8s-node01 env=test                   # 设置节点标签
+kubectl label nodes k8s-node01 env- --overwrite           # 清除节点标签
 ```
 
 #### 2.3.2 配置方式
