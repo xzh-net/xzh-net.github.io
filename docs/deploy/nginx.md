@@ -562,11 +562,7 @@ server {
         add_header Access-Control-Allow-Headers 'Authorization,Content-Type,X-Requested-With';
     }
 }
-```
 
-#### 3.1.3 front_upstream.conf
-
-```nginx
 upstream front {
     server 172.17.17.165:5501 weight=1 max_fails=3 fail_timeout=3s;
     server 172.17.17.165:5502 weight=1 max_fails=3 fail_timeout=3s;
@@ -579,9 +575,11 @@ upstream front {
     check_http_expect_alive http_2xx http_3xx;
     #该指令指定HTTP回复的成功状态，默认为2XX和3XX的状态是健康的
 }
+
 ```
 
-#### 3.1.4 tcp_openfire.conf
+
+#### 3.1.3 tcp_openfire.conf
 
 ```nginx
 timeout 60000;
@@ -631,7 +629,7 @@ server{
 }
 ```
 
-#### 3.1.5 stream_openfire.conf
+#### 3.1.4 stream_openfire.conf
 
 ```nginx
 upstream mysql {
@@ -677,6 +675,23 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
+}
+```
+
+#### 3.1.6 sse.conf
+
+```nginx
+location / {
+    proxy_pass http://app-server;
+    
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_http_version 1.1;
+    proxy_set_header Connection '';
+    proxy_read_timeout 24h;
+    
+    # 确保后端识别为 SSE 请求
+    proxy_set_header Accept 'text/event-stream';
 }
 ```
 
