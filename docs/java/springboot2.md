@@ -1,4 +1,4 @@
-# SpringBoot 2.7.18
+# SpringBoot 2.7.x
 
 ## 1. 配置文件加载顺序
 
