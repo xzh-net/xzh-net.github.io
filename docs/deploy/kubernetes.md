@@ -1805,6 +1805,8 @@ kubectl describe ing ingress-https -n dev
 
 curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
+# 转换为16进制，只显示前5行
+curl -s -H 'Host:png.xuzhihao.net' https://192.168.2.201:30443/1.jpg  | xxd | head -n 5
 ```
 
 ## 3. 数据存储
