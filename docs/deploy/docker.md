@@ -1563,9 +1563,9 @@ openssl rand -base64 3
 ```bash
 docker run --name nacos-standalone-derby \
     -e MODE=standalone \
-    -e NACOS_AUTH_TOKEN=${RK3KM1DQFAM9Xj1aEzL7nMnG9HF+ObBlSeTkJSBMNUs=} \
-    -e NACOS_AUTH_IDENTITY_KEY=${server_key} \
-    -e NACOS_AUTH_IDENTITY_VALUE=${server_value} \
+    -e NACOS_AUTH_TOKEN=RK3KM1DQFAM9Xj1aEzL7nMnG9HF+ObBlSeTkJSBMNUs= \
+    -e NACOS_AUTH_IDENTITY_KEY=Authorization \
+    -e NACOS_AUTH_IDENTITY_VALUE=token \
     -p 8080:8080 \
     -p 8848:8848 \
     -p 9848:9848 \
