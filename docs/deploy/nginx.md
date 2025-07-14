@@ -970,38 +970,44 @@ server {
 
 ### 3.9 访问控制
 
-```bash
-vi blockip.conf
-```
-
-```nginx
-allow 192.168.1.0/24;
-allow 10.1.1.0/16;
-allow 2001:0db8::/32;
-deny  all;
-```
-
-```nginx
+```conf
 http {
-    # 所有站点屏蔽规则
-    # include blockip.conf;
+    # 全局生效（所有站点）
+    # include /usr/local/nginx/conf/blocked_ips.conf;  
     server {
         listen 28101;
         server_name  _;
-        # 针对具体网站屏蔽规则
-        # include blockip.conf;
+        # 或仅对具体站点生效
+        # include /usr/local/nginx/conf/blocked_ips.conf;
         location / {
             proxy_redirect off;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass http://127.0.0.1:18101;
-            # 按路径屏蔽
-            # include blockip.conf;
+            # 或按指定路径生效
+            # include /usr/local/nginx/conf/blocked_ips.conf;
         }
     }
 }
 ```
+
+创建blocked_ips.conf文件
+
+1. 禁止192.168.1.1访问，其他ip正常访问
+
+```
+deny 192.168.1.1;
+```
+
+2. 允许192.168.1.1访问，其他ip禁止访问
+
+```
+allow 192.168.1.1;
+deny all;
+```
+
+
 
 ### 3.10 日志分析
 
