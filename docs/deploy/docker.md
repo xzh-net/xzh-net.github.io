@@ -1516,23 +1516,62 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 
 ### 4.5 微服务
 
+#### Nacos 2.5.1
 
-#### Nacos 2.0.1
+拉取镜像
+```bash
+docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:v2.5.1
+```
+
+创建配置文件目录
+```bash
+mkdir -p /data/nacos
+```
+
+拷贝配置文件
+```bash
+docker cp nacos:/home/nacos/conf /data/nacos/
+docker cp nacos:/home/nacos/data /data/nacos/
+docker cp nacos:/home/nacos/logs /data/nacos/
+docker rm -f nacos
+```
+
+使用配置文件启动
+```bash
+docker run -d \
+  --name nacos \
+  -p 8848:8848 \
+  -p 9848:9848 \
+  -p 9849:9849 \
+  -e MODE=standalone \
+  -e PREFER_HOST_MODE=hostname \
+  -v /data/nacos/logs:/home/nacos/logs \
+  -v /data/nacos/conf:/home/nacos/conf \
+  -v /data/nacos/data:/home/nacos/data \
+  --restart always \
+  nacos/nacos-server:v2.5.1
+```
+
+
+#### Nacos 3.0.2
 
 ```bash
-docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
-
-docker run --name nacos -d --network=host -p 8848:8848 -e MODE=standalone \
--e JVM_XMS=256m -e JVM_XMX=256m \
--e SPRING_DATASOURCE_PLATFORM=mysql \
--e MYSQL_SERVICE_HOST=172.17.17.137 \
--e MYSQL_SERVICE_PORT=3306 \
--e MYSQL_SERVICE_USER=root \
--e MYSQL_SERVICE_PASSWORD=root \
--e MYSQL_SERVICE_DB_NAME=nacos_config \
--e TIME_ZONE='Asia/Shanghai' \
---restart=always nacos/nacos-server:2.0.1
+# 生成随机密码并编码
+openssl rand -base64 3
 ```
+
+```bash
+docker run --name nacos-standalone-derby \
+    -e MODE=standalone \
+    -e NACOS_AUTH_TOKEN=${RK3KM1DQFAM9Xj1aEzL7nMnG9HF+ObBlSeTkJSBMNUs=} \
+    -e NACOS_AUTH_IDENTITY_KEY=${server_key} \
+    -e NACOS_AUTH_IDENTITY_VALUE=${server_value} \
+    -p 8080:8080 \
+    -p 8848:8848 \
+    -p 9848:9848 \
+    -d nacos/nacos-server:3.0.2
+```
+
 
 #### Consul 1.12.1
 
