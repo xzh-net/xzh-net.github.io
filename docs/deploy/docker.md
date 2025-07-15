@@ -1552,6 +1552,7 @@ docker run -d \
   nacos/nacos-server:v2.5.1
 ```
 
+访问地址：http://127.0.0.1:8848/nacos
 
 #### Nacos 3.0.2
 
@@ -1570,6 +1571,34 @@ docker run --name nacos-standalone-derby \
     -p 8848:8848 \
     -p 9848:9848 \
     -d nacos/nacos-server:3.0.2
+```
+
+访问地址：http://127.0.0.1:8080
+
+
+注册服务
+```bash
+curl -X POST 'http://127.0.0.1:8848/nacos/v3/client/ns/instance?serviceName=quickstart.test.service&ip=127.0.0.1&port=8080'
+```
+
+服务发现
+```bash
+curl -X GET 'http://127.0.0.1:8848/nacos/v3/client/ns/instance/list?serviceName=quickstart.test.service'
+```
+
+创建accessToken
+```bash
+curl -X POST 'http://127.0.0.1:8848/nacos/v3/auth/user/login' -d 'username=nacos' -d 'password=nacos'
+```
+
+使用accessToken创建配置
+```bash
+curl -X POST 'http://127.0.0.1:8848/nacos/v3/admin/cs/config?dataId=quickstart.test.config&groupName=test&content=HelloWorld' -H "accessToken:${your_access_token}"
+```
+
+获取配置
+```bash
+curl -X GET 'http://127.0.0.1:8848/nacos/v3/client/cs/config?dataId=quickstart.test.config&groupName=test'
 ```
 
 
