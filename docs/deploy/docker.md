@@ -423,14 +423,16 @@ docker run -it -v /[local_path]|pgdata:/[container_path] [imageid] /bin/bash   #
 
 ```bash
 docker images                   # 查看镜像
+docker image inspect minio/minio:latest | grep  -i version      # 查看已下载镜像版本
 docker history [imageid]        # 查看镜像构建历史
-docker system prune -a -f       # 永久删除镜像
+docker system prune -a -f       # 强制清理未使用的镜像、容器、卷和网络
 docker rmi [imageid]            # 删除指定镜像
 docker rmi $(docker images | grep "none" | awk '{print $3}')    # 删除none的镜像
 docker rmi $(docker images -qa)                                 # 删除所有镜像
-docker save -o logstash_7.6.2.tar logstash:7.6.2                # 镜像备份
-docker load -i logstash_7.6.2.tar                               # 镜像导入
-docker image inspect minio/minio:latest|grep  -i version        # 查看已下载镜像版本
+docker save -o mysql_5.7.44.tar mysql:5.7.44                    # 导出镜像归档文件
+docker load -i mysql_5.7.44.tar                                 # 镜像导入
+# 本地安装xz工具，导出压缩镜像
+docker save mysql:5.7.44 | xz > mysql_5.7.44.tar.xz             # 镜像备份并压缩
 # 镜像分析
 docker stats [containerid]                              # 监控指定容器
 docker stats $(docker ps -a -q)                         # 监控所有容器
