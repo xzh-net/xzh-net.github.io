@@ -1055,6 +1055,7 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 mkdir -p /data/mysql/data /data/mysql/logs /data/mysql/conf
 ```
 
+运行容器
 ```bash
 docker run -p 3306:3306 --name mysql \
 -v /data/mysql/conf:/etc/mysql/conf.d \
@@ -1064,12 +1065,14 @@ docker run -p 3306:3306 --name mysql \
 -d mysql:5.7.44
 ```
 
+拷贝SQL文件到容器中并登录
 ```bash
-docker cp /data/mysql/file-center.sql mysql:/  # sql拷贝到容器中
+docker cp /data/mysql/file-center.sql mysql:/
 docker exec -it mysql /bin/bash
 mysql -uroot -proot --default-character-set=utf8
 ```
 
+执行数据还原
 ```sql
 create database `file_center` character set utf8;
 use file_center;
