@@ -1579,7 +1579,7 @@ docker run --name nacos-standalone-derby \
     -p 8080:8080 \
     -p 8848:8848 \
     -p 9848:9848 \
-    -d nacos/nacos-server:3.0.2
+    -d nacos/nacos-server:v3.0.2
 ```
 
 访问地址：http://127.0.0.1:8080
