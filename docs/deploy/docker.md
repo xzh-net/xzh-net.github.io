@@ -1048,28 +1048,32 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 
 ### 4.2 数据库
 
-#### MySQL 5.7
+#### MySQL 5.7.44
 
-
+创建目录
 ```bash
 mkdir -p /data/mysql/data /data/mysql/logs /data/mysql/conf
+```
 
+```bash
 docker run -p 3306:3306 --name mysql \
 -v /data/mysql/conf:/etc/mysql/conf.d \
 -v /data/mysql/data:/var/lib/mysql \
 -v /data/mysql/logs:/logs \
 -e MYSQL_ROOT_PASSWORD=root \
--d mysql:5.7
+-d mysql:5.7.44
+```
 
-docker cp /data/mall.sql mysql:/  # sql拷贝到容器中
+```bash
+docker cp /data/mysql/file-center.sql mysql:/  # sql拷贝到容器中
 docker exec -it mysql /bin/bash
 mysql -uroot -proot --default-character-set=utf8
 ```
 
 ```sql
-create database mall character set utf8
-use mall;
-source /mall.sql;
+create database `file_center` character set utf8;
+use file_center;
+source /file-center.sql;
 grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
 
