@@ -295,8 +295,8 @@ db.password.0=root
 进入curl-7.66.0_2-win64-mingw的bin目录，进行下边的测试，通过测试可判断nacos是否正常工作：
 
 ```bash
-curl -X POST "http://127.0.0.1:8848/nacos/v1/cs/configs?dataId=nacos.cfg.dataId&group=test&content=HelloWorld" # 发布配置
-curl -X GET "http://127.0.0.1:8848/nacos/v1/cs/configs?dataId=nacos.cfg.dataId&group=test"					   # 获取配置
+curl -X POST "http://127.0.0.1:8848/nacos/v1/cs/configs?dataId=nacos.cfg.dataId&group=test&content=HelloWorld"  # 发布配置
+curl -X GET "http://127.0.0.1:8848/nacos/v1/cs/configs?dataId=nacos.cfg.dataId&group=test"                      # 获取配置
 ```
 
 #### 2.1.2 客户端获取
@@ -370,7 +370,7 @@ public class SimpleDemoMain {
 ```xml
 <dependency>
 	<groupId>org.springframework.security</groupId>
-	<artifactId>spring‐security‐core</artifactId>
+	<artifactId>spring-security-core</artifactId>
 	<version>5.1.4.RELEASE</version>
 </dependency>
 ```
