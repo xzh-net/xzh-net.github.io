@@ -891,13 +891,25 @@ server {
     }
 }
 
-## 永久重定向
+## 外部永久重定向
 server {
     listen 80;
     server_name  www.xuzhihao.net;
     location /console/ {
         rewrite ^/(.*)$ http://www.xuzhihao.net/$1 permanent;
     }
+}
+
+## 内部路径重写
+location ^~ /api/ {
+    rewrite ^/api/(.*)$ /$1 break;
+
+    # 代理到上游服务（注意结尾不带斜杠）
+    proxy_pass http://www.xuzhihao.net;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 
