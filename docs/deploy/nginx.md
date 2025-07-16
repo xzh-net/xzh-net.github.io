@@ -690,8 +690,13 @@ location / {
     proxy_set_header Connection '';
     proxy_read_timeout 24h;
     
-    # 确保后端识别为 SSE 请求
     proxy_set_header Accept 'text/event-stream';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+
 }
 ```
 
@@ -903,8 +908,7 @@ server {
 ## 内部路径重写
 location ^~ /api/ {
     rewrite ^/api/(.*)$ /$1 break;
-
-    # 代理到上游服务（注意结尾不带斜杠）
+    # 结尾不带斜杠
     proxy_pass http://www.xuzhihao.net;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
