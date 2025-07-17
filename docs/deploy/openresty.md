@@ -217,6 +217,7 @@ location /cookie {
 
 业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了单机模式`。
 
+1. 配置nginx.conf
 
 ```nginx
 http {
@@ -288,7 +289,8 @@ http {
 }
 ```
 
-创建`auth.lua`文件
+
+2. 创建脚本auth.lua
 
 ```lua
 -- 从Cookie中提取auth_token
@@ -399,7 +401,7 @@ end
 ```
 
 
-创建`current.lua`文件
+3. 创建脚本current.lua
 
 ```lua
 -- 从Cookie中提取auth_token
@@ -521,7 +523,7 @@ tar -zxvf lua-resty-http-0.17.2.tar.gz
 sudo cp -r lua-resty-http-0.17.2/lib/resty /usr/local/openresty/lualib/
 ```
 
-Nginx配置
+1. 配置nginx.conf
 
 ```conf
 server {
@@ -538,7 +540,7 @@ server {
 }
 ```
 
-创建`check_health.lua`文件
+2. 创建脚本check_health.lua
 
 ```lua
 local http = require "resty.http"
@@ -591,6 +593,163 @@ resolver_timeout 5s;
 lua_shared_dict dns_cache 5m;
 ```
 
+#### 1.4.8 限流
+
+使用令牌桶算法对url进行拦截，限制每秒最多请求50次，超出限制返回429状态码。
+
+1. 配置nginx.conf
+
+```nginx
+server {
+    listen 8080;
+    charset utf-8;
+    location / {			
+        access_by_lua_file conf.d/token_bucket_limit.lua;
+        proxy_pass http://backend/;
+    }
+}
+```
+
+2. 创建限流脚本token_bucket_limit.lua
+
+```lua
+-- Redis连接和操作封装
+local function get_redis_connection()
+    local redis = require "resty.redis"
+    local red = redis:new()
+    
+    red:set_timeout(1000)  -- 1秒超时
+    
+    -- 连接Redis
+    local ok, err = red:connect("127.0.0.1", 6379)
+    if not ok then
+        ngx.log(ngx.ERR, "Redis连接失败: ", err)
+        return nil, err
+    end
+    
+    -- 检查连接复用状态
+    local reused, err = red:get_reused_times()
+    if err then
+        ngx.log(ngx.ERR, "获取连接复用状态失败: ", err)
+        red:close()  -- 无法确定状态，直接关闭
+        return nil, err
+    end
+    
+    -- 全新连接需要认证
+    if reused == 0 then
+        local auth_ok, auth_err = red:auth("123456")
+        if not auth_ok then
+            ngx.log(ngx.ERR, "Redis认证失败: ", auth_err)
+            red:close()
+            return nil, auth_err
+        end
+    end
+    
+    -- 选择数据库
+    local ok, err = red:select(0)
+    if not ok then
+        ngx.log(ngx.ERR, "Redis选择数据库失败: ", err)
+        red:close()
+        return nil, err
+    end
+    
+    return red, nil
+end
+
+-- 释放Redis连接
+local function close_redis(red)
+    if not red then
+        return
+    end
+    
+    -- 尝试放回连接池
+    local ok, err = red:set_keepalive(10000, 100)
+    if not ok then
+        ngx.log(ngx.ERR, "释放Redis连接失败: ", err)
+        -- 连接池失败，直接关闭
+        red:close()
+    end
+end
+
+-- 获取Redis连接
+local red, err = get_redis_connection()
+if not red then
+    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+    ngx.say("系统错误")
+    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+end
+
+-- 限流配置
+local url = ngx.var.uri  -- 当前请求的 URL
+local rate = 50          -- 每秒生成 30 个令牌
+local capacity = 50      -- 桶容量（最大令牌数）
+local limit_key = "token_bucket:" .. url  -- Redis 键
+
+-- 优化后的 Lua 脚本（完全原子操作）
+local script = [[
+    local key = KEYS[1]
+    local now = tonumber(ARGV[1])
+    local rate = tonumber(ARGV[2])
+    local capacity = tonumber(ARGV[3])
+    
+    -- 获取当前桶状态
+    local data = redis.call("HMGET", key, "tokens", "last_time")
+    local tokens = tonumber(data[1])
+    local last_time = tonumber(data[2])
+    
+    -- 初始化桶状态（如果不存在）
+    if not tokens then
+        tokens = capacity
+        last_time = now
+    end
+    
+    -- 计算新增令牌（时间差转换为令牌数）
+    local elapsed = now - last_time
+    if elapsed > 0 then
+        local new_tokens = elapsed * rate
+        tokens = math.min(tokens + new_tokens, capacity)
+        last_time = now  -- 仅在有时间差时更新
+    end
+    
+    -- 尝试消费令牌
+    if tokens >= 1 then
+        tokens = tokens - 1
+        -- 原子更新桶状态
+        redis.call("HMSET", key, "tokens", tokens, "last_time", last_time)
+        redis.call("EXPIRE", key, math.ceil(capacity / rate) * 2)
+        return 1  -- 允许通过
+    end
+    
+    -- 更新空桶状态（避免后续重复计算相同时间段的令牌）
+    if not data[1] then  -- 仅当之前状态不存在时需要初始化
+        redis.call("HMSET", key, "tokens", tokens, "last_time", last_time)
+        redis.call("EXPIRE", key, math.ceil(capacity / rate) * 2)
+    end
+    return 0  -- 拒绝请求
+]]
+
+-- 执行 Lua 脚本
+local now = ngx.now()
+local allowed, err = red:eval(script, 1, limit_key, now, rate, capacity)
+if not allowed then
+    ngx.log(ngx.ERR, "Failed to execute token bucket script: ", err)
+    return ngx.exit(500)
+end
+
+close_redis(redis)
+
+-- 处理限流结果
+if allowed == 1 then
+    ngx.log(ngx.INFO, "Request allowed: ", url)
+else
+    ngx.header["Retry-After"] = math.ceil(1 / rate)  -- 动态计算重试时间
+	ngx.header.content_type = "text/plain" 
+	ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
+    ngx.say("Rate limit exceeded")
+    ngx.exit(ngx.HTTP_TOO_MANY_REQUESTS)
+end
+```
+
 ## 2. 模块
 
 ### 2.1 init_by_lua*
@@ -621,6 +780,9 @@ init_by_lua_block{
 
 该指令用于访问控制、请求过滤、预处理等，不允许使用`ngx.say`和`ngx.print`。
 
+**access_by_lua_file 可以放在 http、server、location 中，优先级依次递减，即 location > server > http**
+
+
 ```lua
 access_by_lua_block {
     -- 检查用户是否登录（示例逻辑）
@@ -650,6 +812,8 @@ access_by_lua_block {
 ### 2.6 content_by_lua*
 
 该指令是应用最多的指令，大部分任务是在这个阶段完成的，其他的过程往往为这个阶段准备数据，正式处理基本都在本阶段。
+
+**content_by_lua_file 必须放在location内**
 
 ```lua
 init_by_lua_block{
