@@ -1208,14 +1208,14 @@ ServerName localhost:80
 service apache2 restart
 ```
 
-#### Redis 5 单机
+#### Redis 5.0.14
 
 下载镜像
 
 ```bash
 docker run -p 6379:6379 --name redis \
 -v /data/redis/data:/data \
--d redis:5 redis-server --appendonly yes --requirepass "123456"
+-d redis:5.0.14 redis-server --appendonly yes --requirepass "123456"
 ```
 
 布隆过滤器 6.0.15
