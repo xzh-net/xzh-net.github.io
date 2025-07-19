@@ -1227,7 +1227,7 @@ http {
 }
 ```
 
-5. 基于请求参数动态设置
+5. 动态设置请求头
 
 业务场景：webide中连接gitlab仓库使用http免密方式拉取代码，如果gitlab用户密码发生变更，webide无法感知密码变化。
 
@@ -1258,7 +1258,8 @@ http {
 }
 ```
 
-> 硬编码实现后需要解决如何根据身份信息设置对应的Authorization内容，原生nginx无法实现，需要借助lua-nginx-module模块实现。
+> 硬编码实现后需要解决如何根据身份信息设置对应的Authorization内容，原生nginx无法实现，需要借助lua实现，详见配置见 [动态设置请求头](/deploy/openresty?id=_149-动态设置请求头)。
+
 
 ## 4. 证书
 
