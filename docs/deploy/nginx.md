@@ -747,7 +747,7 @@ server {
         alias /home/MP_verify_AHlGORozI4xN5yov.txt;
     }
 
-    ## 代理路径和转发路径保证一致，适用于前后台一体的项目
+    # 代理路径和转发路径保证一致，适用于前后台一体的项目
     location /blob/ {
         proxy_redirect off;
         proxy_set_header Host $host;
@@ -756,7 +756,7 @@ server {
         proxy_pass http://127.0.0.1:8000/blob/;
     }
 
-    ## 内部路径重写，将原请求地址匹配成任意路径，适用于接口项目
+    # 内部路径重写，将原请求地址匹配成任意路径，适用于接口项目
     location ^~ /api/ {
         rewrite ^/api/(.*)$ /$1 break;
         # 结尾不带斜杠
