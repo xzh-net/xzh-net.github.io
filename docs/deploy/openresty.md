@@ -750,6 +750,40 @@ else
 end
 ```
 
+
+#### 1.4.9 动态设置请求头
+
+```nginx
+server {
+    listen 3333;
+    charset utf-8;
+
+    location / {
+        access_by_lua_block {
+            local auth_header = "Basic cm9vdDpBYTAwMDAwMA=="
+            local uri = ngx.var.uri
+            local args = ngx.req.get_uri_args()	
+            if string.match(uri, "%.git/(git%-upload%-pack)/?$") then
+                ngx.log(ngx.INFO, "====== 拉取匹配 ====== : " .. auth_header)
+                ngx.req.set_header("Authorization", auth_header)
+                return
+            end
+            if string.match(uri, "%.git/(git%-receive%-pack)/?$") then
+                ngx.log(ngx.INFO, "====== 提交匹配 ====== : " .. auth_header)
+                ngx.req.set_header("Authorization", auth_header)
+                return
+            end	
+            if args.service and (args.service == "git-upload-pack" or args.service == "git-receive-pack") then
+                ngx.log(ngx.INFO, "====== args匹配成功 ====== : " .. auth_header)
+                ngx.req.set_header("Authorization", auth_header)
+            end
+        }        
+        proxy_pass http://172.17.17.161:8080;
+    }		
+}
+```
+
+
 ## 2. 模块
 
 ### 2.1 init_by_lua*
