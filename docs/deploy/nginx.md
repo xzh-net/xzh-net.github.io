@@ -731,21 +731,40 @@ server {
     location / {
         root /home/project;
     }
+
+    # root 表示物理路径，在/home/project/下必须有download文件夹，把/home/project/download作为根路径
     location /download/ {               
-        root  /home/project/;           # root表示物理路径，在/home/project/下必须有download文件夹，把/home/project/download作为根路径
+        root  /home/project/;           
     }
+
+    # alias 表示虚拟路径，不对应任何文件夹，把/home/project/作为根路径
     location /emoji/ {                  
-        alias /home/project/;           # alias表示虚拟路径，不对应任何文件夹，把/home/project/作为根路径
+        alias /home/project/;           
     }
-    location /MP_verify_AHlGORozI4xN5yov.txt {      # wx授权域名绑定
+
+    # wx 授权域名绑定
+    location /MP_verify_AHlGORozI4xN5yov.txt {      
         alias /home/MP_verify_AHlGORozI4xN5yov.txt;
     }
+
+    ## 代理路径和转发路径保证一致，适用于前后台一体的项目
     location /blob/ {
         proxy_redirect off;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_pass http://127.0.0.1:8000/blob/;
+    }
+
+    ## 内部路径重写，将原请求地址匹配成任意路径，适用于接口项目
+    location ^~ /api/ {
+        rewrite ^/api/(.*)$ /$1 break;
+        # 结尾不带斜杠
+        proxy_pass http://www.xuzhihao.net;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
@@ -890,7 +909,7 @@ flag标记
 ## 目录合并
 server {
     listen 80;
-    server_name www.web.name;
+    server_name www.xuzhihao.net;
     location /server {
         rewrite ^/server-([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)\.html$ /server/$1/$2/$3/$4/$5.html last;
     }
@@ -900,21 +919,15 @@ server {
 server {
     listen 80;
     server_name  www.xuzhihao.net;
+    location = /console { 
+        return 301 http://172.17.17.165:1234/console/;
+    }
     location /console/ {
-        rewrite ^/(.*)$ http://www.xuzhihao.net/$1 permanent;
+        rewrite ^/console//*(.*)$ http://172.17.17.165:1234/$1 permanent;
     }
 }
 
-## 内部路径重写
-location ^~ /api/ {
-    rewrite ^/api/(.*)$ /$1 break;
-    # 结尾不带斜杠
-    proxy_pass http://www.xuzhihao.net;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
+
 ```
 
 
