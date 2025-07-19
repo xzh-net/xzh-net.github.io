@@ -755,7 +755,7 @@ end
 
 ```nginx
 server {
-    listen 3333;
+    listen 8080;
     charset utf-8;
 
     location / {
