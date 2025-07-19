@@ -920,7 +920,7 @@ server {
     listen 80;
     server_name  www.xuzhihao.net;
     location = /console { 
-        return 301 http://172.17.17.165:1234/console/;
+        return 301 http://172.17.17.165/console/;
     }
     location /console/ {
         rewrite ^/console//*(.*)$ http://172.17.17.165:1234/$1 permanent;
