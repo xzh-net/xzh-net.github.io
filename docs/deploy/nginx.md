@@ -1071,6 +1071,194 @@ user用户执行以下命令
 /usr/local/nginx/sbin/nginx
 ```
 
+### 3.13 map指令
+
+map 指令是 Nginx 中一个非常强大且灵活的模块（ngx_http_map_module），用于创建变量映射关系。它允许你根据一个原始变量的值（如请求头、请求参数、IP地址等），动态定义另一个新变量的值。map 块通常放在 http 上下文中，使其在整个配置中可用。
+
+1. 基于请求头的值
+
+```nginx
+http {
+    # 定义 map 块：输入变量 $http_user_agent, 输出变量 $is_mobile
+    map $http_user_agent $is_mobile {
+        # 默认值：0 (非移动)
+        default         0;
+
+        # 匹配常见的移动设备 UA 关键词 (部分示例)
+        ~*android.*mobile 1;
+        ~*iphone          1;
+        ~*ipod            1;
+        ~*ipad            1; # iPad 有时算移动有时不算，根据需求定
+        ~*windows\sphone  1;
+        ~*blackberry      1;
+        ~*opera\smini     1;
+        ~*mobile          1;
+    }
+
+    server {
+        listen 80;
+        server_name example.com;
+
+        location / {
+            # 使用 map 生成的 $is_mobile 变量
+            if ($is_mobile = 1) {
+                # 如果是移动设备，重定向到移动站点
+                return 301 https://m.example.com$request_uri;
+                # 或者应用不同的 root/proxy_pass 等配置
+                # root /var/www/mobile-site;
+            }
+
+            # 非移动设备走正常配置
+            root /var/www/main-site;
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+```
+
+2. 基于Cookie的用户类型路由
+
+```nginx
+http {
+    # 解析 Cookie 'user_type'，映射到 $user_type_group
+    map $cookie_user_type $user_type_group {
+        # 默认分组为 'guest'
+        default        "guest";
+
+        # 匹配 cookie 值
+        "free"         "free-tier";
+        "premium"      "premium-tier";
+        "admin"        "admin";
+    }
+
+    upstream free_backend {
+        server backend-free1:8080;
+        server backend-free2:8080;
+    }
+
+    upstream premium_backend {
+        server backend-premium:8081;
+    }
+
+    upstream admin_backend {
+        server backend-admin:8082;
+    }
+
+    server {
+        listen 80;
+        server_name api.example.com;
+
+        location / {
+            # 根据 map 生成的 $user_type_group 变量代理到不同上游
+            proxy_pass http://${user_type_group}_backend;
+
+            # 其他代理设置...
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }
+}
+```
+
+3. 基于$remote_addr区分内网IP访问
+
+```nginx
+http {
+    # 定义内网网段 (示例: 192.168.1.0/24 和 10.0.0.0/8)
+    map $remote_addr $is_internal {
+        # 默认值：0 (外网)
+        default    0;
+
+        # 匹配内网 IP 段 (使用 CIDR 匹配)
+        192.168.1.0/24 1;
+        10.0.0.0/8     1;
+        # 或者精确匹配单个 IP
+        127.0.0.1      1;
+    }
+
+    server {
+        listen 80;
+        server_name admin.example.com;
+
+        location / {
+            # 只有内网 IP 可以访问管理后台
+            if ($is_internal = 0) {
+                return 403 "Access Forbidden (External IP)";
+            }
+
+            # 内网用户正常访问
+            proxy_pass http://admin-backend;
+            # ...其他配置
+        }
+    }
+}
+```
+
+4. 使用外部文件定义 IP 黑白名单
+
+```nginx
+http {
+    # 假设有一个文件 /etc/nginx/ip_blacklist.conf 每行一个 IP
+    map $remote_addr $is_blacklisted {
+        # 默认值：0 (不在黑名单)
+        default     0;
+
+        # 包含黑名单文件，文件中的 IP 会被映射为 1
+        include     /etc/nginx/ip_blacklist.conf;
+    }
+
+    # 文件 /etc/nginx/ip_blacklist.conf 内容示例:
+    # 1.2.3.4 1;
+    # 5.6.7.8 1;
+
+    server {
+        listen 80;
+        server_name example.com;
+
+        location / {
+            # 拒绝黑名单 IP
+            if ($is_blacklisted) {
+                return 403 "Forbidden - Blacklisted IP";
+            }
+
+            # ...正常处理逻辑
+        }
+    }
+}
+```
+
+5. 基于请求参数动态设置
+
+业务场景：webide中连接gitlab仓库使用http免密方式拉取代码，如果gitlab用户密码发生变更，webide无法感知密码变化。
+
+解决办法：客户端在保存git用户密码信息的时候，不使用原用户名和密码，而是使用用户id值作为用户名和密码，这样即使密码发生变更，webide的连接信息也会发生改变。配合nginx在代码提交和拉取等需要认证的时候，根据id动态获取用户真实用户名和密码使用base64编码后设置到http头中。
+
+```nginx
+http {
+    # service=git-upload-pack 或 service=git-receive-pack 时，设置 Basic Auth 头
+    map $arg_service $auth_header_value {
+        default $http_authorization;
+        "git-upload-pack" "Basic cm9vdDpBYTAwMDAwMA==";
+        "git-receive-pack" "Basic cm9vdDpBYTAwMDAwMA==";
+    }
+    server {
+        listen 80;
+        server_name example.com;
+        # 基于uri 设置 Basic Auth 头
+        location ~* (git-upload-pack) {			
+            proxy_set_header Authorization "Basic cm9vdDpBYTAwMDAwMA==";
+            proxy_pass http://172.17.17.161:8080;
+        }
+        # 基于请求参数设置 Basic Auth 头，但是在 if 中如何使用 proxy_set_header，所有使用动态参数的方式
+        location / {
+            proxy_set_header Authorization $auth_header_value;
+            proxy_pass http://172.17.17.161:8080;
+        }
+    }
+}
+```
+
+> 硬编码实现后需要解决如何根据身份信息设置对应的Authorization内容，原生nginx无法实现，需要借助lua-nginx-module模块实现。
 
 ## 4. 证书
 
