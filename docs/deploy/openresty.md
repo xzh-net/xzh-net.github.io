@@ -725,7 +725,7 @@ close_redis(redis)
 if allowed == 1 then
     ngx.log(ngx.INFO, "Request allowed: ", url)
 else
-    ngx.header["Retry-After"] = math.ceil(1 / rate)  -- 动态计算重试时间
+    ngx.header["Retry-After"] = period_seconds  -- 建议客户端在时间窗口后重试
 	ngx.header.content_type = "text/plain" 
 	ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
     ngx.say("Rate limit exceeded")
