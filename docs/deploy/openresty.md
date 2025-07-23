@@ -681,56 +681,39 @@ end
 
 -- 限流配置
 local url = ngx.var.uri  -- 当前请求的 URL
-local rate = 50          -- 每秒生成 30 个令牌
-local capacity = 50      -- 桶容量（最大令牌数）
-local limit_key = "token_bucket:" .. url  -- Redis 键
+local limit_per_period = 30      -- 每两分钟30次
+local period_seconds = 1       -- 时间窗口为1秒
+local limit_key = "rate_limit:" .. url  -- Redis 键
 
--- 优化后的 Lua 脚本（完全原子操作）
+-- 优化的Lua脚本（原子操作）
 local script = [[
     local key = KEYS[1]
-    local now = tonumber(ARGV[1])
-    local rate = tonumber(ARGV[2])
-    local capacity = tonumber(ARGV[3])
+    local limit = tonumber(ARGV[1])
+    local period = tonumber(ARGV[2])
+    local now = tonumber(ARGV[3])
     
-    -- 获取当前桶状态
-    local data = redis.call("HMGET", key, "tokens", "last_time")
-    local tokens = tonumber(data[1])
-    local last_time = tonumber(data[2])
+    -- 获取当前计数和过期时间
+    local current = tonumber(redis.call("GET", key)) or 0
     
-    -- 初始化桶状态（如果不存在）
-    if not tokens then
-        tokens = capacity
-        last_time = now
+    -- 检查是否超过限制
+    if current >= limit then
+        return 0  -- 超过限制
     end
     
-    -- 计算新增令牌（时间差转换为令牌数）
-    local elapsed = now - last_time
-    if elapsed > 0 then
-        local new_tokens = elapsed * rate
-        tokens = math.min(tokens + new_tokens, capacity)
-        last_time = now  -- 仅在有时间差时更新
+    -- 增加计数
+    redis.call("INCR", key)
+    
+    -- 如果是第一次设置，设置过期时间
+    if current == 0 then
+        redis.call("EXPIRE", key, period)
     end
     
-    -- 尝试消费令牌
-    if tokens >= 1 then
-        tokens = tokens - 1
-        -- 原子更新桶状态
-        redis.call("HMSET", key, "tokens", tokens, "last_time", last_time)
-        redis.call("EXPIRE", key, math.ceil(capacity / rate) * 2)
-        return 1  -- 允许通过
-    end
-    
-    -- 更新空桶状态（避免后续重复计算相同时间段的令牌）
-    if not data[1] then  -- 仅当之前状态不存在时需要初始化
-        redis.call("HMSET", key, "tokens", tokens, "last_time", last_time)
-        redis.call("EXPIRE", key, math.ceil(capacity / rate) * 2)
-    end
-    return 0  -- 拒绝请求
+    return 1  -- 允许通过
 ]]
 
--- 执行 Lua 脚本
+-- 执行Lua脚本
 local now = ngx.now()
-local allowed, err = red:eval(script, 1, limit_key, now, rate, capacity)
+local allowed, err = red:eval(script, 1, limit_key, limit_per_period, period_seconds, now)
 if not allowed then
     ngx.log(ngx.ERR, "Failed to execute token bucket script: ", err)
     return ngx.exit(500)
