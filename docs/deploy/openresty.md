@@ -595,7 +595,7 @@ lua_shared_dict dns_cache 5m;
 
 #### 1.4.8 限流
 
-使用令牌桶算法对url进行拦截，限制每秒最多请求50次，超出限制返回429状态码。
+使用固定时间对url进行拦截，限制每秒最多请求30次，超出限制返回429状态码。
 
 1. 配置nginx.conf
 
@@ -680,9 +680,9 @@ if not red then
 end
 
 -- 限流配置
-local url = ngx.var.uri  -- 当前请求的 URL
-local limit_per_period = 30      -- 每两分钟30次
-local period_seconds = 1       -- 时间窗口为1秒
+local url = ngx.var.uri             -- 当前请求的 URL
+local limit_per_period = 30         -- 每分钟30次
+local period_seconds = 1            -- 时间窗口为1秒
 local limit_key = "rate_limit:" .. url  -- Redis 键
 
 -- 优化的Lua脚本（原子操作）
