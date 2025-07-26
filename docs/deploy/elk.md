@@ -234,11 +234,12 @@ http://172.17.17.194:9201/_cat/nodes
 
 1. Chrome版
 
-- 下载地址：https://www.crx4chrome.com， 打开搜索`ElasticSearch-Head-0.1.5-Chrome.crx`下载
-- 打开Chrome插件设置页面，拖入下载好的.crx插件，启用
-- 使用插件：依次点击Chrome右上角插件图标—>ElasticSearch-Head—>输入ES地址—>连接
+- 下载`ElasticSearch Head 0.1.5.crx`插件
+- 打开Chrome插件设置页面，拖入下载好的crx插件，启用
+- 如果浏览器提示`无法从该网站添加应用、扩展程序和用户脚本`，则点击`扩展程序 -> 加载未打包的扩展程序`，选择插件所在目录即可。（crx文件修改后缀为rar并解压）
+- 使用插件：依次点击Chrome右上角插件图标 -> ElasticSearch-Head -> 输入ES地址 -> 连接
 
-2. docker版
+1. docker版
 
 ```bash
 # 拉取镜像
