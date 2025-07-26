@@ -248,7 +248,7 @@ docker run -d --name elasticsearch-head -p 9100:9100 docker.io/mobz/elasticsearc
 
 插件请求406解决：修改容器中`/usr/src/app/_site/vendor.js`文件
 - 6886行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
-- 7574行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
+- 7573行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
 
 从容器中拷贝文件到宿主机
 
@@ -257,6 +257,16 @@ docker cp elasticsearch-head:/usr/src/app/_site/vendor.js /home
 docker cp /home/vendor.js elasticsearch-head:/usr/src/app/_site/
 docker restart elasticsearch-head
 ```
+
+docker run -d -p 9100:9100 docker.io/mobz/elasticsearch-head:5
+
+连接es的控制台提示跨域，需要修改`elasticsearch.yml`，在文件末尾加入以下配置开启跨域
+
+```yml
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+```
+
 
 #### 1.3.2 analysis-ik
 
