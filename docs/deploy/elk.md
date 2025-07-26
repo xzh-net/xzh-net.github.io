@@ -240,25 +240,23 @@ http://172.17.17.194:9201/_cat/nodes
 
 2. docker版
 
-拉取镜像
-
 ```bash
+# 拉取镜像
 docker run -d --name elasticsearch-head -p 9100:9100 docker.io/mobz/elasticsearch-head:5
 ```
 
 插件请求406解决：修改容器中`/usr/src/app/_site/vendor.js`文件
-- 6886行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
-- 7573行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
-
-从容器中拷贝文件到宿主机
 
 ```bash
+# 从容器中拷贝文件到宿主机
 docker cp elasticsearch-head:/usr/src/app/_site/vendor.js /home
 docker cp /home/vendor.js elasticsearch-head:/usr/src/app/_site/
 docker restart elasticsearch-head
 ```
 
-docker run -d -p 9100:9100 docker.io/mobz/elasticsearch-head:5
+- 6886行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
+- 7573行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
+
 
 连接es的控制台提示跨域，需要修改`elasticsearch.yml`，在文件末尾加入以下配置开启跨域
 
