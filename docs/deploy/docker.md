@@ -1904,7 +1904,7 @@ http://192.168.3.200:9200/_cat/plugins
 docker run -d -p 9100:9100 docker.io/mobz/elasticsearch-head:5
 ```
 
-连接es的时候会提示跨域，需要修改`elasticsearch.yml`，在文件末尾加入以下配置开启跨域
+连接es的控制台提示跨域，需要修改`elasticsearch.yml`，在文件末尾加入以下配置开启跨域
 
 ```yml
 http.cors.enabled: true
