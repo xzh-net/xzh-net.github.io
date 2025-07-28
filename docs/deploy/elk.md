@@ -239,7 +239,7 @@ http://172.17.17.194:9201/_cat/nodes
 - 如果浏览器提示`无法从该网站添加应用、扩展程序和用户脚本`，将crx文件修改后缀为rar并解压，点击`扩展程序 -> 加载未打包的扩展程序`，选择插件所在目录即可。
 - 使用插件：打开Chrome浏览器右上角插件图标，选择ElasticSearch-Head，输入ES地址点击连接。
 
-1. docker版
+2. docker版
 
 ```bash
 # 拉取镜像
@@ -259,7 +259,7 @@ docker restart elasticsearch-head
 - 7573行`application/x-www-form-urlencoded`改成`application/json;charset=UTF-8`
 
 
-连接es的控制台提示跨域，需要修改`elasticsearch.yml`，在文件末尾加入以下配置开启跨域
+连接es的时候，如果控制台提示跨域，需要修改`elasticsearch.yml`，在文件末尾加入以下配置开启跨域
 
 ```yml
 http.cors.enabled: true
