@@ -34,8 +34,10 @@ vi conf/redis-6379.conf
 port 6379
 daemonize yes
 protected-mode no
-logfile "6379.log"
-dir /data/redis
+requirepass 123456
+dir /usr/local/redis/data/
+pidfile /usr/local/redis/logs/redis.pid
+logfile /usr/local/redis/logs/redis.log
 ```
 
 #### 1.1.4 启动服务
