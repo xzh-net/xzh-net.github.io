@@ -2298,16 +2298,21 @@ vm.max_map_count=655360
 sysctl -p
 ```
 
-配置第三方存储
+配置挂载路径
 ```bash
 mkdir -p /data/sonarqube/sonarqube_extensions
 mkdir -p /data/sonarqube/sonarqube_logs
 mkdir -p /data/sonarqube/sonarqube_data
 ```
 
+修改挂载路径所有者为容器启动用户`sonarqube`
+
+```bash
+chown -R 999:999 /data/sonarqube
+```
+
 ```bash
 docker run -dit --name sonarqube \
-    --link postgres \
     -p 9000:9000 \
     -e SONARQUBE_JDBC_URL=jdbc:postgresql://xxx.xxx.xxx.xxx:5432/sonardb \
     -e SONARQUBE_JDBC_USERNAME=postgres \
@@ -2318,17 +2323,17 @@ docker run -dit --name sonarqube \
     sonarqube:7.8-community
 ```
 
-插件安装，因为容器内用户ID为999，所以需要修改文件所有者
-```bash
-chown -R 999:999 /opt/software/sonarqube/*.jar
+默认账户密码：admin/admin
 
+
+如果不使用挂载的形式，需要手动把插件放到容器内
+
+```bash
 docker cp /opt/software/sonarqube/sonar-pmd-plugin-3.2.0-SNAPSHOT.jar sonarqube:/opt/sonarqube/extensions/plugins
 docker cp /opt/software/sonarqube/sonar-l10n-zh-plugin-1.28.jar sonarqube:/opt/sonarqube/extensions/plugins
 docker cp /opt/software/sonar-pdfreport-plugin-3.0.3.jar sonarqube:/opt/sonarqube/extensions/plugins
 docker restart sonarqube
 ```
-
-默认账户密码：admin/admin
 
 #### SonarQube 9.9
 
