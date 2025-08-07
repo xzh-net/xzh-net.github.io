@@ -205,15 +205,6 @@ server {
 }
 ```
 
-> 说明一下，有多个反向代理存在场景下，会遇到转义符失效的问题，这个问题本身和正向代理无关，但是使用到了`$request_uri`，解决办法推荐使用`$request_uri`保留原始URL
-
-```conf
-location / {
-    proxy_pass http://backend$request_uri;  # 直接传递原始请求URI
-    proxy_redirect off;
-}
-```
-
 配置代理服务器地址
 
 ```bash
@@ -261,6 +252,15 @@ make && make install
 ```
 
 Nginx高于1.20.1版本编译报错，插件源码在`ngx_tcp_ssl_module.c`文件中搜索`ngx_ssl_rsa512_key_callback`注释掉可以解决编译报错问题
+
+> 有多级反向代理存在场景下，会遇到转义符失效的问题，解决办法推荐使用`$request_uri`保留原始URL
+
+```conf
+location / {
+    proxy_pass http://backend$request_uri;  # 直接传递原始请求URI
+    proxy_redirect off;
+}
+```
 
 ### 2.4 目录索引
 
