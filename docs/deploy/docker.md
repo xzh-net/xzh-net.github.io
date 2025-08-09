@@ -556,10 +556,9 @@ vi Dockerfile2
 
 ```bash
 FROM openjdk:8-jre-alpine
-WORKDIR /apps
-COPY eureka /apps/
-EXPOSE 9001
-ENTRYPOINT ["java","-jar","eureka-server.jar"]
+COPY target/*.jar /app.jar
+EXPOSE 8080
+ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
 ```
 
 2. 构建镜像
