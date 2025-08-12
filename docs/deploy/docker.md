@@ -551,27 +551,35 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 ```bash
 cd /data/apps
-vi Dockerfile2
+vi Dockerfile
 ```
 
 ```bash
-FROM openjdk:8-jre-alpine
-COPY target/*.jar /app.jar
-EXPOSE 8080
-ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
+FROM maven:3-jdk-8-alpine
+
+WORKDIR /usr/src/app
+COPY settings.xml /usr/share/maven/conf/
+COPY . /usr/src/app
+RUN mvn package
+
+ENV PORT 5000
+EXPOSE $PORT
+CMD [ "sh", "-c", "mvn -Dserver.port=${PORT} spring-boot:run" ]
 ```
+
+>`maven:3-jdk-8-alpine`集成了编译环境和运行环境，所以体积较大。没有梯子的情况下`mvn package`执行时间较长。这里将外部配置文件`settings.xml`复制到镜像中，可以配置国内镜像源，加快编译速度。3.3章节中基于插件构建使用到了`openjdk:8-jre-alpine`，体积较小，但编译环境需要单独配置，比较麻烦。具体编辑环境在主机还是在容器内，可以根据项目情况选择。
 
 2. 构建镜像
 
 ```bash
-docker build -f Dockerfile2 -t eureka-server .
+docker build -f Dockerfile -t app-server .
 ```
 
 3. 运行
 
 ```bash
-docker run -dit --name eureka-server -p 9001:9001 eureka-server
-docker exec -it eureka-server /bin/ash      # 进入容器
+docker run -dit --name app-server -p 5000:5000 app-server
+docker exec -it app-server /bin/ash      # 进入容器
 cat /etc/issue                              # 查看操作系统
 uname -a                                    # 查看内核
 ```
