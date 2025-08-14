@@ -142,6 +142,36 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
 
+#### 1.4.5 设置容器子网
+
+```bash
+vi /etc/docker/daemon.json
+```
+
+增加默认子网和自定义子网，默认子网用于未指定网络的容器，自定义子网用于指定网络的容器。
+
+```bash
+{
+  "bip": "192.168.0.1/24",
+  "default-address-pools": [
+      {
+        "base": "172.17.0.0/16",
+        "size": 24
+      }
+  ]
+}
+```
+
+bip表示默认子网从`192.168.0.1/24`开始分配，有254个IP。default-address-pools表示自定义子网从`172.17.0.0/16`开始分配，size表示每个子网有256个IP。
+
+重载守护进程并重启
+
+```bash
+systemctl daemon-reload
+systemctl restart docker
+```
+
+
 ### 1.5 docker-compose
 
 #### 1.5.1 安装
@@ -401,12 +431,20 @@ docker info | grep -i proxy             # 查看代理
 ### 2.2 网络
 
 ```bash
-docker network ls                                       # 查看网络
-docker network create -d bridge my-bridge               # 创建一个连接方式是bridge网桥
-docker inspect my-bridge                                # 查看my-bridge网络里面的容器
-docker network connect my-bridage [containerid]         # 手动将某个容器加入网桥
-docker port [containerid]                               # 查看容器端口映射关系
-docker run --name mynginx2 --network my-bridge -p 8080:80 -d nginx:latest   # 创建容器时添加到指定网桥中
+docker network ls                                           # 列出所有网络
+docker network create -d bridge xzh-bridge                  # 创建新网络，连接方式是bridge网桥
+docker network rm xzh-bridge                                # 删除指定网络
+docker network prune                                        # 删除未使用的网络
+docker network inspect xzh-bridge                           # 查看网络信息           
+docker network connect xzh-bridge  [containerid]            # 手动将某个容器加入网桥
+docker network disconnect xzh-bridge  [containerid]         # 手动将某个容器从网桥中移除
+docker port [containerid]                                   # 查看容器端口映射关系
+docker run --name nginx --network xzh-bridge -p 8080:80 -d nginx:latest   # 创建容器时添加到指定网桥中
+```
+
+```bash
+docker network create -d bridge --subnet=172.18.0.0/16 xzh-bridge  # 创建新网络，并指定网段
+docker network create -d bridge --subnet=172.18.0.0/16 --gateway=172.18.0.1 xzh-bridge  # 创建新网络，并指定网段和网关
 ```
 
 ### 2.3 存储
@@ -478,7 +516,9 @@ docker stop [containerid]
 docker exec -it [containerid] /bin/bash
 docker top [containerid]
 
+docker inspect [containerid] | grep IPAddress
 docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]    # 查看容器ip地址
+
 docker inspect nodered | grep Mounts -A 20                                  # 查看容器映射目录
 docker update --restart=always [container_id]                               # 修改指定容器自动启动
 docker update --restart=always $(docker ps -q -a)                           # 更新所有容器启动时自动启动
