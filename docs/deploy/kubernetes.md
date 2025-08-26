@@ -1741,7 +1741,7 @@ kubectl apply -f ingress-http.yaml
 kubectl get ing ingress-http -n dev
 kubectl describe ing ingress-http -n dev  # 查详情
 
-curl -H 'Host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
+curl -H 'host:nginx.xuzhihao.net' http://192.168.2.201:30080  # 具体端口查看  kubectl get svc -n ingress-nginx
 ```
 
 > 注意：在Kubernetes 1.21版本之后，Ingress API版本已经更新为`networking.k8s.io/v1`，并且没有了`serviceName` 和 `servicePort` 字段
@@ -1803,10 +1803,10 @@ kubectl apply -f ingress-https.yaml
 kubectl get ing ingress-https -n dev
 kubectl describe ing ingress-https -n dev
 
-curl -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
-curl -k -H 'Host:tomcat.xuzhihao.net' https://192.168.2.201:30443
+curl -H 'host:tomcat.xuzhihao.net' https://192.168.2.201:30443
+curl -k -H 'host:tomcat.xuzhihao.net' https://192.168.2.201:30443
 # 转换为16进制，只显示前5行
-curl -s -H 'Host:png.xuzhihao.net' https://192.168.2.201:30443/1.jpg  | xxd | head -n 5
+curl -s -H 'host:png.xuzhihao.net' https://192.168.2.201:30443/1.jpg  | xxd | head -n 5
 ```
 
 ## 3. 数据存储
