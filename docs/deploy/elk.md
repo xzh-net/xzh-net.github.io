@@ -364,7 +364,35 @@ POST /mytest/_doc
 }
 ```
 
-#### 2.5.5 排序查询
+#### 2.5.5 删除数据
+
+删除指定数据
+```bash
+# 语法格式
+DELETE /<index_name>/_doc/<document_id>
+
+DELETE mytest/_doc/1871446175516553218
+```
+
+删除所有符合条件的数据，此操作会删除所有匹配的文档，需谨慎操作。
+```bash
+POST /product/_delete_by_query
+{
+  "query": {
+    "match": {
+      "mytest": "身份证"
+    }
+  }
+}
+```
+
+如果没有`Kibana Dev Tools`，则使用`curl`命令删除
+```bash
+curl -X DELETE -u username:password "http://localhost:9200/test/_doc/123"
+```
+
+
+#### 2.5.6 排序查询
 
 ```bash
 get mytest/_search
@@ -380,7 +408,7 @@ get mytest/_search
 }　
 ```
 
-#### 2.5.6 过滤查询
+#### 2.5.7 过滤查询
 
 ```bash
 get mytest/_search
@@ -393,7 +421,7 @@ get mytest/_search
 }
 ```
 
-#### 2.5.7 IK分词器
+#### 2.5.8 IK分词器
 
 ```bash
 POST /_analyze
