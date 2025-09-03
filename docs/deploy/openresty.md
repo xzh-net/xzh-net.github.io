@@ -460,6 +460,79 @@ server {
 }
 ```
 
+#### 2.4.4 根据请求参数进行地址分发
+
+```lua  
+server {
+    listen 7799;
+    server_name _;
+
+    location /v1 {
+        # 初始化变量
+        set $target_model "";
+        
+        # 使用access_by_lua_block进行请求验证，避免content阶段执行代理
+        access_by_lua_block {
+            local cjson = require "cjson.safe"
+            ngx.req.read_body()
+            local body_data = ngx.req.get_body_data()
+
+            -- 验证请求体存在
+            if not body_data then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Missing request body"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            end
+
+            -- 解析JSON
+            local json_args, err = cjson.decode(body_data)
+            if not json_args then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Invalid JSON format"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            end
+            
+            -- 验证model字段
+            if not json_args.model or json_args.model == "" then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Missing required parameter: model"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            end	
+                    
+            -- 定义模型到上游的映射
+            local upstream_map = {
+                ["Qwen3-VJSP-Pro"] = "pro/v1",
+                ["Qwen2.5-VL-32B-Instruct"] = "pro/v1",
+                ["Qwen3-Embedding-8B"] = "pro/v1",
+                ["Qwen3-Reranker-8B"] = "pro/v1",
+                ["Qwen3-Coder-30B-A3B-Instruct"] = "pro/v1"
+            }
+            
+            -- 模型匹配
+            local model = upstream_map[json_args.model]
+            if not model then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Invalid model value"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            else
+                -- 设置目标路径
+                ngx.var.target_model = model
+            end
+        }
+        
+        # 代理设置
+        proxy_pass http://172.17.17.161:8099/$target_model;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+    }
+}
+```
+
 ### 2.6 content_by_lua
 
 该指令是应用最多的指令，大部分任务是在这个阶段完成的，其他的过程往往为这个阶段准备数据，正式处理基本都在本阶段。content_by_lua_file 必须放在location内
