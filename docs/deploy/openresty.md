@@ -185,8 +185,6 @@ location /headers {
 }
 ```
 
-
-
 #### 1.4.5 获取Cookie
 
 ```lua
@@ -208,8 +206,405 @@ location /cookie {
 }
 ```
 
+## 2. 模块
 
-#### 1.4.6 操作Redis
+### 2.1 init_by_lua*
+
+该指令在每次Nginx重新加载配置时执行，可以用来完成一些耗时模块的加载，或者初始化一些全局配置。
+
+```lua
+init_by_lua_block{
+    redis = require "resty.redis"
+    mysql = require "resty.mysql"
+    cjson = require "cjson"
+}
+```
+
+### 2.2 init_worker_by_lua*
+
+该指令用于启动一些定时任务，如心跳检查、定时拉取服务器配置等。
+
+### 2.3 set_by_lua
+
+该指令只要用来做变量赋值，这个指令一次只能返回一个值，并将结果赋值给Nginx中指定的变量。
+
+#### 2.3.1 处理复杂判断逻辑
+
+```lua
+set_by_lua_block $is_mobile {
+    local ua = ngx.var.http_user_agent or ""
+    -- 简单的移动设备匹配规则
+    if ua:match("iPhone") or ua:match("Android") or ua:match("Mobile") then
+        return "1"
+    else
+        return "0"
+    end
+}
+
+location /v2 {
+    # 后续可以使用 $is_mobile 变量
+    if ($is_mobile = "1") {
+        # 重写到移动端页面或设置特定头信息
+    }
+    proxy_pass https://www.baidu.com/s?wd=$is_mobile;
+}
+```
+
+
+### 2.4 rewrite_by_lua*
+
+该指令用于执行内部URL重写或者外部重定向，典型的如伪静态化URL重写，本阶段在rewrite处理阶段的最后默认执行。
+
+### 2.5 access_by_lua
+
+该指令用于访问控制、请求过滤、预处理等，不允许使用`ngx.say`和`ngx.print`。access_by_lua_file 可以放在 http、server、location 中，优先级依次递减，即 location > server > http
+
+
+#### 2.5.1 访问限流
+
+使用固定时间对url进行拦截，限制每秒最多请求30次，超出限制返回429状态码。
+
+1. 配置nginx.conf
+
+```nginx
+server {
+    listen 8080;
+    charset utf-8;
+    location / {			
+        access_by_lua_file conf.d/token_bucket_limit.lua;
+        proxy_pass http://backend/;
+    }
+}
+```
+
+2. 创建限流脚本token_bucket_limit.lua
+
+```lua
+-- Redis连接和操作封装
+local function get_redis_connection()
+    local redis = require "resty.redis"
+    local red = redis:new()
+    
+    red:set_timeout(1000)  -- 1秒超时
+    
+    -- 连接Redis
+    local ok, err = red:connect("127.0.0.1", 6379)
+    if not ok then
+        ngx.log(ngx.ERR, "Redis连接失败: ", err)
+        return nil, err
+    end
+    
+    -- 检查连接复用状态
+    local reused, err = red:get_reused_times()
+    if err then
+        ngx.log(ngx.ERR, "获取连接复用状态失败: ", err)
+        red:close()  -- 无法确定状态，直接关闭
+        return nil, err
+    end
+    
+    -- 全新连接需要认证
+    if reused == 0 then
+        local auth_ok, auth_err = red:auth("123456")
+        if not auth_ok then
+            ngx.log(ngx.ERR, "Redis认证失败: ", auth_err)
+            red:close()
+            return nil, auth_err
+        end
+    end
+    
+    -- 选择数据库
+    local ok, err = red:select(0)
+    if not ok then
+        ngx.log(ngx.ERR, "Redis选择数据库失败: ", err)
+        red:close()
+        return nil, err
+    end
+    
+    return red, nil
+end
+
+-- 释放Redis连接
+local function close_redis(red)
+    if not red then
+        return
+    end
+    
+    -- 尝试放回连接池
+    local ok, err = red:set_keepalive(10000, 100)
+    if not ok then
+        ngx.log(ngx.ERR, "释放Redis连接失败: ", err)
+        -- 连接池失败，直接关闭
+        red:close()
+    end
+end
+
+-- 获取Redis连接
+local red, err = get_redis_connection()
+if not red then
+    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+    ngx.say("系统错误")
+    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+end
+
+-- 限流配置
+local url = ngx.var.uri             -- 当前请求的 URL
+local limit_per_period = 30         -- 每分钟30次
+local period_seconds = 1            -- 时间窗口为1秒
+local limit_key = "rate_limit:" .. url  -- Redis 键
+
+-- 优化的Lua脚本（原子操作）
+local script = [[
+    local key = KEYS[1]
+    local limit = tonumber(ARGV[1])
+    local period = tonumber(ARGV[2])
+    local now = tonumber(ARGV[3])
+    
+    -- 获取当前计数和过期时间
+    local current = tonumber(redis.call("GET", key)) or 0
+    
+    -- 检查是否超过限制
+    if current >= limit then
+        return 0  -- 超过限制
+    end
+    
+    -- 增加计数
+    redis.call("INCR", key)
+    
+    -- 如果是第一次设置，设置过期时间
+    if current == 0 then
+        redis.call("EXPIRE", key, period)
+    end
+    
+    return 1  -- 允许通过
+]]
+
+-- 执行Lua脚本
+local now = ngx.now()
+local allowed, err = red:eval(script, 1, limit_key, limit_per_period, period_seconds, now)
+if not allowed then
+    ngx.log(ngx.ERR, "Failed to execute token bucket script: ", err)
+    return ngx.exit(500)
+end
+
+close_redis(redis)
+
+-- 处理限流结果
+if allowed == 1 then
+    ngx.log(ngx.INFO, "Request allowed: ", url)
+else
+    ngx.header["Retry-After"] = period_seconds  -- 建议客户端在时间窗口后重试
+	ngx.header.content_type = "text/plain" 
+	ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
+    ngx.say("Rate limit exceeded")
+    ngx.exit(ngx.HTTP_TOO_MANY_REQUESTS)
+end
+```
+#### 2.5.2 获取Cookie判断非空重定向
+
+```lua
+access_by_lua_block {
+    -- 检查用户是否登录（示例逻辑）
+    local cookie = ngx.var.http_cookie
+    local auth_token
+
+    if cookie then
+        -- 使用正则表达式匹配auth_token
+        local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
+        if m then
+            auth_token = m[1]
+        end
+    end
+
+    -- 如果未找到token，重定向到登录页面
+    if not auth_token then
+        -- 跳转到登录页面，保留原始请求URL用于登录后跳回
+        local from_uri = ngx.var.request_uri
+        local login_url = "/login?from=" .. ngx.escape_uri(from_uri)
+        
+        -- 执行302重定向
+        return ngx.redirect(login_url)
+    end
+}
+```
+
+
+#### 2.4.3 动态设置请求头
+
+```nginx
+server {
+    listen 8080;
+    charset utf-8;
+
+    location / {
+        access_by_lua_block {
+            local auth_header = "Basic cm9vdDpBYTAwMDAwMA=="
+            local uri = ngx.var.uri
+            local args = ngx.req.get_uri_args()	
+            if string.match(uri, "%.git/(git%-upload%-pack)/?$") then
+                ngx.log(ngx.INFO, "====== 拉取匹配 ====== : " .. auth_header)
+                ngx.req.set_header("Authorization", auth_header)
+                return
+            end
+            if string.match(uri, "%.git/(git%-receive%-pack)/?$") then
+                ngx.log(ngx.INFO, "====== 提交匹配 ====== : " .. auth_header)
+                ngx.req.set_header("Authorization", auth_header)
+                return
+            end	
+            if args.service and (args.service == "git-upload-pack" or args.service == "git-receive-pack") then
+                ngx.log(ngx.INFO, "====== args匹配成功 ====== : " .. auth_header)
+                ngx.req.set_header("Authorization", auth_header)
+            end
+        }        
+        proxy_pass http://172.17.17.161:8080;
+    }		
+}
+```
+
+### 2.6 content_by_lua
+
+该指令是应用最多的指令，大部分任务是在这个阶段完成的，其他的过程往往为这个阶段准备数据，正式处理基本都在本阶段。content_by_lua_file 必须放在location内
+
+#### 2.6.1 探测网站状态
+
+下载并安装`lua-resty-http`库
+
+```bash
+wget https://github.com/ledgetech/lua-resty-http/archive/refs/tags/v0.17.2.tar.gz
+tar -zxvf lua-resty-http-0.17.2.tar.gz
+sudo cp -r lua-resty-http-0.17.2/lib/resty /usr/local/openresty/lualib/
+```
+
+1. 配置nginx.conf
+
+```conf
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name _;
+    
+    location /check_health {
+        default_type 'text/html';
+        add_header Content-Type 'text/html; charset=utf-8';
+        content_by_lua_file conf/conf.d/check_health.lua;
+    }
+}
+```
+
+2. 创建脚本check_health.lua
+
+```lua
+local http = require "resty.http"
+local url = ngx.var.arg_url  -- 获取url参数
+
+-- 创建 HTTP 客户端
+local client = http.new()
+client:set_timeout(5000)  -- 设置超时(毫秒)
+
+-- 发送请求
+local res, err = client:request_uri(url, {
+    method = "GET",
+    headers = { ["User-Agent"] = "Mozilla/5.0" },
+    ssl_verify = false  -- 跳过 HTTPS 证书验证
+})
+
+-- 处理结果
+if not res then
+    ngx.say(err)
+    ngx.exit(500)
+end
+
+-- 检查状态码
+if res.status == 200 then
+    ngx.say(200)
+else
+    ngx.say(res.status)
+end
+```
+
+测试验证
+```bash
+# 测试正常网站
+curl "http://172.17.17.160/check_health?url=https://maven.aliyun.com"
+# 测试无效域名
+curl "http://172.17.17.160/check_health?url=https://invalid-domain-xxxxxxxx.com"
+# 测试超时网站，IP不可达
+curl "http://172.17.17.160/check_health??url=http://10.255.255.1"
+```
+
+> 出现错误信息`no resolver defined to resolve`和`could not be resolved (110: Operation timed out)`，是因为没有配置DNS解析服务器和设置超时时间。
+
+在Nginx配置文件中Http块内添加以下配置
+
+```conf
+# 核心 DNS 配置（必须）
+resolver 114.114.114.114 valid=30s;
+resolver_timeout 5s;
+# 共享内存用于 DNS 缓存
+lua_shared_dict dns_cache 5m;
+```
+
+#### 2.6.2 操作MySQL和Redis（单机）
+
+```lua
+init_by_lua_block{
+	redis = require "resty.redis"
+    mysql = require "resty.mysql"
+    cjson = require "cjson"
+}
+location / {
+        default_type "text/html";
+        content_by_lua_block {
+            --获取请求的参数username
+            local param = ngx.req.get_uri_args()["username"]
+            --建立mysql数据库的连接
+            local db = mysql:new()
+            local ok,err = db:connect{
+                host="192.168.200.111",
+                port=3306,
+                user="root",
+                password="123456",
+                database="nginx_db"
+            }
+            if not ok then
+                ngx.say("failed connect to mysql:",err)
+                return
+            end
+            --设置连接超时时间
+            db:set_timeout(1000)
+            --查询数据
+            local sql = "";
+            if not param then
+                sql="select * from users"
+            else
+                sql="select * from users where username=".."'"..param.."'"
+            end
+            local res,err,errcode,sqlstate=db:query(sql)
+            if not res then
+                ngx.say("failed to query from mysql:",err)
+                return
+            end
+            --连接redis
+            local rd = redis:new()
+            ok,err = rd:connect("192.168.200.111",6379)
+            if not ok then
+                ngx.say("failed to connect to redis:",err)
+                return
+            end
+            rd:set_timeout(1000)
+            --循环遍历数据
+            for i,v in ipairs(res) do
+                rd:set("user_"..v.username,cjson.encode(v))
+            end
+            ngx.say("success")
+            rd:close()
+            db:close()
+        }
+}
+```
+
+
+#### 2.6.3 操作Redis（集群）
 
 下载客户端：https://openresty.org/en/lua-resty-redis-library.html
 
@@ -513,381 +908,6 @@ ngx.say(res)
 close_redis(red)
 ```
 
-#### 1.4.7 探测网站状态
-
-下载并安装`lua-resty-http`库
-
-```bash
-wget https://github.com/ledgetech/lua-resty-http/archive/refs/tags/v0.17.2.tar.gz
-tar -zxvf lua-resty-http-0.17.2.tar.gz
-sudo cp -r lua-resty-http-0.17.2/lib/resty /usr/local/openresty/lualib/
-```
-
-1. 配置nginx.conf
-
-```conf
-server {
-    listen 80;
-    listen [::]:80;
-
-    server_name _;
-    
-    location /check_health {
-        default_type 'text/html';
-        add_header Content-Type 'text/html; charset=utf-8';
-        content_by_lua_file conf/conf.d/check_health.lua;
-    }
-}
-```
-
-2. 创建脚本check_health.lua
-
-```lua
-local http = require "resty.http"
-local url = ngx.var.arg_url  -- 获取url参数
-
--- 创建 HTTP 客户端
-local client = http.new()
-client:set_timeout(5000)  -- 设置超时(毫秒)
-
--- 发送请求
-local res, err = client:request_uri(url, {
-    method = "GET",
-    headers = { ["User-Agent"] = "Mozilla/5.0" },
-    ssl_verify = false  -- 跳过 HTTPS 证书验证
-})
-
--- 处理结果
-if not res then
-    ngx.say(err)
-    ngx.exit(500)
-end
-
--- 检查状态码
-if res.status == 200 then
-    ngx.say(200)
-else
-    ngx.say(res.status)
-end
-```
-
-测试验证
-```bash
-# 测试正常网站
-curl "http://172.17.17.160/check_health?url=https://maven.aliyun.com"
-# 测试无效域名
-curl "http://172.17.17.160/check_health?url=https://invalid-domain-xxxxxxxx.com"
-# 测试超时网站，IP不可达
-curl "http://172.17.17.160/check_health??url=http://10.255.255.1"
-```
-
-> 出现错误信息`no resolver defined to resolve`和`could not be resolved (110: Operation timed out)`，是因为没有配置DNS解析服务器和设置超时时间。
-
-在Nginx配置文件中Http块内添加以下配置
-
-```conf
-# 核心 DNS 配置（必须）
-resolver 114.114.114.114 valid=30s;
-resolver_timeout 5s;
-# 共享内存用于 DNS 缓存
-lua_shared_dict dns_cache 5m;
-```
-
-#### 1.4.8 限流
-
-使用固定时间对url进行拦截，限制每秒最多请求30次，超出限制返回429状态码。
-
-1. 配置nginx.conf
-
-```nginx
-server {
-    listen 8080;
-    charset utf-8;
-    location / {			
-        access_by_lua_file conf.d/token_bucket_limit.lua;
-        proxy_pass http://backend/;
-    }
-}
-```
-
-2. 创建限流脚本token_bucket_limit.lua
-
-```lua
--- Redis连接和操作封装
-local function get_redis_connection()
-    local redis = require "resty.redis"
-    local red = redis:new()
-    
-    red:set_timeout(1000)  -- 1秒超时
-    
-    -- 连接Redis
-    local ok, err = red:connect("127.0.0.1", 6379)
-    if not ok then
-        ngx.log(ngx.ERR, "Redis连接失败: ", err)
-        return nil, err
-    end
-    
-    -- 检查连接复用状态
-    local reused, err = red:get_reused_times()
-    if err then
-        ngx.log(ngx.ERR, "获取连接复用状态失败: ", err)
-        red:close()  -- 无法确定状态，直接关闭
-        return nil, err
-    end
-    
-    -- 全新连接需要认证
-    if reused == 0 then
-        local auth_ok, auth_err = red:auth("123456")
-        if not auth_ok then
-            ngx.log(ngx.ERR, "Redis认证失败: ", auth_err)
-            red:close()
-            return nil, auth_err
-        end
-    end
-    
-    -- 选择数据库
-    local ok, err = red:select(0)
-    if not ok then
-        ngx.log(ngx.ERR, "Redis选择数据库失败: ", err)
-        red:close()
-        return nil, err
-    end
-    
-    return red, nil
-end
-
--- 释放Redis连接
-local function close_redis(red)
-    if not red then
-        return
-    end
-    
-    -- 尝试放回连接池
-    local ok, err = red:set_keepalive(10000, 100)
-    if not ok then
-        ngx.log(ngx.ERR, "释放Redis连接失败: ", err)
-        -- 连接池失败，直接关闭
-        red:close()
-    end
-end
-
--- 获取Redis连接
-local red, err = get_redis_connection()
-if not red then
-    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
-    ngx.say("系统错误")
-    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-end
-
--- 限流配置
-local url = ngx.var.uri             -- 当前请求的 URL
-local limit_per_period = 30         -- 每分钟30次
-local period_seconds = 1            -- 时间窗口为1秒
-local limit_key = "rate_limit:" .. url  -- Redis 键
-
--- 优化的Lua脚本（原子操作）
-local script = [[
-    local key = KEYS[1]
-    local limit = tonumber(ARGV[1])
-    local period = tonumber(ARGV[2])
-    local now = tonumber(ARGV[3])
-    
-    -- 获取当前计数和过期时间
-    local current = tonumber(redis.call("GET", key)) or 0
-    
-    -- 检查是否超过限制
-    if current >= limit then
-        return 0  -- 超过限制
-    end
-    
-    -- 增加计数
-    redis.call("INCR", key)
-    
-    -- 如果是第一次设置，设置过期时间
-    if current == 0 then
-        redis.call("EXPIRE", key, period)
-    end
-    
-    return 1  -- 允许通过
-]]
-
--- 执行Lua脚本
-local now = ngx.now()
-local allowed, err = red:eval(script, 1, limit_key, limit_per_period, period_seconds, now)
-if not allowed then
-    ngx.log(ngx.ERR, "Failed to execute token bucket script: ", err)
-    return ngx.exit(500)
-end
-
-close_redis(redis)
-
--- 处理限流结果
-if allowed == 1 then
-    ngx.log(ngx.INFO, "Request allowed: ", url)
-else
-    ngx.header["Retry-After"] = period_seconds  -- 建议客户端在时间窗口后重试
-	ngx.header.content_type = "text/plain" 
-	ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
-    ngx.say("Rate limit exceeded")
-    ngx.exit(ngx.HTTP_TOO_MANY_REQUESTS)
-end
-```
-
-
-#### 1.4.9 动态设置请求头
-
-```nginx
-server {
-    listen 8080;
-    charset utf-8;
-
-    location / {
-        access_by_lua_block {
-            local auth_header = "Basic cm9vdDpBYTAwMDAwMA=="
-            local uri = ngx.var.uri
-            local args = ngx.req.get_uri_args()	
-            if string.match(uri, "%.git/(git%-upload%-pack)/?$") then
-                ngx.log(ngx.INFO, "====== 拉取匹配 ====== : " .. auth_header)
-                ngx.req.set_header("Authorization", auth_header)
-                return
-            end
-            if string.match(uri, "%.git/(git%-receive%-pack)/?$") then
-                ngx.log(ngx.INFO, "====== 提交匹配 ====== : " .. auth_header)
-                ngx.req.set_header("Authorization", auth_header)
-                return
-            end	
-            if args.service and (args.service == "git-upload-pack" or args.service == "git-receive-pack") then
-                ngx.log(ngx.INFO, "====== args匹配成功 ====== : " .. auth_header)
-                ngx.req.set_header("Authorization", auth_header)
-            end
-        }        
-        proxy_pass http://172.17.17.161:8080;
-    }		
-}
-```
-
-
-## 2. 模块
-
-### 2.1 init_by_lua*
-
-该指令在每次Nginx重新加载配置时执行，可以用来完成一些耗时模块的加载，或者初始化一些全局配置。
-
-```lua
-init_by_lua_block{
-    redis = require "resty.redis"
-    mysql = require "resty.mysql"
-    cjson = require "cjson"
-}
-```
-
-### 2.2 init_worker_by_lua*
-
-该指令用于启动一些定时任务，如心跳检查、定时拉取服务器配置等。
-
-### 2.3 set_by_lua*
-
-该指令只要用来做变量赋值，这个指令一次只能返回一个值，并将结果赋值给Nginx中指定的变量。
-
-### 2.4 rewrite_by_lua*
-
-该指令用于执行内部URL重写或者外部重定向，典型的如伪静态化URL重写，本阶段在rewrite处理阶段的最后默认执行。
-
-### 2.5 access_by_lua*
-
-该指令用于访问控制、请求过滤、预处理等，不允许使用`ngx.say`和`ngx.print`。
-
-**access_by_lua_file 可以放在 http、server、location 中，优先级依次递减，即 location > server > http**
-
-
-```lua
-access_by_lua_block {
-    -- 检查用户是否登录（示例逻辑）
-    local cookie = ngx.var.http_cookie
-    local auth_token
-
-    if cookie then
-        -- 使用正则表达式匹配auth_token
-        local m, err = ngx.re.match(cookie, "auth_token=([^;]+)", "jo")
-        if m then
-            auth_token = m[1]
-        end
-    end
-
-    -- 如果未找到token，重定向到登录页面
-    if not auth_token then
-        -- 跳转到登录页面，保留原始请求URL用于登录后跳回
-        local from_uri = ngx.var.request_uri
-        local login_url = "/login?from=" .. ngx.escape_uri(from_uri)
-        
-        -- 执行302重定向
-        return ngx.redirect(login_url)
-    end
-}
-```
-
-### 2.6 content_by_lua*
-
-该指令是应用最多的指令，大部分任务是在这个阶段完成的，其他的过程往往为这个阶段准备数据，正式处理基本都在本阶段。
-
-**content_by_lua_file 必须放在location内**
-
-```lua
-init_by_lua_block{
-	redis = require "resty.redis"
-    mysql = require "resty.mysql"
-    cjson = require "cjson"
-}
-location / {
-        default_type "text/html";
-        content_by_lua_block {
-            --获取请求的参数username
-            local param = ngx.req.get_uri_args()["username"]
-            --建立mysql数据库的连接
-            local db = mysql:new()
-            local ok,err = db:connect{
-                host="192.168.200.111",
-                port=3306,
-                user="root",
-                password="123456",
-                database="nginx_db"
-            }
-            if not ok then
-                ngx.say("failed connect to mysql:",err)
-                return
-            end
-            --设置连接超时时间
-            db:set_timeout(1000)
-            --查询数据
-            local sql = "";
-            if not param then
-                sql="select * from users"
-            else
-                sql="select * from users where username=".."'"..param.."'"
-            end
-            local res,err,errcode,sqlstate=db:query(sql)
-            if not res then
-                ngx.say("failed to query from mysql:",err)
-                return
-            end
-            --连接redis
-            local rd = redis:new()
-            ok,err = rd:connect("192.168.200.111",6379)
-            if not ok then
-                ngx.say("failed to connect to redis:",err)
-                return
-            end
-            rd:set_timeout(1000)
-            --循环遍历数据
-            for i,v in ipairs(res) do
-                rd:set("user_"..v.username,cjson.encode(v))
-            end
-            ngx.say("success")
-            rd:close()
-            db:close()
-        }
-}
-```
 
 ### 2.7 header_filter_by_lua*
 
