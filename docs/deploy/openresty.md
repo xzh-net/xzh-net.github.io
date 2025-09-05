@@ -462,16 +462,17 @@ server {
 
 #### 2.4.4 根据请求参数进行地址分发
 
+`NGINX -> APIPARK -> 大模型服务`
+
 ```lua  
 server {
-    listen 7799;
+    listen 8080;
     server_name _;
 
-    location /v1 {
+    location /v1/chat/completions {
         # 初始化变量
         set $target_model "";
         
-        # 使用access_by_lua_block进行请求验证，避免content阶段执行代理
         access_by_lua_block {
             local cjson = require "cjson.safe"
             ngx.req.read_body()
@@ -501,11 +502,9 @@ server {
                     
             -- 定义模型到上游的映射
             local upstream_map = {
-                ["Qwen3-VJSP-Pro"] = "pro/v1",
-                ["Qwen2.5-VL-32B-Instruct"] = "pro/v1",
-                ["Qwen3-Embedding-8B"] = "pro/v1",
-                ["Qwen3-Reranker-8B"] = "pro/v1",
-                ["Qwen3-Coder-30B-A3B-Instruct"] = "pro/v1"
+                ["Qwen3-VJSP-Pro"] = "f013eef5/chat/completions",
+                ["Qwen2.5-VL-32B-Instruct"] = "0a7e93ff/chat/completions",
+                ["Qwen3-Coder-30B-A3B-Instruct"] = "fe880f86/chat/completions"
             }
             
             -- 模型匹配
@@ -521,15 +520,90 @@ server {
         }
         
         # 代理设置
-        proxy_pass http://172.17.17.161:8099/$target_model;
+        proxy_pass http://172.17.17.95:8099/$target_model;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+        proxy_read_timeout 600s;
+        proxy_buffering off;
+    }
+    
+    location = /v1/embeddings {
+        # 初始化变量
+        set $target_model "";
+        
+        access_by_lua_block {
+            local cjson = require "cjson.safe"
+            ngx.req.read_body()
+            local body_data = ngx.req.get_body_data()
+
+            -- 验证请求体存在
+            if not body_data then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Missing request body"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            end
+
+            -- 解析JSON
+            local json_args, err = cjson.decode(body_data)
+            if not json_args then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Invalid JSON format"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            end
+            
+            -- 验证model字段
+            if not json_args.model or json_args.model == "" then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Missing required parameter: model"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            end	
+                    
+            -- 定义模型到上游的映射
+            local upstream_map = {
+                ["Qwen3-Embedding-8B"] = "457202a0/embeddings",
+            }
+            
+            -- 模型匹配
+            local model = upstream_map[json_args.model]
+            if not model then
+                ngx.status = ngx.HTTP_BAD_REQUEST
+                ngx.say('{"error": "Invalid model value"}')
+                return ngx.exit(ngx.HTTP_BAD_REQUEST)
+            else
+                -- 设置目标路径
+                ngx.var.target_model = model
+            end
+        }
+        
+        # 代理设置
+        proxy_pass http://172.17.17.95:8099/$target_model;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+        proxy_read_timeout 600s;
+        proxy_buffering off;
+    }
+    
+    location = /v1/models {
+        proxy_pass http://172.17.18.24:8106/v1/models;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_connect_timeout 30s;
         proxy_send_timeout 30s;
-        proxy_read_timeout 30s;
+        proxy_read_timeout 30s;			
     }
+    
 }
 ```
 
