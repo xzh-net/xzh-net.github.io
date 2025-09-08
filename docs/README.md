@@ -1,5 +1,5 @@
 
-所有编译环境默认使用CentOS 7.9.2009，由于CentOS 7的官方支持已于2024年6月30日正式结束，后续将使用Ubuntu 22.04作为基础环境。
+CentOS 7的官方支持已于2024年6月30日正式结束，之前所有编译环境默认使用CentOS 7.9.2009，后续将使用Ubuntu 22.04作为基础环境。
 
 1. Kubernetes资源 https://github.com/fungitive/kubernetes
 2.  虫洞栈学习 https://github.com/fuzhengwei/CodeGuide
