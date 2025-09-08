@@ -585,7 +585,7 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 > Dockerfile 的指令每执行一次都会在 docker 上新建一层。所以过多无意义的层，会造成镜像膨胀过大
 
-#### 3.1.1 基于环境构建应用
+#### 3.1.1 基于编译环境构建
 
 1. 创建文件
 
@@ -598,7 +598,7 @@ vi Dockerfile
 FROM maven:3-jdk-8-alpine
 
 WORKDIR /usr/src/app
-COPY settings.xml /usr/share/maven/conf/
+# COPY settings.xml /usr/share/maven/conf/
 COPY . /usr/src/app
 RUN mvn package
 
@@ -607,7 +607,7 @@ EXPOSE $PORT
 CMD [ "sh", "-c", "mvn -Dserver.port=${PORT} spring-boot:run" ]
 ```
 
->`maven:3-jdk-8-alpine`集成了编译环境和运行环境，所以体积较大。没有梯子的情况下`mvn package`执行时间较长。这里将外部配置文件`settings.xml`复制到镜像中，可以配置国内镜像源，加快编译速度。3.3章节中基于插件构建使用到了`openjdk:8-jre-alpine`，体积较小，但编译环境需要单独配置，比较麻烦。具体编辑环境在主机还是在容器内，可以根据项目情况选择。
+>`maven:3-jdk-8-alpine`集成了编译环境和运行环境，所以体积较大。没有梯子的情况下`mvn package`执行时间较长。这里将外部配置文件`settings.xml`复制到镜像中（根据环境可选），可以配置国内镜像源，加快编译速度。3.3章节中基于插件构建使用到了`openjdk:8-jre-alpine`，体积较小，但编译环境需要单独配置，比较麻烦。具体编辑环境在主机还是在容器内，可以根据项目情况选择。
 
 2. 构建镜像
 
@@ -624,7 +624,22 @@ cat /etc/issue                              # 查看操作系统
 uname -a                                    # 查看内核
 ```
 
-#### 3.1.2 基于操作系统构建Tomcat
+#### 3.1.2 基于运行环境构建
+
+```bash
+FROM openjdk:8-jre-alpine
+COPY target/*.jar /app.jar
+EXPOSE 8080
+ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
+```
+
+```bash
+FROM tomcat:8-jre8
+ADD target/ROOT.war /usr/local/tomcat/webapps/
+CMD ["catalina.sh", "run"]
+```
+
+#### 3.1.3 基于CentOS 7构建
 
 1. 创建文件
 
@@ -666,7 +681,7 @@ docker run -dit --name tomcat8 -p 8080:8080 tomcat8
 docker exec -it tomcat8 /bin/bash
 ```
 
-#### 3.1.3 基于操作系统构建Turnserver
+#### 3.1.4 基于Ubuntu 14构建
 
 1. 创建文件
 
@@ -754,7 +769,54 @@ sudo docker build --tag coturn .
 sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 ```
 
-#### 3.1.4 使用镜像嵌套构建Hadoop 3.x
+#### 3.1.5 基于Ubuntu 22构建
+
+```yaml
+FROM ubuntu:22.04
+MAINTAINER xzh
+# 系统环境
+RUN apt-get update && apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping git
+
+# java 1.8.0
+ADD jdk-8u202-linux-x64.tar.gz /usr/local
+ENV JAVA_HOME /usr/local/jdk1.8.0_202
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
+
+# node 14.21.3
+ADD node-v14.21.3-linux-x64.tar.gz /usr/local
+RUN mv /usr/local/node-v14.21.3-linux-x64 /usr/local/node
+ENV NODE_HOME /usr/local/node
+ENV PATH $PATH:$NODE_HOME/bin
+
+# maven3.6.3
+ADD apache-maven-3.6.3-bin.tar.gz /usr/local/
+RUN mv /usr/local/apache-maven-3.6.3 /usr/local/maven && ln -s /usr/local/maven/bin/mvn /usr/bin/mvn
+ENV MAVEN_VERSION 3.6.3
+ENV MAVEN_HOME /usr/local/maven
+ENV PATH $PATH:$MAVEN_HOME/bin
+
+# 容器工作目录
+WORKDIR /data/workspace
+# 安装webide并配置
+ENV PATH "/root/.local/bin:${PATH}"
+RUN curl -fsSL https://poc.dev.xuzhihao.net/install.sh | sh -s -- --method standalone &&\
+    code-server --install-extension redhat.vscode-yaml &&\
+    echo done
+# 默认配置
+COPY config.yaml /root/.config/code-server/
+# 默认插件
+ADD extensions/* /data/code-server/extensions/
+# 暴漏端口
+EXPOSE 8080
+# 映射磁盘目录
+VOLUME [ "/data/workspace","/data/code-server" ]
+# 启动
+CMD ["code-server", "--auth", "none", "--bind-addr", "0.0.0.0:8080", "--config", "/root/.config/code-server/config.yaml", "--user-data-dir", "/data/code-server/user-data", "--extensions-dir", "/data/code-server/extensions", "/data/workspace"]
+```
+
+
+#### 3.1.6 基于自定义镜像构建
 
 1. 构建centos7-ssh-sync
 
@@ -913,52 +975,6 @@ jps
 
 > web上传附件，需要在本地hosts添加 `0.0.0.0 hadoop3`，否则提示`Couldn't upload the file`问题
 
-#### 3.1.5 基于操作系统构建Code Server
-
-
-```yaml
-FROM ubuntu:22.04
-MAINTAINER xzh
-# 系统环境
-RUN apt-get update && apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping git
-
-# java 1.8.0
-ADD jdk-8u202-linux-x64.tar.gz /usr/local
-ENV JAVA_HOME /usr/local/jdk1.8.0_202
-ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
-
-# node 14.21.3
-ADD node-v14.21.3-linux-x64.tar.gz /usr/local
-RUN mv /usr/local/node-v14.21.3-linux-x64 /usr/local/node
-ENV NODE_HOME /usr/local/node
-ENV PATH $PATH:$NODE_HOME/bin
-
-# maven3.6.3
-ADD apache-maven-3.6.3-bin.tar.gz /usr/local/
-RUN mv /usr/local/apache-maven-3.6.3 /usr/local/maven && ln -s /usr/local/maven/bin/mvn /usr/bin/mvn
-ENV MAVEN_VERSION 3.6.3
-ENV MAVEN_HOME /usr/local/maven
-ENV PATH $PATH:$MAVEN_HOME/bin
-
-# 容器工作目录
-WORKDIR /data/workspace
-# 安装webide并配置
-ENV PATH "/root/.local/bin:${PATH}"
-RUN curl -fsSL https://poc.dev.xuzhihao.net/install.sh | sh -s -- --method standalone &&\
-    code-server --install-extension redhat.vscode-yaml &&\
-    echo done
-# 默认配置
-COPY config.yaml /root/.config/code-server/
-# 默认插件
-ADD extensions/* /data/code-server/extensions/
-# 暴漏端口
-EXPOSE 8080
-# 映射磁盘目录
-VOLUME [ "/data/workspace","/data/code-server" ]
-# 启动
-CMD ["code-server", "--auth", "none", "--bind-addr", "0.0.0.0:8080", "--config", "/root/.config/code-server/config.yaml", "--user-data-dir", "/data/code-server/user-data", "--extensions-dir", "/data/code-server/extensions", "/data/workspace"]
-```
 
 ### 3.2 容器构建
 
