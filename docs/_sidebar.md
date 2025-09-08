@@ -18,22 +18,9 @@
   - [MongoDB](deploy/mongodb)
   - [Redis](deploy/redis)
   - [DM](deploy/dm)
+  - [OceanBase](deploy/oceanbase)
+  - [HGDB](deploy/hgdb)
 
-- 大数据
-  - [HBase](deploy/hbase)
-  - [ClickHouse](deploy/clickhouse)
-  - [Kudu](deploy/kudu)
-  - [Hudi](deploy/hudi)
-  - [Kafka](deploy/kafka)
-  - [Hadoop](deploy/hadoop)
-  - [Spark](deploy/spark)
-  - [Flink](deploy/flink)
-  - [Flume](deploy/flume)
-  - [Hive](deploy/hive)
-  - [Kettle](deploy/kettle)
-  - [DataX](deploy/datax)
-  - [Debezium](deploy/debezium)
-  
 - 中间件
   - [Nginx](deploy/nginx)
   - [OpenResty](deploy/openresty)
@@ -53,9 +40,6 @@
   - [Simple RTMP Server](deploy/srs)
   - [Turnserver](deploy/turnserver)
   - [Nps](deploy/nps)
-  - [Fisco Bcos](deploy/fisco)
-
-- 分布式
   - [Elastic Stack](deploy/elk)
   - [FastDFS](deploy/fastdfs)
   - [Skywalking](deploy/skywalking)
@@ -67,8 +51,34 @@
   - [Pulsar](deploy/pulsar)
   - [Emqx](deploy/emqx)
   - [Mycat](deploy/mycat)
+
+- 大模型
+  - [LLM](deploy/llm)
+  - [Dify](deploy/dify)
+  - [Spring AI](deploy/springai)
+  - [APIPark](deploy/apipark)
+  - [Higress](deploy/higress)
+
+- 区块链
+  - [Fisco Bcos](deploy/fisco)
+
+- 大数据
+  - [HBase](deploy/hbase)
+  - [ClickHouse](deploy/clickhouse)
+  - [Kudu](deploy/kudu)
+  - [Hudi](deploy/hudi)
+  - [Kafka](deploy/kafka)
+  - [Hadoop](deploy/hadoop)
+  - [Spark](deploy/spark)
+  - [Flink](deploy/flink)
+  - [Flume](deploy/flume)
+  - [Hive](deploy/hive)
+  - [Kettle](deploy/kettle)
+  - [DataX](deploy/datax)
+  - [Debezium](deploy/debezium)
   
-- 开发SDK
+
+- 开发工具
   - [Java](deploy/java)
   - [Sacla](deploy/scala)
   - [Python](deploy/python)
