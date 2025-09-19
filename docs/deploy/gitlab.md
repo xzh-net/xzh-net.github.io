@@ -228,35 +228,49 @@ export GIT_PASSWORD="your_password"
 > 用户名和密码必须进行编码，否则会报错
 
 
-### 3.3 提交代码
+### 3.3 常用命令
+
+提交代码
 
 ```bash
-git add .                     # 提交文件到暂存区
-git rm README.md              # 删除文件
-git commit -m "remark"        # 提交代码以...为注释
-git push                      # 推送到远程仓库
-git pull                      # 拉取代码
+git branch                      # 查看所有本地分支
+git status                      # 查看本地仓库文件状况
+git log                         # 查看提交记录
 
 # 克隆远程仓库的dev分支到本地
-git clone --branch dev http://192.168.3.200/xzh-group/xzh-spring-boot.git  
-git checkout -b develop_xzh     # 创建新分支，并把当前分支内容复制到新分支中
-git push origin develop_xzh     # 将新分支推送到远程仓库
+git clone --branch dev http://192.168.3.200/xzh-group/xzh-spring-boot.git
+
+git branch new-feature          # 已当前分支创建一个新本地分支
+git switch new-feature          # 切换本地分支
+git push --set-upstream origin new-feature      # 将新分支推送到远程仓库
+
+git add .                       # 提交文件到暂存区
+git rm README.md                # 删除文件
+git commit -m "remark"          # 提交代码以...为注释
+git push                        # 推送到远程仓库
+git pull                        # 拉取代码
+
+git merge new-feature           # 将指定分支合并到当前分支  
+git branch -d new-feature       # 删除一个已经合并的本地分支
+git branch -D new-feature       # 强制删除一个本地分支（未合并的）	
+git push origin --delete new-feature    # 删除远端分支
 ```
 
-### 3.4 常用命令
+全局
 
 ```bash
 git config --global user.name "xuzhihao"
 git config --global user.email "xuzhihao@163.com"
 git config --global credential.helper store     # 持久化
+git config --global push.autoSetupRemote true   # 自动设置远程仓库
 
 git config --global --list      # 查看全局配置
 git config --global --edit      # 编辑全局配置，windows按下 Win + R 键，然后输入 control keymgr.dll 来打开凭据管理器
+```
 
-git branch                      # 查看分支
-git status                      # 查看本地仓库文件状况
-git log                         # 查看提交记录
+代码统计
 
+```bash
 # 统计特定时间段内、由指定作者所做的代码更改的统计数据
 git log --since='2024-11-14 09:00:00' --until='2024-11-14 23:59:59'  --author="xuzhihao"  --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "增加数: %s, 删除的行数: %s, 净增加行数: %s\n", add, subs, loc }'
 ```
