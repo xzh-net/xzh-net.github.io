@@ -1868,6 +1868,16 @@ JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
 $JAVA ${JAVA_OPT} $@
 ```
 
+#### 2.6.4 Python HTTP
+
+```bash
+# python2
+nohup python -m SimpleHTTPServer 9000 > t1.log 2>&1 &
+
+# python3
+nohup python3 -m http.server 9000 > t1.log 2>&1 &
+```
+
 ## 3. 初始化
 
 ### 3.1 配置静态IP地址
