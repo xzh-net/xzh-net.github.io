@@ -1508,9 +1508,9 @@ fdfs_test /etc/fdfs/client.conf upload index.html
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   -v /data/minio/data:/data \
   -v /data/minio/config:/root/.minio \
-  minio/minio:RELEASE.2024-10-29T16-01-48Z
-  server /data 
-  --console-address ":9001"
+  minio/minio:RELEASE.2024-10-29T16-01-48Z \
+  server /data \
+  --console-address ":9001" 
 ```
 
 访问地址：http://192.168.2.100:9001  ，帐号/密码：minioadmin
