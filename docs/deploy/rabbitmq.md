@@ -72,7 +72,7 @@ rabbitmq-plugins enable rabbitmq_web_stomp          # 15674
 
 ### 1.4 用户权限设置
 
-开启管控台
+开启管理界面
 ```bash
 rabbitmq-plugins enable rabbitmq_management
 ```

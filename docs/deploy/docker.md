@@ -2086,13 +2086,15 @@ docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:
 
 ```bash
 docker run -p 5672:5672 -p 15672:15672 --name rabbitmq -d rabbitmq:3.7.15
-# 下载插件
+# 启动管理界面
+rabbitmq-plugins enable rabbitmq_management
+# 下载延迟插件
 wget https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.8.0/rabbitmq_delayed_message_exchange-3.8.0.ez
 docker cp rabbitmq_delayed_message_exchange-3.8.0.ez rabbitmq:/plugins/
 docker exec -it rabbitmq /bin/bash
-# 启动插件
+# 启动延迟插件
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
-rabbitmq-plugins enable rabbitmq_management
+# 创建用户
 rabbitmqctl add_user admin 123456
 rabbitmqctl set_user_tags admin administrator
 rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
