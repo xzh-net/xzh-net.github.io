@@ -192,7 +192,7 @@ mkdir -p /data/{elasticsearch/plugins,elasticsearch/data,logstash}
 chmod -R 777 /data
 ```
 
-上传logstash配置
+上传logstash.conf
 
 ```conf
 input {
