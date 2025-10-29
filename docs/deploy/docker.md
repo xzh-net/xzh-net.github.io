@@ -183,139 +183,125 @@ cp /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose -v
 ```
 
-#### 1.5.2 文件示例
+#### 1.5.2 ELK 7.17.3
 
-1. mall-env.yml
-
-```bash
-vi docker-compose-env.yml
-```
-
-```yml
-version: '3'
-services:
-  mysql:
-    image: mysql:5.7
-    container_name: mysql
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root     # 设置root帐号密码
-    ports:
-      - 3306:3306
-    volumes:
-      - /data/mysql/conf:/etc/mysql/conf.d  # 配置文件挂载
-      - /data/mysql/data:/var/lib/mysql     # 数据文件挂载
-      - /data/mysql/logs:/logs              # 日志文件挂载
-  redis:
-    image: redis:5
-    container_name: redis
-    command: redis-server --appendonly yes
-    volumes:
-      - /data/redis/data:/data      # 数据文件挂载
-    ports:
-      - 6379:6379
-  nginx:
-    image: nginx:1.10
-    container_name: nginx
-    volumes:
-      - /data/nginx/nginx.conf:/etc/nginx/nginx.conf    # 配置文件挂载
-      - /data/nginx/html:/usr/share/nginx/html          # 静态资源根目录挂载
-      - /data/nginx/log:/var/log/nginx                  # 日志文件挂载
-    ports:
-      - 80:80
-  rabbitmq:
-    image: rabbitmq:3.7.15-management
-    container_name: rabbitmq
-    volumes:
-      - /data/rabbitmq/data:/var/lib/rabbitmq   # 数据文件挂载
-      - /data/rabbitmq/log:/var/log/rabbitmq    # 日志文件挂载
-    ports:
-      - 5672:5672
-      - 15672:15672
-  mongo:
-    image: mongo:4.2.5
-    container_name: mongo
-    volumes:
-      - /data/mongo/db:/data/db     # 数据文件挂载
-    ports:
-      - 27017:27017
-  nacos-registry:
-    image: nacos/nacos-server:2.0.1
-    container_name: nacos-registry
-    environment:
-      - "MODE=standalone"
-    ports:
-      - 8848:8848
-```
-
-```
-docker-compose -f docker-compose-env.yml up -d  
-docker-compose -f docker-compose-env.yml down
-```
-
-
-2. elk-762.yml
+创建文件目录
 
 ```bash
-vi docker-compose-elk.yml
+mkdir -p /data/{elasticsearch/plugins,elasticsearch/data,logstash}
+chmod -R 777 /data
 ```
 
-```yml
+上传logstash配置
+
+```conf
+input {
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4560
+    codec => json_lines
+    type => "debug"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4561
+    codec => json_lines
+    type => "error"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4562
+    codec => json_lines
+    type => "business"
+  }
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"
+    port => 4563
+    codec => json_lines
+    type => "record"
+  }
+}
+filter{
+  if [type] == "record" {
+    mutate {
+      remove_field => "port"
+      remove_field => "host"
+      remove_field => "@version"
+    }
+    json {
+      source => "message"
+      remove_field => ["message"]
+    }
+  }
+}
+output {
+  elasticsearch {
+    hosts => "localhost:9200"
+    index => "mall-%{type}-%{+YYYY.MM.dd}"
+  }
+}
+```
+
+创建docker-compose.yml
+
+```yaml
 version: '3'
-networks:
-  es:
 services:
   elasticsearch:
-    image: elasticsearch:7.6.2
+    image: elasticsearch:7.17.3
     container_name: elasticsearch
     user: root
     environment:
-      - "cluster.name=elasticsearch"      # 设置集群名称为elasticsearch
-      - "discovery.type=single-node"      # 以单一节点模式启动
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 设置使用jvm内存大小
+      - "cluster.name=elasticsearch" #设置集群名称为elasticsearch
+      - "discovery.type=single-node" #以单一节点模式启动
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m" #设置使用jvm内存大小
     volumes:
-      - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins  # 插件文件挂载
-      - /data/elasticsearch/data:/usr/share/elasticsearch/data        # 数据文件挂载
+      - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins #插件文件挂载
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data #数据文件挂载
     ports:
       - 9200:9200
       - 9300:9300
-    networks:
-      - es  
-  kibana:
-    image: kibana:7.6.2
-    container_name: kibana
-    links:
-      - elasticsearch:es  # 可以用es这个域名访问elasticsearch服务
-    depends_on:
-      - elasticsearch     # kibana在elasticsearch启动之后再启动
-    environment:
-      - "elasticsearch.hosts=http://es:9200"  # 设置访问elasticsearch的地址
-    ports:
-      - 5601:5601
-    networks:
-      - es  
   logstash:
-    image: logstash:7.6.2
+    image: logstash:7.17.3
     container_name: logstash
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf     # 挂载logstash的配置文件
+      - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf #挂载logstash的配置文件
     depends_on:
-      - elasticsearch       # kibana在elasticsearch启动之后再启动
+      - elasticsearch #kibana在elasticsearch启动之后再启动
     links:
-      - elasticsearch:es    # 可以用es这个域名访问elasticsearch服务
+      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
     ports:
       - 4560:4560
       - 4561:4561
       - 4562:4562
       - 4563:4563
-    networks:
-      - es  
+  kibana:
+    image: kibana:7.17.3
+    container_name: kibana
+    links:
+      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
+    depends_on:
+      - elasticsearch #kibana在elasticsearch启动之后再启动
+    environment:
+      - "elasticsearch.hosts=http://es:9200" #设置访问elasticsearch的地址
+    ports:
+      - 5601:5601
 ```
 
-3. spark.yml
+启动服务
+```
+docker-compose up -d  
+docker-compose down
+```
+
+
+#### 1.5.3 Spark
 
 ```bash
 vi spark.yml
