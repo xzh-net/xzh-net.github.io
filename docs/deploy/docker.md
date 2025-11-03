@@ -813,30 +813,24 @@ vi Dockerfile
 
 ```bash
 FROM centos:7
-MAINTAINER xzh
+
+# 更换为可用的yum源
+RUN curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo && \
+    sed -i -e '/mirrors.cloud.aliyuncs.com/d' -e '/mirrors.aliyuncs.com/d' /etc/yum.repos.d/CentOS-Base.repo
 
 ENV TZ=Asia/Shanghai
-#install vim & net-tools
-RUN yum -y install vim
-RUN yum -y install net-tools
 
-#install rsync
-RUN yum -y install rsync
+# 清理并更新yum缓存
+RUN yum clean all && yum makecache
 
-#安装ssh
-RUN yum install -y openssh-server sudo
-RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
-RUN yum  install -y openssh-clients
+RUN yum -y install vim net-tools rsync openssh-server openssh-clients sudo && \
+    sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config && \
+    echo "root:123456" | chpasswd && \
+    echo "root   ALL=(ALL)       ALL" >> /etc/sudoers && \
+    ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N '' && \
+    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
+    mkdir /var/run/sshd
 
-#配置用户名和密码
-RUN echo "root:123456" | chpasswd
-RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
-#生成ssh key
-RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
-RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
-
-#配置sshd服务
-RUN mkdir /var/run/sshd
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 ```
@@ -854,18 +848,17 @@ vi Dockerfile
 
 ```bash
 FROM centos7-ssh-sync
-MAINTAINER xzh
 
 # install jdk8
 ADD jdk-8u202-linux-x64.tar.gz /usr/local/
-ENV JAVA_HOME /usr/local/jdk1.8.0_202
-ENV PATH $PATH:$JAVA_HOME/bin
+ENV JAVA_HOME=/usr/local/jdk1.8.0_202
+ENV PATH=$PATH:$JAVA_HOME/bin
 
 # install hadoop3.1.4
 ADD hadoop-3.1.4-bin-snappy-CentOS7.tar.gz /usr/local/
-ENV HADOOP_HOME /usr/local/hadoop-3.1.4
-ENV PATH $PATH:$HADOOP_HOME/bin
-ENV PATH $PATH:$HADOOP_HOME/sbin
+ENV HADOOP_HOME=/usr/local/hadoop-3.1.4
+ENV PATH=$PATH:$HADOOP_HOME/bin
+ENV PATH=$PATH:$HADOOP_HOME/sbin
 
 WORKDIR /usr/local
 ```
