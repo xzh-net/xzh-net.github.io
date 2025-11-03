@@ -16,13 +16,14 @@ Kettle是一款开源的ETL工具，纯java编写，可以在Window、Linux、Un
 
 ![](../../assets/_images/deploy/kattle/1.png)
 
-在文件->新建装换，新建转换后在左边的主对象树中建立DB连接用以连接数据库
+在文件`->`新建装换，新建转换后在左边的主对象树中建立DB连接用以连接数据库
 
 ![](../../assets/_images/deploy/kattle/2.png)
 
-连接oralce 
+连接Oralce，将Oracle驱动jar包放到lib目录下
 
 ![](../../assets/_images/deploy/kattle/3.png)
+
 
 
 ### 1.2 导出Excel
