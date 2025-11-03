@@ -950,9 +950,9 @@ start-all.sh
 jps
 ```
 
-访问地址：http://ip:9870
+访问地址：http://172.17.17.161:9870
 
-> web上传附件，需要在本地hosts添加 `0.0.0.0 hadoop3`，否则提示`Couldn't upload the file`问题
+> web上传附件，需要在本地hosts添加 `172.17.17.161 hadoop3`，否则提示`Couldn't upload the file`问题
 
 
 ### 3.2 容器构建
