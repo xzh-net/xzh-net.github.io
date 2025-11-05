@@ -103,8 +103,7 @@ Hosted安全策略:
 修改Maven的settings.xml文件，加入认证机制
 
 ```xml
-<!--nexus服务器,id为组仓库name-->
-  <servers>  
+<servers>  
     <server>  
         <id>xzh-group</id>  
         <username>admin</username>  
@@ -125,16 +124,15 @@ Hosted安全策略:
         <username>admin</username>  
         <password>admin</password>  
     </server>   
-  </servers>  
-<!--仓库组的url地址，id和name可以写组仓库name，mirrorOf的值设置为central-->  
-  <mirrors>     
+</servers> 
+<mirrors>
     <mirror>  
         <id>xzh-group</id>  
         <name>xzh-group</name>  
-        <url>http://172.17.17.200:8081/repository/xzh-group/</url>  
+        <url>http://172.17.17.161:8081/repository/xzh-group/</url>  
         <mirrorOf>central</mirrorOf>  
-    </mirror>     
-  </mirrors>
+    </mirror> 
+</mirrors>
 ```
 
 ### 3.2 手动上传
@@ -177,12 +175,12 @@ mvn deploy:deploy-file -DgroupId=net.xzh -DartifactId=spring-boot-email -Dversio
 <!-- 配置资源上传的仓库地址，与settings.xml中  -->
 <distributionManagement>
     <repository>
-        <id>xzh-release</id>
-        <url>http://172.17.17.200:8081/repository/xzh-release/</url>
+        <id>xzh-releases</id>
+        <url>http://172.17.17.161:8081/repository/xzh-releases/</url>
     </repository>
     <snapshotRepository>
         <id>xzh-snapshots</id>
-        <url>http://172.17.17.200:8081/repository/xzh-snapshots/</url>
+        <url>http://172.17.17.161:8081/repository/xzh-snapshots/</url>
     </snapshotRepository>
 </distributionManagement>
 ```
