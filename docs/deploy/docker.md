@@ -240,8 +240,8 @@ filter{
 }
 output {
   elasticsearch {
-    hosts => "localhost:9200"
-    index => "mall-%{type}-%{+YYYY.MM.dd}"
+    hosts => "172.17.17.161:9200"
+    index => "app-%{type}-%{+YYYY.MM.dd}"
   }
 }
 ```
