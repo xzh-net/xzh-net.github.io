@@ -2162,9 +2162,9 @@ docker exec -it kafka /bin/bash
 cd /opt/kafka_2.13-2.8.1
 
 bin/kafka-topics.sh --create --topic topic1 --partitions 2 --replication-factor 3 --bootstrap-server 172.17.17.161:9092     # 创建主题
-bin/kafka-console-producer.sh --topic product --bootstrap-server 172.17.17.161:9092                                         # 发送消息
-bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 172.17.17.161:9092                        # 消费
-bin/kafka-topics.sh --delete --topic product --bootstrap-server 172.17.17.161:9092                                          # 删除主题
+bin/kafka-console-producer.sh --topic topic1 --bootstrap-server 172.17.17.161:9092                                         # 发送消息
+bin/kafka-console-consumer.sh --topic topic1 --from-beginning --bootstrap-server 172.17.17.161:9092                        # 消费
+bin/kafka-topics.sh --delete --topic topic1 --bootstrap-server 172.17.17.161:9092                                          # 删除主题
 ```
 
 #### Pulsar 2.8.4
