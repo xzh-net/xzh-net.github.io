@@ -703,7 +703,14 @@ logging.files:
 
 ```bash
 cd /home/elastic/filebeat-7.6.2
-./filebeat -c filebeat.yml -e
+# 测试配置
+filebeat test config -c filebeat.yml
+# 测试输出
+filebeat test output -c filebeat.yml
+# -e 查看实时参数启动
+./filebeat -e -c filebeat.yml 
+# 后台启动
+./filebeat -c filebeat.yml &
 ```
 
 ### 4.5 修改Logstash
