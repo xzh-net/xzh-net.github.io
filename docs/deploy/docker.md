@@ -2144,13 +2144,27 @@ docker run -itd --name kafka -p 9092:9092 \
   --link some-zookeeper:zookeeper \
   -e KAFKA_BROKER_ID=0 \
   -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
-  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.17.17.200:9092 \
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.17.17.161:9092 \
   -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
   -t wurstmeister/kafka:2.13-2.8.1
 ```
 
+webUI
+
 ```bash
-docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.200:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
+docker run -itd --name kafka-manager -p 9000:9000 -e ZK_HOSTS="172.17.17.161:2181" -e APPLICATION_SECRET=letmein sheepkiller/kafka-manager
+```
+
+客户端测试
+
+```bash
+docker exec -it kafka /bin/bash
+cd /opt/kafka_2.13-2.8.1
+
+bin/kafka-topics.sh --create --topic topic1 --partitions 2 --replication-factor 3 --bootstrap-server 172.17.17.161:9092     # 创建主题
+bin/kafka-console-producer.sh --topic product --bootstrap-server 172.17.17.161:9092                                         # 发送消息
+bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 172.17.17.161:9092                        # 消费
+bin/kafka-topics.sh --delete --topic product --bootstrap-server 172.17.17.161:9092                                          # 删除主题
 ```
 
 #### Pulsar 2.8.4
