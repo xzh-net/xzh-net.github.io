@@ -486,11 +486,11 @@ input {
     host => "0.0.0.0"
     port => 4563
     codec => json_lines
-    type => "common"
+    type => "record"
   }
 }
 filter{
-  if [type] == "common" {
+  if [type] == "record" {
     mutate {
       remove_field => "port"
       remove_field => "host"
@@ -504,8 +504,8 @@ filter{
 }
 output {
   elasticsearch {
-    hosts => ["172.17.17.194:9201","172.17.17.194:9202","172.17.17.194:9203"]
-    index => "springboot-%{type}-%{+YYYY.MM.dd}"
+    hosts => "172.17.17.161:9200"
+    index => "app-%{type}-%{+YYYY.MM.dd}"
   }
 }
 ```
@@ -563,28 +563,29 @@ cp -p filebeat.yml filebeat.yml.bak
 vi filebeat.yml
 ```
 
-```conf
+```yml
 filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /data/app/logs/application/*/*.log
-  exclude_lines: ['\sDEBUG\s\d']
-  exclude_files: ['sc-admin.*.log$']
+    - /data/higress/logs/*/*.log            # 监控多层目录结构
+  exclude_lines: ['\sDEBUG\s\d']            # 排除 DEBUG 级别日志 \s 表示空白字符 \d 表示数字 比如：[INFO] DEBUG 3 Processing request
+  exclude_files: ['sc-admin.*.log$', 'error.*.log$']         # 排除特定文件
   fields:
-    docType: sys-log
-    project: microservices-platform
+    docType: ai-log
+    project: higress
   multiline:
-    pattern: '^\[\S+:\S+:\d{2,}] '
+    pattern: '^\{"ai_log"'                  # 多行日志合并模式以：'^\{"ai_log"'开头
     negate: true
     match: after
+    max_lines: 500
 - type: log
   enabled: true
   paths:
     - /data/app/logs/point/*.log
   fields:
-    docType: point-log
-    project: microservices-platform
+    docType: audit-log
+    project: microservices
 output.logstash:
   hosts: ["172.17.17.194:5044"]
   bulk_max_size: 2048
