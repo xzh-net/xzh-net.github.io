@@ -2010,7 +2010,7 @@ filter{
 output {
   elasticsearch {
     hosts => "es:9200"
-    index => "mall-%{type}-%{+YYYY.MM.dd}"
+    index => "app-%{type}-%{+YYYY.MM.dd}"
   }
 }
 ```
