@@ -60,9 +60,10 @@ nohup bin/kafka-server-start.sh config/server.properties &
 #### 1.1.5 客户端测试
 
 ```bash
-bin/kafka-topics.sh --create --topic product --partitions 2 --replication-factor 3 --bootstrap-server 192.168.3.200:9092 	# 创建主题
+bin/kafka-topics.sh --create --topic product --partitions 2 --replication-factor 3 --bootstrap-server 192.168.3.200:9092    # 创建主题
 bin/kafka-console-producer.sh --topic product --bootstrap-server 192.168.3.200:9092                                         # 发送消息
 bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 192.168.3.200:9092                        # 消费
+bin/kafka-topics.sh --delete --topic product --bootstrap-server 192.168.3.200:9092                                          # 删除主题
 ```
 
 ### 1.2 集群
