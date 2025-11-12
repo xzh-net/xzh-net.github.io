@@ -512,12 +512,16 @@ output {
 
 ### 3.4 安装json_lines插件
 
+修改下载源
+
 ```bash
 cd /home/elastic/logstash-7.6.2/
 vim Gemfile
-# 修改source属性为国内的源
+# 修改内容
 source "http://mirrors.tuna.tsinghua.edu.cn/rubygems/"
 ```
+
+安装插件
 
 ```bash
 ./bin/logstash-plugin install --no-verify logstash-codec-json_lines
@@ -532,7 +536,97 @@ tail -f ../logs/logstash-plain.log
 lsof -i:4560,4561,4562,4563
 ```
 
-至此，服务端配置完毕，验证应用：https://github.com/xzh-net/spring-boot/tree/main/spring-boot-elk
+### 3.6 客户端测试
+
+创建一个测试脚本
+
+```bash
+cd /data/logstash
+vi test_logstash.sh
+```
+
+```bash
+#!/bin/bash
+
+HOST="172.17.17.161"
+
+# 检查nc命令是否可用
+check_nc() {
+    if ! command -v nc &> /dev/null; then
+        echo "错误: nc (netcat) 命令未找到，请先安装"
+        exit 1
+    fi
+}
+
+# 测试连接
+test_connection() {
+    echo "测试连接到 $HOST..."
+    for port in 4560 4561 4562 4563; do
+        if nc -z -w 3 $HOST $port; then
+            echo "端口 $port: 可达"
+        else
+            echo "端口 $port: 不可达"
+        fi
+    done
+    echo
+}
+
+send_debug() {
+    echo "发送 DEBUG 消息..."
+    echo '{"message": "Debug test message", "level": "DEBUG", "timestamp": "'$(date -Iseconds)'", "source": "test_script"}' | nc -w 3 $HOST 4560
+}
+
+send_error() {
+    echo "发送 ERROR 消息..."
+    echo '{"message": "Error test message", "level": "ERROR", "timestamp": "'$(date -Iseconds)'", "source": "test_script"}' | nc -w 3 $HOST 4561
+}
+
+send_business() {
+    echo "发送 BUSINESS 事务..."
+    echo '{"message": "Business transaction", "action": "purchase", "amount": 100.50, "timestamp": "'$(date -Iseconds)'", "user_id": "test_user_123"}' | nc -w 3 $HOST 4562
+}
+
+send_record() {
+    echo "发送 RECORD 数据..."
+    # 修正：移除多余的空格和引号问题
+    echo '{"record_id": 456, "type": "user", "details": {"name": "john", "age": 30}, "timestamp": "'$(date -Iseconds)'"}' | nc -w 3 $HOST 4563
+}
+
+# 主执行函数
+main() {
+    echo "开始 Logstash 连接测试..."
+    echo "目标主机: $HOST"
+    echo "======================================"
+    
+    # 检查依赖
+    check_nc
+    
+    # 测试连接
+    test_connection
+    
+    # 发送测试数据
+    send_debug
+    sleep 1
+    send_error
+    sleep 1
+    send_business
+    sleep 1
+    send_record
+    
+    echo "======================================"
+    echo "测试数据发送完成"
+    echo "请检查 Logstash 日志和输出目标（如 Elasticsearch）来验证数据接收"
+}
+
+# 执行主函数
+main
+```
+
+给予执行权限
+```bash
+chmod +x test_logstash.sh
+./test_logstash.sh
+```
 
 ## 4. Filebeat
 
