@@ -544,12 +544,12 @@ ll /opt/flume/data/flume3
 
 #### 2.7.2 自定义拦截器
 
-代码地址：https://github.com/xzh-net/java/tree/main/flume
+代码地址：https://github.com/xzh-net/java-demo/tree/main/flume-ng-plug
 
 #### 2.7.2 编译上传
 
 ```bash
-cp /opt/software/flume-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
+cp /opt/software/flume-ng-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
 ```
 
 #### 2.7.3 node01创建flume1.conf
@@ -930,12 +930,12 @@ node03查看控制台数据
 
 #### 2.10.2 代码编写
 
-代码地址：https://github.com/xzh-net/java/tree/main/flume
+代码地址：https://github.com/xzh-net/java-demo/tree/main/flume-ng-plug
 
 #### 2.10.3 编译上传
 
 ```bash
-cp /opt/software/flume-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
+cp /opt/software/flume-ng-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
 ```
 
 #### 2.10.4 创建flume1.conf
@@ -981,12 +981,12 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group5/flume1.conf -Df
 
 #### 2.11.2 代码编写
 
-代码地址：https://github.com/xzh-net/java/tree/main/flume
+代码地址：https://github.com/xzh-net/java-demo/tree/main/flume-ng-plug
 
 #### 2.11.3 编译上传
 
 ```bash
-cp /opt/software/flume-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
+cp /opt/software/flume-ng-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
 ```
 
 #### 2.11.4 创建flume1.conf
