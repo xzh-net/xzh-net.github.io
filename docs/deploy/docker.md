@@ -2180,6 +2180,28 @@ docker run -dit \
     bin/pulsar standalone
 ```
 
+测试
+```bash
+docker exec -it pulsar-standalone /bin/bash
+
+# 创建持久化主题
+bin/pulsar-admin topics create persistent://public/default/my-topic-1
+# 创建带分区的主题
+bin/pulsar-admin topics create-partitioned-topic persistent://public/default/my-partitioned-topic --partitions 3
+# 或者直接发送指定消息
+bin/pulsar-client produce persistent://public/default/my-topic-1 --messages "admin123456789"
+# 实时消费消息（持续监听）
+bin/pulsar-client consume persistent://public/default/my-topic-1 -s "my-subscription" -n 0
+# 消费指定数量的消息
+bin/pulsar-client consume persistent://public/default/my-topic-1 -s "my-subscription" -n 5
+# 查询主题列表
+bin/pulsar-admin topics list public/default
+# 删除主题
+bin/pulsar-admin topics delete persistent://public/default/my-topic-1
+```
+
+webUI
+
 ```bash
 docker run -dit \
     -p 9527:9527 -p 7750:7750 \
