@@ -717,7 +717,7 @@ filebeat test output -c filebeat.yml
 
 ```bash
 echo '{"level": "info", "message": "我们都是好孩子"}' >> audit.log
-echo '{"nested": {"name": "zhangsan"}}' >> audit.log
+echo '{"我是个大盗贼": {"name": "zhangsan"}}' >> audit.log
 ```
 
 去Kafka查看消费数据
