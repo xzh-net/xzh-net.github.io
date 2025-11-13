@@ -57,9 +57,8 @@ source /etc/profile
 #### 2.1.1 创建flume-netcat-logger.conf文件
 
 ```bash
-cd /opt/flume/
-mkdir job
-cd job
+mkdir -p /opt/flume/job
+cd /opt/flume/job
 vim flume-netcat-logger.conf
 ```
 
