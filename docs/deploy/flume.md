@@ -319,7 +319,7 @@ echo log2 >> log2.txt
 
 ### 2.5 采集数据写入Pulsar
 
-代码地址：https://github.com/xzh-net/java-demo/tree/main/pulsar-flume-ng-sink
+代码地址：https://github.com/xzh-net/java-demo/tree/main/flume-ng-pulsar-sink
 
 #### 2.5.1 编译上传
 
