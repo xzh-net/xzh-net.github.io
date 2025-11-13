@@ -549,7 +549,7 @@ ll /opt/flume/data/flume3
 #### 2.7.2 编译上传
 
 ```bash
-cp /opt/software/flume-test-1.0-SNAPSHOT.jar /opt/flume/lib/
+cp /opt/software/flume-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
 ```
 
 #### 2.7.3 node01创建flume1.conf
@@ -656,9 +656,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group4/flume1.conf -Df
 nc localhost 44444   # node01执行，输入xzh
 ```
 
-#### 2.7.8 查看数据
-
-node02，node03查看控制台数据
+node02，node03查看控制台数据，根据预设逻辑，当body中包含xzh转发到c1，否则转发到c2
 
 ### 2.8 负载均衡和故障转移
 
@@ -937,7 +935,7 @@ node03查看控制台数据
 #### 2.10.3 编译上传
 
 ```bash
-cp /opt/software/flume-test-1.0-SNAPSHOT.jar /opt/flume/lib/
+cp /opt/software/flume-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
 ```
 
 #### 2.10.4 创建flume1.conf
@@ -988,7 +986,7 @@ bin/flume-ng agent --conf conf/ --name a1 --conf-file job/group5/flume1.conf -Df
 #### 2.11.3 编译上传
 
 ```bash
-cp /opt/software/flume-test-1.0-SNAPSHOT.jar /opt/flume/lib/
+cp /opt/software/flume-plug-1.0-SNAPSHOT.jar /opt/flume/lib/
 ```
 
 #### 2.11.4 创建flume1.conf
