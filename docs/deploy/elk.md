@@ -632,7 +632,7 @@ chmod +x test_logstash.sh
 
 ## 4. Filebeat
 
-数据流向： `应用 -> Filebeat -> Logstash -> Kafka -> App`
+数据流向： `应用 -> Filebeat  -> Kafka`
 
 ### 4.1 下载解压
 
@@ -668,32 +668,30 @@ filebeat.inputs:
   encoding: utf-8
   paths:
     - /data/app/logs/audit/*.log
-  exclude_lines: ['\sDEBUG\s\d']        # 排除 DEBUG 级别日志 \s 表示空白字符 \d 表示数字 比如：[INFO] DEBUG 3 Processing request
-  exclude_files: ['access.*.log$', 'error.*.log$']  # 排除特定文件
-  fields:
-    docType: audit-log
-    project: microservices
-  multiline:
-    pattern: '^\{'
-    negate: true
-    match: after
-    max_lines: 500
-    timeout: 5s
-
-# 输出配置
-output.logstash:
-  hosts: ["172.17.17.161:4564"]
-  bulk_max_size: 2048
+  # 禁用JSON解析，作为纯文本处理
+  json.enabled: false
 
 # 禁用 Elasticsearch 自动配置
 setup.ilm.enabled: false
 setup.template.enabled: false
 
+# 输出配置
+output.kafka:
+  enabled: true
+  hosts: ["172.17.17.161:9092"]
+  topic: "topic1"
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000
+  timeout: 30s
+
 # 日志配置
 logging.level: info
 logging.to_files: true
 logging.files:
-  path: log/filebeat
+  path: /var/log/filebeat
   name: filebeat.log
   keepfiles: 7
   permissions: 0644
@@ -713,69 +711,13 @@ filebeat test output -c filebeat.yml
 ./filebeat -c filebeat.yml &
 ```
 
-### 4.5 修改Logstash
-
-1. 修改配置
-
-```bash
-su - elastic
-cd /home/elastic/logstash-7.6.2/config
-vi logstash.conf
-```
-
-```conf
-input {
-  beats {
-    port => 4564
-    codec => "plain"
-  }
-}
-
-filter {
-  mutate {
-    add_field => {
-      "log_source" => "filebeat"
-    }
-    remove_field => "@version"
-    remove_field => "agent"
-    remove_field => "log"
-    remove_field => "host"
-    remove_field => "input"
-    remove_field => "ecs"
-    remove_field => "fields"
-    remove_field => "tags"
-  }
-}
-
-output {
-  stdout { 
-    codec => rubydebug 
-  }
-  
-  elasticsearch {
-    hosts => "172.17.17.161:9200"
-    index => "ai-logs-%{+YYYY.MM.dd}"
-  }
-}
-```
-
-
 ### 4.6 客户端测试
 
-记录数据
+模拟数据写入
 
 ```bash
-echo '{"ai_log": "zhangsan login","details": {"name": "zhangsan", "login_time": "2025-01-01 12:00:00"}}' >> /data/app/logs/audit/audit.log
+echo '{"level": "info", "message": "我们都是好孩子"}' >> audit.log
+echo '{"nested": {"name": "zhangsan"}}' >> audit.log
 ```
 
-不记录数据
-
-```bash
-# 排除文件
-echo '{"ai_log": "zhangsan login","details": {"name": "zhangsan", "login_time": "2025-01-01 12:00:00"}}' >> /data/app/logs/audit/error.2025.log
-echo '{"ai_log": "zhangsan login","details": {"name": "zhangsan", "login_time": "2025-01-01 12:00:00"}}' >> /data/app/logs/audit/access.2025.log
-# 排除行
-echo '{"ai_log": "[INFO] DEBUG 3 admin login","details": {"lisi": "zhangsan", "login_time": "2025-01-02 13:00:00"}}' >> /data/app/logs/audit/audit.log
-```
-
-去Kibana查看日志，生成了索引`ai-logs-2025.xx.xx`，并且日志内容被正确解析。
+去Kafka查看消费数据
