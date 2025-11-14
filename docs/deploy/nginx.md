@@ -1278,6 +1278,8 @@ http {
 
 ### 4.1 openssl自签名
 
+生成证书
+
 ```bash
 mkdir /root/cert
 cd /root/cert
@@ -1286,8 +1288,26 @@ openssl req -new -key private.key -out server.csr       # 生成证书请求文�
 cp private.key private.key.org        
 openssl rsa -in private.key.org -out private.key        # 利用私钥生成一个不需密码的密钥
 openssl x509 -req -days 365 -in server.csr -signkey private.key -out server.crt  # 生成自签名证书365天
+```
 
-openssl x509 -in server.crt -noout -dates               # 验证到期时间
+校验证书
+
+```bash
+# 检查证书链、SAN、颁发者等完整信息
+openssl x509 -in server.crt -text -noout
+# 检查证书有效期
+openssl x509 -in server.crt -noout -dates
+# 检查证书主题和颁发者
+openssl x509 -in server.crt -noout -subject -issuer
+# 检查证书序列号
+openssl x509 -in server.crt -noout -serial
+# 检查证书指纹
+openssl x509 -in server.crt -noout -fingerprint
+
+# 验证证书与私钥是否匹配
+openssl x509 -noout -modulus -in server.crt | openssl md5
+openssl rsa -noout -modulus -in server.key | openssl md5
+# 两个MD5值应该相同
 ```
 
 ```nginx
