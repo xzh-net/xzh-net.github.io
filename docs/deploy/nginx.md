@@ -1281,13 +1281,28 @@ http {
 生成证书
 
 ```bash
-mkdir /root/cert
-cd /root/cert
-openssl genrsa -des3 -out private.key 2048              # 生成私钥文件
-openssl req -new -key private.key -out server.csr       # 生成证书请求文件（CSR）
-cp private.key private.key.org        
-openssl rsa -in private.key.org -out private.key        # 利用私钥生成一个不需密码的密钥
-openssl x509 -req -days 365 -in server.csr -signkey private.key -out server.crt  # 生成自签名证书365天
+# 1. 生成带密码的加密私钥（安全存储）
+openssl genrsa -aes256 -out server.encrypted.key 2048
+
+# 2. 生成CSR请求文件
+openssl req -new -key server.encrypted.key -out server.csr \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Your Company/OU=IT/CN=www.xuzhihao.net"
+
+# 3. 生成无密码私钥（用于服务器配置）
+openssl rsa -in server.encrypted.key -out server.key
+
+# 4. 生成证书（使用无密码私钥）
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+```
+
+开发环境快速生成
+
+```bash
+# 更简洁的证书生成方式（一步生成无密码私钥和证书）
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout cert/server.key \
+    -out cert/server.crt \
+    -subj "/C=CN/ST=Province/L=City/O=Organization/OU=Organization Unit/CN=www.xuzhihao.net"
 ```
 
 校验证书
