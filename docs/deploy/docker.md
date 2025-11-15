@@ -1494,7 +1494,79 @@ docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
 
 访问地址：http://192.168.2.100:9001  ，帐号/密码：minioadmin
 
-客户端调用
+桶命令
+
+```bash
+# 进入容器
+docker exec -it minio /bin/bash
+# 配置 MinIO 客户端
+mc alias set myminio http://localhost:9000 admin password123
+# 列出所有桶
+mc ls myminio
+# 创建测试桶
+mc mb myminio/test-bucket
+# 删除桶（强制删除包含文件的桶）
+mc rb --force myminio/your-bucket-name
+# 在宿主机上直接执行 mc 命令
+docker exec minio mc alias set myminio http://localhost:9000 admin password123
+docker exec minio mc rb --force myminio/your-bucket-name
+```
+
+用户命令
+
+```bash
+# 创建用户
+mc admin user add myminio xuzhihao password123
+# 禁用用户
+mc admin user disable myminio xuzhihao
+# 启用用户
+mc admin user enable myminio xuzhihao
+# 删除用户
+mc admin user remove myminio xuzhihao
+# 列出所有用户
+mc admin user list myminio
+# 查看用户信息
+mc admin user info myminio xuzhihao
+```
+
+策略命令
+
+```bash
+# 为用户分配策略（权限）
+mc admin policy attach myminio readwrite --user=xuzhihao
+# 创建自定义策略（可选）
+mc admin policy add myminio mypolicy policy.json
+# 查看所有策略
+mc admin policy list myminio
+# 创建新的访问密钥
+mc admin user svcacct add myminio xuzhihao
+# 指定自定义访问密钥名称
+mc admin user svcacct add myminio xuzhihao --access-key "my-access-key"
+# 删除密钥
+mc admin user svcacct remove myminio my-access-key
+```
+
+策略文件
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::my-bucket/*"
+      ]
+    }
+  ]
+}
+```
+
+客户端测试
 
 ```bash
 # 安装
