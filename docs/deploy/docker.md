@@ -1505,6 +1505,18 @@ mc alias set myminio http://localhost:9000 admin password123
 mc ls myminio
 # 创建测试桶
 mc mb myminio/test-bucket
+
+# 设置桶策略
+mc anonymous set download myminio/test-bucket
+# 设置为完全公开（读写权限）
+mc anonymous set public myminio/test-bucket
+# 设置为只读公开
+mc anonymous set download myminio/test-bucket
+# 设置为仅上传公开
+mc anonymous set upload myminio/test-bucket
+# 移除所有公开访问权限
+mc anonymous set none myminio/test-bucket
+
 # 删除桶（强制删除包含文件的桶）
 mc rb --force myminio/your-bucket-name
 # 在宿主机上直接执行 mc 命令
