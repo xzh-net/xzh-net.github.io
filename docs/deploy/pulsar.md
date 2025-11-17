@@ -423,7 +423,7 @@ bin/pulsar-client produce persistent://public/default/exclamation-input --messag
 
 #### 3.7.6 自定义function
 
-代码地址：https://github.com/xzh-net/java/tree/main/pulsar
+代码地址：https://github.com/xzh-net/java-demo/tree/main/pulsar
 
 1. 创建function
 
