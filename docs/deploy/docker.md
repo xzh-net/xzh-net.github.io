@@ -1481,13 +1481,13 @@ fdfs_test /etc/fdfs/client.conf upload index.html
 
 #### MinIO
 
-2025年6月19日：当前最新版`RELEASE.2025-05-24T17-08-30Z`界面发生变更没有设置功能，历史版本请使用`RELEASE.2024-10-29T16-01-48Z`
+从`RELEASE.2025-05-24T17-08-30Z`开始移除了Web UI。如果需要Web UI请使用`RELEASE.2025-04-22T22-12-26Z`版本
 
 ```bash
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
   -v /data/minio/data:/data \
   -v /data/minio/config:/root/.minio \
-  minio/minio:RELEASE.2024-10-29T16-01-48Z \
+  minio/minio:RELEASE.2025-04-22T22-12-26Z \
   server /data \
   --console-address ":9001" 
 ```
