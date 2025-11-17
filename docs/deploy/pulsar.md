@@ -428,7 +428,7 @@ bin/pulsar-client produce persistent://public/default/exclamation-input --messag
 1. 创建function
 
 ```bash
-cd /export/server/pulsar_2.8.1/
+cd /opt/apache-pulsar-2.10.1
 bin/pulsar-admin functions create \
 --jar examples/pulsar-1.0-SNAPSHOT.jar \
 --classname net.xzh.pulsar.functions.FormatDateFunction \
