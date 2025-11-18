@@ -1069,7 +1069,7 @@ docker run -d \
   -e HTTP_AUTH="off" \
   -e HTTP_USERNAME="admin" \
   -e HTTP_PASSWD="admin" \
-  -v /home/my-files:/app/public \
+  -v /data/my-files:/app/public \
   --restart unless-stopped \
   --mount type=tmpfs,destination=/tmp \
   80x86/nginx-fancyindex
@@ -1090,7 +1090,7 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 
 ### 4.2 数据库
 
-#### MySQL 5.7.44
+#### 【关系型】MySQL 5.7.44
 
 创建目录
 ```bash
@@ -1122,7 +1122,7 @@ source /file-center.sql;
 grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
 
-#### PostgreSQL 12.4
+#### 【关系型】PostgreSQL 12.4
 
 ```bash
 docker volume create pgdata  # 创建本地卷，数据卷可以在容器之间共享和重用，默认会一直存在，即使容器被删除
@@ -1142,11 +1142,11 @@ docker exec -it postgres2 /bin/bash
 psql -Upostgres # 连接数据库
 ```
 
-#### Oracle XE 11
+#### 【关系型】Oracle XE 11
 
 
 ```bash
-docker run -dit --name oracle-xe-11g -p 1022:22 -p 1521:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
+docker run -dit --name oracle-xe-11g -p 1022:22 -p 1521:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g-r2:latest
 docker exec -it oracle-xe-11g /bin/bash
 ```
 
@@ -1174,7 +1174,7 @@ password: 123456
 管理员账号：system / oracle，sys / oracle
 
 
-#### SQL Server 2019
+#### 【关系型】SQL Server 2019
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@w0rd" \
@@ -1201,7 +1201,7 @@ select * from pms_product
 go
 ```
 
-#### DM 8.1.2
+#### 【关系型】DM 8.1.2
 
 请在达梦数据库官网下载 [Docker](https://eco.dameng.com/download/) 安装包，拷贝安装包到 `/opt` 目录下，执行以下命令导入安装包：
 
@@ -1215,7 +1215,7 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 > 2.新版本 Docker 镜像中数据库默认用户名/密码为 SYSDBA/SYSDBA001  
 
 
-#### SQLite-Web
+#### 【嵌入式】SQLite
 
 创建目录，将`webui.db`文件拷贝到目录中
 
@@ -1231,10 +1231,7 @@ docker run -it --rm \
   coleifer/sqlite-web:latest
 ```
 
-
-### 4.3 缓存
-
-#### Memcached 1.6.12
+#### 【内存】Memcached 1.6.12
 
 ```bash
 docker run -dit --name memcached -m 128m -c 16382 -p 11211:11211 -d memcached:1.6.12
@@ -1250,7 +1247,7 @@ ServerName localhost:80
 service apache2 restart
 ```
 
-#### Redis 5.0.14
+#### 【内存】Redis 5.0.14
 
 下载镜像
 
@@ -1280,90 +1277,52 @@ prometheus监控
 docker run -d --name redis_exporter16379 -p 16379:9121 oliver006/redis_exporter:v1.28.0 --redis.addr redis://172.17.17.191:16379 --redis.password 'redis16379'
 ```
 
-#### Redis 7 1主2从3哨兵
+#### 【内存】Apache Geode
 
-创建文件夹
-
-```bash
-mkdir /data/redis -p
+镜像拉取
+```
+docker pull apachegeode/geode
 ```
 
-创建哨兵配置
-```bash
-vi /data/redis/sentinel1.conf
-
-# 所有IP修改为宿主机
-sentinel monitor mymaster 172.17.17.161 6379 2
-sentinel down-after-milliseconds mymaster 60000
-sentinel failover-timeout mymaster 180000
-sentinel parallel-syncs mymaster 1
+启动命令行
+```
+docker run --net=host -it -p 10334:10334 -p 7575:7575 -p 40404:40404 -p 1099:1099  apachegeode/geode gfsh
 ```
 
-复制3份
-```bash
-cp /data/redis/sentinel1.conf /data/redis/sentinel2.conf
-cp /data/redis/sentinel1.conf /data/redis/sentinel3.conf
+创建locator和server
+```
+gfsh> start locator --name=locator1 --port=10334
+gfsh> start server --name=server1 --server-port=40404
 ```
 
-创建compose文件
-```bash
-vi docker-compose.yml
+查看集群状态
+```
+gfsh> list members
 ```
 
-```yaml
-version: "3"
-services:
-  master:
-    image: redis:7.0.4
-    container_name: redis-master
-    command: redis-server --requirepass "123456" --slave-announce-ip 172.17.17.161 --slave-announce-port 6379
-    ports:
-      - 6379:6379
-  slave1:
-    image: redis:7.0.4
-    container_name: redis-slave-1
-    ports:
-      - 6380:6379
-    command: redis-server --requirepass "123456" --slaveof redis-master 6379 --slave-announce-ip 172.17.17.161 --slave-announce-port 6380
-  slave2:
-    image: redis:7.0.4
-    container_name: redis-slave-2
-    ports:
-      - 6381:6379
-    command: redis-server --requirepass "123456" --slaveof redis-master 6379 --slave-announce-ip 172.17.17.161 --slave-announce-port 6381
-
-  sentinel1:
-    image: redis:7.0.4
-    container_name: redis-sentinel-1
-    ports:
-      - 26379:26379
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
-    volumes:
-      - /data/redis/sentinel1.conf:/usr/local/etc/redis/sentinel.conf
-  sentinel2:
-    image: redis:7.0.4
-    container_name: redis-sentinel-2
-    ports:
-    - 26380:26379
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
-    volumes:
-      - /data/redis/sentinel2.conf:/usr/local/etc/redis/sentinel.conf
-  sentinel3:
-    image: redis:7.0.4
-    container_name: redis-sentinel-3
-    ports:
-      - 26381:26379
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
-    volumes:
-      - /data/redis/sentinel3.conf:/usr/local/etc/redis/sentinel.conf
+创建区域
+```
+gfsh> create region --name=User --type=REPLICATE
 ```
 
-```bash
-docker-compose up -d
+查询区域
+```
+gfsh> query --query="select * from /User"
 ```
 
+清除区域
+```
+gfsh> remove --all --region=User
+```
 
-#### MongoDB 4.4.6
+关闭服务
+```
+gfsh> shutdown --include-locators=true
+```
+
+### 4.3 NoSQL数据库
+
+#### 【文档】MongoDB 4.4.6
 
 ```bash
 docker run -p 27017:27017 --name mongo \
@@ -1371,7 +1330,7 @@ docker run -p 27017:27017 --name mongo \
 -d mongo:4.4.6
 ```
 
-#### CouchDB 3.2
+#### 【文档】CouchDB 3.2
 
 ```bash
 docker run -p 5984:5984 --name my-couchdb -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=admin -v /data/couchdb/data:/opt/couchdb/data -d couchdb:3.2
@@ -1380,44 +1339,70 @@ docker run -d -p 8000:8000 --link=couchdb_docker:couchdb --name fauxton -e COUCH
 ```
 
 
-#### InfluxDB 2.0.6
+#### 【时序】InfluxDB 2.0.6
 
 1.8
 
 ```bash
 docker run -d -p 8086:8086 \
-      -v /data/influxdb1:/var/lib/influxdb \
-      --name influxdb1 \
-      influxdb:1.8
+    -v /data/influxdb1:/var/lib/influxdb \
+    --name influxdb1 \
+    influxdb:1.8
 ```
 
 2.0.6
 
 ```bash
 docker run -d -p 8086:8086 \
-      -v /data/influxdb2/data:/var/lib/influxdb2 \
-      -v /data/influxdb2/config:/etc/influxdb2 \
-      -e DOCKER_INFLUXDB_INIT_MODE=setup \
-        -e DOCKER_INFLUXDB_INIT_USERNAME=my-user \
-      -e DOCKER_INFLUXDB_INIT_PASSWORD=my-password \
-      -e DOCKER_INFLUXDB_INIT_ORG=org \
-      -e DOCKER_INFLUXDB_INIT_BUCKET=bucket \
-        --name influxdb2 \
-      influxdb:2.0.6
+    -v /data/influxdb2/data:/var/lib/influxdb2 \
+    -v /data/influxdb2/config:/etc/influxdb2 \
+    -e DOCKER_INFLUXDB_INIT_MODE=setup \
+    -e DOCKER_INFLUXDB_INIT_USERNAME=my-user \
+    -e DOCKER_INFLUXDB_INIT_PASSWORD=my-password \
+    -e DOCKER_INFLUXDB_INIT_ORG=org \
+    -e DOCKER_INFLUXDB_INIT_BUCKET=bucket \
+    --name influxdb2 \
+    influxdb:2.0.6
 ```
 
-#### TDengine 2.0.19.1
+#### 【时序】TDengine 3.3.6.13
 
 ```bash
-docker run -d -p 6041:6041 \
-    -v /data/taos/conf:/etc/taos \
-    -v /data/taos/data:/var/lib/taos \
-    -v /data/taos/logs:/var/log/taos \
-    --name tdengine 
-    tdengine:2.0.19.1
+docker run -d \
+    --name tdengine \
+    -v /data/tdengine/taos/log:/var/log/taos \
+    -v /data/tdengine/taos/data:/var/lib/taos \
+    -p 6030-6060:6030-6060 \
+    -p 6030-6060:6030-6060/udp \
+    tdengine/tdengine:3.3.6.13
 ```
 
-#### HBase 2.1
+进入容器
+```bash
+docker exec -it tdengine /bin/bash
+taos
+```
+
+执行sql
+```sql
+-- 显示数据库
+SHOW DATABASES;
+-- 创建数据库
+CREATE DATABASE mydb;
+-- 使用数据库
+USE mydb;
+-- 创建表
+CREATE TABLE temperature (
+  ts TIMESTAMP,
+  temp FLOAT
+);
+-- 插入数据
+INSERT INTO temperature VALUES (NOW(), 23.5);
+-- 查询数据
+SELECT * FROM temperature;
+```
+
+#### 【列式】HBase 2.1
 
 ```bash
 docker run -dit --name hbase2 -h hbase2 \
@@ -1445,7 +1430,7 @@ delete "test", "10010", "c1:sex"
 deleteall "test", "10010"
 ```
 
-#### ClickHouse 21.3.20.1
+#### 【列式】ClickHouse 21.3.20.1
 
 ```bash
 docker run -d --name clickhouse-server --privileged=true \
@@ -1737,10 +1722,12 @@ curl -X GET 'http://127.0.0.1:8848/nacos/v3/client/cs/config?dataId=quickstart.t
 ```
 
 
-#### Consul 1.12.1
+#### Consul 1.15.4
+
+代理模式，服务器模式，单节点模式，UI模式，节点名称，绑定客户端所有网络接口
 
 ```
-docker run -d -p 8500:8500 --restart=always --name=consul consul:1.12.1 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
+docker run -d -p 8500:8500 --name=consul consul:1.15.4 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
 ```
 
 
@@ -1853,14 +1840,19 @@ SEATA_CONFIG_NAME   # 可选, 指定配置文件位置, 如 file:/root/registry,
 docker run --name sentinel -d -p 8858:8858 -d bladex/sentinel-dashboard:1.7.2
 ```
 
-#### Dubbo Admin
+#### dubbo-admin 0.6.0
 
 ```bash
-docker run -d -p 7001:7001 -e dubbo.registry.address=zookeeper://172.17.17.200:2181 \
--e dubbo.admin.root.password=root \
--e dubbo.admin.guest.password=guest \
-chenchuxin/dubbo-admin
+docker run -d --name dubbo-admin -p 8080:8080 \
+-e DUBBO_IP_TO_REGISTRY=172.17.17.161 \
+-e SERVER_PORT=8080 \
+-e admin.registry.address=zookeeper://172.17.17.161:2181 \
+-e admin.config-center=zookeeper://172.17.17.161:2181 \
+-e admin.metadata-report.address=zookeeper://172.17.17.161:2181 \
+apache/dubbo-admin:0.6.0
 ```
+
+默认用户名/密码：root/root
 
 #### Zookeeper 3.7.0
 
@@ -1902,7 +1894,7 @@ docker run -d --name zipkin -p  9411:9411 openzipkin/zipkin:2.23
 | :---------- | :----------: | :----------: |
 | skywalking-oap-server | 8.9.1 | 11800，12800 |
 | skywalking-ui | 8.9.1 | 8080 |
-| elasticsearch | 7.17.6 | 9200 |
+| elasticsearch | 7.17.3 | 9200 |
 | apache-skywalking-java-agent| 8.15.0 | xxx |
 
 2. 创建目录赋予权限
@@ -1918,7 +1910,7 @@ chmod 775 /data/elasticsearch/
 version: '3.3'
 services:
   elasticsearch:
-    image: elasticsearch:7.17.6
+    image: elasticsearch:7.17.3
     container_name: elasticsearch
     restart: always
     ports:
@@ -2838,3 +2830,11 @@ code-server --bind-addr=0.0.0.0:8080 --user-data-dir=/data/code-server/user-data
 # 默认全局配置
 /root/.config/code-server/config.yaml
 ```
+
+#### draw.io 29.0.3
+
+```bash
+docker run -dit --name=draw -p 8080:8080 -p 8443:8443 jgraph/drawio:29.0.3
+```
+
+离线请求地址：http://127.0.0.1:8080/draw?offline=1
