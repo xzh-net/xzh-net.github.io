@@ -59,8 +59,8 @@ storage:
 临时创建镜像，生产环境需手动安装
 
 ```bash
-docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.1
-docker run -d -p 9200:9200 -p 9300:9300 --name es -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms128m -Xmx256m" elasticsearch:7.17.6
+docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.5.1
+docker run -d -p 9200:9200 -p 9300:9300 --name es -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms128m -Xmx256m" elasticsearch:7.17.3
 ```
 
 ### 1.1.3 修改UI配置
