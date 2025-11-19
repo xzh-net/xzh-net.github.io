@@ -28,8 +28,14 @@ PATH
 
 ![](../../assets/_images/deploy/scala/2.png)
 
+设置SDK
+
 ![](../../assets/_images/deploy/scala/3.png)
 
 运行
 
 ![](../../assets/_images/deploy/scala/4.png)
+
+非新建项目设置SDK
+
+![](../../assets/_images/deploy/scala/5.png)
