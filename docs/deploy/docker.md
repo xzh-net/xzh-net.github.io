@@ -301,62 +301,72 @@ docker-compose down
 ```
 
 
-#### 1.5.3 Spark
+#### 1.5.3 Spark 3.3.0
+
 
 ```bash
-vi spark.yml
+mkdir /data/spark
+```
+
+```bash
+vi docker-compose.yml
 ```
 
 ```yml
-version: '3.8'
-
+version: '3'
 services:
   spark-master:
-    image: bde2020/spark-master:3.2.0-hadoop3.2
+    image: bde2020/spark-master:3.3.0-hadoop3.3
     container_name: spark-master
     ports:
       - "8080:8080"
       - "7077:7077"
-    volumes:
-      - /home/data/spark:/data
     environment:
       - INIT_DAEMON_STEP=setup_spark
   spark-worker-1:
-    image: bde2020/spark-worker:3.2.0-hadoop3.2
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
     container_name: spark-worker-1
     depends_on:
       - spark-master
     ports:
       - "8081:8081"
-    volumes:
-      - /home/data/spark:/data
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
   spark-worker-2:
-    image: bde2020/spark-worker:3.2.0-hadoop3.2
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
     container_name: spark-worker-2
     depends_on:
       - spark-master
     ports:
       - "8082:8081"
-    volumes:
-      - /home/data/spark:/data
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
+  spark-history-server:
+      image: bde2020/spark-history-server:3.3.0-hadoop3.3
+      container_name: spark-history-server
+      depends_on:
+        - spark-master
+      ports:
+        - "18081:18081"
+      volumes:
+        - /tmp/spark-events-local:/tmp/spark-events
 ```
 
-启动
+启动服务
 
 ```bash
-docker-compose -f spark.yml up -d
-docker exec -it [容器的id] /bin/bash
+docker-compose up -d
+
+```
+
+客户端测试
+
+```bash
+# 进入容器
+docker exec -it spark-master /bin/bash
 ls /spark/bin
 /spark/bin/spark-shell --master spark://spark-master:7077 --total-executor-cores 8 --executor-memory 2560m
-```
-
-访问地址：http://127.0.0.1:8080
-
-```bash
+# 输入以下代码
 val rdd=sc.parallelize(Array(1,2,3,4,5,6,7,8))  # 创建一个RDD
 rdd.collect()                                   # 打印rdd内容
 rdd.partitions.size                             # 查询分区数
@@ -364,6 +374,13 @@ val rddFilter=rdd.filter(_ > 5)                 # 选出大于5的数值
 rddFilter.collect()                             # 打印rddFilter内容
 :quit                                           # 退出spark-shell
 ```
+
+WebUI
+
+- 8080 Spark Master Web UI
+- 8081 Spark Worker Web UI
+- 8082 Spark Worker Web UI
+- 18081 Spark History Server Web UI
 
 ### 1.6 卸载
 
