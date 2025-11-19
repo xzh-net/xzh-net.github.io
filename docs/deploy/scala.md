@@ -16,6 +16,8 @@ PATH
 %SCALA_HOME%\bin
 ```
 
+> cmd窗口执行 `scala`
+
 ### 1.2 安装IDEA插件
 
 下载
