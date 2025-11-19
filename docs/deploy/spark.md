@@ -497,7 +497,7 @@ ${SPARK_HOME}/examples/jars/spark-examples_2.12-3.1.3.jar \
 
 参考代码：https://github.com/apache/spark/tree/master/examples/src/main/scala/org/apache/spark/examples
 
-代码地址：https://github.com/xzh-net/scala/tree/main/spark3-test
+代码地址：https://github.com/xzh-net/scala-demo/tree/main/spark
 
 ```bash
 mvn clean package   # 编译后上传
