@@ -495,15 +495,12 @@ ${SPARK_HOME}/examples/jars/spark-examples_2.12-3.1.3.jar \
 
 #### 1.4.9 自定义jar开发
 
-参考代码：https://github.com/apache/spark/tree/master/examples/src/main/scala/org/apache/spark/examples
+- 参考代码：https://github.com/apache/spark/tree/master/examples/src/main/scala/org/apache/spark/examples
 
-代码地址：https://github.com/xzh-net/scala-demo/tree/main/spark
+- 代码地址：https://github.com/xzh-net/scala-demo/tree/main/spark
 
-```bash
-mvn clean package   # 编译后上传
-```
+使用`mvn package`将编译后的程序上传到`/opt/spark/examples/jars`路径下，然后执行以下命令：
 
-提交任务
 
 ```bash
 SPARK_HOME=/opt/spark
@@ -514,7 +511,7 @@ ${SPARK_HOME}/bin/spark-submit \
 --executor-memory 512m \
 --num-executors 1 \
 --class net.xzh.test.WordCountOnYarn \
-${SPARK_HOME}/examples/jars/original-spark3-test-1.0-SNAPSHOT.jar \
+${SPARK_HOME}/examples/jars/spark-1.0-SNAPSHOT.jar \
 hdfs://node01:8020/test/input/words.txt \
 hdfs://node01:8020/test/output2022
 ```
