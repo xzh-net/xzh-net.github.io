@@ -148,7 +148,12 @@ network:
 ```
 
 ```bash
+# 检查语法是否正确，如果没有错误，按回车确认
+sudo netplan try
+# 应用
 netplan apply
+# 验证DNS生效
+nslookup www.baidu.com
 ```
 
 > 配置网络报错：`Netplan configuration should NOT be accessible by others` 解决办法
