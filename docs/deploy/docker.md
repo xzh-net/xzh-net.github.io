@@ -483,28 +483,88 @@ docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:
 
 > 2024年6月6日，国内镜像仓库地址无全部无法使用，只有阿里云个人镜像容器服务`暂时`可以下载，但是镜像版本比较低，让我产生了导出镜像的想法，把平时经常用到的镜像全部离线保存下来，在遇到无法下载时候可以快速搭建调试环境。
 
-镜像导出
+导出镜像
+
 ```bash
 #!/bin/bash
 
-# 获取所有的镜像ID
-image_ids=$(docker images -q)
-# 循环遍历每个镜像ID
-for id in $image_ids; do
-    # 获取镜像的名字和版本号
-    image_name=$(docker inspect --format='{{ .RepoTags }}' $id | tr -d '[]')
-    image_tar=$(echo $image_name | sed 's/\//_/g')
-    # 导出镜像为tar文件
-    output_file="${image_tar}.tar"
-    docker save -o $output_file $image_name
-    echo "导出镜像 $image_name 为 $output_file"
+set -e
+
+# 创建输出目录
+output_dir="docker_images_$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$output_dir"
+echo "输出目录: $output_dir"
+
+# 计数器
+success_count=0
+fail_count=0
+
+# 检查是否有镜像可导出
+if ! docker images --quiet | grep -q .; then
+    echo "警告: 没有找到任何 Docker 镜像"
+    exit 0
+fi
+
+# 获取镜像列表，处理多标签情况
+docker images --format "{{.Repository}}:{{.Tag}}@{{.ID}}" | grep -v "<none>:<none>" | while IFS=@ read image image_id; do
+    if [ -n "$image" ] && [ "$image" != "<none>:<none>" ]; then
+        # 处理镜像名中的特殊字符，创建安全的文件名
+        safe_name=$(echo "$image" | sed 's/[^a-zA-Z0-9._-]/_/g' | sed 's/__+/_/g' | sed 's/^_//' | sed 's/_$//')
+        
+        # 使用镜像ID确保文件名唯一性，避免多标签冲突
+        short_id=$(echo "$image_id" | cut -c1-12)
+        output_file="${output_dir}/${safe_name}_${short_id}.tar.gz"
+        
+        # 如果文件已存在（多标签指向同一镜像），则跳过
+        if [ -f "$output_file" ]; then
+            echo "⚠️  跳过 (重复镜像): $image"
+            continue
+        fi
+        
+        echo "正在导出并压缩: $image"
+        if docker save "$image" | gzip > "$output_file"; then
+            file_size=$(du -h "$output_file" | cut -f1)
+            echo "✓ 完成: $(basename "$output_file") (${file_size})"
+            ((success_count++)) || true
+        else
+            echo "✗ 失败: $image"
+            rm -f "$output_file"
+            ((fail_count++)) || true
+        fi
+    fi
 done
+
+# 由于 while 循环在子shell中运行，我们需要其他方式来统计
+echo "导出操作完成！"
+echo "输出目录: $output_dir"
+
+# 显示导出结果统计
+total_files=$(find "$output_dir" -name "*.tar.gz" | wc -l)
+if [ "$total_files" -gt 0 ]; then
+    total_size=$(du -sh "$output_dir" | cut -f1)
+    echo "成功导出: $total_files 个镜像"
+    echo "总大小: $total_size"
+else
+    echo "没有成功导出任何镜像"
+fi
+
+# 列出导出的文件
+if [ "$total_files" -gt 0 ]; then
+    echo -e "\n导出的文件:"
+    ls -lh "$output_dir"/*.tar.gz 2>/dev/null | awk '{print $9, $5}' | while read file size; do
+        filename=$(basename "$file")
+        echo "  - $filename ($size)"
+    done
+fi
 ```
 
-批量导入
+批量导入镜像
+
 ```bash
-ls *.tar | xargs -I {} docker load -i {}
-for t in *.tar; do docker load -i "$t"; done
+# 如果文件数量很多，性能更好
+ls *.tar.gz | xargs -I {} docker load -i {}
+# 如果只在当前目录且文件数量不多
+for t in *.tar.gz; do docker load -i "$t"; done
 ```
 
 ### 2.5 容器
