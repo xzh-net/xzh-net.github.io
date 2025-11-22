@@ -228,7 +228,7 @@ init_by_lua_block{
 
 该指令只要用来做变量赋值，这个指令一次只能返回一个值，并将结果赋值给Nginx中指定的变量。
 
-#### 2.3.1 处理复杂判断逻辑
+处理复杂判断逻辑
 
 ```lua
 set_by_lua_block $is_mobile {
@@ -607,6 +607,94 @@ server {
 }
 ```
 
+#### 2.4.5 根据请求参数设置Cookie
+
+业务场景：判断请求参数中是否包含`prompt=login`，如果包含则把Cookie中的JSESSIONID清空
+
+1. 配置nginx.conf
+
+```nginx
+server {
+    listen 8080;
+    charset utf-8;
+    location /{
+        access_by_lua_block {
+            local filter = require "script.filter_cookie"
+            filter.filter_cookies_by_condition()
+        }    
+        proxy_pass http://172.17.17.184:28081/;
+    }
+}
+```
+
+2. 创建脚本filter_cookie.lua
+
+将脚本上传到`/usr/local/openresty/lualib/script`
+
+```lua
+local _M = {}
+
+-- 配置拦截条件
+local intercept_conditions = {
+    {
+        param_name = "test",
+        param_value = "123456",
+        remove_cookies = {"jsessionid", "SESSION"}
+    },
+    {
+        param_name = "prompt",
+        param_value = "login",
+        remove_cookies = {"JSESSIONID"}
+    }
+}
+
+function _M.filter_cookies_by_condition()
+
+    -- 打印完整 URL（包含协议、主机和路径）
+    ngx.log(ngx.ERR, "==========Request URI: ", ngx.var.request_uri)
+
+    local args = ngx.req.get_uri_args()
+    local cookie_header = ngx.var.http_cookie
+    ngx.log(ngx.ERR, "原始 Cookie: ", cookie_header or "none")
+
+    for _, condition in ipairs(intercept_conditions) do
+        if args and args[condition.param_name] == condition.param_value then
+            ngx.log(ngx.INFO, string.format("Intercepting request with %s=%s", 
+                    condition.param_name, condition.param_value))
+            
+            local cookie_header = ngx.var.http_cookie
+            
+            if not cookie_header then
+                return
+            end
+            
+            local new_cookie = cookie_header
+            for _, cookie_name in ipairs(condition.remove_cookies) do
+                new_cookie = ngx.re.gsub(new_cookie, cookie_name .. "=[^;]*(;\\s*)?", "")
+            end
+            
+            -- 清理cookie字符串
+            new_cookie = ngx.re.gsub(new_cookie, "^\\s*;\\s*", "")
+            new_cookie = ngx.re.gsub(new_cookie, ";\\s*$", "")
+            new_cookie = ngx.re.gsub(new_cookie, "\\s*;\\s*", "; ")
+            
+            -- 打印 New Cookie
+            ngx.log(ngx.ERR, "处理 New Cookie: ", new_cookie)
+            
+            if new_cookie and #new_cookie > 0 then
+                ngx.req.set_header("Cookie", new_cookie)
+            else
+                ngx.req.clear_header("Cookie")
+            end
+            
+            break
+        end
+    end
+end
+
+return _M
+```
+
 ### 2.6 content_by_lua
 
 该指令是应用最多的指令，大部分任务是在这个阶段完成的，其他的过程往往为这个阶段准备数据，正式处理基本都在本阶段。content_by_lua_file 必须放在location内
@@ -769,16 +857,7 @@ tar -zxvf lua-resty-redis-connector-0.11.0.tar.gz
 cp lua-resty-redis-connector-0.11.0/lib/resty/redis /usr/local/openresty/lualib/resty/
 ```
 
-业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了集群模式`。
-
-1. 配置nginx.conf
-
-```nginx
-http {
-    include       mime.types;
-```
-
-业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了单机模式`。
+业务场景：拦截所有请求地址，读取Cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了单机模式`。
 
 1. 配置nginx.conf
 
