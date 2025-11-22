@@ -1111,7 +1111,7 @@ close_redis(red)
 ```bash
 wget https://github.com/bungle/lua-resty-template/archive/refs/tags/v2.0.tar.gz
 tar -zxvf lua-resty-template-2.0.tar.gz
-cp -r lua-resty-template-2.0/lib/resty/template.lua /usr/local/openresty/lualib/resty/
+cp lua-resty-template-2.0/lib/resty/template.lua /usr/local/openresty/lualib/resty/
 ```
 
 #### 3.1.2 配置openresty
