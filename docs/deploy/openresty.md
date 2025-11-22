@@ -752,14 +752,30 @@ location / {
 
 #### 2.6.3 操作Redis（集群）
 
-下载并安装`lua-resty-redis`库
+下载并安装`lua-resty-redis`和`lua-resty-redis-connector`库
 - https://openresty.org/en/lua-resty-redis-library.html
 - https://github.com/openresty/lua-resty-redis
+- https://github.com/ledgetech/lua-resty-redis-connector
 
 ```bash
+# 安装lua-resty-redis
 wget https://github.com/openresty/lua-resty-redis/archive/refs/tags/v0.29.tar.gz
 tar -zxvf lua-resty-redis-0.29.tar.gz
 cp cp lua-resty-redis-0.29/lib/resty/redis.lua /usr/local/openresty/lualib/resty/
+
+# 安装lua-resty-redis-connector
+wget https://github.com/ledgetech/lua-resty-redis-connector/archive/refs/tags/v0.11.0.tar.gz
+tar -zxvf lua-resty-redis-connector-0.11.0.tar.gz
+cp -r lua-resty-redis-connector-0.11.0/lib/resty/redis /usr/local/openresty/lualib/resty/
+```
+
+业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了集群模式`。
+
+1. 配置nginx.conf
+
+```nginx
+http {
+    include       mime.types;
 ```
 
 业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了单机模式`。
