@@ -618,7 +618,7 @@ server {
 ```bash
 wget https://github.com/ledgetech/lua-resty-http/archive/refs/tags/v0.17.2.tar.gz
 tar -zxvf lua-resty-http-0.17.2.tar.gz
-sudo cp -r lua-resty-http-0.17.2/lib/resty /usr/local/openresty/lualib/
+cp lua-resty-http-0.17.2/lib/resty/* /usr/local/openresty/lualib/resty
 ```
 
 1. 配置nginx.conf
@@ -750,12 +750,17 @@ location / {
 }
 ```
 
-
 #### 2.6.3 操作Redis（集群）
 
-下载客户端：https://openresty.org/en/lua-resty-redis-library.html
+下载并安装`lua-resty-redis`库
+- https://openresty.org/en/lua-resty-redis-library.html
+- https://github.com/openresty/lua-resty-redis
 
-解压后将redis.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下。
+```bash
+wget https://github.com/openresty/lua-resty-redis/archive/refs/tags/v0.29.tar.gz
+tar -zxvf lua-resty-redis-0.29.tar.gz
+cp cp lua-resty-redis-0.29/lib/resty/redis.lua /usr/local/openresty/lualib/resty/
+```
 
 业务场景：拦截所有请求地址，读取cookie中指定名称字段获取凭证，再调用redis查询用户信息，未找到则返回登录页面，`拦截使用了集群模式，获取用户信息使用了单机模式`。
 
@@ -1082,9 +1087,16 @@ close_redis(red)
 
 #### 3.1.1 导入模板引擎
 
-下载地址：http://luarocks.org/modules/bungle/lua-resty-template
+下载并安装`lua-resty-template`库
 
-将template.lua文件复制到`/usr/local/openresty/lualib/resty/`目录下
+- http://luarocks.org/modules/bungle/lua-resty-template
+- https://github.com/bungle/lua-resty-template
+
+```bash
+wget https://github.com/bungle/lua-resty-template/archive/refs/tags/v2.0.tar.gz
+tar -zxvf lua-resty-template-2.0.tar.gz
+cp -r lua-resty-template-2.0/lib/resty/template.lua /usr/local/openresty/lualib/resty/
+```
 
 #### 3.1.2 配置openresty
 
