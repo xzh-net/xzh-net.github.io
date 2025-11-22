@@ -761,7 +761,7 @@ location / {
 # 安装lua-resty-redis
 wget https://github.com/openresty/lua-resty-redis/archive/refs/tags/v0.29.tar.gz
 tar -zxvf lua-resty-redis-0.29.tar.gz
-cp cp lua-resty-redis-0.29/lib/resty/redis.lua /usr/local/openresty/lualib/resty/
+cp lua-resty-redis-0.29/lib/resty/redis.lua /usr/local/openresty/lualib/resty/
 
 # 安装lua-resty-redis-connector
 wget https://github.com/ledgetech/lua-resty-redis-connector/archive/refs/tags/v0.11.0.tar.gz
