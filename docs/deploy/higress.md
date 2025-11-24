@@ -38,7 +38,7 @@ docker run -dit --name higress-ai \
 
 ![](../../assets/_images/deploy/higress/5_1.png)
 
-![](../../assets/_images/deploy/higress/5_1.png)
+![](../../assets/_images/deploy/higress/5_2.png)
 
 ## 3. 日志
 
