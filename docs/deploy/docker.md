@@ -582,7 +582,7 @@ docker top [containerid]
 docker inspect [containerid] | grep IPAddress
 docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]    # 查看容器ip地址
 
-docker inspect nodered | grep Mounts -A 20                                  # 查看容器映射目录
+docker inspect [containerid] | | grep Mounts -A 20                          # 查看容器映射目录
 docker update --restart=always [container_id]                               # 修改指定容器自动启动
 docker update --restart=always $(docker ps -q -a)                           # 更新所有容器启动时自动启动
 # 删除
