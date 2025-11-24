@@ -52,11 +52,8 @@
   - [Emqx](deploy/emqx)
   - [Mycat](deploy/mycat)
 
-- 大模型
-  - [LLM](deploy/llm)
-  - [Dify](deploy/dify)
-  - [Spring AI](deploy/springai)
-  - [APIPark](deploy/apipark)
+- 人工智能
+  - [OpenAI](deploy/OpenAI)
   - [Higress](deploy/higress)
 
 - 区块链
