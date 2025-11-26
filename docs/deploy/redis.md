@@ -125,7 +125,7 @@ requirepass "123456"
 masterauth "123456"
 daemonize yes
 protected-mode no
-logfile "6380.log"
+logfile "6381.log"
 dir /data/redis/6381
 rdbcompression yes
 rdbchecksum yes
