@@ -61,7 +61,7 @@ vim /usr/lib/systemd/system/nginx.service
 ```
 
 添加内容
-```conf
+```nginx
 [Unit]
 Description=nginx web service
 Documentation=http://nginx.org/en/docs/
@@ -153,7 +153,7 @@ patch -p1 < /opt/software/nginx-1.22.1/modules/nginx_upstream_check_module/check
 make && make install
 ```
 
-```conf
+```nginx
 location /nstatus {
     #状态页配置
     check_status;
@@ -189,7 +189,7 @@ make && make install
 
 正向代理在http模块内
 
-```conf
+```nginx
 server {
     listen 3182;
     resolver 114.114.114.114;
@@ -255,7 +255,7 @@ Nginx高于1.20.1版本编译报错，插件源码在`ngx_tcp_ssl_module.c`文�
 
 > 有多级反向代理存在场景下，会遇到转义符失效的问题，解决办法推荐使用`$request_uri`保留原始URL
 
-```conf
+```nginx
 location / {
     proxy_pass http://backend$request_uri;  # 直接传递原始请求URI
     proxy_redirect off;
@@ -288,7 +288,7 @@ make && make install
 
 #### 2.4.2 基础配置
 
-```conf
+```nginx
 server {
     listen 80;
     server_name www.xuzhihao.net;
@@ -309,7 +309,7 @@ server {
 - https://github.com/fraoustin/Nginx-Fancyindex-Theme
 - https://github.com/alehaa/nginx-fancyindex-flat-theme
 
-```conf
+```nginx
 server {
     listen 80;
     server_name www.xuzhihao.net;
@@ -330,7 +330,7 @@ server {
 
 #### 2.4.4 MD预览
 
-```conf
+```nginx
 server {
     listen   80;
     listen   [::]:80 ipv6only=on;
@@ -432,7 +432,7 @@ server {
 
 #### 3.1.1 nginx.conf
 
-```conf
+```nginx
 user nginx;
 worker_processes 32;
 error_log logs/error.log error;
@@ -524,7 +524,7 @@ tcp {
 
 #### 3.1.2 front.conf
 
-```conf
+```nginx
 server {
     listen 80;
     server_name www.xuzhihao.net;
@@ -581,7 +581,7 @@ upstream front {
 
 #### 3.1.3 tcp_openfire.conf
 
-```conf
+```nginx
 timeout 60000;
 proxy_read_timeout 60000;
 proxy_send_timeout 60000;
@@ -631,7 +631,7 @@ server{
 
 #### 3.1.4 stream_openfire.conf
 
-```conf
+```nginx
 upstream mysql {
     server 172.17.17.137:3306;
 }
@@ -661,7 +661,7 @@ server {
 
 场景：WebSocket协议维护
 
-```conf
+```nginx
 server {
     listen 80;
     server_name  www.xuzhihao.net;
@@ -684,7 +684,7 @@ server {
 
 场景：实时数据流代理配置
 
-```conf
+```nginx
 location / {
     proxy_pass http://app-server;
     
@@ -706,7 +706,7 @@ location / {
 
 场景：应用环境无法访问互联网，通过转发短信宝API请求实现访问。客户端配置`hosts`，设置api.smsbao.com地址为nginx服务器IP。
 
-```conf
+```nginx
 server {
     listen 80;
     server_name localhost;
@@ -728,7 +728,7 @@ server {
 
 ### 3.2 范域名
 
-```conf
+```nginx
 server {
     listen 80;
     server_name  ~^(?<serno>.+).xuzhihao.net$;
@@ -748,7 +748,7 @@ server {
 
 ### 3.3 二级路径
 
-```conf
+```nginx
 server {
     listen 80;
     server_name  www.xuzhihao.net;
@@ -801,7 +801,7 @@ server {
 
 1. 指定具体跳转地址
 
-```conf
+```nginx
 server {
     error_page 404 http://www.xuzhihao.net;
 }
@@ -809,7 +809,7 @@ server {
 
 2. 指定重定向地址
 
-```conf
+```nginx
 server {
     error_page 404 /50x.html;
     error_page 500 502 503 504 /50x.html;
@@ -821,7 +821,7 @@ server {
 
 3. 使用location的@符号
 
-```conf
+```nginx
 server {
     error_page 404 @jump_to_error;
     location @jump_to_error {
@@ -833,7 +833,7 @@ server {
 
 4. 修改指定状态码
 
-```conf
+```nginx
 server {
     error_page 404 =200 /50x.html;
     location =/50x.html {
@@ -844,7 +844,7 @@ server {
 
 ### 3.5 跨域
 
-```conf
+```nginx
 location /user {
     default_type application/json;
     add_header Content-Type 'text/html; charset=utf-8';
@@ -865,7 +865,7 @@ location /user {
 
 ### 3.6 防盗链
 
-```conf
+```nginx
 location ~*\.(png|jpg|gif) {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer) {
@@ -875,7 +875,7 @@ location ~*\.(png|jpg|gif) {
 }
 ```
 
-```conf
+```nginx
 location /images {
     valid_referers none blocked www.xuzhihao.net 192.168.3.200 *.xuzhihao.net hwcq.*  ~\.hwcq\.;
     if ($invalid_referer) {
@@ -930,7 +930,7 @@ flag标记
 
 使用示例
 
-```conf
+```nginx
 
 ## 目录合并
 server {
@@ -959,7 +959,7 @@ server {
 
 ### 3.8 web缓存
 
-```conf
+```nginx
 http {
     proxy_cache_path /usr/local/proxy_cache levels=2:1 keys_zone=xzh:200m inactive=1d max_size=20g; # 缓存文件的存放路径
     upstream backend {
@@ -1013,7 +1013,7 @@ make upgrade
 
 在nginx配置文件中进行如下配置
 
-```conf
+```nginx
 server {
     location ~ /purge(/.*) {
         proxy_cache_purge xzh xuzhihao;
@@ -1025,7 +1025,7 @@ server {
 
 ### 3.9 访问控制
 
-```conf
+```nginx
 http {
     # 全局生效（所有站点）
     # include /usr/local/nginx/conf/blocked_ips.conf;  
@@ -1080,7 +1080,7 @@ cat access.log | grep 'keywords' | awk '{print $1}'  | sort | uniq -c | sort -nr
 
 解决VUE项目下`#`号参数被拦截的问题
 
-```conf
+```nginx
 location / {
 	root /home/www/software/;
 	index index.html index.htm;
@@ -1116,7 +1116,7 @@ map 指令是 Nginx 中一个非常强大且灵活的模块（ngx_http_map_modul
 
 1. 基于请求头的值
 
-```conf
+```nginx
 http {
     # 定义 map 块：输入变量 $http_user_agent, 输出变量 $is_mobile
     map $http_user_agent $is_mobile {
@@ -1157,7 +1157,7 @@ http {
 
 2. 基于Cookie的用户类型路由
 
-```conf
+```nginx
 http {
     # 解析 Cookie 'user_type'，映射到 $user_type_group
     map $cookie_user_type $user_type_group {
@@ -1201,7 +1201,7 @@ http {
 
 3. 基于$remote_addr区分内网IP访问
 
-```conf
+```nginx
 http {
     # 定义内网网段 (示例: 192.168.1.0/24 和 10.0.0.0/8)
     map $remote_addr $is_internal {
@@ -1235,7 +1235,7 @@ http {
 
 4. 使用外部文件定义 IP 黑白名单
 
-```conf
+```nginx
 http {
     # 假设有一个文件 /etc/nginx/ip_blacklist.conf 每行一个 IP
     map $remote_addr $is_blacklisted {
@@ -1272,7 +1272,7 @@ http {
 
 解决办法：客户端在保存git用户密码信息的时候，不使用原用户名和密码，而是使用用户id值作为用户名和密码，这样即使密码发生变更，webide的连接信息也会发生改变。配合nginx在代码提交和拉取等需要认证的时候，根据id动态获取用户真实用户名和密码使用base64编码后设置到http头中。
 
-```conf
+```nginx
 http {
     # service=git-upload-pack 或 service=git-receive-pack 时，设置 Basic Auth 头
     map $arg_service $auth_header_value {
@@ -1351,7 +1351,7 @@ openssl rsa -noout -modulus -in server.key | openssl md5
 # 两个MD5值应该相同
 ```
 
-```conf
+```nginx
 server {
     listen       80; # 同时支持HTTP
     listen       443 ssl; # 添加HTTPS支持
@@ -1418,7 +1418,7 @@ source ~/.bashrc
 
 #### 4.2.4 配置证书
 
-```conf
+```nginx
 ssl_certificate /etc/nginx/cert.d/fullchain.cer;
 ssl_certificate_key /etc/nginx/cert.d/xuzhihao.net.key;
 ```
