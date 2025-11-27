@@ -63,4 +63,7 @@ sudo apt update && sudo apt upgrade -y
 
 ```bash
 apt install openjdk-17-jdk
+
+# 图形化安装
+dpkg -i dbeaver-ce_25.0.5_amd64.deb
 ```
