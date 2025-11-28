@@ -78,7 +78,7 @@ rdbchecksum yes
 save 3600 1
 save 300 100
 save 60 10000
-appendonly no
+appendonly yes
 appendfilename "appendonly-6379.aof"
 ```
 
@@ -106,7 +106,7 @@ rdbchecksum yes
 save 3600 1
 save 300 100
 save 60 10000
-appendonly no
+appendonly yes
 appendfilename "appendonly-6380.aof"
 replicaof 192.168.3.200 6379
 ```
@@ -132,7 +132,7 @@ rdbchecksum yes
 save 3600 1
 save 300 100
 save 60 10000
-appendonly no
+appendonly yes
 appendfilename "appendonly-6381.aof"
 replicaof 192.168.3.200 6379
 ```
