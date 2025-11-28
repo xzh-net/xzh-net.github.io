@@ -265,8 +265,12 @@ sudo apt install -f && sudo apt autoremove
 ### 2.7 安装常用软件
 
 ```bash
-apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping
+apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping ntpdate
 
+# 执行一次性同步
+sudo ntpdate ntp4.aliyun.com
+
+# deb安装包
 dpkg -i jenkins_2.426.3_all.deb
 dpkg --list | grep jenkins
 dpkg -r jenkins
@@ -354,32 +358,39 @@ sudo adduser vjsp
 
 ### 2.11 系统服务管理
 
-#### 2.11.1 rc.local
+#### 2.11.1 使用 systemd 启用 rc.local 服务
 
-在Ubuntu22.04中，传统的/etc/rc.local启动脚本默认不再启用，因为系统已全面转向systemd。
+1. 创建 rc.local 文件
 
-修改配置文件
+```bash
+vi /etc/rc.local
+```
+
+```bash
+#!/bin/bash
+touch /var/log/rc.local
+path=/usr/local/redis
+su - root -c "${path}/bin/redis-server ${path}/conf/redis.conf"
+exit 0
+```
+
+
+2. 给 rc.local 添加执行权限
+
+```bash
+sudo chmod +x /etc/rc.local
+```
+
+3. 创建 systemd 服务文件
 
 ```bash
 vi /etc/systemd/system/rc-local.service
 ```
 
 ```conf
-#  SPDX-License-Identifier: LGPL-2.1-or-later
-#
-#  This file is part of systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
-
-# This unit gets pulled automatically into multi-user.target by
-# systemd-rc-local-generator if /etc/rc.local is executable.
 [Unit]
 Description=/etc/rc.local Compatibility
-Documentation=man:systemd-rc-local-generator(8)
-ConditionFileIsExecutable=/etc/rc.local
+ConditionPathExists=/etc/rc.local
 After=network.target
 
 [Service]
@@ -388,56 +399,68 @@ ExecStart=/etc/rc.local start
 TimeoutSec=0
 RemainAfterExit=yes
 GuessMainPID=no
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-新建启动脚本，包含记录总日志，并且为root用户和vjsp用户创建单独的启动入口，`启动文件需要各自手动创建并授权`
+4. 启用并启动服务
 
 ```bash
-vi /etc/rc.local
+sudo systemctl daemon-reload
+sudo systemctl enable rc-local.service
+sudo systemctl start rc-local.service
+sudo systemctl status rc-local.service
+sudo journalctl -u rc-local.service
 ```
-
-```shell
-#!/bin/bash
-bat="/bin/bash /usr/boot"
-echo "$(date) - rc.local 执行成功" >> /var/log/rc.local.log
-$bat/root
-su - vjsp -c "${bat}/vjsp"
-```
-
-
-给文件添加执行权限
-```bash
-sudo chmod +x /etc/rc.local
-```
-
-重载配置启动服务
-
-```bash
-systemctl daemon-reload
-systemctl enable rc-local.service
-systemctl start rc-local.service
-```
-
-启动后检查服务状态
-
-```bash
-systemctl status rc-local.service
-```
-
-显示 active (exited) 表示成功。
-
-查看日志
-```bash
-journalctl -xeu rc-local.service
-```
-
 
 #### 2.11.2 Systemd
 
 Systemd是Linux系统里用来启动和管理服务的工具，是大多数现代Linux发行版（如 Ubuntu、CentOS、Debian、Fedora）默认的初始化系统，它是系统启动后，第一个跑起来的进程（PID 1）
 
 
-下面是jenkins的配置文件
+1. 创建服务文件
+
+```bash
+vi /etc/systemd/system/mycustom.service
+```
+
+2. 添加配置
+
+```conf
+[Unit]
+Description=My Custom Startup Script
+ConditionPathExists=/path/to/your/script.sh
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/path/to/your/script.sh
+TimeoutSec=0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. 启动服务
+
+```bash
+sudo systemctl enable mycustom.service
+sudo systemctl start mycustom.service
+```
+
+4. 验证服务状态
+
+```bash
+sudo systemctl status rc-local.service
+# 或
+sudo systemctl status mycustom.service
+# 查看日志
+sudo journalctl -u rc-local.service
+```
+
+5. 参考示例（jenkins）
 
 ```bash
 vim /usr/lib/systemd/system/jenkins.service
