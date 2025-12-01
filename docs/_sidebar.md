@@ -53,7 +53,7 @@
   - [Mycat](deploy/mycat)
 
 - 人工智能
-  - [OpenAI](deploy/OpenAI)
+  - [Ollama](deploy/ollama)
   - [Higress](deploy/higress)
 
 - 区块链
