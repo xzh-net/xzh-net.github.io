@@ -515,7 +515,6 @@ http {
     open_file_cache_min_uses 5;             # 件缓存最小的访问次数，只有访问超过5次的才会被缓存
     
     include /usr/local/nginx/conf/front.conf;
-    include /usr/local/nginx/conf/front_upstream.conf;
 }
 
 stream {
@@ -534,6 +533,9 @@ tcp {
 ```
 
 #### 3.1.2 HTML和API代理
+
+
+front.conf
 
 ```nginx
 server {
@@ -616,6 +618,8 @@ upstream minio {
 
 #### 3.1.3 TCP代理【已废弃】
 
+tcp_openfire
+
 TCP代理的模块，存在于早期版本中，只支持TCP代理。从Nginx 1.9.0版本之后被`stream`模块取代。
 
 ```nginx
@@ -668,6 +672,7 @@ server{
 
 #### 3.1.4 TCP代理【stream】
 
+stream_openfire.conf
 
 从 Nginx 1.9.0 开始引入，取代了旧的 tcp 模块，提供了更强大的功能，是当前标准的 TCP/UDP 代理模块
 
