@@ -430,7 +430,7 @@ server {
 
 ### 3.1 配置示例
 
-#### 3.1.1 nginx.conf
+#### 3.1.1 全局配置
 
 ```nginx
 user nginx;
@@ -522,7 +522,7 @@ tcp {
 }
 ```
 
-#### 3.1.2 front.conf
+#### 3.1.2 HTML和API代理
 
 ```nginx
 server {
@@ -563,6 +563,7 @@ server {
     }
 }
 
+# 主动健康检查，用于性能要求高，故障快速转移场景，依赖三方模块`nginx_upstream_check_module`
 upstream front {
     server 172.17.17.165:5501 weight=1 max_fails=3 fail_timeout=3s;
     server 172.17.17.165:5502 weight=1 max_fails=3 fail_timeout=3s;
@@ -576,10 +577,37 @@ upstream front {
     #该指令指定HTTP回复的成功状态，默认为2XX和3XX的状态是健康的
 }
 
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name att.xuzhihao.net;
+    charset utf-8;
+    access_log logs/att/access_$logdate.log main;
+    location / {
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://minio/;
+        proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
+    }
+}
+
+# 被动检查，请求失败时触发检查逻辑
+upstream minio {
+    server 192.168.100.162:9000 max_fails=3 fail_timeout=300s;
+    server 192.168.100.163:9000 max_fails=3 fail_timeout=300s;
+    server 192.168.100.164:9000 max_fails=3 fail_timeout=300s;
+    server 192.168.100.165:9000 max_fails=3 fail_timeout=300s;
+}
+
 ```
 
 
-#### 3.1.3 tcp_openfire.conf
+#### 3.1.3 TCP代理【已废弃】
+
+TCP代理的模块，存在于早期版本中，只支持TCP代理。从Nginx 1.9.0版本之后被`stream`模块取代。
 
 ```nginx
 timeout 60000;
@@ -629,7 +657,10 @@ server{
 }
 ```
 
-#### 3.1.4 stream_openfire.conf
+#### 3.1.4 TCP代理【stream】
+
+
+从 Nginx 1.9.0 开始引入，取代了旧的 tcp 模块，提供了更强大的功能，是当前标准的 TCP/UDP 代理模块
 
 ```nginx
 upstream mysql {
@@ -657,7 +688,7 @@ server {
 }
 ```
 
-#### 3.1.5 websocket.conf
+#### 3.1.5 WebSocket
 
 场景：WebSocket协议维护
 
@@ -680,7 +711,7 @@ server {
 }
 ```
 
-#### 3.1.6 sse.conf
+#### 3.1.6 SSE
 
 场景：实时数据流代理配置
 
@@ -702,7 +733,7 @@ location / {
 }
 ```
 
-#### 3.1.7 sms.conf
+#### 3.1.7 请求转发
 
 场景：应用环境无法访问互联网，通过转发短信宝API请求实现访问。客户端配置`hosts`，设置api.smsbao.com地址为nginx服务器IP。
 
@@ -726,7 +757,7 @@ server {
 }
 ```
 
-### 3.2 范域名
+### 3.2 子域名动态解析
 
 ```nginx
 server {
