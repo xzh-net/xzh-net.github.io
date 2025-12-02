@@ -99,6 +99,17 @@ systemctl reload nginx    # 重新加载配置文件
 systemctl status nginx    # 查看状态
 ```
 
+非root账户启动设置
+
+```bash
+# root账户下设置权限
+chown -R user:user /usr/local/nginx/
+setcap cap_net_bind_service=+eip /usr/local/nginx/sbin/nginx
+getcap /usr/local/nginx/sbin/nginx
+# 切换到非root账户下启动
+/usr/local/nginx/sbin/nginx
+```
+
 ### 1.8 日志切割
 
 ```bash
@@ -229,7 +240,7 @@ curl -i https://openapi.alipay.com/gateway.do
 curl -i --proxy 192.168.3.114:3182  https://openapi.alipay.com/gateway.do
 ```
 
-### 2.3 TCP反向代理
+### 2.3 TCP代理
 
 下载地址：https://github.com/yaoweibin/nginx_tcp_proxy_module
 
@@ -264,7 +275,7 @@ location / {
 
 ### 2.4 目录索引
 
-下载地址：https://codeload.github.com/aperezdc/ngx-fancyindex/zip/master
+下载地址：https://github.com/aperezdc/ngx-fancyindex
 
 #### 2.4.1 解压编译
 
@@ -558,8 +569,6 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-        add_header Access-Control-Allow-Credentials 'true';
-        add_header Access-Control-Allow-Headers 'Authorization,Content-Type,X-Requested-With';
     }
 }
 
@@ -777,7 +786,7 @@ server {
 ```
 
 
-#### 3.1.9 虚拟路径
+#### 3.1.9 二级路径
 
 ```nginx
 server {
@@ -836,8 +845,16 @@ server {
 location /test {
     default_type application/json;
     add_header Content-Type 'text/html; charset=utf-8';
+    # 方案1，不需要凭据，允许所有源
     add_header Access-Control-Allow-Origin *;
-    add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
+    add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+    
+    # 方案2：需要凭据，指定具体域名
+    add_header Access-Control-Allow-Origin https://yourdomain.com;
+    add_header Access-Control-Allow-Credentials 'true';
+    add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+    add_header Access-Control-Allow-Headers 'Authorization,Content-Type,X-Requested-With';
+
     if ( $request_method !~* GET ) {
         return 403;
     }
@@ -847,6 +864,7 @@ location /test {
     if ( $query_string ~* ^(.*)name=lisi$ ) {
         return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
     }
+
     return 200 "没有找到用户，当前时间：$time_local";
 }
 ```
