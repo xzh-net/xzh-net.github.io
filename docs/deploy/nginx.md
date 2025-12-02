@@ -757,7 +757,7 @@ server {
 }
 ```
 
-### 3.2 子域名动态解析
+#### 3.1.8 子域名动态解析
 
 ```nginx
 server {
@@ -777,7 +777,7 @@ server {
 ```
 
 
-### 3.3 二级路径
+#### 3.1.9 虚拟路径
 
 ```nginx
 server {
@@ -791,7 +791,8 @@ server {
 
     # root 表示物理路径，在/home/project/下必须有download文件夹，把/home/project/download作为根路径
     location /download/ {               
-        root  /home/project/;           
+        root  /home/project/;
+        try_files $uri $uri/ /download/index.html;   
     }
 
     # alias 表示虚拟路径，不对应任何文件夹，把/home/project/作为根路径
@@ -828,7 +829,30 @@ server {
 
 > `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
 
-### 3.4 错误页
+
+#### 3.1.10 跨域
+
+```nginx
+location /test {
+    default_type application/json;
+    add_header Content-Type 'text/html; charset=utf-8';
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
+    if ( $request_method !~* GET ) {
+        return 403;
+    }
+    if ( $query_string ~* ^(.*)name=zhangsan$ ) {
+        return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
+    }
+    if ( $query_string ~* ^(.*)name=lisi$ ) {
+        return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
+    }
+    return 200 "没有找到用户，当前时间：$time_local";
+}
+```
+
+
+### 3.2 错误页
 
 1. 指定具体跳转地址
 
@@ -873,28 +897,9 @@ server {
 }
 ```
 
-### 3.5 跨域
 
-```nginx
-location /user {
-    default_type application/json;
-    add_header Content-Type 'text/html; charset=utf-8';
-    add_header Access-Control-Allow-Origin *;
-    add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE;
-    if ( $request_method !~* GET ) {
-        return 403;
-    }
-    if ( $query_string ~* ^(.*)name=zhangsan$ ) {
-        return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
-    }
-    if ( $query_string ~* ^(.*)name=lisi$ ) {
-        return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
-    }
-    return 200 "没有找到用户，当前时间：$time_local";
-}
-```
 
-### 3.6 防盗链
+### 3.3 防盗链
 
 ```nginx
 location ~*\.(png|jpg|gif) {
@@ -916,7 +921,7 @@ location /images {
 }
 ```
 
-### 3.7 Rewrite
+### 3.4 Rewrite
 
 Rewrite作用就是使用nginx提供的全局变量或自己设置的变量，结合正则表达式和标志位实现url重写以及重定向
 
@@ -988,7 +993,7 @@ server {
 ```
 
 
-### 3.8 web缓存
+### 3.5 web缓存
 
 ```nginx
 http {
@@ -1052,9 +1057,7 @@ server {
 }
 ```
 
-
-
-### 3.9 访问控制
+### 3.6 访问控制
 
 ```nginx
 http {
@@ -1095,53 +1098,8 @@ deny all;
 
 
 
-### 3.10 日志分析
 
-```bash
-# 过滤指定时间内的数据输出到文件
-sed -n '/31\/Jan\/2024:09/,/31\/Jan\/2024:10/p' access.log > new.log
-
-# 统计ip或者url访问最频繁的次数
-awk '{print $1}' access.log | sort | uniq -c | sort -n
-# 过滤指定关键词出现次数
-cat access.log | grep 'keywords' | awk '{print $1}'  | sort | uniq -c | sort -nr -k1 | head -n 10
-```
-
-### 3.11 URL美化
-
-解决VUE项目下`#`号参数被拦截的问题
-
-```nginx
-location / {
-	root /home/www/software/;
-	index index.html index.htm;
-	try_files $uri $uri/ /index.html;
-}
-
-location /console {
-	alias /home/www/lowcode_console;
-	index index.html index.htm;
-	try_files $uri $uri/ /console/index.html;
-}
-```
-
-### 3.12 非root启动
-
-root用户执行以下命令
-
-```bash
-chown -R user:user /usr/local/nginx/
-setcap cap_net_bind_service=+eip /usr/local/nginx/sbin/nginx
-getcap /usr/local/nginx/sbin/nginx
-```
-
-user用户执行以下命令
-
-```bash
-/usr/local/nginx/sbin/nginx
-```
-
-### 3.13 map指令
+### 3.7 map指令
 
 map 指令是 Nginx 中一个非常强大且灵活的模块（ngx_http_map_module），用于创建变量映射关系。它允许你根据一个原始变量的值（如请求头、请求参数、IP地址等），动态定义另一个新变量的值。map 块通常放在 http 上下文中，使其在整个配置中可用。
 
@@ -1328,8 +1286,20 @@ http {
 }
 ```
 
-> 硬编码实现后需要解决如何根据身份信息设置对应的Authorization内容，原生nginx无法实现，需要借助lua实现，详见配置见 [动态设置请求头](/deploy/openresty?id=_149-动态设置请求头)。
+> 硬编码实现后需要解决如何根据身份信息设置对应的Authorization内容，原生nginx无法实现，需要借助lua实现，详见配置见 [动态设置请求头](/deploy/openresty?id=_243-动态设置请求头)。
 
+
+### 3.8 日志分析
+
+```bash
+# 过滤指定时间内的数据输出到文件
+sed -n '/31\/Jan\/2024:09/,/31\/Jan\/2024:10/p' access.log > new.log
+
+# 统计ip或者url访问最频繁的次数
+awk '{print $1}' access.log | sort | uniq -c | sort -n
+# 过滤指定关键词出现次数
+cat access.log | grep 'keywords' | awk '{print $1}'  | sort | uniq -c | sort -nr -k1 | head -n 10
+```
 
 ## 4. 证书
 
