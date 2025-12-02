@@ -618,9 +618,9 @@ upstream minio {
 
 #### 3.1.3 TCP代理【已废弃】
 
-tcp_openfire
+tcp_openfire.conf
 
-TCP代理的模块，存在于早期版本中，只支持TCP代理。从Nginx 1.9.0版本之后被`stream`模块取代。
+TCP 代理的模块，存在于早期版本中，只支持 TCP 代理。从Nginx 1.9.0版本之后被 `stream` 模块取代。
 
 ```nginx
 timeout 60000;
@@ -674,7 +674,7 @@ server{
 
 stream_openfire.conf
 
-从 Nginx 1.9.0 开始引入，取代了旧的 tcp 模块，提供了更强大的功能，是当前标准的 TCP/UDP 代理模块
+从 Nginx 1.9.0 开始引入，取代了旧的 TCP 模块，提供了更强大的功能，是当前标准的 TCP/UDP 代理模块
 
 ```nginx
 upstream mysql {
