@@ -353,14 +353,14 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 `adduser`交互式命令，默认创建主目录，设置密码，适合手动操作或需要快速创建用户并设置密码的场景。
 
 ```bash
-sudo adduser vjsp
+sudo adduser xzh
 ```
 
 ### 2.11 系统服务管理
 
 #### 2.11.1 使用 systemd 启用 rc.local 服务
 
-1. 创建 rc.local 文件
+1. 创建系统 rc.local 文件
 
 ```bash
 vi /etc/rc.local
@@ -369,9 +369,43 @@ vi /etc/rc.local
 ```bash
 #!/bin/bash
 touch /var/log/rc.local
-path=/usr/local/redis
-su - root -c "${path}/bin/redis-server ${path}/conf/redis.conf"
-exit 0
+/bin/bash /usr/boot/root
+su - xzh -c "/bin/bash /usr/boot/xzh"
+```
+
+创建 ROOT 用户启动文件
+
+```bash
+mkdir /usr/boot
+vi /usr/boot/root
+```
+
+```sh
+touch ~/root
+nohup /opt/node_exporter --web.listen-address=":9100" &
+```
+
+创建非 ROOT 用户启动文件
+
+```bash
+sudo adduser xzh
+vi /usr/boot/xzh
+```
+
+```sh
+touch ~/xzh
+/usr/local/redis/bin/redis-server /usr/local/redis/conf/redis.conf
+```
+
+授权
+
+```bash
+# 启动命令权限
+chown xzh:xzh /usr/boot/xzh
+# 程序执行权限
+chown -R xzh:xzh /usr/local/redis
+# 数据目录权限
+chown -R xzh:xzh /data/redis
 ```
 
 
