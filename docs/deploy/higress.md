@@ -5,20 +5,28 @@
 
 ## 1. 快速开始
 
-极简方式，基于本地文件做配置存储
+极简方式，基于本地文件做配置存储，创建挂载路径
 
 ```bash
-mkdir /data/higress/{data,log} -p
+mkdir /data/higress/{data,log,proxy} -p
+chmod -R /data/higress
+```
 
+启动服务
+
+```bash
 docker run -dit --name higress-ai \
     -v /data/higress/data:/data \
     -v /data/higress/log:/var/log/higress \
+    -v /data/higress/proxy:/var/log/proxy \
     -e O11Y=on \
     -p 8001:8001 -p 8080:8080 -p 8443:8443  \
     higress-registry.cn-hangzhou.cr.aliyuncs.com/higress/all-in-one:2.1.9
 ```
 
 ## 2. 配置
+
+访问地址：http://192.168.1.100:8001
 
 ### 2.1 创建AI服务提供者
 
@@ -42,7 +50,7 @@ docker run -dit --name higress-ai \
 
 ## 3. 日志
 
-网关日志已经映射到宿主机的`/data/higress/log`路径下，其中`gateway.log`是每次请求的日志，后面我们基于这个日志汇总每次请求消耗的token数量，生成账单。
+网关日志已经映射到宿主机的`/data/higress/proxy`路径下，其中`access.log`是每次请求的日志，后面我们基于这个日志汇总每次请求消耗的token数量，生成账单。
 
 前面已经为每个服务添加了消费者，但是统计日志的时候无法获取消费者身份信息，需要自定义日志格式。因为我们是本地配置，可以直接编辑映射出来的配置文件。
 
