@@ -121,3 +121,5 @@ vi /data/higress/data/configmaps/higress-config.yaml
 "user_api_key": "%REQ(vjsp-api-key)%",
 "client_version": "%REQ(CLIENT-VERSION)%"
 ```
+
+重启服务
