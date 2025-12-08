@@ -1,0 +1,55 @@
+# Dify 1.10.1
+
+下载地址：https://github.com/langgenius/dify
+
+## 1. 快速开始
+
+```bash
+cd /data/dify/dify-1.10.1-fix.1/docker
+cp .env.example .env
+chmod -R 777 /data/dify
+docker compose up -d
+```
+
+## 2. 初始化模型
+
+个人中心 -> 设置 
+
+![](../../assets/_images/deploy/dify/1.png)
+
+模型供应商 -> 搜索 `OpenAI-API-compatible`，点击安装。如果使用第三方模型，请选择对应的插件名称。
+
+![](../../assets/_images/deploy/dify/2.png)
+
+插件安装成功后，添加模型。
+
+![](../../assets/_images/deploy/dify/3.png)
+
+![](../../assets/_images/deploy/dify/4.png)
+
+添加成功后，列表可以正常显示
+
+![](../../assets/_images/deploy/dify/5.png)
+
+
+## 3. 第一个应用
+
+创建空白应用
+
+![](../../assets/_images/deploy/dify/21.png)
+
+选择`Chatflow`并设置应用名称
+
+![](../../assets/_images/deploy/dify/22.png)
+
+预览发布
+
+![](../../assets/_images/deploy/dify/23.png)
+
+![](../../assets/_images/deploy/dify/24.png)
+
+访问API和密钥
+
+![](../../assets/_images/deploy/dify/25.png)
+
+![](../../assets/_images/deploy/dify/26.png)

@@ -54,6 +54,7 @@
 
 - 人工智能
   - [Ollama](deploy/ollama)
+  - [Dify](deploy/dify)
   - [Higress](deploy/higress)
 
 - 区块链
