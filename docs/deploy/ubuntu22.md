@@ -292,7 +292,7 @@ source /etc/profile
 
 ### 2.9 安装Docker
 
-#### 2.9.1 在线安装
+1. 在线安装
 
 ```bash
 # 卸载
@@ -312,7 +312,7 @@ systemctl start docker
 systemctl enable docker
 ```
 
-#### 2.9.2 安装docker-compose
+2. 安装docker-compose
 
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -320,7 +320,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 
-#### 2.9.3 安装Portainer
+3. 安装Portainer
 
 ```bash
 docker volume create portainer_data
@@ -542,4 +542,59 @@ Group=jenkins
 # Directory where Jenkins stores its configuration and workspaces
 Environment="JENKINS_HOME=/data/jenkins"
 WorkingDirectory=/data/jenkins
+```
+
+### 2.12 时间同步服务（Chrony）
+
+1. 服务端安装
+
+```bash
+# 更新包列表
+sudo apt update
+
+# 安装 Chrony 服务
+sudo apt install chrony -y
+```
+
+2. 修改配置
+
+```bash
+vi /etc/chrony/chrony.conf
+```
+
+```conf
+# 设置上游服务器
+pool ntp4.aliyun.com iburst
+# 允许同步的客户端网络
+allow 172.17.17.0/24
+# 设置本地时间层（当无法同步外部源时）
+local stratum 10
+```
+
+3. 启动服务
+
+```bash
+sudo systemctl start chrony
+sudo systemctl enable chrony
+sudo systemctl status chrony
+```
+
+4. 常用命令
+
+```bash
+# 查看同步状态
+chronyc sources -v
+# 查看服务器信息
+chronyc tracking
+# 查看已连接的客户端
+chronyc clients
+```
+
+
+5. 客户端测试
+
+```bash
+date -s "2022-07-04 16:44:30"
+/usr/sbin/ntpdate ntp4.aliyun.com &>/dev/null
+sudo ntpdate 172.17.17.161
 ```
