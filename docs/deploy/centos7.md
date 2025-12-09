@@ -772,33 +772,11 @@ yum install -y telnet
 telnet 192.168.100.1 # 输入用户名和密码
 ```
 
-### 1.9 NTP
+### 1.9 时间同步服务
 
-#### 1.9.1 时间和时区设置
+#### 1.9.1 安装 NTP 服务
 
-```bash
-timedatectl                             # 查看时区
-timedatectl list-timezones              # 查看所有可以使用的时区
-timedatectl set-timezone Asia/Shanghai  # 设置本地时区
-timedatectl set-timezone UTC            # 设置UTC时区
-
-timedatectl set-local-rtc 1 # 硬件时钟协调本地时间
-timedatectl set-local-rtc 0 # 硬件时钟协调世界时间
-timedatectl status
-
-# 时间设置（需要关闭NTP服务）
-timedatectl set-ntp true
-timedatectl set-ntp false
-
-timedatectl set-time 16:40:30
-timedatectl set-time 2022-07-04
-timedatectl set-time "2022-07-04 16:44:30"
-```
-
-
-#### 1.9.2 NTP服务
-
-1. 安装NTP
+1. 服务端配置
 
 ```bash
 yum install -y ntp
@@ -810,7 +788,7 @@ rpm -ql ntp
 ```bash
 vim /etc/ntp.conf
 # 添加配置
-restrict 172.17.17.0 mask 255.0.0.0 nomodify notrap	# 允许172.17.17.0/24网段的主机同步时间
+restrict 172.17.17.0 mask 255.255.255.0 nomodify notrap	# 允许172.17.17.0/24网段的主机同步时间
 ```
 
 3. 启动服务
@@ -830,9 +808,50 @@ timedatectl set-time "2022-07-04 16:44:30" # 模拟时间错乱
 ntpdate 172.17.17.201
 ```
 
-#### 1.9.2 xinetd服务
 
-1. 安装
+#### 1.9.2 常用命令
+
+查看时区与时间状态
+
+```bash
+timedatectl         # 查看时区
+timedatectl status
+```
+
+管理时区
+
+```bash
+timedatectl list-timezones              # 查看所有可以使用的时区
+timedatectl set-timezone Asia/Shanghai  # 设置本地时区
+timedatectl set-timezone UTC            # 设置UTC时区
+```
+
+管理硬件时钟
+
+```bash
+timedatectl set-local-rtc 1     # 将硬件时钟设置为本地时间
+timedatectl set-local-rtc 0     # 将硬件时钟设置为 UTC 时间
+```
+
+手动设置时间（前提关闭NTP）
+
+```bash
+timedatectl set-time 16:40:30
+timedatectl set-time 2022-07-04
+timedatectl set-time "2022-07-04 16:44:30"
+```
+
+NTP 控制
+```bash
+timedatectl set-ntp true    # 启用同步
+timedatectl set-ntp false   # 禁止同步
+```
+
+#### 1.9.3 安装 xinetd 服务
+
+在没有互联网或 NTP 服务器的环境中，可以使用 xinetd 提供的时间服务来同步时间。
+
+1. 服务端安装
 
 ```bash
 yum -y install xinetd
@@ -861,7 +880,10 @@ netstat -ntlup |grep :37
 4. 客户端测试
 
 ```bash
+# 先把时间设错
 date -s "2022-07-04 16:44:30"
+
+# 从时间服务器同步时间
 rdate -s 172.17.17.201
 ```
 
