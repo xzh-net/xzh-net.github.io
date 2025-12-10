@@ -169,12 +169,20 @@ vrrp_instance VI_1 {
 #!/bin/bash
 count=`ps -C nginx --no-header | wc -l`
 if [ $count -eq 0 ]; then
+    # 尝试启动 nginx
     su - nginx -c "/usr/local/nginx/sbin/nginx"
     sleep 2
+    # 重新检查 nginx 进程状态
+    count=`ps -C nginx --no-header | wc -l`
     if [ $count -eq 0 ]; then
+        # 启动失败
         exit 1;
+    else
+        # 启动成功
+        exit 0
     fi
 else
+    # nginx 已经在运行
     exit 0;
 fi
 ```
@@ -257,12 +265,20 @@ vrrp_instance VI_1 {
 #!/bin/bash
 count=`ps -C haproxy --no-header |wc -l`
 if [ $count -eq 0 ];then
+    # 尝试启动 haproxy
     /usr/local/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg
     sleep 2
+    # 重新检查 haproxy 进程状态
+    count=`ps -C haproxy --no-header |wc -l`
     if [ $count -eq 0 ]; then
+        # 启动失败
         exit 1;
+    else
+        # 启动成功
+        exit 0
     fi
 else
+    # haproxy 已经在运行
     exit 0;
 fi
 ```
