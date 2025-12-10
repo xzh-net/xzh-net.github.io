@@ -238,9 +238,13 @@ sudo ufw limit 22   # 限制22端口连接数
 
 ```bash
 vim /etc/apt/sources.list
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
-apt update      # 更新apt
-apt upgrade     # 更新系统
+deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+```
+
+更新软件包列表
+```bash
+apt update
+apt upgrade
 ```
 
 添加自定义软件源，并设置授信
@@ -558,17 +562,40 @@ sudo apt install chrony -y
 
 2. 修改配置
 
+
 ```bash
+# 备份默认配置文件
+cp /etc/chrony/chrony.conf /etc/chrony/chrony.conf.bak
+```
+
+
+```bash
+# 去掉注释行，生成文件
+egrep -v "(^#|^$)" /etc/chrony/chrony.conf.bak > /etc/chrony/chrony.conf 
 vi /etc/chrony/chrony.conf
 ```
 
 ```conf
+# 监听所有IP的命令端口
+bindcmdaddress 0.0.0.0
 # 设置上游服务器
 pool ntp4.aliyun.com iburst
 # 允许同步的客户端网络
 allow 172.17.17.0/24
 # 设置本地时间层（当无法同步外部源时）
 local stratum 10
+
+confdir /etc/chrony/conf.d
+sourcedir /run/chrony-dhcp
+sourcedir /etc/chrony/sources.d
+keyfile /etc/chrony/chrony.keys
+driftfile /var/lib/chrony/chrony.drift
+ntsdumpdir /var/lib/chrony
+logdir /var/log/chrony
+maxupdateskew 100.0
+rtcsync
+makestep 1 3
+leapsectz right/UTC
 ```
 
 3. 启动服务
@@ -582,6 +609,8 @@ sudo systemctl status chrony
 4. 常用命令
 
 ```bash
+# 设置本地时区
+timedatectl set-timezone Asia/Shanghai
 # 查看同步状态
 chronyc sources -v
 # 查看服务器信息
@@ -594,7 +623,44 @@ chronyc clients
 5. 客户端测试
 
 ```bash
-date -s "2022-07-04 16:44:30"
-/usr/sbin/ntpdate ntp4.aliyun.com &>/dev/null
-sudo ntpdate 172.17.17.161
+# 安装 Chrony 服务
+sudo apt install chrony -y
+```
+
+```bash
+# 去掉注释行，生成文件
+egrep -v "(^#|^$)" /etc/chrony/chrony.conf.bak > /etc/chrony/chrony.conf 
+vi /etc/chrony/chrony.conf
+```
+
+```conf
+server 172.17.17.160 minpoll 0 maxpoll 5 maxdelay .05
+
+confdir /etc/chrony/conf.d
+sourcedir /run/chrony-dhcp
+sourcedir /etc/chrony/sources.d
+keyfile /etc/chrony/chrony.keys
+driftfile /var/lib/chrony/chrony.drift
+ntsdumpdir /var/lib/chrony
+logdir /var/log/chrony
+maxupdateskew 100.0
+rtcsync
+makestep 1 3
+leapsectz right/UTC
+```
+
+启动服务
+
+```bash
+sudo systemctl start chrony
+sudo systemctl enable chrony
+sudo systemctl status chrony
+```
+
+
+常用命令
+
+```bash
+# 设置本地时间
+date -s "2025-12-10 15:20:30"
 ```
