@@ -634,7 +634,7 @@ vi /etc/chrony/chrony.conf
 ```
 
 ```conf
-server 172.17.17.160 minpoll 0 maxpoll 5 maxdelay .05
+server 172.17.17.160 minpoll 5 maxpoll 10 maxdelay .05
 
 confdir /etc/chrony/conf.d
 sourcedir /run/chrony-dhcp
