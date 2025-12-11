@@ -386,7 +386,7 @@ vi /usr/boot/root
 
 ```sh
 touch ~/root
-nohup /opt/node_exporter --web.listen-address=":9100" &
+/usr/local/keepalived/sbin/keepalived -f /etc/keepalived/keepalived.conf
 ```
 
 创建非 ROOT 用户启动文件
