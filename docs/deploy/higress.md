@@ -9,7 +9,7 @@
 
 ```bash
 mkdir /data/higress/{data,log,proxy} -p
-chmod -R /data/higress
+chmod -R 777 /data/higress
 ```
 
 启动服务
