@@ -50,7 +50,7 @@ vrrp_instance VI_1 {
         auth_type PASS
         auth_pass 1111
     }
-    # 多网卡下指定广播地址，减少报错和冲突
+    # 多网卡下指定广播地址，减少报错和冲突，比如 AWS、阿里云等不支持组播
     unicast_src_ip 192.168.1.31     # 当前主机的IP地址
     unicast_peer {                  # 其他主机的IP地址
         192.168.1.32
