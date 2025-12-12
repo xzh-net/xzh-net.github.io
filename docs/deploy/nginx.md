@@ -960,11 +960,10 @@ server {
     
     # 灰度开关控制
     location = /api/gray/switch {
-        allow 172.17.17.0;  # 内网IP
+        allow 172.17.17.0/24;  # 内网IP
         deny all;
         default_type application/json;
         
-        # 使用rewrite模块替代lua，避免依赖lua模块
         if ($arg_version = "gray") {
             add_header Set-Cookie "gray_version=gray; path=/; max-age=86400";
             return 200 '{"code":0,"msg":"已切换到灰度版本"}';
