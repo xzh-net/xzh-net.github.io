@@ -6,7 +6,7 @@
 
 请求报文由请求行、请求头部、空行和请求包体4个部分组成
 
-![](../../assets/_images/java//network/net/http1.jpg)
+![](../../assets/_images/java/network/http1.jpg)
 
 ```html
 POST /examples/default.jsp HTTP/1.1 
@@ -78,7 +78,7 @@ Warning	关于消息实体的警告信息	Warn: 199 Miscellaneous warning
 
 响应报文由状态行、响应头部、空行和响应包体4个部分组成
 
-![](../../assets/_images/java//network/net/http2.jpg)
+![](../../assets/_images/java/network/http2.jpg)
 
 ```html
 HTTP/1.1 200 OK 
@@ -247,7 +247,7 @@ HTTP代理分为正向代理、反向代理和透明代理；
 OSI（Open System Interconnect），即开放式系统互联。 一般都叫OSI参考模型，是ISO（国际标准化组织）组织在1985年研究的网络互连模型。ISO为了更好的使网络应用更为普及，推出了OSI参考模型。其含义就是推荐所有公司使用这个规范来控制网络。这样所有公司都有相同的规范，就能互联了。
 OSI定义了网络互连的七层框架（物理层、数据链路层、网络层、传输层、会话层、表示层、应用层），即ISO开放互连系统参考模型
 
-![](../../assets/_images/java//network/net/osi.png)
+![](../../assets/_images/java/network/osi.png)
 
 OSI七层和TCP/IP四层的关系
 
@@ -259,7 +259,7 @@ OSI是一种理论下的模型，而TCP/IP已被广泛使用，成为网络互�
  - TCP：transmission control protocol 传输控制协议
  - UDP：user data protocol 用户数据报协议
 
-![](../../assets/_images/java//network/net/osi7.png)
+![](../../assets/_images/java/network/osi7.png)
 
 OSI七层和TCP/IP的区别
 
@@ -267,7 +267,7 @@ OSI七层和TCP/IP的区别
  - TCP/IP是由一些交互性的模块做成的分层次的协议，其中每个模块提供特定的功能；OSi则指定了哪个功能是属于哪一层的。
  - TCP/IP是五层结构，而OSI是七层结构。OSI的最高三层在TCP中用应用层表示。
 
-![](../../assets/_images/java//network/net/osiall.png)
+![](../../assets/_images/java/network/osiall.png)
 
 ## 8. TCP协议详解
 
@@ -348,7 +348,7 @@ MQTT（Message Queuing Telemetry Transport，消息队列遥测传输协议）�
 | DISCONNECT | 14 | Client--->Server | 客户端断开连接请求|  1110 |
 | AUTH（V5.0使用） | 15 | Client <--> Server | 认证数据交换|  1111 |
 
-![](../../assets/_images/java//network/net/mqtt2.png)
+![](../../assets/_images/java/network/mqtt2.png)
 
 | 报文类型 | 是否需要payload |
 | ----- | ----- |
@@ -371,13 +371,13 @@ MQTT（Message Queuing Telemetry Transport，消息队列遥测传输协议）�
 MQTT消息QoS
 
 - Qos0消息发布订阅
-![](../../assets/_images/java//network/net/mqtt_qos0.png)
+![](../../assets/_images/java/network/mqtt_qos0.png)
 
 - Qos1消息发布订阅
-![](../../assets/_images/java//network/net/mqtt_qos1.png)
+![](../../assets/_images/java/network/mqtt_qos1.png)
 
 - Qos2消息发布订阅
-![](../../assets/_images/java//network/net/mqtt_qos2.png)
+![](../../assets/_images/java/network/mqtt_qos2.png)
 
 选型：
 - Eclipse Mosquitto
@@ -400,4 +400,4 @@ MQTT消息QoS
 8. MQTT提供的服务质量是fire和forget，如果QoS为0。如果QoS为1，则至少有一个，如果QoS为2，则正好有一个。AMQP提供的服务质量是与MQTT类似的结算和取消结算格式。
 
 
-![](../../assets/_images/java//network/net/amqp-vs-mqtt.png)
+![](../../assets/_images/java/network/amqp-vs-mqtt.png)
