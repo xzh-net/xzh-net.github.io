@@ -872,7 +872,7 @@ location /test {
 }
 ```
 
-#### 3.1.11 获取客户端IP
+#### 3.1.11 获取客户端 IP
 
 ```nginx
 # 在http块中定义
@@ -896,6 +896,95 @@ location /getRemoteIP.json {
 }
 ```
 
+#### 3.1.12 基于 Cookie 灰度发布
+
+```conf
+upstream stable_backend {
+    server 127.0.0.1:8080;
+}
+
+upstream gray_backend {
+    server 127.0.0.1:8090;
+}
+
+# 定义map实现灰度分流 - 仅基于cookie
+map $cookie_gray_version $upstream_group {
+    default stable_backend;
+    gray    gray_backend;
+    stable  stable_backend;
+}
+
+server {
+    listen  8080;
+	server_name www.xuzhihao.net;
+	location / {
+		default_type application/json;
+		return 200 "稳定版本，当前时间：$time_local";
+	}
+}
+
+server {
+    listen  8090;
+	server_name www.xuzhihao.net;
+	location / {
+		default_type application/json;
+		return 200 "灰度版本，当前时间：$time_local";
+	}
+}
+
+server {
+    listen  443 ssl;
+	server_name www.xuzhihao.net;
+	charset utf-8;
+	ssl_certificate cert/xuzhihao.net.pem;
+	ssl_certificate_key cert/xuzhihao.net.key;
+	ssl_session_timeout 5m;
+	ssl_session_cache shared:SSL:20m;
+	ssl_buffer_size 256k;
+	ssl_session_tickets on;
+	resolver 223.5.5.5 114.114.114.114 180.76.76.76 valid=300s;
+	resolver_timeout 10s;
+	ssl_protocols TLSv1.1 TLSv1.2;
+	ssl_ciphers HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM;
+	ssl_prefer_server_ciphers on;
+	index index.html index.htm index.jsp index.do index.action;
+	access_log logs/www/access_$logdate.log main;
+    
+    location / {
+		proxy_pass http://$upstream_group;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # 灰度开关控制
+    location = /api/gray/switch {
+        allow 172.17.17.0;  # 内网IP
+        deny all;
+        default_type application/json;
+        
+        # 使用rewrite模块替代lua，避免依赖lua模块
+        if ($arg_version = "gray") {
+            add_header Set-Cookie "gray_version=gray; path=/; max-age=86400";
+            return 200 '{"code":0,"msg":"已切换到灰度版本"}';
+        }
+        
+        if ($arg_version = "stable") {
+            add_header Set-Cookie "gray_version=stable; path=/; max-age=86400";
+            return 200 '{"code":0,"msg":"已切换到稳定版本"}';
+        }
+        
+        # 清除cookie
+        add_header Set-Cookie "gray_version=; path=/; max-age=0";
+        return 200 '{"code":0,"msg":"已清除灰度标记"}';
+    }
+}
+```
+
+- 测试地址：https://www.xuzhihao.net
+- 开启灰度：https://www.xuzhihao.net/api/gray/switch?version=gray
+- 关闭灰度：https://www.xuzhihao.net/api/gray/switch
 
 ### 3.2 错误页
 
