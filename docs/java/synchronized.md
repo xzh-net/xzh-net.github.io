@@ -228,11 +228,11 @@ synchronized未优化之前，效率低的原因。
 长度一般为32位或者64位，分为两部分信息：一部分用于存储对象自身的运行时数据，如哈希码，GC分代年龄，锁状态标志，线程持有的锁，偏向线程的ID，偏向时间戳等，称之为Mark Word。另一部分是类型指针，是对象指向他的类元数据的指针，用于确定是哪个类的实例（非必须）；如果是数组还需要有一块记录数组长度的数据
 
 在64位虚拟机下，Mark Word是64bit大小的，其存储结构如下：
-![](../../assets/_images/java/thread/synchronized_2.png)
+![](../../assets/_images/java/synchronized/synchronized_2.png)
 
 在32位虚拟机下，Mark Word是32bit大小的，其存储结构如下：
 
-![](../../assets/_images/java/thread/synchronized_3.png)
+![](../../assets/_images/java/synchronized/synchronized_3.png)
 
 - 实例数据
 
@@ -241,7 +241,7 @@ synchronized未优化之前，效率低的原因。
 - 对齐填充
 
 非必须，内存管理系统要求对象起始地址必须是8字节的整数倍，通常用于填充实例数据。
-![](../../assets/_images/java/thread/synchronized_1.png)
+![](../../assets/_images/java/synchronized/synchronized_1.png)
 
 对象头 = Mark Word + 类型指针（未开启指针压缩的情况下）
 
@@ -513,7 +513,7 @@ ReentrantLock的自旋、cas、park在`线程交替执行没有竞争的情况�
 
 > ReentrantLock实现了Lock接口，并使用内部类Sync(Sync继承AbstractQueuedSynchronizer)来实现同步操作
 
-![](../../assets/_images/java/thread/reentrantlock_1.png)  
+![](../../assets/_images/java/synchronized/reentrantlock_1.png)  
 
 > ReentrantLock内部类Sync非公平锁实现
 ```java
@@ -725,7 +725,7 @@ public class AbstractQueuedSynchronizer{
 
 - AQS内部维护一个同步队列，元素就是包装了线程的Node
 - 同步队列中首节点是获取到锁的节点，它在释放锁的时会唤醒后继节点，后继节点获取到锁的时候，会把自己设为首节点
-![](../../assets/_images/java/thread/aqs_1.jpg)  
+![](../../assets/_images/java/synchronized/aqs_1.jpg)  
 ```java
 public final void acquire(int arg) {
         if (!tryAcquire(arg) &&
@@ -765,7 +765,7 @@ public final void await() throws InterruptedException{
     if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
         interruptMode = REINTERRUPT;
 ```
-![](../../assets/_images/java/thread/aqs_2.jpg)  
+![](../../assets/_images/java/synchronized/aqs_2.jpg)  
 
 - 调用Condition.signal时，获取条件队列的首节点，将其移动到同步队列并且利用LockSupport唤醒节点中的线程。随后继续执行wait挂起前的状态，调用acquireQueued(node, savedState)竞争同步状态
 ```java
@@ -779,7 +779,7 @@ public final void await() throws InterruptedException{
                  (first = firstWaiter) != null);
     }
 ```
-![](../../assets/_images/java/thread/aqs_3.jpg)  
+![](../../assets/_images/java/synchronized/aqs_3.jpg)  
 
 - volatile+cas机制保证了代码的同步性和可见性，而AQS封装了线程阻塞等待挂起，解锁唤醒其他线程的逻辑。AQS子类只需根据状态变量，判断是否可获取锁，是否释放锁成功即可
 - 继承AQS可选性重写以下几个接口

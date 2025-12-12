@@ -324,7 +324,7 @@ final Entry<K,V> getEntry(Object key) {
 
 ## 1.4 ConcurrentHashMap源码1.7
 
-![](../../assets/_images/java/j2se/map/jdk7chashmap.png)
+![](../../assets/_images/java/map/jdk7chashmap.png)
 
 ### 1.4.1 成员变量
 

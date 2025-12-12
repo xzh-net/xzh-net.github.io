@@ -7,11 +7,11 @@
 
 ### 1.1 BTree
 
-![](../../assets/_images/java/database/mysql/btree.png)
+![](../../assets/_images/java/mysql/btree.png)
 
 ### 1.2 B+Tree
 
-![](../../assets/_images/java/database/mysql/b+tree.png)
+![](../../assets/_images/java/mysql/b+tree.png)
 
 InnoDB（索引组织表）使用的聚簇索引、索引就是数据，顺序存储，因此能缓存索引，也能缓存数据
 

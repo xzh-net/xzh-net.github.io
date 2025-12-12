@@ -4,24 +4,24 @@
 
 ### 1.1 Spring核心知识点
 
-![](../../assets/_images/java/frame/spring/spring.png)
+![](../../assets/_images/java/spring/spring.png)
 
 ### 1.2 依赖注入的工作流程
 
-![](../../assets/_images/java/frame/spring/ioc.png)
+![](../../assets/_images/java/spring/ioc.png)
 
 
 ### 1.3 AOP的工作流程
 
-![](../../assets/_images/java/frame/spring/aop.png)
+![](../../assets/_images/java/spring/aop.png)
 
 ### 1.4 Bean的生命周期原理详解与源码分析
 
-![](../../assets/_images/java/frame/spring/bean.png)
+![](../../assets/_images/java/spring/bean.png)
 
 ### 1.5 事务隔离级别流程
 
-![](../../assets/_images/java/frame/spring/transaction.png)
+![](../../assets/_images/java/spring/transaction.png)
 
 ### 1.6 ApplicationContext和BeanFactory架构图
 
@@ -29,11 +29,11 @@
 
 如果一个类实现了ApplicationContextAware接口，spring 创建bean的时候会自动注入ApplicationContext，大家获取ApplicationContext的成本很低，所以ApplicationContext被大家更多使用
 
-![](../../assets/_images/java/frame/spring/applicationcontext.png)
+![](../../assets/_images/java/spring/applicationcontext.png)
 
 ### 1.7 BeanFactory架构
 
-![](../../assets/_images/java/frame/spring/beanfactory.png)
+![](../../assets/_images/java/spring/beanfactory.png)
 
 
 
@@ -287,7 +287,7 @@ public class CustomBeanPostProcessor implements BeanPostProcessor {
 
 ### 2.7 aware接口
 
-![](../../assets/_images/java/frame/spring/aware.png)
+![](../../assets/_images/java/spring/aware.png)
 
 #### 2.7.1 BeanNameAware
 

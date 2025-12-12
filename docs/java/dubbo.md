@@ -1,6 +1,6 @@
 # Dubbo源码解析
 
-![](../../assets/_images/java//distributed/dubbo/dubbo-framework.jpg)
+![](../../assets/_images/java/dubbo/dubbo-framework.jpg)
 
 优点：
 
@@ -86,7 +86,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
   
 ## 2. 服务暴露
 
-![](../../assets/_images/java//distributed/dubbo/dubbo-export.jpg)
+![](../../assets/_images/java/dubbo/dubbo-export.jpg)
 
 ServiceBean继承自ServiceConfig，ServiceConfig是服务暴露的具体实现类。另外ServiceBean还实现了InitializingBean，DisposableBean，ApplicationContextAware，ApplicationListener，BeanNameAware，
 ApplicationEventPublisherAware几个接口，简单介绍下几个接口的作用：

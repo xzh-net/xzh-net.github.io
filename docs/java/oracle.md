@@ -8,7 +8,7 @@
 - Control File 控制文件
 - Redo Log File 重做日志文件
 
-![](../../assets/_images/java/database/oracle/2.png)
+![](../../assets/_images/java/oracle/2.png)
 
 
 ```sql
@@ -25,7 +25,7 @@ show parameter memory
 
 ### 1.2 内存结构
 
-![](../../assets/_images/java/database/oracle/1.png)
+![](../../assets/_images/java/oracle/1.png)
 
 
 是一种数据库访问机制，主要由内存结构和进程结构组成

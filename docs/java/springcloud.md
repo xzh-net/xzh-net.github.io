@@ -8,7 +8,7 @@
 
 org.springframework.cloud.netflix.eureka.server.EurekaServerAutoConfiguration
 
-![](../../assets/_images/java//microservice/springcloud/eurekastart.png)
+![](../../assets/_images/java/springcloud/eurekastart.png)
 
 Jersey是一个RESTFUL请求服务JAVA框架，与常规的JAVA编程使用的struts框架类似，它主要用于处理业务逻辑层
 
@@ -51,7 +51,7 @@ uri路径参数
 
 由于集成了Jersey，我们可以找到在EurekaServer的依赖包中的 eureka-core-1.9.8.jar ,可以看到一些列的XXXResource
 
-![](../../assets/_images/java//microservice/springcloud/jersey.png)
+![](../../assets/_images/java/springcloud/jersey.png)
 
 eureka信息查看 get: {ip:port}/eureka/status
 >注册到eureka的服务信息查看 get: {ip:port}/eureka/apps
@@ -88,7 +88,7 @@ eureka信息查看 get: {ip:port}/eureka/status
 
 ### 1.2 客户端
 
-![](../../assets/_images/java//microservice/springcloud/eurecaclient.png)
+![](../../assets/_images/java/springcloud/eurecaclient.png)
 
 ```java
 @Configuration
@@ -185,7 +185,7 @@ public interface EurekaHttpClient {
 
 ### 1.4 注册中心的比较
 
-![](../../assets/_images/java//microservice/springcloud/serverDiscovery.png)
+![](../../assets/_images/java/springcloud/serverDiscovery.png)
 
 
 
@@ -193,7 +193,7 @@ public interface EurekaHttpClient {
 
 ## 3. Feign的源码分析
 
-![](../../assets/_images/java//microservice/springcloud/feign.png)
+![](../../assets/_images/java/springcloud/feign.png)
 
 @EnableFeignClients 应用到@Import 导入ImportBeanDefinitionRegistrar的实现类方式
 
@@ -582,7 +582,7 @@ Hystrix能做什么
 4. 提供失败回退（Fallback）和优雅的服务降级机制
 5. 提供近似实时的监控、报警和运维控制手段
 
-![](../../assets/_images/java//microservice/springcloud/hystrix.png)
+![](../../assets/_images/java/springcloud/hystrix.png)
 
 隔离策略
 
@@ -601,7 +601,7 @@ Hystrix能做什么
 
 线程池隔离模式 VS 信号量隔离模式
 
-![](../../assets/_images/java//microservice/springcloud/hystrix2.png)
+![](../../assets/_images/java/springcloud/hystrix2.png)
 
 - hystrix.command.default.execution.isolation.strategy : 配置隔离策略
 - ExecutionIsolationStrategy.SEMAPHORE 信号量隔离
@@ -610,8 +610,8 @@ Hystrix能做什么
 
 Hystrix主要配置项
 
-![](../../assets/_images/java//microservice/springcloud/hystrixparam1.png)
-![](../../assets/_images/java//microservice/springcloud/hystrixparam2.png)
+![](../../assets/_images/java/springcloud/hystrixparam1.png)
+![](../../assets/_images/java/springcloud/hystrixparam2.png)
 
 
 Hystrix 底层基于 RxJava，RxJava 是响应式编程开发库，因此Hystrix的整个实现策略简单说即：把一个HystrixCommand封装成一个Observable（待观察者），针对自身要实现的核心功能，对Observable进行各种装饰，并在订阅各步装饰的Observable，以便在指定事件到达时，添加自己的业务
@@ -669,13 +669,13 @@ clusterNameExpression: "'default'"
 
 在启动类使用@EnableHystrixDashboard注解和@EnableTurbine激活仪表盘项目
 
-![](../../assets/_images/java//microservice/springcloud/hystrixdashboard.png)
+![](../../assets/_images/java/springcloud/hystrixdashboard.png)
 
 ### 5.2 Hystrix替代方案 
 
 [Alibaba Sentinel分布式系统流量防卫兵](/share/microservice/springclouda?id=_1-sentinel分布式系统的流量防卫兵)
 
-![](../../assets/_images/java//microservice/springcloud/sentinel-hystrix.png)
+![](../../assets/_images/java/springcloud/sentinel-hystrix.png)
 
 ## 6. GateWay
 
@@ -684,7 +684,7 @@ clusterNameExpression: "'default'"
 1. 路由（route） 路由是网关最基础的部分，路由信息由一个ID、一个目的URL、一组断言工厂和一组Filter组成。如果断言为真，则说明请求URL和配置的路由匹配。
 2. 断言（predicates） Java8中的断言函数，Spring Cloud Gateway中的断言函数输入类型是Spring5.0框架中的ServerWebExchange。Spring Cloud Gateway中的断言函数允许开发者去定义匹配来自Http Request中的任何信息，比如请求头和参数等。`实现灰度发布`
 
-![](../../assets/_images/java//microservice/springcloud/predicates.png)
+![](../../assets/_images/java/springcloud/predicates.png)
 
 3. 过滤器（filter） 一个标准的Spring webFilter，Spring Cloud Gateway中的Filter分为两种类型，分别是Gateway Filter和Global Filter。过滤器Filter可以对请求和响应进行处理。
 
@@ -1115,7 +1115,7 @@ spring:
 
 自动刷新：依赖rabbitmq完成，post去触发config服务器的bus-refresh端点完成全局通知s
 
-![](../../assets/_images/java//microservice/springcloud/config-mq.png)
+![](../../assets/_images/java/springcloud/config-mq.png)
 
 
 ## 9. 链路跟踪

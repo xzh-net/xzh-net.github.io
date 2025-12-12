@@ -71,7 +71,7 @@
 - 读取通信对端的请求或者应答消息
 - 向通信对端发送消息请求或者应答消息
 
-![](../../assets/_images/java//network/netty/netty1.png)
+![](../../assets/_images/java/netty/netty1.png)
 
 总结：对于一些小容量应用场景，可以使用单线程模型，但是对于高负载、大并发的应用却不合适，主要原因如下：
 
@@ -85,7 +85,7 @@
 - 网络I/O操作--读、写等由一个NIO线程池负责，线程池可以采用标准的JDK线程池实现，它包含一个任务队列和N个可用的线程，由这些NIO线程负责消息的读取、解码、编码和发送
 - 1个NIO线程可以同时处理N条链路，但是1个链路只对应1个NIO线程，防止发生并发操作问题
 
-![](../../assets/_images/java//network/netty/netty2.png)
+![](../../assets/_images/java/netty/netty2.png)
 
 总结：在绝大多数场景下，Reactor多线程模型都可以满足性能需求；但是，在极特殊应用场景中，一个NIO线程负责监听和处理所有的客户端连接可能会存在性能问题。例如百万客户端并发连接，或者服务端需要对客户端的握手信息进行安全认证，认证本身非常损耗性能。这类场景下，单独一个Acceptor线程可能会存在性能不足问题，为了解决性能问题，产生了第三种Reactor线程模型--主从Reactor多线程模型
 
@@ -93,7 +93,7 @@
 
 特点是：服务端用于接收客户端连接的不再是1个单独的NIO线程，而是一个独立的NIO线程池。Acceptor接收到客户端TCP连接请求处理完成后（可能包含接入认证等），将新创建的SocketChannel注册到I/O线程池（sub reactor线程池）的某个I/O线程上，由它负责SocketChannel的读写和编解码工作
 
-![](../../assets/_images/java//network/netty/netty3.png)
+![](../../assets/_images/java/netty/netty3.png)
 
 ## 3. Netty大数据量的传输，压缩，解压缩
 

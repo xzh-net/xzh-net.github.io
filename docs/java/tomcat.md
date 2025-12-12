@@ -34,11 +34,11 @@ ProtocolHandler是EndPoint和Processor的组合
 
 ### 1.2 catalina容器
 
-![](../../assets/_images/java//network/tomcat/tomcat_1.jpg)
+![](../../assets/_images/java/tomcat/tomcat_1.jpg)
 
-![](../../assets/_images/java//network/tomcat/tomcat_2.png)
+![](../../assets/_images/java/tomcat/tomcat_2.png)
 
-![](../../assets/_images/java//network/tomcat/tomcat_3.png)
+![](../../assets/_images/java/tomcat/tomcat_3.png)
 
 
 ## 2. Tomcat中“HTTP长连接”的实现原理与源码分析
@@ -49,7 +49,7 @@ ProtocolHandler是EndPoint和Processor的组合
 
 ## 5. Tomcat中响应一个请求的原理与源码分析
 
-![](../../assets/_images/java//network/tomcat/tomcat_5.png)
+![](../../assets/_images/java/tomcat/tomcat_5.png)
 
 NioEndpoint processKey接收请求，交给线程池处理 进入SocketProcessorBase的run方法
 ```java
@@ -348,7 +348,7 @@ Tomcat在默认web.xml中配置了
 
 JspServlet处理流程图
 
-![](../../assets/_images/java//network/tomcat/tomcat_jsp.png)
+![](../../assets/_images/java/tomcat/tomcat_jsp.png)
 
 源码跟踪
 
@@ -542,17 +542,17 @@ public void compile(boolean compileClass, boolean jspcMode)
 
 java文件和class文件生成后，回到JspServletWrapper类中，调用getServlet()方法：加载jsp对应的servlet
 
-![](../../assets/_images/java//network/tomcat/tomcat_jsp1.png)
+![](../../assets/_images/java/tomcat/tomcat_jsp1.png)
 
-![](../../assets/_images/java//network/tomcat/tomcat_jsp2.png)
+![](../../assets/_images/java/tomcat/tomcat_jsp2.png)
 
 然后执行service()方法：
 
-![](../../assets/_images/java//network/tomcat/tomcat_jsp3.png)
+![](../../assets/_images/java/tomcat/tomcat_jsp3.png)
 
 查看index_jsp源码：在_jspService()方法中写出响应：
 
-![](../../assets/_images/java//network/tomcat/tomcat_jsp4.png)
+![](../../assets/_images/java/tomcat/tomcat_jsp4.png)
 
 **编译结果**
 
@@ -764,7 +764,7 @@ tomcat 为了实现隔离性，没有遵守这个父类委托机制约定，每�
 
 Server,Service,Container,Executor都实现了Lifecycle接口
 
-![](../../assets/_images/java//network/tomcat/tomcat_4.png)
+![](../../assets/_images/java/tomcat/tomcat_4.png)
 
 ## 13. Tomcat性能调优
 

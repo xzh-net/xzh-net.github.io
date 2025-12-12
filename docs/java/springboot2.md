@@ -369,7 +369,7 @@ public class HttpEncodingAutoConfiguration {
 ```
 
 EurekaServer装配过程
-![](../../assets/_images/java/frame/springboot/autoConfig.png)
+![](../../assets/_images/java/springboot/autoConfig.png)
 
 ## 4. 热部署DevTools原理
 
@@ -470,7 +470,7 @@ pom.xml
 
 spring-boot-starter-web的依赖树
 
-![](../../assets/_images/java/frame/springboot/slf4j.png)
+![](../../assets/_images/java/springboot/slf4j.png)
 
 更换日志
 ```xml
