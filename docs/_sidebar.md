@@ -88,6 +88,10 @@
   - [Arthas](deploy/arthas)
 
 - 学习笔记
+  - [网络协议详解](deploy/network)
+  - [IP子网划分](deploy/ip)
+  - [IO模型](java/io)
+  - [分布式理论与算法](java/cap)
   - [设计模式](java/model)
   - [J2SE](java/j2se)
   - [JVM底层原理](java/jvm)
@@ -114,10 +118,7 @@
   - [MySQL](java/mysql)
   - [Oracle](java/oracle)
   - [ShardingSphere](java/shardingsphere)
-  - [网络协议详解](kernel/net)
-  - [IP子网划分](kernel/ip)
-  - [IO模型](kernel/io)
-  - [分布式理论与算法](kernel/cap)
+
 
 - 其他
   - [热血传奇](game/mir2)
