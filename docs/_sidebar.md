@@ -117,7 +117,6 @@
   - [网络协议详解](kernel/net)
   - [IP子网划分](kernel/ip)
   - [IO模型](kernel/io)
-  - [解决方案](kernel/diagram)
   - [分布式理论与算法](kernel/cap)
 
 - 其他
