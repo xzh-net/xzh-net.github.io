@@ -7,7 +7,7 @@ IO模型就是说用什么样的通道进行数据的发送和接收，Java共�
 
 同步阻塞模型，一个客户端连接对应一个处理线程
 
-![](../../assets/_images/java//network/io/io_1.png)
+![](../../assets/_images/java/io/io_1.png)
 
 ```java
 public class BioServer {
@@ -62,9 +62,9 @@ strace -ff -o out /usr/java/j2sdk1.4.2_18/bin/java BioServer
 ```
 JDK1.4 accept和recv都会产生阻塞 
 
-![](../../assets/_images/java//network/io/bio1.png)
-![](../../assets/_images/java//network/io/bio2.png)
-![](../../assets/_images/java//network/io/bio3.png)
+![](../../assets/_images/java/io/bio1.png)
+![](../../assets/_images/java/io/bio2.png)
+![](../../assets/_images/java/io/bio3.png)
 
 ```bash
 strace -ff -o out /usr/local/jdk1.8.0_202/bin/java BioServer,
@@ -72,7 +72,7 @@ strace -ff -o out /usr/local/jdk1.8.0_202/bin/java BioServer,
 
 JDK1.8 使用非阻塞模型poll
 
-![](../../assets/_images/java//network/io/bio4.png)
+![](../../assets/_images/java/io/bio4.png)
 
 
 ## 2. NIO底层原理
@@ -189,7 +189,7 @@ NIO 有三大核心组件： Channel(通道)， Buffer(缓冲区)，Selector(多
 - 2、channel 会注册到 selector 上，由 selector 根据 channel 读写事件的发生将其交由某个空闲的线程处理
 - 3、NIO 的 Buffer 和 channel 都是既可以读也可以写
 
-![](../../assets/_images/java//network/io/nio_1.png)
+![](../../assets/_images/java/io/nio_1.png)
 
 NIO底层在JDK1.4版本是用linux的内核函数select()或poll()来实现，跟上面的NioServer代码类似，selector每次都会轮询所有的sockchannel看下哪个channel有读写事件，有的话就处理，没有就继续遍历，JDK1.5开始引入了epoll基于事件响应机制来优化NIO
 
@@ -201,7 +201,7 @@ socketChannel.register(selector, SelectionKey.OP_READ) //将channel注册到多�
 selector.select() //阻塞等待需要处理的事件发生
 ```
 
-![](../../assets/_images/java//network/io/nio_2.jpg)
+![](../../assets/_images/java/io/nio_2.jpg)
 
 总结：
 
@@ -218,7 +218,7 @@ int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout)
 
 I/O多路复用底层主要用的Linux 内核函数（select，poll，epoll）来实现，windows不支持epoll实现，windows底层是基于winsock2的select函数实现的(不开源)
 
-![](../../assets/_images/java//network/io/nio_3.jpg)
+![](../../assets/_images/java/io/nio_3.jpg)
 
 **Redis就是典型的基于epoll的NIO线程模型(nginx也是)，epoll实例收集所有事件(连接与读写事件)，由一个服务端线程连续处理所有事件命令。**
 
