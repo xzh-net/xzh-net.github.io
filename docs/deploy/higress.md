@@ -114,11 +114,11 @@ vi /data/higress/data/configmaps/higress-config.yaml
 }
 ```
 
-增加自定义信息
+增加从请求头获取数据
 
 ```yaml
-# 自定义请求头
-"user_api_key": "%REQ(vjsp-api-key)%",
+# 请求头
+"user_api_key": "%REQ(user-api-key)%",
 "client_version": "%REQ(CLIENT-VERSION)%"
 ```
 
