@@ -1010,7 +1010,7 @@ spring:
 
 WebJars是将web前端资源（js，css等）打成jar包文件，然后借助Maven工具，以jar包形式对web前端资源进行统一依赖管理，保证这些Web资源版本唯一性。
 
-官网地址 ： https://www.webjars.org/
+官方网站：https://www.webjars.org/
 
 
 ```xml

@@ -1,7 +1,7 @@
 
 #  Node.js 14.16.0
 
-- 网站地址：https://nodejs.org/
+- 官方网站：https://nodejs.org/
 - 下载地址：https://nodejs.org/download/release/
 - Npm仓库: https://www.npmjs.com/
 

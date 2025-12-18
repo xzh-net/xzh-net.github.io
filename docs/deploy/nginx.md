@@ -1327,7 +1327,7 @@ server {
 
 `acme.sh`脚本实现了acme协议, 可以从`Let’s Encrypt`生成免费的证书。一般证书有效期是1年，过期需要重新申请，使用脚本可以实现到期自动申请，再也不用担心证书过期了
 
-- 官网：https://github.com/acmesh-official/acme.sh
+- 官方网站：https://github.com/acmesh-official/acme.sh
 
 #### 4.2.1 安装
 

@@ -3,9 +3,11 @@
 面向 LLM，统一代理各主流大模型和自建大模型服务，提供 OpenAI 兼容的访问方式，并提供二次 API KEY 签发、限流、安全防护、观测等治理能力。
 
 
-## 1. 快速开始
+## 1. 部署
 
-极简方式，基于本地文件做配置存储，创建挂载路径
+### 1.1 极简方式
+
+基于本地文件做配置存储，创建挂载路径
 
 ```bash
 mkdir /data/higress/{data,log,proxy} -p
@@ -23,6 +25,10 @@ docker run -dit --name higress-ai \
     -p 8001:8001 -p 8080:8080 -p 8443:8443  \
     higress-registry.cn-hangzhou.cr.aliyuncs.com/higress/all-in-one:2.1.9
 ```
+
+### 1.2 独立运行版
+
+
 
 ## 2. 配置
 
@@ -48,7 +54,13 @@ docker run -dit --name higress-ai \
 
 ![](../../assets/_images/deploy/higress/5_2.png)
 
-## 3. 日志
+## 3. 高级功能
+
+所有高级功能插件配置全部基于极简方式部署的路径
+
+### 3.1 网关日志
+
+网关的访问日志输出格式是基于`系统设置 -> 编辑全局配置`中的`accessLogFormat`字段设置，每次修改需要重启应用。
 
 网关日志已经映射到宿主机的`/data/higress/proxy`路径下，其中`access.log`是每次请求的日志，后面我们基于这个日志汇总每次请求消耗的token数量，生成账单。
 
@@ -123,3 +135,92 @@ vi /data/higress/data/configmaps/higress-config.yaml
 ```
 
 重启服务
+
+
+### 3.2 调整日志等级
+
+进入 gateway 所在容器的 bash 终端
+
+```bash
+docker exec -it higress-ai /bin/bash
+```
+
+如果是独立运行版
+
+```bash
+docker exec -it higress-gateway-1 /bin/bash
+```
+
+执行命令
+
+```
+# Wasm 插件模块
+curl localhost:15000/logging?wasm=debug -X POST
+# MCP Server 模块
+curl localhost:15000/logging?golang=debug -X POST    
+```
+
+
+
+日志等级包括：
+- trace
+- debug
+- info
+- warning/warn（默认值）
+- error
+- critical
+- off
+
+调整后的日志等级在 gateway 重启后将会自动失效
+
+
+### 3.3 AI 统计
+
+```bash
+
+```
+
+### 3.4 AI 意图识别
+
+1. 新建一个固定地址的服务：intent-service，服务指向172.17.17.16:80 （即自身网关实例+端口）
+2. 新建一条higress的大模型路由，供插件访问大模型，路由以 /intent 作为前缀
+
+```yaml
+llm:
+  proxyDomain: "172.17.17.161"
+  proxyModel: "Qwen3-Coder-30B-A3B-Instruct"
+  proxyPort: "80"
+  proxyServiceName: "intent-service.static"
+  proxyTimeout: "10000"
+  proxyUrl: "http://172.17.17.161:80/intent/compatible-mode/v1/chat/completions"
+scene:
+  category: "金融|电商|金融"
+  prompt: "你是一个智能类别识别助手，负责根据用户提出的问题和预设的类别，确定问题属于哪个预设的类别，并给出相应的类别。用户提出的问题为:'%s',预设的\
+    类别为'%s'，直接返回一种具体类别，如果没有找到就返回'NotFound'。"
+```
+
+
+### 3.5 请求/响应转换
+
+将请求Header中的`intent_category`解析后，设置到Header中`x-ai-Intent`
+
+```yaml
+reqRules:
+- headers:
+  - fromKey: "intent_category"
+    toKey: "x-ai-Intent"
+  mapSource: "headers"
+  operate: "map"
+```
+
+将请求body中的`userId`解析出后，设置到请求Header中的`x-user-id`
+
+```yaml
+reqRules:
+- operate: map
+  headers:
+  - fromKey: userId
+    toKey: x-user-id
+  mapSource: body
+```
+

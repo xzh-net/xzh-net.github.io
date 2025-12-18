@@ -2,7 +2,7 @@
 
 Apache RocketMQ是一个分布式消息和流媒体平台，具有低延迟、高性能和可靠性、万亿级容量和灵活的可扩展性
 
-- 网站地址：https://rocketmq.apache.org
+- 官方网站：https://rocketmq.apache.org
 
 ## 1. 安装
 

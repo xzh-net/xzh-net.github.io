@@ -2,7 +2,7 @@
 
 EMQX基于Erlang/OTP平台开发的MQTT消息服务器，是开源社区中最流行的MQTT消息服务器。
 
-- 网站地址：https://www.emqx.io/zh/community
+- 官方网站：https://www.emqx.io/zh/community
 
 ## 1. 安装
 
