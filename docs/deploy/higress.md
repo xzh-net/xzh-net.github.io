@@ -2,6 +2,7 @@
 
 面向 LLM，统一代理各主流大模型和自建大模型服务，提供 OpenAI 兼容的访问方式，并提供二次 API KEY 签发、限流、安全防护、观测等治理能力。
 
+- 官方网站：https://higress.cn/
 
 ## 1. 部署
 
@@ -153,7 +154,7 @@ docker exec -it higress-gateway-1 /bin/bash
 
 执行命令
 
-```
+```bash
 # Wasm 插件模块
 curl localhost:15000/logging?wasm=debug -X POST
 # MCP Server 模块
@@ -176,14 +177,32 @@ curl localhost:15000/logging?golang=debug -X POST
 
 ### 3.3 AI 统计
 
-```bash
+提供了对 token 用量的统计信息，包括日志、监控以及告警
 
+```yaml
+attributes:
+- apply_to_log: true
+  key: "question"
+  value: "messages.@reverse.0.content"
+  value_source: "request_body"
+- apply_to_log: true
+  key: "answer"
+  rule: "append"
+  value: "choices.0.delta.content"
+  value_source: "response_streaming_body"
+- apply_to_log: true
+  key: "answer"
+  value: "choices.0.message.content"
+  value_source: "response_body"
 ```
 
 ### 3.4 AI 意图识别
 
-1. 新建一个固定地址的服务：intent-service，服务指向172.17.17.16:80 （即自身网关实例+端口）
-2. 新建一条higress的大模型路由，供插件访问大模型，路由以 /intent 作为前缀
+通过大模型对用户提问进行分类，将返回结果通过请求头或者请求体进行分发，实现精确路由。
+
+1. 新建一个固定地址的服务：intent-service，服务指向172.17.17.16:80 （即自身网关实例+端口）。
+2. 新建一条higress的大模型路由，供插件访问大模型，路由以 /intent 作为前缀。
+3. 为路由开启`AI 意图识别`插件功能。
 
 ```yaml
 llm:
@@ -194,26 +213,28 @@ llm:
   proxyTimeout: "10000"
   proxyUrl: "http://172.17.17.161:80/intent/compatible-mode/v1/chat/completions"
 scene:
-  category: "金融|电商|金融"
-  prompt: "你是一个智能类别识别助手，负责根据用户提出的问题和预设的类别，确定问题属于哪个预设的类别，并给出相应的类别。用户提出的问题为:'%s',预设的\
-    类别为'%s'，直接返回一种具体类别，如果没有找到就返回'NotFound'。"
+  category: "金融|电商|法律|Higress"
+  prompt: "你是一个智能类别识别助手，负责根据用户提出的问题和预设的类别，确定问题属于哪个预设的类别，并给出相应的类别。用户提出的问题为:'%s',预设的类别为'%s'，直接返回一种具体类别，如果没有找到就返回'NotFound'。"
 ```
 
 
 ### 3.5 请求/响应转换
 
-将请求Header中的`intent_category`解析后，设置到Header中`x-ai-Intent`
+对请求/响应头、请求查询参数、请求/响应体参数进行转换。
+
+
+1. 将请求Header中的`intent_category`解析后，设置到Header中的`x-ai-Intent`
 
 ```yaml
 reqRules:
-- headers:
-  - fromKey: "intent_category"
-    toKey: "x-ai-Intent"
-  mapSource: "headers"
-  operate: "map"
+- operate: map
+  headers:
+  - fromKey: intent_category
+    toKey: x-ai-Intent
+  mapSource: headers
 ```
 
-将请求body中的`userId`解析出后，设置到请求Header中的`x-user-id`
+2. 将请求body中的`userId`解析后，设置到请求Header中的`x-user-id`
 
 ```yaml
 reqRules:
