@@ -29,6 +29,9 @@ docker run -dit --name higress-ai \
 
 ### 1.2 独立运行版
 
+下载地址：https://github.com/higress-group/higress-standalone
+
+
 
 
 ## 2. 配置

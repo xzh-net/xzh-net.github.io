@@ -4,7 +4,7 @@
 
 ## 1. 安装
 
-### 1.1 在线安装
+### 1.1 包管理器安装
 
 ```bash
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -19,7 +19,7 @@ yum install --setopt=obsoletes=0 docker-ce-18.06.3.ce-3.el7 -y
 docker -v
 ```
 
-### 1.2 离线安装
+### 1.2 二进制文件安装
 
 下载地址：https://download.docker.com/linux/static/stable/x86_64/docker-18.06.3-ce.tgz
 
@@ -65,18 +65,29 @@ systemctl start docker
 systemctl enable docker
 ```
 
-### 1.3 RPM安装
+### 1.3 离线安装
 
-下载
+在有网络的机器上下载所需 RPM 包
+
 ```bash
 yum install -y yum-plugin-downloadonly
 yum install --downloadonly --downloaddir=/data/rpm/ docker-ce-18.06.3.ce-3.el7
 ```
 
-安装
+在目标机器上使用 yum  或 rpm 本地安装
+
+推荐使用 yum localinstall 方式，此方法会自动处理本地RPM文件间的依赖关系。
+
 ```
 cd /data/rpm
 yum localinstall *.rpm
+```
+
+使用 rpm -ivh 方式安装，必须手动安装依赖
+
+```
+cd /data/rpm
+rpm -ivh *.rpm
 ```
 
 ### 1.4 修改配置
