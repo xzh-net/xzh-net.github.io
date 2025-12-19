@@ -206,6 +206,150 @@ location /cookie {
 }
 ```
 
+#### 1.4.6 记录所有请求信息
+
+记录请求信息，包括请求方法、URI、HTTP版本、客户端IP等基本信息，以及详细的GET参数、POST参数、Cookie、请求头等，同时还根据Content-Type智能解析不同类型的请求体
+
+```lua
+location / {
+    access_by_lua_block {
+        -- 记录请求基本信息
+        ngx.log(ngx.INFO, "====== HTTP请求信息 ======")
+        ngx.log(ngx.INFO, "请求方法: ", ngx.var.request_method)
+        ngx.log(ngx.INFO, "请求URI: ", ngx.var.request_uri)
+        ngx.log(ngx.INFO, "HTTP版本: ", ngx.var.server_protocol)
+        ngx.log(ngx.INFO, "客户端IP: ", ngx.var.remote_addr)
+        ngx.log(ngx.INFO, "服务器IP: ", ngx.var.server_addr)
+        ngx.log(ngx.INFO, "请求时间: ", ngx.var.time_local)
+        
+        -- 打印请求头
+        ngx.log(ngx.INFO, "====== 请求头 ======")
+        local headers = ngx.req.get_headers()
+        for key, value in pairs(headers) do
+            if type(value) == "table" then
+                ngx.log(ngx.INFO, key .. ": " .. table.concat(value, ", "))
+            else
+                ngx.log(ngx.INFO, key .. ": " .. tostring(value))
+            end
+        end
+        
+        -- 专门处理Cookie
+        ngx.log(ngx.INFO, "====== Cookie参数 ======")
+        local cookie_header = headers["Cookie"] or headers["cookie"]
+        if cookie_header then
+            if type(cookie_header) == "table" then
+                cookie_header = table.concat(cookie_header, "; ")
+            end
+            ngx.log(ngx.INFO, "Raw Cookie: ", cookie_header)
+            
+            -- 解析Cookie键值对
+            local cookies = {}
+            for k, v in string.gmatch(cookie_header, "([^=]+)=([^;]+)") do
+                cookies[k:match("^%s*(.-)%s*$")] = v:match("^%s*(.-)%s*$")
+                ngx.log(ngx.INFO, "Cookie参数 [" .. k:match("^%s*(.-)%s*$") .. "]: " .. v:match("^%s*(.-)%s*$"))
+            end
+        else
+            ngx.log(ngx.INFO, "无Cookie")
+        end
+        
+        -- 打印 GET 参数
+        ngx.log(ngx.INFO, "====== GET参数 ======")
+        local get_args = ngx.req.get_uri_args()
+        if next(get_args) then
+            for key, value in pairs(get_args) do
+                if type(value) == "table" then
+                    ngx.log(ngx.INFO, "GET参数 [" .. tostring(key) .. "]: " .. table.concat(value, ", "))
+                else
+                    ngx.log(ngx.INFO, "GET参数 [" .. tostring(key) .. "]: " .. tostring(value))
+                end
+            end
+        else
+            ngx.log(ngx.INFO, "无GET参数")
+        end
+        
+        -- 读取请求体
+        ngx.req.read_body()
+        local body_data = ngx.req.get_body_data()
+        
+        -- 打印请求体参数
+        ngx.log(ngx.INFO, "====== 请求体信息 ======")
+        if body_data then
+            ngx.log(ngx.INFO, "Content-Type: ", headers["Content-Type"] or headers["content-type"] or "unknown")
+            ngx.log(ngx.INFO, "Body长度: ", #body_data, " bytes")
+            ngx.log(ngx.INFO, "Body原始数据前200字符: ", string.sub(body_data, 1, 200))
+            
+            -- 根据Content-Type解析请求体
+            local content_type = headers["Content-Type"] or headers["content-type"]
+            if content_type then
+                -- application/x-www-form-urlencoded
+                if string.find(content_type:lower(), "application/x-www-form-urlencoded") then
+                    ngx.log(ngx.INFO, "====== POST参数(x-www-form-urlencoded) ======")
+                    local args = ngx.req.get_post_args()
+                    if args then
+                        for key, value in pairs(args) do
+                            if type(value) == "table" then
+                                ngx.log(ngx.INFO, "POST参数 [" .. tostring(key) .. "]: " .. table.concat(value, ", "))
+                            else
+                                ngx.log(ngx.INFO, "POST参数 [" .. tostring(key) .. "]: " .. tostring(value))
+                            end
+                        end
+                    end
+                -- application/json
+                elseif string.find(content_type:lower(), "application/json") then
+                    ngx.log(ngx.INFO, "====== JSON数据 ======")
+                    local json = require("cjson")
+                    local status, result = pcall(json.decode, body_data)
+                    if status and type(result) == "table" then
+                        local function print_json_table(t, indent)
+                            indent = indent or 0
+                            for k, v in pairs(t) do
+                                if type(v) == "table" then
+                                    ngx.log(ngx.INFO, string.rep("  ", indent) .. tostring(k) .. ": {")
+                                    print_json_table(v, indent + 1)
+                                    ngx.log(ngx.INFO, string.rep("  ", indent) .. "}")
+                                else
+                                    ngx.log(ngx.INFO, string.rep("  ", indent) .. tostring(k) .. ": " .. tostring(v))
+                                end
+                            end
+                        end
+                        print_json_table(result)
+                    else
+                        ngx.log(ngx.INFO, "JSON解析失败或不是对象")
+                    end
+                -- multipart/form-data
+                elseif string.find(content_type:lower(), "multipart/form-data") then
+                    ngx.log(ngx.INFO, "====== 文件上传数据(multipart/form-data) ======")
+                    -- 注意：nginx默认不解析multipart，这里只记录原始数据长度
+                -- text/plain
+                elseif string.find(content_type:lower(), "text/plain") then
+                    ngx.log(ngx.INFO, "====== 文本数据 ======")
+                    ngx.log(ngx.INFO, "文本内容: ", string.sub(body_data, 1, 500))
+                else
+                    ngx.log(ngx.INFO, "====== 未知Content-Type的请求体 ======")
+                end
+            else
+                ngx.log(ngx.INFO, "未指定Content-Type")
+            end
+        else
+            -- 尝试从临时文件读取大请求体
+            local body_file = ngx.req.get_body_file()
+            if body_file then
+                ngx.log(ngx.INFO, "请求体存储在临时文件: ", body_file)
+                ngx.log(ngx.INFO, "文件大小较大，已写入临时文件")
+            else
+                ngx.log(ngx.INFO, "请求体为空")
+            end
+        end
+        
+        ngx.log(ngx.INFO, "====== 请求结束 ======\n")
+    }
+    
+    proxy_pass http://backend;
+}
+```
+
+> nginx 日志级别设置为 `error_log logs/error.log info;`
+
 ## 2. 模块
 
 ### 2.1 init_by_lua*
