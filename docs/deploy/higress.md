@@ -236,21 +236,12 @@ scene:
 对请求/响应头、请求查询参数、请求/响应体参数进行转换。
 
 
-1. 将请求Header中的`intent_category`解析后，设置到Header中的`x-ai-Intent`
+
+#### 3.5.1 实现基于Body参数路由
 
 ```yaml
 reqRules:
-- operate: map
-  headers:
-  - fromKey: intent_category
-    toKey: x-ai-Intent
-  mapSource: headers
-```
-
-2. 将请求body中的`userId`解析后，设置到请求Header中的`x-user-id`
-
-```yaml
-reqRules:
+# 将body中的 userId 转换到 请求头中的 x-user-id 
 - operate: map
   headers:
   - fromKey: userId
@@ -258,3 +249,168 @@ reqRules:
   mapSource: body
 ```
 
+
+#### 3.5.2 请求头转换
+
+```yaml
+reqRules:
+# 移除请求头中的 X-remove
+- operate: remove
+  headers:
+  - key: X-remove
+# 将请求头中的 X-not-renamed 重命名 X-renamed
+- operate: rename
+  headers:
+  - oldKey: X-not-renamed
+    newKey: X-renamed
+# 将请求头中的 X-replace 的值更新成 replaced
+- operate: replace
+  headers:
+  - key: X-replace
+    newValue: replaced
+# 添加请求头中的 X-add-append
+- operate: add
+  headers:
+  - key: X-add-append
+    value: host-$1
+    host_pattern: ^(.*)\.com$
+# 追加请求头中的 X-add-append
+- operate: append
+  headers:
+  - key: X-add-append
+    appendValue: path-$1
+    path_pattern: ^.*?\/(\w+)[\?]{0,1}.*$
+# 将加请求头中的 X-add-append 转成 X-map
+- operate: map
+  headers:
+  - fromKey: X-add-append
+    toKey: X-map
+# 将加请求头中的 字段值去重
+- operate: dedupe
+  headers:
+  ## X-dedupe-first 取第一个值
+  - key: X-dedupe-first
+    strategy: RETAIN_FIRST
+  ## X-dedupe-last 取最后一个值  
+  - key: X-dedupe-last
+    strategy: RETAIN_LAST
+  ## X-dedupe-unique 取唯一值    
+  - key: X-dedupe-unique
+    strategy: RETAIN_UNIQUE
+```
+
+
+#### 3.5.3 请求体参数转换
+
+```yaml
+reqRules:
+# 将body中 a1 移除
+- operate: remove
+  body:
+  - key: a1
+# 将body中 a2 重命名 a2-new
+- operate: rename
+  body:
+  - oldKey: a2
+    newKey: a2-new
+# 将body中的 temperature 设置新值
+  operate: "replace"
+- body:
+  - key: "temperature"
+    newValue: 0.79
+    value_type: "string"
+# 向body中添加新值
+- operate: add
+  body:
+  - key: a1-new
+    value: t1-new
+    value_type: string
+# 向body中追加新值
+- operate: append
+  body:
+  - key: a1-new
+    appendValue: t1-$1-append
+    value_type: string
+    host_pattern: ^(.*)\.com$
+```
+
+#### 3.5.4 请求查询参数转换
+
+```yaml
+reqRules:
+# 去除 k1
+- operate: remove
+  querys:
+  - key: k1
+# k2 重命名 k2-new
+- operate: rename
+  querys:
+  - oldKey: k2
+    newKey: k2-new
+# k2-new 设置新值
+- operate: replace
+  querys:
+  - key: k2-new
+    newValue: v2-new
+# 添加新值 k3
+- operate: add
+  querys:
+  - key: k3
+    value: v31-$1
+    path_pattern: ^.*?\/(\w+)[\?]{0,1}.*$
+# 追加新值 k3
+- operate: append
+  querys:
+  - key: k3
+    appendValue: v32
+# k3 转换成 k4
+- operate: map
+  querys:
+  - fromKey: k3
+    toKey: k4
+# k4 去重 取第一个值
+- operate: dedupe
+  querys:
+  - key: k4
+    strategy: RETAIN_FIRST
+```
+
+#### 3.5.5 嵌套
+
+
+```yaml
+respRules:
+- operate: add
+  body:
+  - key: foo.bar
+    value: value
+```
+
+非嵌套转义
+
+```yaml
+respRules:
+- operate: add
+  body:
+  - key: foo\.bar
+    value: value
+```
+
+访问元素数组
+
+```yaml
+reqRules:
+- operate: remove
+  body:
+  - key: users.0
+```
+
+遍历数组
+
+```yaml
+reqRules:
+- operate: replace
+  body:
+  - key: users.#.age
+    newValue: 20
+```
