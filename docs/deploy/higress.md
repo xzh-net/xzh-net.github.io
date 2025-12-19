@@ -31,8 +31,18 @@ docker run -dit --name higress-ai \
 
 下载地址：https://github.com/higress-group/higress-standalone
 
+```bash
+mkdir /data && cd /data
+# 上传文件解压
+unzip higress-standalone-aio-v2.1.9.zip
+cd higress-standalone-aio-v2.1.9
+# 安装初始化
+./bin/configure.sh -a
+```
 
+依照命令行提示输入所需要的配置参数。脚本会自动写入配置并启动 Higress。
 
+在浏览器中打开 [http://localhost:8080/](http://localhost:8080/) ，并使用 admin 作为用户名和密码进行登录，即可正常通过 Higress Console 操作 Higress 的路由配置。所有配置的域名均需要先通过 hosts 文件将其强制解析至 127.0.0.1 再进行访问。
 
 ## 2. 配置
 
