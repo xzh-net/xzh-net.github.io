@@ -23,7 +23,7 @@ docker run -dit --name higress-ai \
     -v /data/higress/log:/var/log/higress \
     -v /data/higress/proxy:/var/log/proxy \
     -e O11Y=on \
-    -p 8001:8001 -p 8080:8080 -p 8443:8443  \
+    -p 8080:8001 -p 80:8080 -p 443:8443  \
     higress-registry.cn-hangzhou.cr.aliyuncs.com/higress/all-in-one:2.1.9
 ```
 
@@ -46,7 +46,7 @@ cd higress-standalone-aio-v2.1.9
 
 ## 2. 配置
 
-访问地址：http://192.168.1.100:8001
+访问地址：http://192.168.1.100:8080
 
 ### 2.1 创建AI服务提供者
 
