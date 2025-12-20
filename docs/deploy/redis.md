@@ -88,8 +88,8 @@ appendfilename "appendonly-6379.aof"
 ```bash
 mkdir -p /data/redis/6380
 cd /usr/local/redis/conf
-sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
 
+sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
 vi /usr/local/redis/conf/redis-6380.conf
 ```
 
@@ -115,6 +115,8 @@ replicaof 192.168.3.200 6379
 
 ```bash
 mkdir -p /data/redis/6381
+cd /usr/local/redis/conf
+
 sed 's/6380/6381/g' redis-6380.conf > redis-6381.conf
 vi /usr/local/redis/conf/redis-6381.conf
 ```
@@ -140,10 +142,9 @@ replicaof 192.168.3.200 6379
 #### 1.2.4 启动服务
 
 ```bash
-cd /usr/local/redis/bin
-./redis-server ../conf/redis-6379.conf
-./redis-server ../conf/redis-6380.conf
-./redis-server ../conf/redis-6381.conf
+/usr/local/redis/bin/redis-server  /usr/local/redis/conf/redis-6379.conf
+/usr/local/redis/bin/redis-server  /usr/local/redis/conf/redis-6380.conf
+/usr/local/redis/bin/redis-server  /usr/local/redis/conf/redis-6381.conf
 ```
 
 #### 1.2.5 验证
@@ -179,6 +180,9 @@ sentinel failover-timeout mymaster 180000
 
 ```bash
 mkdir -p /data/redis/26380
+cd /usr/local/redis/conf
+
+sed 's/26379/26380/g' sentinel-26379.conf > sentinel-26380.conf
 vi /usr/local/redis/conf/sentinel-26380.conf
 ```
 
@@ -199,6 +203,9 @@ sentinel failover-timeout mymaster 180000
 
 ```bash
 mkdir -p /data/redis/26381
+cd /usr/local/redis/conf
+
+sed 's/26380/26381/g' sentinel-26380.conf > sentinel-26381.conf
 vi /usr/local/redis/conf/sentinel-26381.conf
 ```
 
@@ -218,10 +225,9 @@ sentinel failover-timeout mymaster 180000
 #### 1.3.4 启动服务
 
 ```bash
-cd /usr/local/redis/bin
-./redis-sentinel ../conf/sentinel-26379.conf
-./redis-sentinel ../conf/sentinel-26380.conf
-./redis-sentinel ../conf/sentinel-26381.conf
+/usr/local/redis/bin/redis-sentinel /usr/local/redis/conf/sentinel-26379.conf
+/usr/local/redis/bin/redis-sentinel /usr/local/redis/conf/sentinel-26380.conf
+/usr/local/redis/bin/redis-sentinel /usr/local/redis/conf/sentinel-26381.conf
 ```
 
 #### 1.3.5 验证
