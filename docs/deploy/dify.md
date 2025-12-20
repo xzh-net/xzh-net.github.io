@@ -5,13 +5,16 @@
 ## 1. 快速开始
 
 ```bash
+chmod -R 777 /data/dify
+
 cd /data/dify/dify-1.10.1-fix.1/docker
 cp .env.example .env
-chmod -R 777 /data/dify
 docker compose up -d
 ```
 
 ## 2. 初始化模型
+
+访问地址：http://127.0.0.1:80
 
 个人中心 -> 设置 
 
