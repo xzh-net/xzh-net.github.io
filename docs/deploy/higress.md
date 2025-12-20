@@ -90,53 +90,53 @@ vi /data/higress/data/configmaps/higress-config.yaml
 {
     
     # AI特征日志
-	"ai_log": "%FILTER_STATE(wasm.ai_log:PLAIN)%",
+	"ai_log":"%FILTER_STATE(wasm.ai_log:PLAIN)%",
     # 目标服务地址（网关或后端服务的 IP + 端口）
-	"authority": "%REQ(X-ENVOY-ORIGINAL-HOST?:AUTHORITY)%",
+	"authority":"%REQ(X-ENVOY-ORIGINAL-HOST?:AUTHORITY)%",
     # 网关从下游客户端接收的字节数（即用户请求体大小，含提问内容、请求参数等）
-	"bytes_received": "%BYTES_RECEIVED%",
+	"bytes_received":"%BYTES_RECEIVED%",
     # 网关向上游服务发送 + 向下游客户端返回的总字节数（含 AI 回复内容、响应头、元数据等）
-	"bytes_sent": "%BYTES_SENT%",
-    # 网关接收下游请求的本地 IP: 端口（即网关对外提供服务的地址，客户端实际连接的网关地址）
-	"downstream_local_address": "%DOWNSTREAM_LOCAL_ADDRESS%",
-    # 下游客户端的IP: 端口（即发起请求的客户端地址）
-	"downstream_remote_address": "%DOWNSTREAM_REMOTE_ADDRESS%",
+	"bytes_sent":"%BYTES_SENT%",
+    # 网关接收下游请求的本地 IP:端口（即网关对外提供服务的地址，客户端实际连接的网关地址）
+	"downstream_local_address":"%DOWNSTREAM_LOCAL_ADDRESS%",
+    # 下游客户端的IP:端口（即发起请求的客户端地址）
+	"downstream_remote_address":"%DOWNSTREAM_REMOTE_ADDRESS%",
     # 整个请求的总耗时（单位：毫秒），从网关接收请求到返回响应的完整周期（含网关转发 + 上游处理 + 网络耗时）
-	"duration": "%DURATION%",
+	"duration":"%DURATION%",
     # Istio 服务网格的策略执行状态（如认证、授权、限流等），-表示未启用 Istio 策略或无相关策略触发
-    "istio_policy_status": "%DYNAMIC_METADATA(istio.mixer:status)%",
+    "istio_policy_status":"%DYNAMIC_METADATA(istio.mixer:status)%",
     # HTTP 请求方法，默认使用POST
-	"method": "%REQ(:METHOD)%",
+	"method":"%REQ(:METHOD)%",
     # 请求的 URL 路径，LLM chat模型默认端点：/v1/chat/completions
-	"path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%",
+	"path":"%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%",
     # HTTP 协议版本
-	"protocol": "%PROTOCOL%",
+	"protocol":"%PROTOCOL%",
     # 网关生成的请求唯一 ID（与ai_log.chat_id一致），用于追踪单个请求的全链路（网关→上游→AI 模型）
-	"request_id": "%REQ(X-REQUEST-ID)%",
+	"request_id":"%REQ(X-REQUEST-ID)%",
     # TLS 请求的SNI（服务器名称指示），用于多域名共享证书场景，-表示未使用 TLS 或未指定 SNI
-	"requested_server_name": "%REQUESTED_SERVER_NAME%",
+	"requested_server_name":"%REQUESTED_SERVER_NAME%",
     # 响应状态码
-	"response_code": "%RESPONSE_CODE%",
+	"response_code":"%RESPONSE_CODE%",
     # 网关处理响应的标记（如UF表示上游连接失败、NR表示无匹配路由），-表示无异常标记（处理正常）
-	"response_flags": "%RESPONSE_FLAGS%",
+	"response_flags":"%RESPONSE_FLAGS%",
     # 网关匹配的路由规则名称
-	"route_name": "%ROUTE_NAME%",
+	"route_name":"%ROUTE_NAME%",
     # 请求开始处理的时间
-	"start_time": "%START_TIME%",
+	"start_time":"%START_TIME%",
     # 分布式追踪的全局唯一 ID
-	"trace_id": "%REQ(X-B3-TRACEID)%",
+	"trace_id":"%REQ(X-B3-TRACEID)%",
     # 上游信息
-	"upstream_cluster": "%UPSTREAM_CLUSTER%",
-	"upstream_host": "%UPSTREAM_HOST%",
-	"upstream_local_address": "%UPSTREAM_LOCAL_ADDRESS%",
-	"upstream_service_time": "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%",
-	"upstream_transport_failure_reason": "%UPSTREAM_TRANSPORT_FAILURE_REASON%",
+	"upstream_cluster":"%UPSTREAM_CLUSTER%",
+	"upstream_host":"%UPSTREAM_HOST%",
+	"upstream_local_address":"%UPSTREAM_LOCAL_ADDRESS%",
+	"upstream_service_time":"%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%",
+	"upstream_transport_failure_reason":"%UPSTREAM_TRANSPORT_FAILURE_REASON%",
     # 客户端请求头
-	"user_agent": "%REQ(USER-AGENT)%",
+	"user_agent":"%REQ(USER-AGENT)%",
     # 客户端的原始 IP 地址
-	"x_forwarded_for": "%REQ(X-FORWARDED-FOR)%",
+	"x_forwarded_for":"%REQ(X-FORWARDED-FOR)%",
     # 响应明细
-	"response_code_details": "%RESPONSE_CODE_DETAILS%"
+	"response_code_details":"%RESPONSE_CODE_DETAILS%"
 }
 ```
 
@@ -144,8 +144,8 @@ vi /data/higress/data/configmaps/higress-config.yaml
 
 ```yaml
 # 请求头
-"user_api_key": "%REQ(user-api-key)%",
-"client_version": "%REQ(CLIENT-VERSION)%"
+"user_api_key":"%REQ(user-api-key)%",
+"client_version":"%REQ(CLIENT-VERSION)%"
 ```
 
 重启服务
@@ -194,19 +194,19 @@ curl localhost:15000/logging?golang=debug -X POST
 
 ```yaml
 attributes:
-- apply_to_log: true
-  key: "question"
-  value: "messages.@reverse.0.content"
-  value_source: "request_body"
-- apply_to_log: true
-  key: "answer"
-  rule: "append"
-  value: "choices.0.delta.content"
-  value_source: "response_streaming_body"
-- apply_to_log: true
-  key: "answer"
-  value: "choices.0.message.content"
-  value_source: "response_body"
+- apply_to_log:true
+  key:"question"
+  value:"messages.@reverse.0.content"
+  value_source:"request_body"
+- apply_to_log:true
+  key:"answer"
+  rule:"append"
+  value:"choices.0.delta.content"
+  value_source:"response_streaming_body"
+- apply_to_log:true
+  key:"answer"
+  value:"choices.0.message.content"
+  value_source:"response_body"
 ```
 
 ### 3.4 AI 意图识别
@@ -219,15 +219,15 @@ attributes:
 
 ```yaml
 llm:
-  proxyDomain: "172.17.17.161"
-  proxyModel: "Qwen3-Coder-30B-A3B-Instruct"
-  proxyPort: "80"
-  proxyServiceName: "intent-service.static"
-  proxyTimeout: "10000"
-  proxyUrl: "http://172.17.17.161:80/intent/compatible-mode/v1/chat/completions"
+  proxyDomain:"172.17.17.161"
+  proxyModel:"Qwen3-Coder-30B-A3B-Instruct"
+  proxyPort:"80"
+  proxyServiceName:"intent-service.static"
+  proxyTimeout:"10000"
+  proxyUrl:"http://172.17.17.161:80/intent/compatible-mode/v1/chat/completions"
 scene:
-  category: "金融|电商|法律|Higress"
-  prompt: "你是一个智能类别识别助手，负责根据用户提出的问题和预设的类别，确定问题属于哪个预设的类别，并给出相应的类别。用户提出的问题为:'%s',预设的类别为'%s'，直接返回一种具体类别，如果没有找到就返回'NotFound'。"
+  category:"金融|电商|法律|Higress"
+  prompt:"你是一个智能类别识别助手，负责根据用户提出的问题和预设的类别，确定问题属于哪个预设的类别，并给出相应的类别。用户提出的问题为:'%s',预设的类别为'%s'，直接返回一种具体类别，如果没有找到就返回'NotFound'。"
 ```
 
 
@@ -243,11 +243,11 @@ scene:
 
 ```yaml
 reqRules:
-- operate: map
+- operate:map
   headers:
-  - fromKey: userId
-    toKey: x-user-id
-  mapSource: body
+  - fromKey:userId
+    toKey:x-user-id
+  mapSource:body
 ```
 
 此配置同时支持 application/json 和 application/x-www-form-urlencoded 两种类型的请求Body。复杂 Json 处理，可以根据 [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md?spm=36971b57.35684624.0.0.67a947678O6zqr&file=SYNTAX.md) 语法。
@@ -257,55 +257,55 @@ reqRules:
 ```yaml
 reqRules:
 # 移除请求头中的 X-remove
-- operate: remove
+- operate:remove
   headers:
-  - key: X-remove
+  - key:X-remove
 # 将请求头中的 X-not-renamed 重命名 X-renamed
-- operate: rename
+- operate:rename
   headers:
-  - oldKey: X-not-renamed
-    newKey: X-renamed
+  - oldKey:X-not-renamed
+    newKey:X-renamed
 # 将请求头中的 X-replace 的值更新成 replaced
-- operate: replace
+- operate:replace
   headers:
-  - key: X-replace
-    newValue: replaced
+  - key:X-replace
+    newValue:replaced
 # 添加请求头中的 X-add-append
-- operate: add
+- operate:add
   headers:
-  - key: X-add-append
-    value: host-$1
-    host_pattern: ^(.*)\.com$
+  - key:X-add-append
+    value:host-$1
+    host_pattern:^(.*)\.com$
 # 追加请求头中的 X-add-append
-- operate: append
+- operate:append
   headers:
-  - key: X-add-append
-    appendValue: path-$1
-    path_pattern: ^.*?\/(\w+)[\?]{0,1}.*$
+  - key:X-add-append
+    appendValue:path-$1
+    path_pattern:^.*?\/(\w+)[\?]{0,1}.*$
 # 将加请求头中的 X-add-append 转成 X-map
-- operate: map
+- operate:map
   headers:
-  - fromKey: X-add-append
-    toKey: X-map
+  - fromKey:X-add-append
+    toKey:X-map
 # 将加请求头中的 字段值去重
-- operate: dedupe
+- operate:dedupe
   headers:
   ## X-dedupe-first 取第一个值
-  - key: X-dedupe-first
-    strategy: RETAIN_FIRST
+  - key:X-dedupe-first
+    strategy:RETAIN_FIRST
   ## X-dedupe-last 取最后一个值  
-  - key: X-dedupe-last
-    strategy: RETAIN_LAST
+  - key:X-dedupe-last
+    strategy:RETAIN_LAST
   ## X-dedupe-unique 取唯一值    
-  - key: X-dedupe-unique
-    strategy: RETAIN_UNIQUE
+  - key:X-dedupe-unique
+    strategy:RETAIN_UNIQUE
 ```
 
 数据样例
 
 ```bash
-curl -v console.higress.io/get -H 'host: foo.bar.com' \
--H 'X-remove: exist' -H 'X-not-renamed:test' -H 'X-replace:not-replaced' \
+curl -v console.higress.io/get -H 'host:foo.bar.com' \
+-H 'X-remove:exist' -H 'X-not-renamed:test' -H 'X-replace:not-replaced' \
 -H 'X-dedupe-first:1' -H 'X-dedupe-first:2' -H 'X-dedupe-first:3' \
 -H 'X-dedupe-last:a' -H 'X-dedupe-last:b' -H 'X-dedupe-last:c' \
 -H 'X-dedupe-unique:1' -H 'X-dedupe-unique:2' -H 'X-dedupe-unique:3' \
@@ -313,18 +313,18 @@ curl -v console.higress.io/get -H 'host: foo.bar.com' \
 
 # httpbin 响应结果
 {
-  "args": {},
-  "headers": {
+  "args":{},
+  "headers":{
     ...
-    "X-Add-Append": "host-foo.bar,path-get",
+    "X-Add-Append":"host-foo.bar,path-get",
     ...
-    "X-Dedupe-First": "1",
-    "X-Dedupe-Last": "c",
-    "X-Dedupe-Unique": "1,2,3",
+    "X-Dedupe-First":"1",
+    "X-Dedupe-Last":"c",
+    "X-Dedupe-Unique":"1,2,3",
     ...
-    "X-Map": "host-foo.bar,path-get",
-    "X-Renamed": "test",
-    "X-Replace": "replaced"
+    "X-Map":"host-foo.bar,path-get",
+    "X-Renamed":"test",
+    "X-Replace":"replaced"
   },
   ...
 }
@@ -335,33 +335,33 @@ curl -v console.higress.io/get -H 'host: foo.bar.com' \
 ```yaml
 reqRules:
 # 将body中 a1 移除
-- operate: remove
+- operate:remove
   body:
-  - key: a1
+  - key:a1
 # 将body中 a2 重命名 a2-new
-- operate: rename
+- operate:rename
   body:
-  - oldKey: a2
-    newKey: a2-new
+  - oldKey:a2
+    newKey:a2-new
 # 将body中的 temperature 设置新值
-  operate: "replace"
+  operate:"replace"
 - body:
-  - key: "temperature"
-    newValue: 0.79
-    value_type: "string"
+  - key:"temperature"
+    newValue:0.79
+    value_type:"string"
 # 向body中添加新值
-- operate: add
+- operate:add
   body:
-  - key: a1-new
-    value: t1-new
-    value_type: string
+  - key:a1-new
+    value:t1-new
+    value_type:string
 # 向body中追加新值
-- operate: append
+- operate:append
   body:
-  - key: a1-new
-    appendValue: t1-$1-append
-    value_type: string
-    host_pattern: ^(.*)\.com$
+  - key:a1-new
+    appendValue:t1-$1-append
+    value_type:string
+    host_pattern:^(.*)\.com$
 ```
 
 #### 3.5.4 请求查询参数转换
@@ -369,40 +369,40 @@ reqRules:
 ```yaml
 reqRules:
 # 移除 k1
-- operate: remove
+- operate:remove
   querys:
-  - key: k1
+  - key:k1
 # k2 重命名 k2-new
-- operate: rename
+- operate:rename
   querys:
-  - oldKey: k2
-    newKey: k2-new
+  - oldKey:k2
+    newKey:k2-new
 # k2-new 设置新值
-- operate: replace
+- operate:replace
   querys:
-  - key: k2-new
-    newValue: v2-new
+  - key:k2-new
+    newValue:v2-new
 # 添加新值 k3
-- operate: add
+- operate:add
   querys:
-  - key: k3
-    value: v31-$1
-    path_pattern: ^.*?\/(\w+)[\?]{0,1}.*$
+  - key:k3
+    value:v31-$1
+    path_pattern:^.*?\/(\w+)[\?]{0,1}.*$
 # 追加新值 k3
-- operate: append
+- operate:append
   querys:
-  - key: k3
-    appendValue: v32
+  - key:k3
+    appendValue:v32
 # k3 转换成 k4
-- operate: map
+- operate:map
   querys:
-  - fromKey: k3
-    toKey: k4
+  - fromKey:k3
+    toKey:k4
 # k4 去重 取第一个值
-- operate: dedupe
+- operate:dedupe
   querys:
-  - key: k4
-    strategy: RETAIN_FIRST
+  - key:k4
+    strategy:RETAIN_FIRST
 ```
 
 #### 3.5.5 嵌套
@@ -412,10 +412,10 @@ reqRules:
 
 ```yaml
 respRules:
-- operate: add
+- operate:add
   body:
-  - key: foo.bar
-    value: value
+  - key:foo.bar
+    value:value
 ```
 
 样例数据
@@ -426,8 +426,8 @@ curl -v console.higress.io/get
 # httpbin 响应结果
 {
  ...
- "foo": {
-  "bar": "value"
+ "foo":{
+  "bar":"value"
  },
  ...
 }
@@ -438,10 +438,10 @@ curl -v console.higress.io/get
 
 ```yaml
 respRules:
-- operate: add
+- operate:add
   body:
-  - key: foo\.bar
-    value: value
+  - key:foo\.bar
+    value:value
 ```
 
 样例数据
@@ -453,7 +453,7 @@ curl -v console.higress.io/get
 # httpbin 响应结果
 {
  ...
- "foo.bar": "value",
+ "foo.bar":"value",
  ...
 }
 ```
@@ -462,12 +462,12 @@ curl -v console.higress.io/get
 
 ```json
 {
-  "users": [
+  "users":[
     {
-      "123": { "name": "zhangsan", "age": 18 }
+      "123":{ "name":"zhangsan", "age":18 }
     },
     {
-      "456": { "name": "lisi", "age": 19 }
+      "456":{ "name":"lisi", "age":19 }
     }
   ]
 }
@@ -477,24 +477,24 @@ curl -v console.higress.io/get
 
 ```yaml
 reqRules:
-- operate: remove
+- operate:remove
   body:
-  - key: users.0
+  - key:users.0
 ```
 
 样例数据
 
 ```bash
 curl -v -X POST console.higress.io/post \
--H 'Content-Type: application/json' \
+-H 'Content-Type:application/json' \
 -d '{"users":[{"123":{"name":"zhangsan"}},{"456":{"name":"lisi"}}]}'
 {
   ...
-  "json": {
-    "users": [
+  "json":{
+    "users":[
       {
-        "456": {
-          "name": "lisi"
+        "456":{
+          "name":"lisi"
         }
       }
     ]
@@ -509,14 +509,14 @@ curl -v -X POST console.higress.io/post \
 
 ```json
 {
-  "users": [
+  "users":[
     {
-      "name": "zhangsan",
-      "age": 18
+      "name":"zhangsan",
+      "age":18
     },
     {
-      "name": "lisi",
-      "age": 19
+      "name":"lisi",
+      "age":19
     }
   ]
 }
@@ -524,29 +524,29 @@ curl -v -X POST console.higress.io/post \
 
 ```yaml
 reqRules:
-- operate: replace
+- operate:replace
   body:
-  - key: users.#.age
-    newValue: 20
+  - key:users.#.age
+    newValue:20
 ```
 
 样例数据
 
 ```bash
 curl -v -X POST console.higress.io/post \
--H 'Content-Type: application/json' \
+-H 'Content-Type:application/json' \
 -d '{"users":[{"name":"zhangsan","age":18},{"name":"lisi","age":19}]}'
 {
   ...
-  "json": {
-    "users": [
+  "json":{
+    "users":[
       {
-        "age": "20",
-        "name": "zhangsan"
+        "age":"20",
+        "name":"zhangsan"
       },
       {
-        "age": "20",
-        "name": "lisi"
+        "age":"20",
+        "name":"lisi"
       }
     ]
   },
