@@ -239,9 +239,10 @@ scene:
 
 #### 3.5.1 实现基于Body参数路由
 
+将body中的 userId 转换到请求头中的 x-user-id 
+
 ```yaml
 reqRules:
-# 将body中的 userId 转换到 请求头中的 x-user-id 
 - operate: map
   headers:
   - fromKey: userId
@@ -249,6 +250,7 @@ reqRules:
   mapSource: body
 ```
 
+此配置同时支持 application/json 和 application/x-www-form-urlencoded 两种类型的请求Body。复杂 Json 处理，可以根据 [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md?spm=36971b57.35684624.0.0.67a947678O6zqr&file=SYNTAX.md) 语法。
 
 #### 3.5.2 请求头转换
 
@@ -299,6 +301,34 @@ reqRules:
     strategy: RETAIN_UNIQUE
 ```
 
+数据样例
+
+```bash
+curl -v console.higress.io/get -H 'host: foo.bar.com' \
+-H 'X-remove: exist' -H 'X-not-renamed:test' -H 'X-replace:not-replaced' \
+-H 'X-dedupe-first:1' -H 'X-dedupe-first:2' -H 'X-dedupe-first:3' \
+-H 'X-dedupe-last:a' -H 'X-dedupe-last:b' -H 'X-dedupe-last:c' \
+-H 'X-dedupe-unique:1' -H 'X-dedupe-unique:2' -H 'X-dedupe-unique:3' \
+-H 'X-dedupe-unique:3' -H 'X-dedupe-unique:2' -H 'X-dedupe-unique:1'
+
+# httpbin 响应结果
+{
+  "args": {},
+  "headers": {
+    ...
+    "X-Add-Append": "host-foo.bar,path-get",
+    ...
+    "X-Dedupe-First": "1",
+    "X-Dedupe-Last": "c",
+    "X-Dedupe-Unique": "1,2,3",
+    ...
+    "X-Map": "host-foo.bar,path-get",
+    "X-Renamed": "test",
+    "X-Replace": "replaced"
+  },
+  ...
+}
+```
 
 #### 3.5.3 请求体参数转换
 
@@ -338,7 +368,7 @@ reqRules:
 
 ```yaml
 reqRules:
-# 去除 k1
+# 移除 k1
 - operate: remove
   querys:
   - key: k1
@@ -378,6 +408,8 @@ reqRules:
 #### 3.5.5 嵌套
 
 
+指定的 key 中含有 `.` 表示嵌套含义
+
 ```yaml
 respRules:
 - operate: add
@@ -386,7 +418,23 @@ respRules:
     value: value
 ```
 
-非嵌套转义
+样例数据
+
+```bash
+curl -v console.higress.io/get
+
+# httpbin 响应结果
+{
+ ...
+ "foo": {
+  "bar": "value"
+ },
+ ...
+}
+```
+
+
+#### 3.5.6 非嵌套转义
 
 ```yaml
 respRules:
@@ -396,7 +444,36 @@ respRules:
     value: value
 ```
 
-访问元素数组
+样例数据
+
+
+```bash
+curl -v console.higress.io/get
+
+# httpbin 响应结果
+{
+ ...
+ "foo.bar": "value",
+ ...
+}
+```
+
+#### 3.5.7 访问元素数组
+
+```json
+{
+  "users": [
+    {
+      "123": { "name": "zhangsan", "age": 18 }
+    },
+    {
+      "456": { "name": "lisi", "age": 19 }
+    }
+  ]
+}
+```
+
+移除 `user` 第一个元素
 
 ```yaml
 reqRules:
@@ -405,7 +482,45 @@ reqRules:
   - key: users.0
 ```
 
-遍历数组
+样例数据
+
+```bash
+curl -v -X POST console.higress.io/post \
+-H 'Content-Type: application/json' \
+-d '{"users":[{"123":{"name":"zhangsan"}},{"456":{"name":"lisi"}}]}'
+{
+  ...
+  "json": {
+    "users": [
+      {
+        "456": {
+          "name": "lisi"
+        }
+      }
+    ]
+  },
+  ...
+}
+```
+
+#### 3.5.8 遍历数组
+
+!> 该操作目前只能用在 replace 上，请勿在其他转换中尝试该操作，以免造成无法预知的结果
+
+```json
+{
+  "users": [
+    {
+      "name": "zhangsan",
+      "age": 18
+    },
+    {
+      "name": "lisi",
+      "age": 19
+    }
+  ]
+}
+```
 
 ```yaml
 reqRules:
@@ -413,4 +528,28 @@ reqRules:
   body:
   - key: users.#.age
     newValue: 20
+```
+
+样例数据
+
+```bash
+curl -v -X POST console.higress.io/post \
+-H 'Content-Type: application/json' \
+-d '{"users":[{"name":"zhangsan","age":18},{"name":"lisi","age":19}]}'
+{
+  ...
+  "json": {
+    "users": [
+      {
+        "age": "20",
+        "name": "zhangsan"
+      },
+      {
+        "age": "20",
+        "name": "lisi"
+      }
+    ]
+  },
+  ...
+}
 ```
