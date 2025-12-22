@@ -47,7 +47,7 @@ wget -O  /etc/yum.repos.d/msprod.repo https://packages.microsoft.com/config/rhel
 yum install -y mssql-tools unixODBC-devel # 输入两次yes进行确认
 ```
 
-2. 设置环境变量
+2. 配置环境变量
 
 ```bash
 echo "export PATH=$PATH:/opt/mssql-tools/bin" >> /etc/profile

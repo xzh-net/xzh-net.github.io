@@ -47,7 +47,7 @@ source /etc/profile
 #### 1.1.3 创建数据目录
 
 ```bash
-mkdir -p /data/kafka/{logs,kraft-data}
+mkdir -p /data/kafka/logs
 ```
 
 #### 1.1.4 配置 server.properties
@@ -124,7 +124,7 @@ vi /etc/hosts
 所有节点创建数据目录
 
 ```bash
-mkdir -p /data/kafka/{logs,kraft-data}
+mkdir -p /data/kafka/logs
 ```
 
 #### 1.2.3 配置 server.properties
@@ -213,52 +213,82 @@ KRaft 是Kafka 自2.8版本开始引入的新的元数据管理机制，用于�
 /usr/local/kafka/bin/kafka-storage.sh random-uuid
 ```
 
-例如： Rj3jxXL5SSepoaWBf0LYIA，后面配置会用到。
+例如： `Rj3jxXL5SSepoaWBf0LYIA`，后面配置会用到。
 
-#### 1.3.2 配置 server.properties
+#### 1.3.2 配置 kraft/server.properties
 
 所有节点修改配置
 
 ```bash
-vi /usr/local/kafka/config/server.properties
+vi /usr/local/kafka/config/kraft/server.properties
 ```
 
 node01 节点
 
 ```conf
-cluster.id=Rj3jxXL5SSepoaWBf0LYIA
-broker.id=1
+# 节点基础配置
+node.id=1
 process.roles=controller,broker
-listeners=PLAINTEXT://node01:9092
+
+# 网络配置
+listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+advertised.listeners=PLAINTEXT://node01:9092
+controller.listener.names=CONTROLLER
+
+# Controller配置
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
+
+# 存储配置
 log.dirs=/data/kafka/logs
-controller.log.dirs=/data/kafka/kraft-data
+
+# 集群配置
+cluster.id=LAY6pXKJQlCj8G8-PSFXjA
 ```
 
 
 node02 节点
 
 ```conf
-cluster.id=Rj3jxXL5SSepoaWBf0LYIA
-broker.id=2
+# 节点基础配置
+node.id=2
 process.roles=controller,broker
-listeners=PLAINTEXT://node02:9092
+
+# 网络配置
+listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+advertised.listeners=PLAINTEXT://node02:9092
+controller.listener.names=CONTROLLER
+
+# Controller配置
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
+
+# 存储配置
 log.dirs=/data/kafka/logs
-controller.log.dirs=/data/kafka/kraft-data
+
+# 集群配置
+cluster.id=LAY6pXKJQlCj8G8-PSFXjA
 ```
 
 
 node03 节点
 
 ```conf
-cluster.id=Rj3jxXL5SSepoaWBf0LYIA
-broker.id=3
+# 节点基础配置
+node.id=3
 process.roles=controller,broker
-listeners=PLAINTEXT://node03:9092
+
+# 网络配置
+listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+advertised.listeners=PLAINTEXT://node03:9092
+controller.listener.names=CONTROLLER
+
+# Controller配置
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
+
+# 存储配置
 log.dirs=/data/kafka/logs
-controller.log.dirs=/data/kafka/kraft-data
+
+# 集群配置
+cluster.id=LAY6pXKJQlCj8G8-PSFXjA
 ```
 
 #### 1.3.3 格式化存储
@@ -273,7 +303,7 @@ controller.log.dirs=/data/kafka/kraft-data
 格式化结果查看
 
 ```bash
-ls -la /data/kafka/kraft-data/
+ls -la /data/kafka/logs
 ```
 
 #### 1.3.4 启动集群
@@ -283,6 +313,14 @@ ls -la /data/kafka/kraft-data/
 ${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/server.properties
 ```
 
+#### 1.3.5 验证集群
+
+```bash
+# node01 节点执行创建主题
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 6 --replication-factor 3 --bootstrap-server 127.0.0.1:9092
+# 其他节点查询主题，有数据表示消息同步成功
+/usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node01:9092 --list
+```
 
 ## 2. 可视化监控
 
@@ -298,7 +336,7 @@ rm -rf /opt/kafka-eagle-bin-3.0.1
 cd /opt/efak-web-3.0.1
 ```
 
-### 2.2 设置环境变量
+### 2.2 配置环境变量
 
 ```bash
 vi /etc/profile

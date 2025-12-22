@@ -21,7 +21,7 @@ cd openresty-1.25.3.1
 make && make install
 ```
 
-### 1.3 设置环境变量
+### 1.3 配置环境变量
 
 ```bash
 vi /etc/profile

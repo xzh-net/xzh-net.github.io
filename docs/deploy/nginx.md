@@ -41,7 +41,7 @@ cd nginx-1.22.1
 make && make install
 ```
 
-### 1.5 设置环境变量
+### 1.5 配置环境变量
 
 ```bash
 vi /etc/profile

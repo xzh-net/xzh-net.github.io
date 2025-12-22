@@ -641,7 +641,7 @@ spec:
   - name: busybox
     image: busybox:1.30
     command: ["/bin/sh","-c","while true;do /bin/echo $(date +%T);sleep 60; done;"]
-    env: # 设置环境变量列表
+    env: # 配置环境变量列表
     - name: "username"
       value: "admin"
     - name: "password"

@@ -69,7 +69,7 @@ VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\centos7\centos7.vdi"
 
 - 下载地址：https://dev.mysql.com/downloads/mysql/
 
-#### 2.2.2 设置环境变量
+#### 2.2.2 配置环境变量
 
 新建MYSQL_HOME
 ```

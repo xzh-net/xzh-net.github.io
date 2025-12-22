@@ -88,7 +88,7 @@ vi /etc/security/limits.conf
 * hard memlock 50000000
 ```
 
-#### 1.1.6 设置环境变量
+#### 1.1.6 配置环境变量
 
 ```bash
 su - postgres

@@ -63,7 +63,7 @@
 
 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2021.05-Windows-x86_64.exe
 
-#### 1.3.1 设置环境变量
+#### 1.3.1 配置环境变量
 
 ```java
 PATH
@@ -133,7 +133,7 @@ cd Python-3.12.2
 make && make install
 ```
 
-#### 2.1.3 设置环境变量
+#### 2.1.3 配置环境变量
 
 ```bash
 vi /etc/profile

@@ -97,7 +97,7 @@ tar -xvf node-v14.16.0-linux-x64.tar.xz
 mv node-v14.16.0-linux-x64 /usr/local/node
 ```
 
-#### 2.1.2 设置环境变量
+#### 2.1.2 配置环境变量
 
 ```bash
 vim /etc/profile

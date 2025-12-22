@@ -73,7 +73,7 @@ node02.xuzhihao.net
 node03.xuzhihao.net
 ```
 
-### 1.3 设置环境变量
+### 1.3 配置环境变量
 
 ```bash
 vim /etc/profile
@@ -267,7 +267,7 @@ scp phoenix-*.jar node02.xuzhihao.net:$PWD
 scp phoenix-*.jar node03.xuzhihao.net:$PWD
 ```
 
-#### 3.1.3 设置环境变量
+#### 3.1.3 配置环境变量
 
 ```bash
 vi /etc/profile

@@ -51,7 +51,7 @@ sh bin/mqshutdown namesrv # 关闭NameServer
 1. 发送消息
 
 ```bash
-# 设置环境变量
+# 配置环境变量
 export NAMESRV_ADDR=localhost:9876
 sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer
 ```
@@ -59,7 +59,7 @@ sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer
 1. 接收消息
 
 ```bash
-# 设置环境变量
+# 配置环境变量
 export NAMESRV_ADDR=localhost:9876
 sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
 ```

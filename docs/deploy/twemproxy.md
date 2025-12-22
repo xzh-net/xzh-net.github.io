@@ -119,7 +119,7 @@ alpha:
 
 ### 2.2 启动服务
 
-设置环境变量
+配置环境变量
 
 ```bash
 echo "PATH=$PATH:/usr/local/twemproxy/sbin/" >> /etc/profile

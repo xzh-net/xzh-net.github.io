@@ -6,7 +6,7 @@
 
 下载地址：https://www.scala-lang.org/download/2.12.16.html
 
-设置环境变量
+配置环境变量
 
 ```lua
 SCALA_HOME

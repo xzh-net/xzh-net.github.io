@@ -7,7 +7,7 @@
 
 ### 1.1 安装Go
 
-设置环境变量
+配置环境变量
 
 ```lua
 GOROOT
@@ -66,7 +66,7 @@ wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
 tar zxvf go1.13.4.linux-amd64.tar.gz -C /usr/local/
 ```
 
-#### 2.1.2 设置环境变量
+#### 2.1.2 配置环境变量
 
 ```bash
 vi /etc/profile
