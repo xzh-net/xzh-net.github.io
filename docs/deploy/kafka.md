@@ -330,10 +330,9 @@ ${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/serve
 
 ```bash
 cd /opt/software
-tar -zxvf kafka-eagle-bin-3.0.1.tar.gz -C /opt/
-cd /opt/kafka-eagle-bin-3.0.1 && tar -zxvf efak-web-3.0.1-bin.tar.gz -C /opt/
-rm -rf /opt/kafka-eagle-bin-3.0.1
-cd /opt/efak-web-3.0.1
+tar -zxvf kafka-eagle-bin-3.0.1.tar.gz
+cd /opt/kafka-eagle-bin-3.0.1 && tar -zxvf efak-web-3.0.1-bin.tar.gz -C /usr/local
+mv /usr/local/efak-web-3.0.1 /usr/local/efak-web
 ```
 
 ### 2.2 配置环境变量
@@ -343,7 +342,7 @@ vi /etc/profile
 ```
 
 ```conf
-export KE_HOME=/opt/efak-web-3.0.1
+export KE_HOME=/usr/local/efak-web
 export PATH=$PATH:$KE_HOME/bin
 ```
 
@@ -354,11 +353,7 @@ source /etc/profile
 ### 2.3 修改配置
 
 ```bash
-cd /opt/efak-web-3.0.1/conf
-```
-
-```bash
-vi system-config.properties
+vi /usr/local/efak-web/conf/system-config.properties
 ```
 
 ```conf
@@ -376,15 +371,18 @@ efak.password=root
 ```bash
 cd ${KE_HOME}/bin
 chmod +x ke.sh 
-ke.sh start | stop | status | restart
+# 启动
+ke.sh start
+# 停止
+ke.sh stop
 ```
 
 访问地址：http://192.168.3.201:8048 admin/123456
 
 
-## 3. 脚本
+### 2.5 常用脚本
 
-### 3.1 xcall
+#### 2.5.1 xcall
 
 ```bash
 #!/bin/bash
@@ -397,7 +395,7 @@ done
 
 ```
 
-### 3.2 zk.sh
+#### 2.5.2 zookeeper.sh
 
 ```bash
 #!/bin/bash
@@ -407,7 +405,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- zookeeper $i 启动 ------------
-		ssh $i "/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start"
+		ssh $i "/usr/local/zookeeper/bin/zkServer.sh start"
 	done
 }
 ;;
@@ -415,7 +413,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- zookeeper $i 停止 ------------
-		ssh $i "/opt/apache-zookeeper-3.7.0/bin/zkServer.sh stop"
+		ssh $i "/usr/local/zookeeper/bin/zkServer.sh stop"
 	done
 }
 ;;
@@ -423,7 +421,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- zookeeper $i 状态 ------------
-		ssh $i "/opt/apache-zookeeper-3.7.0/bin/zkServer.sh status"
+		ssh $i "/usr/local/zookeeper/bin/zkServer.sh status"
 	done
 }
 ;;
@@ -438,7 +436,7 @@ export PATH=$PATH:$JAVA_HOME/bin
 ```
 
 
-### 3.3 ka.sh
+#### 2.5.3 kafka.sh
 
 ```bash
 #!/bin/bash
@@ -448,7 +446,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- 启动 $i kafka ------------
-		ssh $i "source /etc/profile;export JMX_PORT=9999;${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/server.properties"
+		ssh $i "source /etc/profile;export JMX_PORT=9999;/usr/local/kafka/bin/kafka-server-start.sh -daemon /usr/local/kafka/config/server.properties"
 	done
 }
 ;;
@@ -456,7 +454,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- 停止 $i kafka ------------
-		ssh $i "/opt/kafka_2.13-3.1.0/bin/kafka-server-stop.sh"
+		ssh $i "/usr/local/kafka/bin/kafka-server-stop.sh"
 	done
 }
 ;;
@@ -471,7 +469,7 @@ case $1 in
 esac
 ```
 
-### 3.4 kraft.sh
+#### 2.5.4 kraft.sh
 
 ```bash
 #!/bin/bash
@@ -481,7 +479,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- 启动 $i kafka ------------
-		ssh $i "source /etc/profile;export JMX_PORT=9999;${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/server.properties"
+		ssh $i "source /etc/profile;export JMX_PORT=9999;/usr/local/kafka/bin/kafka-server-start.sh -daemon /usr/local/kafka/config/kraft/server.properties"
 	done
 }
 ;;
@@ -489,7 +487,7 @@ case $1 in
 	for i in node01 node02 node03
 	do
 		echo  ------------- 停止 $i kafka ------------
-		ssh $i "/opt/kafka_2.13-3.1.0/bin/kafka-server-stop.sh"
+		ssh $i "/usr/local/kafka/bin/kafka-server-stop.sh"
 	done
 }
 ;;
