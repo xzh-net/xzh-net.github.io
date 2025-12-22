@@ -60,8 +60,8 @@ vi /usr/local/kafka/config/server.properties
 ```conf
 broker.id=0
 listeners=PLAINTEXT://:9092
-zookeeper.connect=192.168.3.200:2181
 log.dirs=/data/kafka/logs
+zookeeper.connect=localhost:2181
 ```
 
 
@@ -83,7 +83,7 @@ source /etc/profile
 #### 1.1.6 启动服务
 
 ```bash
-# 启动 zookeeper
+# 启动 zookeeper 自带单机版
 nohup /usr/local/kafka/bin/zookeeper-server-start.sh /usr/local/kafka/config/zookeeper.properties &
 # 启动 kafka
 nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties &
@@ -106,7 +106,7 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 /usr/local/kafka/bin/kafka-topics.sh --delete --topic product --bootstrap-server 127.0.0.1:9092
 ```
 
-### 1.2 集群
+### 1.2 zookeeper 集群
 
 #### 1.2.1 服务器准备
 
@@ -140,8 +140,8 @@ node01 节点
 ```conf
 broker.id=1
 listeners=PLAINTEXT://:9092
-zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
 log.dirs=/data/kafka/logs
+zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
 ```
 
 
@@ -150,8 +150,8 @@ node02 节点
 ```conf
 broker.id=2
 listeners=PLAINTEXT://:9092
+log.dirs=/data/kafka/logs
 zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
-log.dirs=/data/kafka
 ```
 
 
@@ -160,8 +160,8 @@ node03 节点
 ```conf
 broker.id=3
 listeners=PLAINTEXT://:9092
+log.dirs=/data/kafka/logs
 zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
-log.dirs=/data/kafka
 ```
 
 
@@ -185,7 +185,7 @@ source /etc/profile
 所有节点执行
 
 ```bash
-# 启动 zookeeper
+# 启动 zookeeper 独立集群
 /usr/local/zookeeper/bin/zkServer.sh start
 # 启动 kafka
 nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties &
@@ -200,7 +200,7 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 /usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 ```
 
-### 1.3 kraft
+### 1.3 kraft 集群
 
 #### 1.3.1 修改配置
 
