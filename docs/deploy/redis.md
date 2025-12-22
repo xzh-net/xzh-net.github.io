@@ -151,6 +151,7 @@ replicaof 192.168.3.200 6379
 
 ```bash
 /usr/local/redis/bin/redis-cli -p 6379
+auth 123456
 info replication
 ```
 
