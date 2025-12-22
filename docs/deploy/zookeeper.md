@@ -9,7 +9,7 @@ ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服�
 
 ### 1.1 单机
 
-#### 1.1.1 上传解压
+#### 1.1.1 下载解压
 
 ```bash
 cd /opt/software
@@ -17,38 +17,25 @@ tar -zxf apache-zookeeper-3.7.0-bin.tar.gz -C /usr/local/
 mv /usr/local/apache-zookeeper-3.7.0-bin /usr/local/zookeeper
 ```
 
-#### 1.1.2 设置环境变量
+#### 1.1.2 安装 Java
 
 ```bash
-vim /etc/profile
 ```
 
-```conf
-export JAVA_HOME=/usr/local/jdk1.8.0_202
-export PATH=$PATH:$JAVA_HOME/bin
-
-export ZK_HOME=/usr/local/zookeeper
-export PATH=$PATH:$ZK_HOME/bin
-```
-
-```bash
-source /etc/profile
-```
-
-#### 1.1.3 修改配置
-
-创建数据和日志目录
+#### 1.1.3 创建数据目录
 
 ```bash
 mkdir -p /data/zookeeper/{data,logs} -p
 ```
 
-修改配置文件
+#### 1.1.4 配置 zoo.cfg
 
 ```bash
 cp /usr/local/zookeeper/conf/zoo_sample.cfg /usr/local/zookeeper/conf/zoo.cfg
 vi /usr/local/zookeeper/conf/zoo.cfg
 ```
+
+修改内容
 
 ```conf
 tickTime=2000
@@ -59,7 +46,22 @@ dataLogDir=/data/zookeeper/logs
 clientPort=2181
 ```
 
-#### 1.1.4 启动服务
+#### 1.1.5 配置环境变量（可选）
+
+```bash
+vim /etc/profile
+```
+
+```conf
+export ZK_HOME=/usr/local/zookeeper
+export PATH=$PATH:$ZK_HOME/bin
+```
+
+```bash
+source /etc/profile
+```
+
+#### 1.1.6 启动服务
 
 ```bash
 # 启动服务
@@ -72,7 +74,7 @@ clientPort=2181
 jps
 ```
 
-#### 1.1.5 验证
+#### 1.1.7 验证
 
 ```bash
 /usr/local/zookeeper/bin/zkCli.sh -server localhost:2181
@@ -93,17 +95,9 @@ create -s -e /senode sedata  # 创建顺序的临时节点
 
 ### 1.2 集群
 
-#### 1.2.1 基础环境准备
+#### 1.2.1 服务器准备
 
-将192.168.20.201单机复制三台，每台机器设置hostname
-
-```bash
-hostnamectl set-hostname node01 # 192.168.20.201 
-hostnamectl set-hostname node02 # 192.168.20.202
-hostnamectl set-hostname node03 # 192.168.20.203 
-```
-
-三台机器配置host
+以3节点示例，所有节点配置Host
 
 ```bash
 vi /etc/hosts
@@ -112,68 +106,82 @@ vi /etc/hosts
 192.168.20.203 node03
 ```
 
-#### 1.2.2 设置环境变量
+#### 1.2.2 创建数据目录
+
+所有节点创建数据目录
 
 ```bash
-vi /etc/profile
-export ZK_HOME=/opt/apache-zookeeper-3.7.0
-export PATH=$PATH:$ZK_HOME/bin
-source /etc/profile
+mkdir -p /data/zookeeper/{data,logs} -p
 ```
 
-#### 1.2.3 环境变量分发
+
+#### 1.2.3 配置 zoo.cfg
+
+所有节点修改配置
 
 ```bash
-scp /etc/profile root@node02:/etc/
-scp /etc/profile root@node03:/etc/
-```
-
-#### 1.2.4 修改配置
-
-```bash
-vi /opt/apache-zookeeper-3.7.0/conf/zoo.cfg
+vi /usr/local/zookeeper/conf/zoo.cfg
 ```
 
 ```conf
 tickTime=2000
 initLimit=10
 syncLimit=5
-dataDir=/opt/apache-zookeeper-3.7.0/data
-dataLogDir=/opt/apache-zookeeper-3.7.0/logs
+dataDir=/data/zookeeper/data
+dataLogDir=/data/zookeeper/logs
 clientPort=2181
-admin.serverPort=8089
+
+# 集群配置 - 所有节点配置相同
 server.1=node01:2888:3888
 server.2=node02:2888:3888
 server.3=node03:2888:3888
 ```
 
-#### 1.2.5 分发安装包
+端口说明：
+- 2888：节点间数据同步端口
+- 3888：选举通信端口
+
+#### 1.2.4 创建 myid 文件
 
 ```bash
-cd /opt/apache-zookeeper-3.7.0
-scp -r /opt/apache-zookeeper-3.7.0 node02:$PWD
-scp -r /opt/apache-zookeeper-3.7.0 node03:$PWD
+# 在 node1 执行
+echo 1 > /data/zookeeper/data/myid    # 192.168.20.201 
+# 在 node2 执行
+echo 2 > /data/zookeeper/data/myid    # 192.168.20.202 
+# 在 node3 执行
+echo 3 > /data/zookeeper/data/myid    # 192.168.20.203 
 ```
 
-#### 1.2.6 修改配置
+#### 1.2.5 配置环境变量（可选）
 
-每台机器设置各自myid
-
-```bash 
-touch /opt/apache-zookeeper-3.7.0/data/myid & echo 1 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.20.201 
-touch /opt/apache-zookeeper-3.7.0/data/myid & echo 2 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.20.202 
-touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7.0/data/myid    # 192.168.20.203 
+```bash
+vim /etc/profile
 ```
 
-#### 1.2.7 启动服务
+```conf
+export ZK_HOME=/usr/local/zookeeper
+export PATH=$PATH:$ZK_HOME/bin
+```
+
+```bash
+source /etc/profile
+```
+
+#### 1.2.6 启动集群
+
+所有节点执行
 
 ```shell
-/opt/apache-zookeeper-3.7.0/bin/zkServer.sh start   # 每个节点分别启动
-/opt/apache-zookeeper-3.7.0/bin/zkServer.sh status  # 检测节点状态
+/usr/local/zookeeper/bin/zkServer.sh start-foreground   # 守护方式启动
+/usr/local/zookeeper/bin/bin/zkServer.sh status  # 检测节点状态
+```
+
+#### 1.2.7 验证集群
+
+```bash
+/usr/local/zookeeper/bin/zkCli.sh -server localhost:2181
 ```
 
 #### 1.2.8 客户端工具
 
 下载地址：https://github.com/vran-dev/PrettyZoo/releases
-
-
