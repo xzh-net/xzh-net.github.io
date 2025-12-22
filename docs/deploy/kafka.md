@@ -12,7 +12,8 @@ Apache Kafka 是一个开源分布式事件流平台
 
 ```bash
 cd /opt/software
-tar -zxf kafka_2.13-3.1.0.tgz -C /opt/
+tar -zxf kafka_2.13-3.1.0.tgz -C /usr/local
+mv /usr/local/kafka_2.13-3.1.0 /usr/local/kafka
 ```
 
 #### 1.1.2 设置环境变量
@@ -22,7 +23,10 @@ vim /etc/profile
 ```
 
 ```conf
-export KAFKA_HOME=/opt/kafka_2.13-3.1.0
+export JAVA_HOME=/usr/local/jdk1.8.0_202
+export PATH=$PATH:$JAVA_HOME/bin
+
+export KAFKA_HOME=/usr/local/kafka
 export PATH=:$PATH:${KAFKA_HOME}
 ```
 
@@ -32,13 +36,15 @@ source /etc/profile
 
 #### 1.1.3 修改配置
 
-```bash
-cd /opt/kafka_2.13-3.1.0/
-mkdir -p /opt/kafka_2.13-3.1.0/data
-```
+创建数据目录
 
 ```bash
-vi config/server.properties
+mkdir -p /data/kafka
+```
+
+修改配置文件
+```bash
+vi /usr/local/kafka/config/server.properties
 ```
 
 ```conf
@@ -46,24 +52,27 @@ broker.id=0
 # brokder对外提供的服务入口地址
 listeners=PLAINTEXT://192.168.3.200:9092
 zookeeper.connect=192.168.3.200:2181
-log.dirs=/opt/kafka_2.13-3.1.0/data
+log.dirs=/data/kafka
 ```
 
 #### 1.1.4 启动服务
 
 ```bash
-cd /opt/kafka_2.13-3.1.0/
-nohup bin/zookeeper-server-start.sh config/zookeeper.properties &
-nohup bin/kafka-server-start.sh config/server.properties &
+nohup /usr/local/kafka/bin/zookeeper-server-start.sh /usr/local/kafka/config/zookeeper.properties &
+nohup /usr/local/kafka/bin//kafka-server-start.sh /usr/local/kafka/config/server.properties &
 ```
 
-#### 1.1.5 客户端测试
+#### 1.1.5 验证
 
 ```bash
-bin/kafka-topics.sh --create --topic product --partitions 2 --replication-factor 3 --bootstrap-server 192.168.3.200:9092    # 创建主题
-bin/kafka-console-producer.sh --topic product --bootstrap-server 192.168.3.200:9092                                         # 发送消息
-bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 192.168.3.200:9092                        # 消费
-bin/kafka-topics.sh --delete --topic product --bootstrap-server 192.168.3.200:9092                                          # 删除主题
+# 创建主题
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 1 --replication-factor 1 --bootstrap-server 127.0.0.1:9092
+# 发送消息
+/usr/local/kafka/bin/kafka-console-producer.sh --topic product --bootstrap-server 127.0.0.1:9092
+# 消费
+/usr/local/kafka/bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 127.0.0.1:9092
+# 删除主题
+/usr/local/kafka/bin/kafka-topics.sh --delete --topic product --bootstrap-server 127.0.0.1:9092
 ```
 
 ### 1.2 集群
