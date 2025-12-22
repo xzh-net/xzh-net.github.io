@@ -8,7 +8,7 @@ Apache Kafka 是一个开源分布式事件流平台
 
 ### 1.1 单机
 
-#### 1.1.1 上传解压
+#### 1.1.1 下载解压
 
 ```bash
 cd /opt/software
@@ -16,31 +16,41 @@ tar -zxf kafka_2.13-3.1.0.tgz -C /usr/local
 mv /usr/local/kafka_2.13-3.1.0 /usr/local/kafka
 ```
 
-#### 1.1.2 设置环境变量
+#### 1.1.2 安装 Java
+
+解压安装包
+
+```bash
+tar -zxvf jdk-8u202-linux-x64.tar.gz -C /usr/local/
+```
+
+配置环境变量
 
 ```bash
 vim /etc/profile
 ```
 
+添加：
+
 ```conf
 export JAVA_HOME=/usr/local/jdk1.8.0_202
 export PATH=$PATH:$JAVA_HOME/bin
-
-export KAFKA_HOME=/usr/local/kafka
-export PATH=:$PATH:${KAFKA_HOME}
 ```
+
+使配置生效
 
 ```bash
 source /etc/profile
 ```
 
-#### 1.1.3 修改配置
 
-创建数据目录
+#### 1.1.3 创建数据目录
 
 ```bash
-mkdir -p /data/kafka
+mkdir -p /data/kafka/logs
 ```
+
+#### 1.1.4 配置 server.properties
 
 修改配置文件
 ```bash
@@ -49,28 +59,45 @@ vi /usr/local/kafka/config/server.properties
 
 ```conf
 broker.id=0
-# brokder对外提供的服务入口地址
-listeners=PLAINTEXT://192.168.3.200:9092
+listeners=PLAINTEXT://:9092
 zookeeper.connect=192.168.3.200:2181
-log.dirs=/data/kafka
+log.dirs=/data/kafka/logs
 ```
 
-#### 1.1.4 启动服务
+
+#### 1.1.5 配置环境变量（可选）
 
 ```bash
+vim /etc/profile
+```
+
+```conf
+export KAFKA_HOME=/usr/local/kafka
+export PATH=:$PATH:${KAFKA_HOME}
+```
+
+```bash
+source /etc/profile
+```
+
+#### 1.1.6 启动服务
+
+```bash
+# 启动 zookeeper
 nohup /usr/local/kafka/bin/zookeeper-server-start.sh /usr/local/kafka/config/zookeeper.properties &
-nohup /usr/local/kafka/bin//kafka-server-start.sh /usr/local/kafka/config/server.properties &
+# 启动 kafka
+nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties &
 
 # 关闭服务
 /usr/local/kafka/bin/zookeeper-server-stop.sh
-/usr/local/kafka/bin//kafka-server-stop.sh
+/usr/local/kafka/bin/kafka-server-stop.sh
 ```
 
-#### 1.1.5 验证
+#### 1.1.7 验证
 
 ```bash
 # 创建主题
-/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 1 --replication-factor 1 --bootstrap-server 127.0.0.1:9092
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 1 --replication-factor 3 --bootstrap-server 127.0.0.1:9092
 # 发送消息
 /usr/local/kafka/bin/kafka-console-producer.sh --topic product --bootstrap-server 127.0.0.1:9092
 # 消费
@@ -81,78 +108,96 @@ nohup /usr/local/kafka/bin//kafka-server-start.sh /usr/local/kafka/config/server
 
 ### 1.2 集群
 
-#### 1.2.1 上传解压 
+#### 1.2.1 服务器准备
+
+以3节点示例，所有节点配置Host，不使用 kafka 自带的 zookeeper，使用独立搭建的 zookeeper 集群
 
 ```bash
-cd /opt/software
-tar -zxf kafka_2.13-3.1.0.tgz -C /opt/
+vi /etc/hosts
+192.168.20.201 node01
+192.168.20.202 node02
+192.168.20.203 node03
 ```
 
-#### 1.2.2 修改配置
+#### 1.2.2 创建数据目录
+
+所有节点创建数据目录
 
 ```bash
-cd /opt/kafka_2.13-3.1.0/
+mkdir -p /data/kafka/logs
 ```
 
+#### 1.2.3 配置 server.properties
+
+所有节点修改配置
+
 ```bash
-vi config/server.properties
+vi /usr/local/kafka/config/server.properties
 ```
+
+node01 节点
 
 ```conf
 broker.id=1
-log.dirs=/opt/kafka_2.13-3.1.0/data
+listeners=PLAINTEXT://:9092
 zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
+log.dirs=/data/kafka/logs
 ```
 
-#### 1.2.3 内容分发
 
-将安装好的kafka复制到另外两台服务器
+node02 节点
 
-```bash
-scp -r /opt/kafka_2.13-3.1.0/ node02:/opt/kafka_2.13-3.1.0/
-scp -r /opt/kafka_2.13-3.1.0/ node03:/opt/kafka_2.13-3.1.0/
-```
-
-修改192.168.3.202节点的broker.id
-```bash
-cd /opt/kafka_2.13-3.1.0/
-vi config/server.properties
+```conf
 broker.id=2
+listeners=PLAINTEXT://:9092
+zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
+log.dirs=/data/kafka
 ```
 
-修改192.168.3.203节点的broker.id
-```bash
-cd /opt/kafka_2.13-3.1.0/
-vi config/server.properties
+
+node03 节点
+
+```conf
 broker.id=3
+listeners=PLAINTEXT://:9092
+zookeeper.connect=node01:2181,node02:2181,node03:2181/kafka
+log.dirs=/data/kafka
 ```
 
-#### 1.2.4 设置环境变量
+
+#### 1.2.4 配置环境变量（可选）
 
 ```bash
 vim /etc/profile
-export KAFKA_HOME=/opt/kafka_2.13-3.1.0
+```
+
+```conf
+export KAFKA_HOME=/usr/local/kafka
 export PATH=:$PATH:${KAFKA_HOME}
+```
+
+```bash
 source /etc/profile
 ```
 
-分发到各个节点
+#### 1.2.5 启动集群
+
+所有节点执行
 
 ```bash
-scp /etc/profile node02:/etc/profile
-scp /etc/profile node03:/etc/profile
-# 每个节点加载环境变量
-source /etc/profile
+# 启动 zookeeper
+/usr/local/zookeeper/bin/zkServer.sh start
+# 启动 kafka
+nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties &
 ```
 
-#### 1.2.5 启动服务
+#### 1.2.6 验证集群
 
 ```bash
-cd /opt/kafka_2.13-3.1.0/
-nohup bin/zookeeper-server-start.sh config/zookeeper.properties &   # 启动ZooKeeper
-nohup bin/kafka-server-start.sh config/server.properties &          # 启动Kafka
-# 测试Kafka集群是否启动成功
-bin/kafka-topics.sh --bootstrap-server node01:9092 --list
+# node01 节点执行创建主题
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 6 --replication-factor 3 --bootstrap-server 127.0.0.1:9092
+# 其他节点查询主题，有数据表示消息同步成功
+/usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 ```
 
 ### 1.3 kraft
