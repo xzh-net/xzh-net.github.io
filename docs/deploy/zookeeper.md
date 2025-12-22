@@ -13,44 +13,82 @@ ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服�
 
 ```bash
 cd /opt/software
-tar -zxf apache-zookeeper-3.7.0-bin.tar.gz -C /opt/
-mv /opt/apache-zookeeper-3.7.0-bin /opt/apache-zookeeper-3.7.0
-sudo chown -R hadoop:hadoop /opt/apache-zookeeper-3.7.0 # 非root启动
+tar -zxf apache-zookeeper-3.7.0-bin.tar.gz -C /usr/local/
+mv /usr/local/apache-zookeeper-3.7.0-bin /usr/local/zookeeper
 ```
 
 #### 1.1.2 设置环境变量
 
 ```bash
-vi /etc/profile
-export ZK_HOME=/opt/apache-zookeeper-3.7.0
+vim /etc/profile
+```
+
+```conf
+export JAVA_HOME=/usr/local/jdk1.8.0_202
+export PATH=$PATH:$JAVA_HOME/bin
+
+export ZK_HOME=/usr/local/zookeeper
 export PATH=$PATH:$ZK_HOME/bin
+```
+
+```bash
 source /etc/profile
 ```
 
 #### 1.1.3 修改配置
 
+创建数据和日志目录
+
 ```bash
-mkdir -p /opt/apache-zookeeper-3.7.0/data /opt/apache-zookeeper-3.7.0/logs
-cd /opt/apache-zookeeper-3.7.0/conf
-cp zoo_sample.cfg zoo.cfg
-vi zoo.cfg
+mkdir -p /data/zookeeper/{data,logs} -p
+```
+
+修改配置文件
+
+```bash
+cp /usr/local/zookeeper/conf/zoo_sample.cfg /usr/local/zookeeper/conf/zoo.cfg
+vi /usr/local/zookeeper/conf/zoo.cfg
 ```
 
 ```conf
 tickTime=2000
 initLimit=10
 syncLimit=5
-dataDir=/opt/apache-zookeeper-3.7.0/data
-dataLogDir=/opt/apache-zookeeper-3.7.0/logs
+dataDir=/data/zookeeper/data
+dataLogDir=/data/zookeeper/logs
 clientPort=2181
-admin.serverPort=8089
 ```
 
 #### 1.1.4 启动服务
 
 ```bash
-zkServer.sh start
+# 启动服务
+/usr/local/zookeeper/bin/zkServer.sh start
+# 停止服务
+/usr/local/zookeeper/bin/zkServer.sh stop    
+# 重启服务
+/usr/local/zookeeper/bin/zkServer.sh restart
+# 查看进程
 jps
+```
+
+#### 1.1.5 验证
+
+```bash
+/usr/local/zookeeper/bin/zkCli.sh -server localhost:2181
+```
+
+```bash
+ls /                # 查看所有节点
+create /app test    # 创建持久节点
+ls /app             # 查看该节点的子节点信息和属性信息
+get /app            # 查看节点数据
+set /app dev               # 修改节点数据
+delete /app                # 删除的节点不能有子节点
+deleteall /app             # 递归删除
+create -s /snode sdata       # 创建顺序节点
+create -e /enode edata       # 创建临时节点
+create -s -e /senode sedata  # 创建顺序的临时节点
 ```
 
 ### 1.2 集群
@@ -134,67 +172,8 @@ touch /opt/apache-zookeeper-3.7.0/data/myid & echo 3 > /opt/apache-zookeeper-3.7
 /opt/apache-zookeeper-3.7.0/bin/zkServer.sh status  # 检测节点状态
 ```
 
-#### 1.2.8 客户端测试
-
-PrettyZoo
+#### 1.2.8 客户端工具
 
 下载地址：https://github.com/vran-dev/PrettyZoo/releases
 
 
-## 2. 命令
-
-```bash
-# 服务端命令
-zkServer.sh start   # 启动命令
-zkServer.sh stop    # 停止命令
-zkServer.sh restart # 重启命令
-zkServer.sh status  # 查看集群节点状态
-
-# 客户端命令
-zkCli.sh            # 启动客户端
-ls /                # 查看节点
-get /test           # 查看节点数据
-ls2 /test           # 查看该节点的子节点信息和属性信息
-create /app1 hello              # 创建普通节点
-create -s /app3 world           # 创建顺序节点
-create -e /tempnode world       # 创建临时节点
-create -s -e /tempnode2 aaa     # 创建顺序的临时节点
-set /app1  xxx                  # 修改节点数据
-delete /test                    # 删除的节点不能有子节点
-rmr    /app1                    # 递归删除
-```
-
-## 3. 配置文件
-
-```bash
-# 快照文件snapshot的目录
-dataDir=/opt/apache-zookeeper-3.7.0/data
-# 事务日志的目录
-dataLogDir=/opt/apache-zookeeper-3.7.0/logs
-# 可以开启自动清理机制,自动清理tx log日志 频率是小时
-autopurge.purgeInterval=48
-# 需要保留的文件数目。默认是保留3个
-autopurge.snapRetainCount=3 
-
-# 客户端连接Zookeeper服务器的端口
-clientPort=2181
-# 客户端的并发连接数限制，默认值是60，将它设置为0表示取消对并发连接的限制
-maxClientCnxns=60
-
-# 服务器之间或客户端与服务器之间维持心跳的时间间隔，每个tickTime就会发送一个心跳。一个标准时间单元。所有时间都是以这个时间单元为基础，进行整数倍配置的。例如，session的最小超时时间是2*tickTime。
-tickTime=2000
-# LF初始通信时限
-initLimit=10
-# LF同步通信时限
-syncLimit=5
-
-server.1=node01:2888:3888
-server.2=node02:2888:3888
-
-## Metrics Providers
-# https://prometheus.io Metrics Exporter
-#metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider
-#metricsProvider.httpPort=7000
-#metricsProvider.exportJvmInfo=true
-
-```
