@@ -123,7 +123,7 @@ create -s -e /senode sedata  # 创建顺序的临时节点
 
 #### 1.2.1 服务器准备
 
-以3节点示例，所有节点配置Host
+以3节点示例，所有节点配置 Host
 
 ```bash
 vi /etc/hosts
