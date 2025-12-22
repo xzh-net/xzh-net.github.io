@@ -60,6 +60,10 @@ log.dirs=/data/kafka
 ```bash
 nohup /usr/local/kafka/bin/zookeeper-server-start.sh /usr/local/kafka/config/zookeeper.properties &
 nohup /usr/local/kafka/bin//kafka-server-start.sh /usr/local/kafka/config/server.properties &
+
+# 关闭服务
+/usr/local/kafka/bin/zookeeper-server-stop.sh
+/usr/local/kafka/bin//kafka-server-stop.sh
 ```
 
 #### 1.1.5 验证
