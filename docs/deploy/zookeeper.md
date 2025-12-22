@@ -19,7 +19,29 @@ mv /usr/local/apache-zookeeper-3.7.0-bin /usr/local/zookeeper
 
 #### 1.1.2 安装 Java
 
+解压安装包
+
 ```bash
+tar -zxvf jdk-8u202-linux-x64.tar.gz -C /usr/local/
+```
+
+配置环境变量
+
+```bash
+vim /etc/profile
+```
+
+添加：
+
+```conf
+export JAVA_HOME=/usr/local/jdk1.8.0_202
+export PATH=$PATH:$JAVA_HOME/bin
+```
+
+使配置生效
+
+```bash
+source /etc/profile
 ```
 
 #### 1.1.3 创建数据目录
@@ -76,9 +98,13 @@ jps
 
 #### 1.1.7 验证
 
+连接服务端
+
 ```bash
 /usr/local/zookeeper/bin/zkCli.sh -server localhost:2181
 ```
+
+常用命令
 
 ```bash
 ls /                # 查看所有节点
@@ -172,8 +198,8 @@ source /etc/profile
 所有节点执行
 
 ```shell
-/usr/local/zookeeper/bin/zkServer.sh start-foreground   # 守护方式启动
-/usr/local/zookeeper/bin/bin/zkServer.sh status  # 检测节点状态
+/usr/local/zookeeper/bin/zkServer.sh start   # 启动
+/usr/local/zookeeper/bin/zkServer.sh status  # 检测节点状态
 ```
 
 #### 1.2.7 验证集群
