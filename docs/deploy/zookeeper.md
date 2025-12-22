@@ -47,7 +47,7 @@ source /etc/profile
 #### 1.1.3 创建数据目录
 
 ```bash
-mkdir -p /data/zookeeper/{data,logs} -p
+mkdir -p /data/zookeeper/{data,logs}
 ```
 
 #### 1.1.4 配置 zoo.cfg
@@ -137,7 +137,7 @@ vi /etc/hosts
 所有节点创建数据目录
 
 ```bash
-mkdir -p /data/zookeeper/{data,logs} -p
+mkdir -p /data/zookeeper/{data,logs}
 ```
 
 
