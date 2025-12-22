@@ -47,7 +47,7 @@ source /etc/profile
 #### 1.1.3 创建数据目录
 
 ```bash
-mkdir -p /data/kafka/logs
+mkdir -p /data/kafka/{logs,kraft-data}
 ```
 
 #### 1.1.4 配置 server.properties
@@ -124,7 +124,7 @@ vi /etc/hosts
 所有节点创建数据目录
 
 ```bash
-mkdir -p /data/kafka/logs
+mkdir -p /data/kafka/{logs,kraft-data}
 ```
 
 #### 1.2.3 配置 server.properties
@@ -202,50 +202,81 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 
 ### 1.3 kraft 集群
 
-#### 1.3.1 修改配置
+KRaft 是Kafka 自2.8版本开始引入的新的元数据管理机制，用于替代 ZooKeeper。以下是一个三节点KRaft集群的搭建步骤
+
+
+#### 1.3.1 生成集群ID
+
+在任意节点执行以下命令生成集群ID
 
 ```bash
-cd /opt/kafka_2.13-3.1.0/config/kraft
-mkdir -p /opt/kafka_2.13-3.1.0/data
+/usr/local/kafka/bin/kafka-storage.sh random-uuid
 ```
+
+例如： Rj3jxXL5SSepoaWBf0LYIA，后面配置会用到。
+
+#### 1.3.2 配置 server.properties
+
+所有节点修改配置
 
 ```bash
-vi server.properties
+vi /usr/local/kafka/config/server.properties
 ```
 
-修改配置
+node01 节点
+
 ```conf
-process.roles=broker,controller	# 数据节点，控制节点
-node.id=1	# 对应broker.id
-controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093 # 对应zk
-advertised.listeners=PLAINTEXT://node01:9092		# 对外暴漏端口，对应主机名称
-log.dirs=/opt/kafka_2.13-3.1.0/data
+cluster.id=Rj3jxXL5SSepoaWBf0LYIA
+broker.id=1
+process.roles=controller,broker
+listeners=PLAINTEXT://node01:9092
+controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
+log.dirs=/data/kafka/logs
+controller.log.dirs=/data/kafka/kraft-data
 ```
 
-#### 1.3.2 内容分发
 
-修改node02和node02的节点id和暴漏端口
+node02 节点
+
+```conf
+cluster.id=Rj3jxXL5SSepoaWBf0LYIA
+broker.id=2
+process.roles=controller,broker
+listeners=PLAINTEXT://node02:9092
+controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
+log.dirs=/data/kafka/logs
+controller.log.dirs=/data/kafka/kraft-data
+```
+
+
+node03 节点
+
+```conf
+cluster.id=Rj3jxXL5SSepoaWBf0LYIA
+broker.id=3
+process.roles=controller,broker
+listeners=PLAINTEXT://node03:9092
+controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
+log.dirs=/data/kafka/logs
+controller.log.dirs=/data/kafka/kraft-data
+```
+
+#### 1.3.3 格式化存储
+
+
+用集群ID格式化三台机器的kafka存储目录
 
 ```bash
-scp -r /opt/kafka_2.13-3.1.0/config/kraft/ node02:/opt/kafka_2.13-3.1.0/config/
-scp -r /opt/kafka_2.13-3.1.0/config/kraft/ node03:/opt/kafka_2.13-3.1.0/config/
+/usr/local/kafka/bin/kafka-storage.sh format -t Rj3jxXL5SSepoaWBf0LYIA -c /usr/local/kafka/config/kraft/server.properties
 ```
 
-#### 1.3.3 初始化
+格式化结果查看
 
 ```bash
-cd $KAFKA_HOME
-bin/kafka-storage.sh random-uuid	# 生成id
+ls -la /data/kafka/kraft-data/
 ```
 
-用该id格式化三台机器的kafka存储目录
-
-```bash
-cd $KAFKA_HOME
-bin/kafka-storage.sh format -t 0T25c_coRNqGuGvssegx3Q -c /opt/kafka_2.13-3.1.0/config/kraft/server.properties
-```
-
-#### 1.3.4 启动服务
+#### 1.3.4 启动集群
 
 三台机器分别执行
 ```bash
