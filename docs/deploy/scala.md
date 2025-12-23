@@ -1,4 +1,4 @@
-# Sacal 2.12.16
+# Scala 2.12.16
 
 ## 1. Windows
 
