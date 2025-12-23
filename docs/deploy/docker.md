@@ -1162,19 +1162,20 @@ docker run -d \
   --mount type=tmpfs,destination=/tmp \
   80x86/nginx-fancyindex
 ```
-#### Rancher
+#### Rancher 2.8.2
 
 ```bash
-mkdir -p /data/rancher_home/rancher
-mkdir -p /data/rancher_home/auditlog
+mkdir -p /data/rancher/{data,logs}
+chmod 777 /data/rancher
 
 docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
-  -v /data/rancher_home/rancher:/var/lib/rancher \
-  -v /data/rancher_home/auditlog:/var/log/auditlog \
-  --name rancher rancher/rancher 
+  -v /data/rancher/data:/var/lib/rancher \
+  -v /data/rancher/logs:/var/log/auditlog \
+  --name rancher rancher/rancher:v2.8.2
 ```
 
-默认安装密码 `docker logs rancher 2>&1 | grep "Bootstrap Password:"`，重置密码 `docker exec -it rancher reset-password`
+- 查看默认密码   `docker logs rancher 2>&1 | grep "Bootstrap Password:"`
+- 重置密码   `docker exec -it rancher reset-password`
 
 ### 4.2 数据库
 
@@ -1182,7 +1183,7 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
 
 创建目录
 ```bash
-mkdir -p /data/mysql/data /data/mysql/logs /data/mysql/conf
+mkdir -p /data/mysql/{data,conf,logs}
 ```
 
 运行容器
