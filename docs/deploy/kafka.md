@@ -106,11 +106,11 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 /usr/local/kafka/bin/kafka-topics.sh --delete --topic product --bootstrap-server 127.0.0.1:9092
 ```
 
-### 1.2 zookeeper 集群
+### 1.2 Zookeeper 集群
 
 #### 1.2.1 服务器准备
 
-以3节点示例，所有节点配置Host，不使用 kafka 自带的 zookeeper，使用独立搭建的 zookeeper 集群
+以3节点示例，所有节点配置 Host，不使用 kafka 自带的 Zookeeper，使用独立搭建的 Zookeeper 集群
 
 ```bash
 vi /etc/hosts
@@ -200,10 +200,9 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 /usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node01:9092 --list
 ```
 
-### 1.3 kraft 集群
+### 1.3 KRaft 集群
 
-KRaft 是Kafka 自2.8版本开始引入的新的元数据管理机制，用于替代 ZooKeeper。以下是一个三节点KRaft集群的搭建步骤
-
+KRaft 是 Kafka 自 2.8 版本开始引入的新的元数据管理机制，用于替代 ZooKeeper。以下是一个三节点 KRaft 集群的搭建步骤
 
 #### 1.3.1 生成集群ID
 
