@@ -1174,8 +1174,15 @@ docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 \
   --name rancher rancher/rancher:v2.8.2
 ```
 
-- 查看默认密码   `docker logs rancher 2>&1 | grep "Bootstrap Password:"`
-- 重置密码   `docker exec -it rancher reset-password`
+查看默认密码   
+```bash
+docker logs rancher 2>&1 | grep "Bootstrap Password:"
+```
+
+重置密码
+```bash
+docker exec -it rancher reset-password
+```
 
 ### 4.2 数据库
 
