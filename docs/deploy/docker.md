@@ -1732,28 +1732,38 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 
 ### 4.5 微服务
 
-#### Nacos 3.1.1
+#### Nacos 3.0.1
 
-快速开始
+快速启动
 
 ```bash
-docker run --name nacos-quick -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.2
+docker run --name nacos-standalone-derby \
+    -e MODE=standalone \
+    -e NACOS_AUTH_TOKEN=RK3KM1DQFAM9Xj1aEzL7nMnG9HF+ObBlSeTkJSBMNUs= \
+    -e NACOS_AUTH_IDENTITY_KEY=Authorization \
+    -e NACOS_AUTH_IDENTITY_VALUE=token \
+    -p 8080:8080 \
+    -p 8848:8848 \
+    -p 9848:9848 \
+    -d nacos/nacos-server:v3.0.1
 ```
+
+访问地址：http://172.17.17.161:8080
 
 高级使用
 
 ```bash
 # 项目地址
-git clone https://github.com/nacos-group/nacos-docker.git
+https://github.com/nacos-group/nacos-docker
 # 解压
-unzip nacos-docker-3.1.1.zip
+unzip nacos-docker-3.0.1.zip
 # 单机模式
 docker-compose -f example/standalone-derby.yaml up
 # 集群模式
 docker-compose -f example/cluster-hostname.yaml up 
 ```
 
-!> 以下 API 仅针对v3.1.1环境验证通过
+!> 以下 API 仅针对v3.0.1环境验证通过
 
 注册服务
 ```bash
@@ -1763,6 +1773,11 @@ curl -X POST 'http://127.0.0.1:8848/nacos/v3/client/ns/instance?serviceName=quic
 服务发现
 ```bash
 curl -X GET 'http://127.0.0.1:8848/nacos/v3/client/ns/instance/list?serviceName=quickstart.test.service'
+```
+
+服务下线
+```bash
+curl -X DELETE 'http://127.0.0.1:8848/nacos/v3/client/ns/instance?serviceName=quickstart.test.service&ip=127.0.0.1&port=8080&ephemeral=false'
 ```
 
 创建Token
