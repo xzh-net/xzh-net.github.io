@@ -21,7 +21,7 @@
   - [OceanBase](deploy/oceanbase)
   - [HGDB](deploy/hgdb)
 
-- 中间件
+- 服务中间件与工具
   - [Nginx](deploy/nginx)
   - [OpenResty](deploy/openresty)
   - [Keepalived](deploy/keepalived)
@@ -37,22 +37,23 @@
   - [Jenkins](deploy/jenkins)
   - [Prometheus](deploy/prometheus)
   - [Zabbix](deploy/zabbix)
-  - [Simple RTMP Server](deploy/srs)
-  - [Turnserver](deploy/turnserver)
-  - [Nps](deploy/nps)
   - [Elastic Stack](deploy/elk)
-  - [FastDFS](deploy/fastdfs)
   - [Skywalking](deploy/skywalking)
+  - [FastDFS](deploy/fastdfs)
   - [Zookeeper](deploy/zookeeper)
   - [Etcd](deploy/etcd)
   - [Seata](deploy/seata)
+  - [Simple RTMP Server](deploy/srs)
+  - [Turnserver](deploy/turnserver)
+  - [Nps](deploy/nps)
   - [RabbitMQ](deploy/rabbitmq)
   - [RocketMQ](deploy/rocketmq)
   - [Pulsar](deploy/pulsar)
   - [Emqx](deploy/emqx)
   - [Mycat](deploy/mycat)
 
-- 人工智能
+- 人工智能平台
+  - [OpenAI](deploy/openai)
   - [Ollama](deploy/ollama)
   - [Dify](deploy/dify)
   - [Higress](deploy/higress)
@@ -60,22 +61,22 @@
 - 区块链
   - [Fisco Bcos](deploy/fisco)
 
-- 大数据
+- 大数据技术栈
   - [HBase](deploy/hbase)
   - [ClickHouse](deploy/clickhouse)
   - [Kudu](deploy/kudu)
   - [Hudi](deploy/hudi)
-  - [Kafka](deploy/kafka)
   - [Hadoop](deploy/hadoop)
   - [Spark](deploy/spark)
   - [Flink](deploy/flink)
-  - [Flume](deploy/flume)
   - [Hive](deploy/hive)
+  - [Kafka](deploy/kafka)
+  - [Flume](deploy/flume)
+  - [Debezium](deploy/debezium)
   - [Kettle](deploy/kettle)
   - [DataX](deploy/datax)
-  - [Debezium](deploy/debezium)
-  
-- 开发工具
+
+- 编程语言与工具
   - [Java](deploy/java)
   - [Sacla](deploy/scala)
   - [Python](deploy/python)
@@ -87,9 +88,7 @@
   - [Lua](deploy/lua)
   - [Arthas](deploy/arthas)
 
-- 学习笔记
-  - [网络协议详解](deploy/network)
-  - [IP子网划分](deploy/ip)
+- Java核心技术体系
   - [IO模型](java/io)
   - [分布式理论与算法](java/cap)
   - [设计模式](java/model)
@@ -119,6 +118,10 @@
   - [Oracle](java/oracle)
   - [ShardingSphere](java/shardingsphere)
 
-- 其他
+- 网络基础
+  - [网络协议详解](deploy/network)
+  - [IP子网划分](deploy/ip)
+  
+- 游戏
   - [热血传奇](game/mir2)
   - [恶魔的幻影](game/ei3)
