@@ -2334,7 +2334,7 @@ docker exec -it kafka /bin/bash
 cd /opt/kafka_2.13-2.8.1
 
 # 创建主题
-bin/kafka-topics.sh --create --topic topic1 --partitions 2 --replication-factor 3 --bootstrap-server 172.17.17.161:9092
+bin/kafka-topics.sh --create --topic topic1 --partitions 1 --replication-factor 1 --bootstrap-server 172.17.17.161:9092
 # 发送消息
 bin/kafka-console-producer.sh --topic topic1 --bootstrap-server 172.17.17.161:9092
 # 消费
