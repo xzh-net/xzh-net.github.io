@@ -1732,69 +1732,32 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 
 ### 4.5 微服务
 
-#### Nacos 2.5.1
+#### Nacos 3.1.1
 
-拉取镜像
-```bash
-docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:v2.5.1
-```
-
-创建配置文件目录
-```bash
-mkdir -p /data/nacos
-```
-
-拷贝配置文件
-```bash
-docker cp nacos:/home/nacos/conf /data/nacos/
-docker cp nacos:/home/nacos/data /data/nacos/
-docker cp nacos:/home/nacos/logs /data/nacos/
-docker rm -f nacos
-```
-
-使用配置文件启动
-```bash
-docker run -d \
-  --name nacos \
-  -p 8848:8848 \
-  -p 9848:9848 \
-  -p 9849:9849 \
-  -e MODE=standalone \
-  -e PREFER_HOST_MODE=hostname \
-  -v /data/nacos/logs:/home/nacos/logs \
-  -v /data/nacos/conf:/home/nacos/conf \
-  -v /data/nacos/data:/home/nacos/data \
-  --restart always \
-  nacos/nacos-server:v2.5.1
-```
-
-访问地址：http://127.0.0.1:8848/nacos
-
-#### Nacos 3.0.2
+快速开始
 
 ```bash
-# 生成随机密码并编码
-openssl rand -base64 3
+docker run --name nacos-quick -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.0.2
 ```
+
+高级使用
 
 ```bash
-docker run --name nacos-standalone-derby \
-    -e MODE=standalone \
-    -e NACOS_AUTH_TOKEN=RK3KM1DQFAM9Xj1aEzL7nMnG9HF+ObBlSeTkJSBMNUs= \
-    -e NACOS_AUTH_IDENTITY_KEY=Authorization \
-    -e NACOS_AUTH_IDENTITY_VALUE=token \
-    -p 8080:8080 \
-    -p 8848:8848 \
-    -p 9848:9848 \
-    -d nacos/nacos-server:v3.0.2
+# 项目地址
+git clone https://github.com/nacos-group/nacos-docker.git
+# 解压
+unzip nacos-docker-3.1.1.zip
+# 单机模式
+docker-compose -f example/standalone-derby.yaml up
+# 集群模式
+docker-compose -f example/cluster-hostname.yaml up 
 ```
 
-访问地址：http://127.0.0.1:8080
-
+!> 以下 API 仅针对v3.1.1环境验证通过
 
 注册服务
 ```bash
-curl -X POST 'http://127.0.0.1:8848/nacos/v3/client/ns/instance?serviceName=quickstart.test.service&ip=127.0.0.1&port=8080'
+curl -X POST 'http://127.0.0.1:8848/nacos/v3/client/ns/instance?serviceName=quickstart.test.service&ip=127.0.0.1&port=8080&ephemeral=false'
 ```
 
 服务发现
@@ -1802,12 +1765,12 @@ curl -X POST 'http://127.0.0.1:8848/nacos/v3/client/ns/instance?serviceName=quic
 curl -X GET 'http://127.0.0.1:8848/nacos/v3/client/ns/instance/list?serviceName=quickstart.test.service'
 ```
 
-创建accessToken
+创建Token
 ```bash
 curl -X POST 'http://127.0.0.1:8848/nacos/v3/auth/user/login' -d 'username=nacos' -d 'password=nacos'
 ```
 
-使用accessToken创建配置
+发布配置
 ```bash
 curl -X POST 'http://127.0.0.1:8848/nacos/v3/admin/cs/config?dataId=quickstart.test.config&groupName=test&content=HelloWorld' -H "accessToken:${your_access_token}"
 ```
