@@ -225,69 +225,168 @@ vi /usr/local/kafka/config/kraft/server.properties
 node01 节点
 
 ```conf
-# 节点基础配置
+# 集群基础配置
+cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+process.roles=broker,controller
 node.id=1
-process.roles=controller,broker
 
 # 网络配置
-listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+listeners=PLAINTEXT://node01:9092,CONTROLLER://node01:9093
 advertised.listeners=PLAINTEXT://node01:9092
 controller.listener.names=CONTROLLER
+inter.broker.listener.name=PLAINTEXT
+listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
 
 # Controller配置
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
 
 # 存储配置
 log.dirs=/data/kafka/logs
+num.recovery.threads.per.data.dir=3
 
-# 集群配置
-cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+# 性能调优
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+
+# 副本和高可用
+num.partitions=3
+default.replication.factor=3
+min.insync.replicas=2
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=3
+transaction.state.log.min.isr=2
+unclean.leader.election.enable=false
+
+# Controller选举配置
+controller.quorum.election.timeout.ms=10000
+controller.quorum.fetch.timeout.ms=20000
+controller.quorum.request.timeout.ms=10000
+
+# 日志配置
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+log.flush.interval.messages=10000
+log.flush.interval.ms=1000
+
+# 消息大小
+message.max.bytes=10485760
+replica.fetch.max.bytes=10485760
 ```
 
 
 node02 节点
 
 ```conf
-# 节点基础配置
+# 集群基础配置
+cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+process.roles=broker,controller
 node.id=2
-process.roles=controller,broker
 
 # 网络配置
-listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+listeners=PLAINTEXT://node02:9092,CONTROLLER://node02:9093
 advertised.listeners=PLAINTEXT://node02:9092
 controller.listener.names=CONTROLLER
+inter.broker.listener.name=PLAINTEXT
+listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
 
 # Controller配置
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
 
 # 存储配置
 log.dirs=/data/kafka/logs
+num.recovery.threads.per.data.dir=3
 
-# 集群配置
-cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+# 性能调优
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+
+# 副本和高可用
+num.partitions=3
+default.replication.factor=3
+min.insync.replicas=2
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=3
+transaction.state.log.min.isr=2
+unclean.leader.election.enable=false
+
+# Controller选举配置
+controller.quorum.election.timeout.ms=10000
+controller.quorum.fetch.timeout.ms=20000
+controller.quorum.request.timeout.ms=10000
+
+# 日志配置
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+log.flush.interval.messages=10000
+log.flush.interval.ms=1000
+
+# 消息大小
+message.max.bytes=10485760
+replica.fetch.max.bytes=10485760
 ```
 
 
 node03 节点
 
 ```conf
-# 节点基础配置
+# 集群基础配置
+cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+process.roles=broker,controller
 node.id=3
-process.roles=controller,broker
 
 # 网络配置
-listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+listeners=PLAINTEXT://node03:9092,CONTROLLER://node03:9093
 advertised.listeners=PLAINTEXT://node03:9092
 controller.listener.names=CONTROLLER
+inter.broker.listener.name=PLAINTEXT
+listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
 
 # Controller配置
 controller.quorum.voters=1@node01:9093,2@node02:9093,3@node03:9093
 
 # 存储配置
 log.dirs=/data/kafka/logs
+num.recovery.threads.per.data.dir=3
 
-# 集群配置
-cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+# 性能调优
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+
+# 副本和高可用
+num.partitions=3
+default.replication.factor=3
+min.insync.replicas=2
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=3
+transaction.state.log.min.isr=2
+unclean.leader.election.enable=false
+
+# Controller选举配置
+controller.quorum.election.timeout.ms=10000
+controller.quorum.fetch.timeout.ms=20000
+controller.quorum.request.timeout.ms=10000
+
+# 日志配置
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+log.flush.interval.messages=10000
+log.flush.interval.ms=1000
+
+# 消息大小
+message.max.bytes=10485760
+replica.fetch.max.bytes=10485760
 ```
 
 #### 1.3.3 格式化存储
