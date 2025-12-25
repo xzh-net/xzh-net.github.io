@@ -204,9 +204,9 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 
 ```bash
 # node01 节点执行创建主题
-/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 3 --replication-factor 3 --bootstrap-server 127.0.0.1:9092
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 3 --replication-factor 3 --bootstrap-server node01:9092
 # 其他节点查询主题，有数据表示消息同步成功
-/usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node01:9092 --list
+/usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node02:9092 --list
 ```
 
 ### 1.3 KRaft 集群
@@ -424,9 +424,9 @@ ls -la /data/kafka/logs
 
 ```bash
 # node01 节点执行创建主题
-/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 3 --replication-factor 3 --bootstrap-server 127.0.0.1:9092
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 3 --replication-factor 3 --bootstrap-server node01:9092
 # 其他节点查询主题，有数据表示消息同步成功
-/usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node01:9092 --list
+/usr/local/kafka/bin/kafka-topics.sh --bootstrap-server node03:9092 --list
 ```
 
 ## 2. 可视化监控
