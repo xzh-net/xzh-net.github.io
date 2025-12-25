@@ -97,13 +97,22 @@ nohup /usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.
 
 ```bash
 # 创建主题
-/usr/local/kafka/bin/kafka-topics.sh --create --topic product --partitions 1 --replication-factor 1 --bootstrap-server 127.0.0.1:9092
-# 发送消息
-/usr/local/kafka/bin/kafka-console-producer.sh --topic product --bootstrap-server 127.0.0.1:9092
-# 消费
-/usr/local/kafka/bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 127.0.0.1:9092
+/usr/local/kafka/bin/kafka-topics.sh --create --topic product --bootstrap-server 127.0.0.1:9092
+# 查询主题
+/usr/local/kafka/bin/kafka-topics.sh --list --bootstrap-server 127.0.0.1:9092
+# 主题详情
+/usr/local/kafka/bin/kafka-topics.sh --topic filebeat-logs --describe  --bootstrap-server 127.0.0.1:9092  
 # 删除主题
 /usr/local/kafka/bin/kafka-topics.sh --delete --topic product --bootstrap-server 127.0.0.1:9092
+# 发送消息
+/usr/local/kafka/bin/kafka-console-producer.sh --topic product --bootstrap-server 127.0.0.1:9092
+# 消费消息
+/usr/local/kafka/bin/kafka-console-consumer.sh --topic product --from-beginning --bootstrap-server 127.0.0.1:9092
+# 查询消息
+/usr/local/kafka/bin/kafka-run-class.sh kafka.tools.GetOffsetShell \
+    --broker-list 127.0.0.1:9092 \
+    --topic filebeat-logs \
+    --time -1
 ```
 
 ### 1.2 Zookeeper 集群
@@ -226,7 +235,7 @@ node01 节点
 
 ```conf
 # 集群基础配置
-cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+cluster.id=Rj3jxXL5SSepoaWBf0LYIA
 process.roles=broker,controller
 node.id=1
 
@@ -282,7 +291,7 @@ node02 节点
 
 ```conf
 # 集群基础配置
-cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+cluster.id=Rj3jxXL5SSepoaWBf0LYIA
 process.roles=broker,controller
 node.id=2
 
@@ -338,7 +347,7 @@ node03 节点
 
 ```conf
 # 集群基础配置
-cluster.id=LAY6pXKJQlCj8G8-PSFXjA
+cluster.id=Rj3jxXL5SSepoaWBf0LYIA
 process.roles=broker,controller
 node.id=3
 
@@ -408,7 +417,7 @@ ls -la /data/kafka/logs
 
 三台机器分别执行
 ```bash
-${KAFKA_HOME}/bin/kafka-server-start.sh -daemon ${KAFKA_HOME}/config/kraft/server.properties
+/usr/local/kafka/bin/kafka-server-start.sh -daemon /usr/local/kafka/config/kraft/server.properties
 ```
 
 #### 1.3.5 验证集群
