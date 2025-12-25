@@ -1763,7 +1763,7 @@ docker-compose -f example/standalone-derby.yaml up
 docker-compose -f example/cluster-hostname.yaml up 
 ```
 
-!> 以下 API 仅针对v3.0.1环境验证通过
+> 以下 API 仅针对v3.0.1环境验证通过
 
 注册服务
 ```bash
