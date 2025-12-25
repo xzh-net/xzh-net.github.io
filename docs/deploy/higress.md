@@ -6,7 +6,7 @@
 
 ## 1. 部署
 
-### 1.1 极简方式
+### 1.1 快速启动
 
 基于本地文件做配置存储，创建挂载路径
 
@@ -34,15 +34,12 @@ docker run -dit --name higress-ai \
 ```bash
 mkdir /data && cd /data
 # 上传文件解压
-unzip higress-standalone-aio-v2.1.9.zip
-cd higress-standalone-aio-v2.1.9
+unzip higress-standalone-aio-v2.1.9.zip && cd higress-standalone-aio-v2.1.9
 # 安装初始化
 ./bin/configure.sh -a
 ```
 
-依照命令行提示输入所需要的配置参数。脚本会自动写入配置并启动 Higress。
-
-在浏览器中打开 [http://localhost:8080/](http://localhost:8080/) ，并使用 admin 作为用户名和密码进行登录，即可正常通过 Higress Console 操作 Higress 的路由配置。所有配置的域名均需要先通过 hosts 文件将其强制解析至 127.0.0.1 再进行访问。
+依照命令行提示输入所需要的配置参数，脚本会自动写入配置并启动 Higress。使用 admin 作为用户名进行登录，首次进入会要求设置密码。
 
 ## 2. 配置
 
@@ -74,9 +71,9 @@ cd higress-standalone-aio-v2.1.9
 
 ### 3.1 网关日志
 
-网关的访问日志输出格式是基于`系统设置 -> 编辑全局配置`中的`accessLogFormat`字段设置，每次修改需要重启应用。
+网关的访问日志输出格式通过 `系统设置 -> 编辑全局配置`中的`accessLogFormat` 字段设置，每次修改需要重启应用。
 
-网关日志已经映射到宿主机的`/data/higress/proxy`路径下，其中`access.log`是每次请求的日志，后面我们基于这个日志汇总每次请求消耗的token数量，生成账单。
+使用极简方式部署，网关日志已经映射到宿主机的`/data/higress/proxy`路径下，其中`access.log`是每次请求的日志，后面我们基于这个日志汇总每次请求消耗的token数量，生成账单。
 
 前面已经为每个服务添加了消费者，但是统计日志的时候无法获取消费者身份信息，需要自定义日志格式。因为我们是本地配置，可以直接编辑映射出来的配置文件。
 
@@ -149,6 +146,13 @@ vi /data/higress/data/configmaps/higress-config.yaml
 ```
 
 重启服务
+
+
+!> 使用独立运行版如果出现修改全局配置`mesh`属性无效的问题，有两种解决办法：
+
+1. 安装之前： `/data/higress-standalone-aio-v2.1.9/compose/scripts/prepare.sh` 修改默认值。
+
+2. 安装之后： `/data/higress-standalone-aio-v2.1.9/compose/volumes/pilot/config/mesh`
 
 
 ### 3.2 调整日志等级
