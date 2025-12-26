@@ -150,9 +150,8 @@ vi /data/higress/data/configmaps/higress-config.yaml
 
 !> 使用独立运行版如果出现修改全局配置`mesh`属性无效的问题，有两种解决办法：
 
-1. 安装之前： `/data/higress-standalone-aio-v2.1.9/compose/scripts/prepare.sh` 修改默认值。
-
-2. 安装之后： `/data/higress-standalone-aio-v2.1.9/compose/volumes/pilot/config/mesh`
+- 安装之前： `/data/higress-standalone-aio-v2.1.9/compose/scripts/prepare.sh` 修改默认值。
+- 安装之后： `/data/higress-standalone-aio-v2.1.9/compose/volumes/pilot/config/mesh`
 
 
 ### 3.2 调整日志等级
@@ -198,20 +197,66 @@ curl localhost:15000/logging?golang=debug -X POST
 
 ```yaml
 attributes:
-- apply_to_log:true
-  key:"question"
-  value:"messages.@reverse.0.content"
-  value_source:"request_body"
-- apply_to_log:true
-  key:"answer"
-  rule:"append"
-  value:"choices.0.delta.content"
-  value_source:"response_streaming_body"
-- apply_to_log:true
-  key:"answer"
-  value:"choices.0.message.content"
-  value_source:"response_body"
+- apply_to_log: true
+  key: "user-api-key"
+  value: "user-api-key"
+  value_source: "request_header"
+- apply_to_log: true
+  key: "question"
+  value: "messages"
+  value_source: "request_body"
+- apply_to_log: true
+  key: "top_p"
+  value: "top_p"
+  value_source: "request_body"
+- apply_to_log: true
+  key: "temperature"
+  value: "temperature"
+  value_source: "request_body"
+- apply_to_log: true
+  key: "answer"
+  rule: "append"
+  value: "choices.0.delta.content"
+  value_source: "response_streaming_body"
+- apply_to_log: true
+  key: "answer"
+  value: "choices.0.message.content"
+  value_source: "response_body"
 ```
+
+!> 如果也出现修改不生效的问题，可以直接修改插件的配置文件 `volumes/nacos/tenant-config-data/higress-system/higress-system/wasmplugins.ai-statistics-1.0.0`
+
+```yaml
+spec:
+  defaultConfig:
+    attributes:
+    - apply_to_log: true
+      key: user-api-key
+      value: user-api-key
+      value_source: request_header
+    - apply_to_log: true
+      key: question
+      value: messages
+      value_source: request_body
+    - apply_to_log: true
+      key: top_p
+      value: top_p
+      value_source: request_body
+    - apply_to_log: true
+      key: temperature
+      value: temperature
+      value_source: request_body
+    - apply_to_log: true
+      key: answer
+      rule: append
+      value: choices.0.delta.content
+      value_source: response_streaming_body
+    - apply_to_log: true
+      key: answer
+      value: choices.0.message.content
+      value_source: response_body
+```
+
 
 ### 3.4 AI 意图识别
 
