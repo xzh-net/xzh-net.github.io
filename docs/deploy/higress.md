@@ -198,6 +198,7 @@ curl localhost:15000/logging?golang=debug -X POST
 ```yaml
 attributes:
 - apply_to_log: true
+  # 将请求头中的key添加到日志中
   key: "user-api-key"
   value: "user-api-key"
   value_source: "request_header"
@@ -205,6 +206,7 @@ attributes:
   key: "question"
   value: "messages"
   value_source: "request_body"
+  # 将请求体中的key添加到日志中
 - apply_to_log: true
   key: "top_p"
   value: "top_p"
@@ -224,7 +226,7 @@ attributes:
   value_source: "response_body"
 ```
 
-!> 如果也出现修改不生效的问题，可以直接修改插件的配置文件 `volumes/nacos/tenant-config-data/higress-system/higress-system/wasmplugins.ai-statistics-1.0.0`
+!> 使用内嵌 Nacos 如果也出现修改不生效的问题，可以直接修改插件的配置文件 `volumes/nacos/tenant-config-data/higress-system/higress-system/wasmplugins.ai-statistics-1.0.0`
 
 ```yaml
 spec:
