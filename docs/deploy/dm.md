@@ -171,17 +171,56 @@ SYSDBA/SYSDBA
 
 ### 2.1 用户管理
 
-```bash
-create user xzh identified by 123456789 limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
-drop user xzh cascade;
-create user xzh identified by "123456789" default tablespace tbs1 temporary tablespace temp_tbs1;
-grant resource,public,soi,svi,vti to xzh;
+1. 创建用户
+
+基础用户
+```sql
+CREATE USER test2026 IDENTIFIED BY "Pwd@2026"
 ```
+
+指定表空间和临时表空间
+```sql
+CREATE USER test2026 IDENTIFIED BY "Pwd@2026" default tablespace tbs1 temporary tablespace temp_tbs1;
+```
+
+带密码策略的用户，密码有效期（天）：60 ，最大失败登录次数：5 ，密码锁定时间（天）：5
+```sql
+create user test2026 identified by Pwd@2026 limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
+```
+
+2. 删除用户
+
+```sql
+DROP USER TEST2026 CASCADE;
+```
+
+3. 查询用户
+
+```sql
+SELECT * FROM DBA_USERS;
+```
+
+4. 修改密码
+
+
+5. 授权
+
+```sql
+-- 查询预定义角色
+SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE='PUBLIC';
+-- 授权RESOURCE角色
+GRANT RESOURCE to test2026;
+-- 授权系统权限
+GRANT CREATE TABLE, CREATE VIEW, CREATE PROCEDURE TO test2026;
+-- 查询用户角色
+SELECT * FROM DBA_ROLE_PRIVS WHERE GRANTEE = 'TEST2026';
+```
+
 
 
 ### 2.2 表空间管理
 
-```bash
+```sql
 create tablespace tbs1 datafile '/opt/dmdbms/data/prod/tbs1_01.dbf' size 128 autoextend on next 4 maxsize 2048; # 初始大小128m，每次自动扩充4m，最大尺寸2g
 drop tablespace tbs1; 
 alter tablespace tbs1 offline|online; # 表空间脱机
