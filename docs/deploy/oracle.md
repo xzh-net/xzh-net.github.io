@@ -1269,7 +1269,7 @@ drop user xzh0610 cascade;
 3. 查询用户
 
 ```sql
-select * from sys.all_users order by user_id;
+SELECT * FROM dba_users;
 ```
 
 4. 修改密码
