@@ -12,14 +12,14 @@
 
 - 数据库
   - [Oracle](deploy/oracle)
+  - [DM](deploy/dm)
   - [PostgreSQL](deploy/postgres)
+  - [HGDB](deploy/hgdb)
   - [MySQL](deploy/mysql)
+  - [OceanBase](deploy/oceanbase)
   - [SQL Server](deploy/mssql)
   - [MongoDB](deploy/mongodb)
   - [Redis](deploy/redis)
-  - [DM](deploy/dm)
-  - [OceanBase](deploy/oceanbase)
-  - [HGDB](deploy/hgdb)
 
 - 服务中间件与工具
   - [Nginx](deploy/nginx)
