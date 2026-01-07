@@ -1,13 +1,14 @@
+
 - 操作系统
-  - [CentOS 7](deploy/centos7)
-  - [Redhat 7](deploy/rhel7)
+  - [CentOS 7.9](deploy/centos7)
+  - [Redhat 7.9](deploy/rhel7)
+  - [Rocky 8.5](deploy/rocky85)
+  - [Kylin V10](deploy/kylinv10)
+  - [NeoKylin V7](deploy/neokylin7)
   - [Debian 10](deploy/debian10)
   - [Kali 2021](deploy/kali2021)
   - [Ubuntu 22](deploy/ubuntu22)
   - [Ubuntu 24](deploy/ubuntu24)
-  - [Rocky 8.5](deploy/rocky85)
-  - [Kylin V10](deploy/kylinv10)
-  - [NeoKylin V7](deploy/neokylin7)
   - [Windows 10](deploy/windows10)
 
 - 数据库
