@@ -1,4 +1,3 @@
-
 - 操作系统
   - [CentOS 7.9](deploy/centos7)
   - [Redhat 7.9](deploy/rhel7)
@@ -22,7 +21,7 @@
   - [MongoDB](deploy/mongodb)
   - [Redis](deploy/redis)
 
-- 服务中间件与工具
+- 服务中间件
   - [Nginx](deploy/nginx)
   - [OpenResty](deploy/openresty)
   - [Keepalived](deploy/keepalived)
@@ -89,7 +88,7 @@
   - [Lua](deploy/lua)
   - [Arthas](deploy/arthas)
 
-- Java核心技术体系
+- Java核心技术
   - [IO模型](java/io)
   - [分布式理论与算法](java/cap)
   - [设计模式](java/model)
