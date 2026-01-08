@@ -345,6 +345,46 @@ select * from TEST_TAB;
 
 ### 3.4 创建函数
 
+根据身份证号判断性别
+
+```sql
+CREATE OR REPLACE FUNCTION TEST2026.GET_SEX(id_card IN VARCHAR(50))
+RETURN CHAR(2)
+AS
+    v_sex CHAR(2);
+BEGIN
+    IF to_number(substr(id_card,17,1))%2=1 THEN
+     v_sex:= '男';
+    ELSE  
+     v_sex:= '女';
+    END IF;
+    RETURN v_sex;
+END;
+```
+
+使用函数
+```sql
+-- 女
+select GET_SEX(110101199612123801) from DUAL;
+-- 男
+select GET_SEX(710000199608051059) from DUAL;
+```
+
 ### 3.5 创建序列
 
+创建序列 SEQ_QUANTITY，起始值为 5，增量值为 2，最大值为 200。示例语句如下所示：
+
+```sql
+CREATE SEQUENCE TEST2026.seq_quantity START WITH 5 INCREMENT BY 2 MAXVALUE 200;
+```
+
+查询下一个值
+```sql
+SELECT TEST2026.seq_quantity.nextval FROM dual;
+```
+
 ### 3.6 创建触发器
+
+### 3.7 创建连接
+
+### 3.8 闪回查询
