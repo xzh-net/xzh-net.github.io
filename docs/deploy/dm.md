@@ -277,10 +277,10 @@ INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('CD','成都',7);
 
 ### 3.2 创建视图
 
-对 CITY 表创建一个视图，命名为 V_CITY，保存 region_id 小于 4 的数据，列名有：city_id，city_name，region_id。示例语句如下所示：
+对 CITY 表创建一个`只读视图`，命名为 V_CITY，保存 region_id 小于 4 的数据，列名有：city_id，city_name，region_id。示例语句如下所示：
 
 ```sql
-CREATE VIEW TEST2026.v_city AS
+CREATE OR REPLACE VIEW TEST2026.v_city AS
 SELECT
         city_id  ,
         city_name ,
@@ -288,7 +288,7 @@ SELECT
 FROM
         TEST2026.city
 WHERE
-        region_id < 4;
+        region_id < 4
 WITH READ ONLY;
 ```
 
@@ -298,21 +298,50 @@ WITH READ ONLY;
 DROP VIEW TEST2026.V_CITY;
 ```
 
-### 3.3 创建存储过程
-
-创建一个名为 PROC_1 的存储过程，入参数据类型为 INT，变量 B 赋予初始值 10，输出变量 A 的值为输入的变量 A 值与变量 B 值之和。示例语句如下所示：
+创建一个可`更新视图`。以后对该视图作插入、修改和删除操作时，系统均会自动用 WHERE 后的条件作检查，不满足条件的数据，则不能通过该视图更新相应基表中的数据
 
 ```sql
-CREATE
-PROCEDURE TEST2026.proc_1
-        (a IN OUT INT)
+CREATE OR REPLACE VIEW TEST2026.v_city AS
+SELECT
+        city_id  ,
+        city_name ,
+        region_id
+FROM
+        TEST2026.city
+WHERE
+        region_id < 4
+WITH CHECK OPTION;
+```
+
+### 3.3 创建存储过程
+
+创建测试表
+```sql
+CREATE TABLE TEST_TAB (ID INT PRIMARY KEY, NAME VARCHAR(30));
+```
+
+创建有参数存储过程 p_test
+```sql
+CREATE OR REPLACE PROCEDURE P_TEST(I IN INT)
 AS
-        b INT:=10;
+    J INT;
 BEGIN
-        a:=a+b;
-        PRINT 'DMHR.PROC_1调用结果:'||a;
+    FOR J IN 1 .. I LOOP
+        INSERT INTO TEST_TAB VALUES (J, 'P_TEST'||J);
+    END LOOP;
 END;
 ```
+
+执行过程
+```sql
+P_TEST(3);
+```
+
+查看结果
+```sql
+select * from TEST_TAB;
+```
+
 
 ### 3.4 创建函数
 
