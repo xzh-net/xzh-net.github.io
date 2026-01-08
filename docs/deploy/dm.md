@@ -169,7 +169,35 @@ SYSDBA/SYSDBA
 
 ## 2. 库操作
 
-### 2.1 用户管理
+### 2.1 创建表空间
+
+表空间名称系统默认全部转换成大写，如有特殊需求使用小写，需加双引号。临时表空间仅初始化时自动创建，无法手动新增。
+
+```sql
+-- 初始大小128m，每次自动扩充10m，最大尺寸2g
+create tablespace tbs1 datafile '/dm8/data/DAMENG/tbs1.dbf' size 128 autoextend on next 10 maxsize 2048; 
+-- 修改表空间，打开自动扩展，每次自动扩展 100M ，扩展上限 10240M
+alter tablespace "tbs1" datafile '/dm8/data/DAMENG/tbs1.dbf' autoextend on next 100 maxsize 10240;
+
+-- 查询表空间
+SELECT TABLESPACE_NAME FROM DBA_TABLESPACES;
+-- 查询表空间文件位置
+SELECT TABLESPACE_NAME,FILE_NAME FROM DBA_DATA_FILES;
+
+-- 检查表对象
+SELECT TABLE_NAME FROM DBA_TABLES WHERE TABLESPACE_NAME = 'tbs1';
+-- 检查索引对象
+SELECT INDEX_NAME FROM DBA_INDEXES WHERE TABLESPACE_NAME = 'tbs1';
+-- 删除表空间，需要手动删除物理文件
+DROP TABLESPACE tbs1;
+
+-- 将表空间离线
+ALTER TABLESPACE tbs1 OFFLINE;
+-- 将表空间重新上线
+ALTER TABLESPACE tbs1 ONLINE;
+```
+
+### 2.2 创建用户
 
 1. 创建用户
 
@@ -178,14 +206,14 @@ SYSDBA/SYSDBA
 CREATE USER test2026 IDENTIFIED BY "Pwd@2026"
 ```
 
-指定表空间和临时表空间
+指定表空间和索引表空间
 ```sql
-CREATE USER test2026 IDENTIFIED BY "Pwd@2026" default tablespace tbs1 temporary tablespace temp_tbs1;
+CREATE USER test2026 IDENTIFIED BY "Pwd@2026" default tablespace tbs1 default index tablespace tbs2;
 ```
 
 带密码策略的用户，密码有效期（天）：60 ，最大失败登录次数：5 ，密码锁定时间（天）：5
 ```sql
-create user test2026 identified by Pwd@2026 limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
+create user test2026 identified by "Pwd@2026" limit password_life_time 60, failed_login_attemps 5, password_lock_time 5;
 ```
 
 2. 删除用户
@@ -209,22 +237,85 @@ SELECT * FROM DBA_USERS;
 -- 查询预定义角色
 SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE='PUBLIC';
 -- 授权RESOURCE角色
-GRANT RESOURCE to test2026;
+GRANT RESOURCE to TEST2026;
 -- 授权系统权限
-GRANT CREATE TABLE, CREATE VIEW, CREATE PROCEDURE TO test2026;
+GRANT CREATE TABLE, CREATE VIEW, CREATE PROCEDURE TO TEST2026;
 -- 查询用户角色
 SELECT * FROM DBA_ROLE_PRIVS WHERE GRANTEE = 'TEST2026';
 ```
 
 
+## 3. 表操作
 
-### 2.2 表空间管理
+### 3.1 创建表
+
+在模式 TEST2026 下创建表 CITY，并插入数据。示例语句如下所示：
 
 ```sql
-create tablespace tbs1 datafile '/opt/dmdbms/data/prod/tbs1_01.dbf' size 128 autoextend on next 4 maxsize 2048; # 初始大小128m，每次自动扩充4m，最大尺寸2g
-drop tablespace tbs1; 
-alter tablespace tbs1 offline|online; # 表空间脱机
-select tablespace_name from dba_tablespaces;
-select tablespace_name,file_name from dba_data_files;
+CREATE TABLE TEST2026.city
+(
+ city_id CHAR(3) NOT NULL,
+ city_name VARCHAR(40) NULL,
+ region_id INT NULL
+);
 ```
 
+```sql
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('BJ','北京',1);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('SJZ','石家庄',1);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('SH','上海',2);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('NJ','南京',2);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('GZ','广州',3);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('HK','海口',3);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('WH','武汉',4);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('CS','长沙',4);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('SY','沈阳',5);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('XA','西安',6);
+INSERT INTO TEST2026.city(city_id,city_name,region_id) VALUES('CD','成都',7);
+```
+
+
+### 3.2 创建视图
+
+对 CITY 表创建一个视图，命名为 V_CITY，保存 region_id 小于 4 的数据，列名有：city_id，city_name，region_id。示例语句如下所示：
+
+```sql
+CREATE VIEW TEST2026.v_city AS
+SELECT
+        city_id  ,
+        city_name ,
+        region_id
+FROM
+        TEST2026.city
+WHERE
+        region_id < 4;
+WITH READ ONLY;
+```
+
+删除视图
+
+```sql
+DROP VIEW TEST2026.V_CITY;
+```
+
+### 3.3 创建存储过程
+
+创建一个名为 PROC_1 的存储过程，入参数据类型为 INT，变量 B 赋予初始值 10，输出变量 A 的值为输入的变量 A 值与变量 B 值之和。示例语句如下所示：
+
+```sql
+CREATE
+PROCEDURE TEST2026.proc_1
+        (a IN OUT INT)
+AS
+        b INT:=10;
+BEGIN
+        a:=a+b;
+        PRINT 'DMHR.PROC_1调用结果:'||a;
+END;
+```
+
+### 3.4 创建函数
+
+### 3.5 创建序列
+
+### 3.6 创建触发器
