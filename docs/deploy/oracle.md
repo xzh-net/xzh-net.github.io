@@ -1818,7 +1818,7 @@ alter system set processes = value scope = spfile;       -- 修改连接数需�
 
 ## 3. 表操作
 
-### 3.1 建表
+### 3.1 创建表
 
 ```sql
 create table tb_order
@@ -1867,8 +1867,9 @@ WHERE
 
 ### 3.2 锁表
 
+查询锁定的对象和会话
+
 ```sql
--- 执行中sql
 SELECT S.USERNAME,
        OBJECT_NAME,
        MACHINE,
@@ -1878,14 +1879,33 @@ SELECT S.USERNAME,
   FROM GV$LOCKED_OBJECT L, DBA_OBJECTS O, GV$SESSION S
  WHERE L.OBJECT_ID = O.OBJECT_ID
    AND L.SESSION_ID = S.SID; 
+```
 
+查询特定用户的会话
+
+```sql
 SELECT 'ALTER SYSTEM KILL SESSION ''' || SID || ',' || SERIAL# || '''' || ';'
   FROM V$SESSION
  WHERE USERNAME = 'XW0125'
+```
 
--- ora-00031错误执行：ps -ef|grep spid，kill -9 spid
+当使用ALTER SYSTEM KILL SESSION遇到ORA-00031错误（标记要终止的会话）时，需要在操作系统级别终止进程
+
+根据SID查找对应的操作系统进程
+```sql
 select spid, osuser, s.program from v$session s, v$process p where s.paddr = p.addr and s.sid = {sid};
 ```
+
+执行操作系统命令
+```bash
+# 查找进程
+ps -ef | grep {spid}
+
+# 强制终止进程
+kill -9 {spid}
+```
+
+###
 
 ## 4. 统计信息
 
