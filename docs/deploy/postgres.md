@@ -765,7 +765,7 @@ select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespa
 
 ## 4. 表操作
 
-### 4.1 表结构
+### 4.1 查询表结构
 
 ```sql
 -- 查询所有数据库大小
@@ -983,6 +983,217 @@ where pid in (
   and t.relkind = 'r' 
 );
 ```
+
+### 4.4 创建视图
+
+#### 4.4.1 虚拟视图
+
+`public`模式下创建一个模仿Oracle数据库中的DUAL表
+
+```sql
+CREATE VIEW "public"."dual" AS  SELECT 'X'::character varying(1) AS dummy;
+ALTER TABLE "public"."dual" OWNER TO "postgres";
+```
+
+#### 4.4.2 普通视图
+
+```sql
+CREATE VIEW "public"."view_product" AS  SELECT product.id,
+    product.create_user_id,
+    product.create_time
+   FROM product;
+
+ALTER TABLE "public"."view_product" OWNER TO "postgres";
+```
+
+#### 4.4.3 拼接视图
+
+```sql
+CREATE VIEW "view_of_user" AS  SELECT ofuser.username,
+    ofuser.email,
+    ofuser.plainpassword AS password,
+    ofuser.username AS loginid
+   FROM ofuser
+UNION
+ SELECT ts_sso_user_info.ts_sso_user_info_id AS username,
+    ts_sso_user_info.ts_email AS email,
+    ts_sso_user_info.ts_sso_user_info_id AS password,
+    ts_sso_user_info.ts_sso_user_info_id AS loginid
+   FROM ts_sso_user_info;
+
+ALTER TABLE "view_of_user" OWNER TO "postgres";
+```
+
+### 4.5 创建函数
+
+#### 4.5.1 自定义函数
+
+```sql
+CREATE OR REPLACE FUNCTION ADDN(_a int,_b int) RETURNS integer AS $total$  
+declare  
+    total integer;  
+BEGIN  
+   total :=_a+_b;
+   RETURN total;  
+END;  
+$total$ LANGUAGE plpgsql;
+```
+
+
+#### 4.5.2 执行动态SQL
+
+查询执行时间大于90s的SQL，执行中断操作并保存到日志表中。无返回值
+
+```sql
+create table monitor_logs (
+  query varchar(4000),
+  cdate timestamp
+)
+```
+
+```sql
+CREATE OR REPLACE FUNCTION check_monitor() RETURNS void AS $$ DECLARE
+    V_SQL VARCHAR ( 4000 );
+    ITEM  RECORD;
+BEGIN
+    FOR ITEM IN (
+        SELECT
+            pid,
+            query 
+        FROM
+            pg_stat_activity pgsa 
+        WHERE
+            pid != pg_backend_pid ( ) 
+            AND pgsa.STATE != 'idle' 
+            AND pgsa.STATE != 'idle in transaction' 
+            AND pgsa.STATE != 'idle in transaction (aborted)' 
+            AND EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) > 90 
+        )
+        LOOP
+        V_SQL := 'SELECT pg_terminate_backend(''' || ITEM.pid || ''');';
+    INSERT INTO monitor_logs ( query, cdate )
+    VALUES
+        ( ITEM.query, CURRENT_TIMESTAMP );
+    EXECUTE V_SQL;
+    END LOOP;
+END;
+$$ LANGUAGE PLPGSQL;
+```
+
+该函数可以配合linux定时任务实现信息系统收集
+
+```bash
+*/3 * * * * sh /home/postgres/shell/check_monitor.sh
+```
+
+```bash
+#!/bin/bash
+export LD_LIBRARY_PATH=/usr/local/pgsql/lib:$LD_LIBRARY_PATH
+starttime=`date +'%Y-%m-%d %H:%M:%S'`
+/usr/local/pgsql/bin/psql -p 5432 -d postgres -U postgres  -c "select check_monitor();"
+echo '执行时间：'$starttime >> /home/postgres/shell/log.log
+```
+
+#### 4.5.3 返回游标
+
+```sql
+-- ----------------------------
+-- Table structure for teacher
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."teacher";
+CREATE TABLE "public"."teacher" (
+  "id" int2 NOT NULL,
+  "teacher_name" varchar(50) COLLATE "pg_catalog"."default",
+  "teacher_age" int2,
+  "tea_salary" numeric(10,2)
+);
+
+COMMENT ON COLUMN "public"."teacher"."id" IS '主键ID';
+COMMENT ON COLUMN "public"."teacher"."teacher_name" IS '教师名称';
+COMMENT ON COLUMN "public"."teacher"."teacher_age" IS '教师年龄';
+COMMENT ON COLUMN "public"."teacher"."tea_salary" IS '教师工资';
+
+INSERT INTO "public"."teacher" VALUES (1, '张飞', 35, 12000.00);
+INSERT INTO "public"."teacher" VALUES (2, '关羽', 12, 30000.00);
+INSERT INTO "public"."teacher" VALUES (3, '杰克', 18, 40000.00);
+INSERT INTO "public"."teacher" VALUES (4, '李逵', 20, 18000.00);
+INSERT INTO "public"."teacher" VALUES (5, '兰陵王', 13, 7800.00);
+INSERT INTO "public"."teacher" VALUES (6, '安其拉', 35, 90000.00);
+INSERT INTO "public"."teacher" VALUES (7, '李白', 7, 59000.00);
+INSERT INTO "public"."teacher" VALUES (8, '赵四', 9, 42000.00);
+INSERT INTO "public"."teacher" VALUES (9, '王五', 5, 2000.00);
+INSERT INTO "public"."teacher" VALUES (10, 'xzh', 13, 1000000.00);
+
+ALTER TABLE "public"."teacher" ADD CONSTRAINT "teacher_pkey" PRIMARY KEY ("id");
+```
+
+```sql
+CREATE OR REPLACE FUNCTION loadata ( IN pagenum int4, OUT v_total int8, OUT v_list refcursor ) 
+    RETURNS record AS $$ DECLARE
+    v_sql TEXT;
+BEGIN
+    OPEN v_list FOR 
+    SELECT * FROM teacher ORDER BY ID LIMIT 5 OFFSET ( pageNum - 1 ) * 5;
+        
+    SELECT COUNT
+        ( * ) INTO v_total 
+    FROM
+        teacher;
+END;
+$$ LANGUAGE plpgsql
+```
+
+
+### 4.6 创建触发器
+
+
+1. 创建表
+
+```sql
+-- 学生分数表
+create table stu_score
+(
+  stuno serial not null,       --学生编号
+  major character varying(16), --专业课程
+  score integer                --分数
+);
+
+-- 汇总表
+create table major_stats
+(
+  major character varying(16), --专业课程
+  total_score integer,         --总分
+  total_students integer       --学生总数
+);
+```
+
+2. 创建计算规则函数
+   
+```sql
+CREATE OR REPLACE FUNCTION fun_stu_major() RETURNS TRIGGER AS $$ DECLARE
+    rec record;
+BEGIN
+    DELETE FROM major_stats; --将统计表里面的旧数据清空
+    FOR rec IN ( SELECT major, SUM(score) AS total_score, COUNT(*) AS total_students FROM stu_score GROUP BY major ) loop    
+        INSERT INTO major_stats
+        VALUES
+            ( rec.major, rec.total_score, rec.total_students );
+    END loop;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+3. 创建触发器
+
+```sql
+create trigger tri_stu_major 
+AFTER insert or update or delete
+on stu_score 
+for each row
+execute procedure fun_stu_major()
+```
+
 
 
 ## 5. 统计信息
@@ -1294,212 +1505,3 @@ vacuum tablename
 -- 更新该数据库所有表
 vacuum               
 ```
-
-## 6. PG/SQL
-
-### 6.1 视图
-
-1. dual
-
-```sql
-CREATE VIEW "public"."dual" AS  SELECT 'X'::character varying(1) AS dummy;
-ALTER TABLE "public"."dual" OWNER TO "postgres";
-```
-
-2. 普通视图
-
-```sql
-CREATE VIEW "public"."view_product" AS  SELECT product.id,
-    product.create_user_id,
-    product.create_time
-   FROM product;
-
-ALTER TABLE "public"."view_product" OWNER TO "postgres";
-```
-
-3. 拼接视图
-
-```sql
-CREATE VIEW "view_of_user" AS  SELECT ofuser.username,
-    ofuser.email,
-    ofuser.plainpassword AS password,
-    ofuser.username AS loginid
-   FROM ofuser
-UNION
- SELECT ts_sso_user_info.ts_sso_user_info_id AS username,
-    ts_sso_user_info.ts_email AS email,
-    ts_sso_user_info.ts_sso_user_info_id AS password,
-    ts_sso_user_info.ts_sso_user_info_id AS loginid
-   FROM ts_sso_user_info;
-
-ALTER TABLE "view_of_user" OWNER TO "postgres";
-```
-
-### 6.2 触发器
-
-1. 创建表
-
-```sql
--- 学生分数表
-create table stu_score
-(
-  stuno serial not null,       --学生编号
-  major character varying(16), --专业课程
-  score integer                --分数
-);
-
--- 汇总表
-create table major_stats
-(
-  major character varying(16), --专业课程
-  total_score integer,         --总分
-  total_students integer       --学生总数
-);
-```
-
-2. 创建计算规则函数
-   
-```sql
-CREATE OR REPLACE FUNCTION fun_stu_major() RETURNS TRIGGER AS $$ DECLARE
-    rec record;
-BEGIN
-    DELETE FROM major_stats; --将统计表里面的旧数据清空
-    FOR rec IN ( SELECT major, SUM(score) AS total_score, COUNT(*) AS total_students FROM stu_score GROUP BY major ) loop    
-        INSERT INTO major_stats
-        VALUES
-            ( rec.major, rec.total_score, rec.total_students );
-    END loop;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-```
-
-3. 创建触发器
-
-```sql
-create trigger tri_stu_major 
-AFTER insert or update or delete
-on stu_score 
-for each row
-execute procedure fun_stu_major()
-```
-
-### 6.3 函数
-
-1. 自定义
-
-```sql
-CREATE OR REPLACE FUNCTION ADDN(_a int,_b int) RETURNS integer AS $total$  
-declare  
-    total integer;  
-BEGIN  
-   total :=_a+_b;
-   RETURN total;  
-END;  
-$total$ LANGUAGE plpgsql;
-```
-
-
-2. 执行SQL
-
-查询执行时间大于90s的SQL，执行中断操作并保存到日志表中。无返回值
-
-```sql
-create table monitor_logs (
-  query varchar(4000),
-  cdate timestamp
-)
-```
-
-```sql
-CREATE OR REPLACE FUNCTION check_monitor() RETURNS void AS $$ DECLARE
-    V_SQL VARCHAR ( 4000 );
-    ITEM  RECORD;
-BEGIN
-    FOR ITEM IN (
-        SELECT
-            pid,
-            query 
-        FROM
-            pg_stat_activity pgsa 
-        WHERE
-            pid != pg_backend_pid ( ) 
-            AND pgsa.STATE != 'idle' 
-            AND pgsa.STATE != 'idle in transaction' 
-            AND pgsa.STATE != 'idle in transaction (aborted)' 
-            AND EXTRACT ( epoch FROM ( now( ) - pgsa.query_start ) ) > 90 
-        )
-        LOOP
-        V_SQL := 'SELECT pg_terminate_backend(''' || ITEM.pid || ''');';
-    INSERT INTO monitor_logs ( query, cdate )
-    VALUES
-        ( ITEM.query, CURRENT_TIMESTAMP );
-    EXECUTE V_SQL;
-    END LOOP;
-END;
-$$ LANGUAGE PLPGSQL;
-```
-
-该函数可以配合linux定时任务实现信息系统收集
-
-```bash
-*/3 * * * * sh /home/postgres/shell/check_monitor.sh
-```
-
-```bash
-#!/bin/bash
-export LD_LIBRARY_PATH=/usr/local/pgsql/lib:$LD_LIBRARY_PATH
-starttime=`date +'%Y-%m-%d %H:%M:%S'`
-/usr/local/pgsql/bin/psql -p 5432 -d postgres -U postgres  -c "select check_monitor();"
-echo '执行时间：'$starttime >> /home/postgres/shell/log.log
-```
-
-3. 返回游标
-
-```sql
--- ----------------------------
--- Table structure for teacher
--- ----------------------------
-DROP TABLE IF EXISTS "public"."teacher";
-CREATE TABLE "public"."teacher" (
-  "id" int2 NOT NULL,
-  "teacher_name" varchar(50) COLLATE "pg_catalog"."default",
-  "teacher_age" int2,
-  "tea_salary" numeric(10,2)
-);
-
-COMMENT ON COLUMN "public"."teacher"."id" IS '主键ID';
-COMMENT ON COLUMN "public"."teacher"."teacher_name" IS '教师名称';
-COMMENT ON COLUMN "public"."teacher"."teacher_age" IS '教师年龄';
-COMMENT ON COLUMN "public"."teacher"."tea_salary" IS '教师工资';
-
-INSERT INTO "public"."teacher" VALUES (1, '张飞', 35, 12000.00);
-INSERT INTO "public"."teacher" VALUES (2, '关羽', 12, 30000.00);
-INSERT INTO "public"."teacher" VALUES (3, '杰克', 18, 40000.00);
-INSERT INTO "public"."teacher" VALUES (4, '李逵', 20, 18000.00);
-INSERT INTO "public"."teacher" VALUES (5, '兰陵王', 13, 7800.00);
-INSERT INTO "public"."teacher" VALUES (6, '安其拉', 35, 90000.00);
-INSERT INTO "public"."teacher" VALUES (7, '李白', 7, 59000.00);
-INSERT INTO "public"."teacher" VALUES (8, '赵四', 9, 42000.00);
-INSERT INTO "public"."teacher" VALUES (9, '王五', 5, 2000.00);
-INSERT INTO "public"."teacher" VALUES (10, 'xzh', 13, 1000000.00);
-
-ALTER TABLE "public"."teacher" ADD CONSTRAINT "teacher_pkey" PRIMARY KEY ("id");
-```
-
-```sql
-CREATE OR REPLACE FUNCTION loadata ( IN pagenum int4, OUT v_total int8, OUT v_list refcursor ) 
-    RETURNS record AS $$ DECLARE
-    v_sql TEXT;
-BEGIN
-    OPEN v_list FOR 
-    SELECT * FROM teacher ORDER BY ID LIMIT 5 OFFSET ( pageNum - 1 ) * 5;
-        
-    SELECT COUNT
-        ( * ) INTO v_total 
-    FROM
-        teacher;
-END;
-$$ LANGUAGE plpgsql
-```
-
