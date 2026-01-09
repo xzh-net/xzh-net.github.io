@@ -1307,8 +1307,8 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 ```
 
 > 注意:  
-> 1.如果使用 docker 容器里面的 disql，进入容器后，先执行 source /etc/profile 防止中文乱码。  
-> 2.新版本 Docker 镜像中数据库默认用户名/密码为 SYSDBA/SYSDBA001  
+> 1. 进入容器先执行 `source /etc/profile` 防止中文乱码。  
+> 2. 打开终端 `/opt/dmdbms/bin/disql` ，用户名/密码 SYSDBA/SYSDBA001  
 
 
 #### 【嵌入式】SQLite
