@@ -202,7 +202,7 @@ mysql -uroot -proot -h 127.0.0.1 -P 3306 sonar</tmp/all.sql                     
 
 ## 3. 表操作
 
-### 3.1 表结构
+### 3.1 查询表结构
    
 获取所有表信息
 
@@ -250,44 +250,7 @@ ORDER BY
     ORDINAL_POSITION
 ```
 
-## 4. 统计信息
-
-### 4.1 负载指标统计
-
-### 4.2 数据分布统计
-
-#### 4.2.1 空间
-
-1. 表占用空间
-
-```sql
-SELECT 
-    table_name,
-    ROUND(((data_length + index_length) / 1024 / 1024), 2) AS total_size_mb
-FROM
-    information_schema.tables
-WHERE
-    table_schema = 'database_name'
-order by ROUND(((data_length + index_length) / 1024 / 1024), 2)
-```
-
-2. 所有表占用空间
-
-```sql
-select table_schema as 'database', SUM(ROUND((data_length + index_length) / 1024 / 1024, 2)) AS 'Size(MB)' FROM information_schema.tables where table_schema = 'database_name'
-```
-
-#### 4.2.2 数据
-
-1. 每个表记录行数查询
-
-```sql
-select table_name,table_rows from information_schema.tables where TABLE_SCHEMA = 'database_name' order by table_rows desc;
-```
-
-## 5. SQL
-
-### 5.1 FUNCTION
+### 3.2 创建函数
 
 ```sql
 CREATE FUNCTION `F_ACTUSER`(v_FLOWCID varchar(40)) RETURNS longtext CHARSET utf8
@@ -322,7 +285,7 @@ BEGIN
 END
 ```
 
-### 5.2 PROCEDURE
+### 3.3 创建存储过程
 
 ```sql
 CREATE PROCEDURE `PROC_INIT_FLOW_SINGLE`(IN V_PARTNERID VARCHAR(40),
@@ -350,4 +313,39 @@ BEGIN
         END LOOP listLoop;
     CLOSE LIST_CUR;
 END
+```
+
+## 4. 统计信息
+
+### 4.1 负载指标统计
+
+### 4.2 数据分布统计
+
+#### 4.2.1 空间
+
+1. 表占用空间
+
+```sql
+SELECT 
+    table_name,
+    ROUND(((data_length + index_length) / 1024 / 1024), 2) AS total_size_mb
+FROM
+    information_schema.tables
+WHERE
+    table_schema = 'database_name'
+order by ROUND(((data_length + index_length) / 1024 / 1024), 2)
+```
+
+2. 所有表占用空间
+
+```sql
+select table_schema as 'database', SUM(ROUND((data_length + index_length) / 1024 / 1024, 2)) AS 'Size(MB)' FROM information_schema.tables where table_schema = 'database_name'
+```
+
+#### 4.2.2 数据
+
+1. 每个表记录行数查询
+
+```sql
+select table_name,table_rows from information_schema.tables where TABLE_SCHEMA = 'database_name' order by table_rows desc;
 ```
