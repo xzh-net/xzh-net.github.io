@@ -387,4 +387,59 @@ SELECT TEST2026.seq_quantity.nextval FROM dual;
 
 ### 3.7 创建连接
 
-### 3.8 闪回查询
+### 3.8 匿名块
+
+#### 3.8.1 执行动态SQL
+
+打印区域id=2的数据条数
+
+```sql
+DECLARE
+    v_sql VARCHAR2(1000);
+    v_region_id NUMBER := 2;
+    v_city_count NUMBER;
+BEGIN
+    -- 动态SQL
+    v_sql := 'SELECT COUNT(*) FROM city WHERE region_id = :1';
+    
+    EXECUTE IMMEDIATE v_sql INTO v_city_count USING v_region_id;
+    
+    DBMS_OUTPUT.PUT_LINE('区域id=' || v_region_id || '的数据有' || v_city_count || '条');
+END;
+```
+
+
+#### 3.8.2 调用带参数的存储过程
+
+创建存储过程
+
+```sql
+CREATE OR REPLACE PROCEDURE proc_calculate_salary(
+    p_in_param IN NUMBER,               -- 仅输入
+    p_in_out_param IN OUT NUMBER,       -- 输入输出
+    p_out_param OUT VARCHAR2            -- 仅输出
+)
+AS
+BEGIN
+    -- 使用并修改IN OUT参数
+    p_in_out_param := p_in_out_param * 1.2;
+    
+    -- 设置输出参数
+    p_out_param := '处理完成，IN_OUT参数已更新';
+END;
+```
+
+执行存储过程
+
+```sql
+DECLARE
+    v_result  NUMBER := 1000;
+    v_message VARCHAR2(100);
+BEGIN
+    -- 调用存储过程
+    proc_calculate_salary(1000, v_result, v_message);
+    DBMS_OUTPUT.PUT_LINE('结果: ' || v_result || ', 消息: ' || v_message);
+END;
+```
+
+### 3.9 闪回查询
