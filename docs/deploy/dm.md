@@ -385,7 +385,168 @@ SELECT TEST2026.seq_quantity.nextval FROM dual;
 
 ### 3.6 创建触发器
 
-### 3.7 创建连接
+#### 3.6.1 表触发器
+
+每次修改用户信息，记录变更审计日志
+
+1. 创建表
+
+```sql
+-- 创建用户表
+CREATE TABLE USER_INFO (
+    USER_ID INT PRIMARY KEY,
+    USER_NAME VARCHAR(50) NOT NULL,
+    GENDER CHAR(1) CHECK (GENDER IN ('M', 'F')),
+    CREATE_TIME DATETIME DEFAULT SYSDATE,
+    IS_DISABLED CHAR(1) DEFAULT '0' CHECK (IS_DISABLED IN ('0', '1'))
+);
+
+COMMENT ON TABLE USER_INFO IS '用户信息表';
+COMMENT ON COLUMN USER_INFO.USER_ID IS '用户ID';
+COMMENT ON COLUMN USER_INFO.USER_NAME IS '用户姓名';
+COMMENT ON COLUMN USER_INFO.GENDER IS '性别（M:男, F:女）';
+COMMENT ON COLUMN USER_INFO.CREATE_TIME IS '创建时间';
+COMMENT ON COLUMN USER_INFO.IS_DISABLED IS '是否禁用（0:否, 1:是）';
+
+-- 创建日志记录表
+CREATE TABLE USER_AUDIT_LOG (
+    AUDIT_ID INT IDENTITY(1, 1) PRIMARY KEY,
+    OPER_TIME DATETIME DEFAULT SYSDATE,
+    OPER_TYPE VARCHAR(10) NOT NULL,
+    OLD_VALUE VARCHAR(2000),
+    NEW_VALUE VARCHAR(2000)
+);
+
+COMMENT ON TABLE USER_AUDIT_LOG IS '用户操作审计日志表';
+COMMENT ON COLUMN USER_AUDIT_LOG.AUDIT_ID IS '审计ID（自增主键）';
+COMMENT ON COLUMN USER_AUDIT_LOG.OPER_TIME IS '操作时间';
+COMMENT ON COLUMN USER_AUDIT_LOG.OPER_TYPE IS '操作类型';
+COMMENT ON COLUMN USER_AUDIT_LOG.OLD_VALUE IS '原值';
+COMMENT ON COLUMN USER_AUDIT_LOG.NEW_VALUE IS '新值';
+```
+
+2. 创建触发器
+
+```sql
+CREATE OR REPLACE TRIGGER TRI_USER_AUDIT
+AFTER INSERT OR UPDATE OR DELETE ON USER_INFO
+FOR EACH ROW
+BEGIN
+    -- 声明变量
+    DECLARE
+        v_old_val VARCHAR(2000);
+        v_new_val VARCHAR(2000);
+        v_oper_type VARCHAR(10);
+    BEGIN
+        -- 判断操作类型并设置变量
+        IF INSERTING THEN
+            v_oper_type := '新增';
+            v_old_val := NULL;
+            -- 拼接新值
+            v_new_val := '用户ID:' || :NEW.USER_ID || 
+                        ', 姓名:' || :NEW.USER_NAME || 
+                        ', 性别:' || :NEW.GENDER || 
+                        ', 创建时间:' || TO_CHAR(:NEW.CREATE_TIME, 'YYYY-MM-DD HH24:MI:SS') || 
+                        ', 是否禁用:' || :NEW.IS_DISABLED;
+        ELSIF UPDATING THEN
+            v_oper_type := '修改';
+            -- 拼接原值
+            v_old_val := '用户ID:' || :OLD.USER_ID || 
+                        ', 姓名:' || :OLD.USER_NAME || 
+                        ', 性别:' || :OLD.GENDER || 
+                        ', 创建时间:' || TO_CHAR(:OLD.CREATE_TIME, 'YYYY-MM-DD HH24:MI:SS') || 
+                        ', 是否禁用:' || :OLD.IS_DISABLED;
+            -- 拼接新值
+            v_new_val := '用户ID:' || :NEW.USER_ID || 
+                        ', 姓名:' || :NEW.USER_NAME || 
+                        ', 性别:' || :NEW.GENDER || 
+                        ', 创建时间:' || TO_CHAR(:NEW.CREATE_TIME, 'YYYY-MM-DD HH24:MI:SS') || 
+                        ', 是否禁用:' || :NEW.IS_DISABLED;
+        ELSIF DELETING THEN
+            v_oper_type := '删除';
+            -- 拼接原值
+            v_old_val := '用户ID:' || :OLD.USER_ID || 
+                        ', 姓名:' || :OLD.USER_NAME || 
+                        ', 性别:' || :OLD.GENDER || 
+                        ', 创建时间:' || TO_CHAR(:OLD.CREATE_TIME, 'YYYY-MM-DD HH24:MI:SS') || 
+                        ', 是否禁用:' || :OLD.IS_DISABLED;
+            v_new_val := NULL;
+        END IF;
+        
+        -- 插入审计日志记录
+        INSERT INTO USER_AUDIT_LOG (OPER_TYPE, OLD_VALUE, NEW_VALUE)
+        VALUES (v_oper_type, v_old_val, v_new_val);
+    END;
+END;
+```
+
+3. 测试触发器
+
+```sql
+-- 1. 测试INSERT操作
+INSERT INTO USER_INFO (USER_ID, USER_NAME, GENDER, IS_DISABLED) 
+VALUES (1, '张三', 'M', '0');
+
+-- 2. 测试UPDATE操作
+UPDATE USER_INFO 
+SET USER_NAME = '张三丰', IS_DISABLED = '1' 
+WHERE USER_ID = 1;
+
+-- 3. 测试DELETE操作
+DELETE FROM USER_INFO WHERE USER_ID = 1;
+
+-- 4. 查看审计日志
+SELECT * FROM USER_AUDIT_LOG ORDER BY OPER_TIME DESC;
+
+-- 5. 清空测试数据
+TRUNCATE TABLE USER_INFO;
+TRUNCATE TABLE USER_AUDIT_LOG;
+```
+
+#### 3.6.2 管理触发器
+
+每个触发器创建成功后都自动处于允许状态 (ENABLE)，当不想被触发，但是又不想删除这个触发器。这时，可将其设置关闭触发器 (DISABLE)。
+
+```sql
+-- 禁用触发器
+ALTER TRIGGER TRI_USER_AUDIT DISABLE;
+-- 启用触发器
+ALTER TRIGGER TRI_USER_AUDIT ENABLE;
+-- 删除触发器
+DROP TRIGGER TRI_USER_AUDIT;
+```
+
+查看触发器
+
+```sql
+--查看当前数据库的全部触发器
+SELECT * FROM DBA_TRIGGERS;
+--查看当前用户有权限访问的触发器
+SELECT * FROM ALL_TRIGGERS;
+--查看示当前用户所拥有的触发器
+SELECT * FROM USER_TRIGGERS;
+```
+
+### 3.7 创建链接
+
+在主机 A 上建表 test
+
+```sql
+CREATE TABLE TEST(C1 INT,C2 VARCHAR(20));
+```
+
+在 B 上建立到 A 的数据库链接 LINK01，使用链接进行插入
+
+```sql
+CREATE LINK LINK01 CONNECT 'DAMENG' WITH "SYSDBA" IDENTIFIED BY "SYSDBA" USING '192.168.1.110/5236';
+INSERT INTO TEST@LINK01 VALUES(1,'A');
+COMMIT;
+```
+
+删除链接
+```sql
+DROP LINK LINK01;
+```
 
 ### 3.8 匿名块
 
@@ -441,5 +602,3 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('结果: ' || v_result || ', 消息: ' || v_message);
 END;
 ```
-
-### 3.9 闪回查询
