@@ -1847,7 +1847,7 @@ comment on column tb_order.create_time  is '创建时间';
 comment on column tb_order.is_deleted  is '是否删除';
 ```
 
-分页
+分页查询
 ```sql
 SELECT
     * 
@@ -1983,7 +1983,7 @@ BEGIN
 END;
 ```
 
-2. 创建调用调用脚本
+2. 创建调用脚本
 
 ```shell
 #!/bin/bash
