@@ -1847,7 +1847,7 @@ comment on column tb_order.create_time  is '创建时间';
 comment on column tb_order.is_deleted  is '是否删除';
 ```
 
-
+分页
 ```sql
 SELECT
     * 
@@ -1863,6 +1863,13 @@ FROM
     ) rs 
 WHERE
     rs.RN > #{pageNum-1}*#{pageSize}
+```
+
+查询Blob字段
+
+```sql
+select * from qrtz_job_details_local t 
+where dbms_lob.instr(job_data,utl_raw.cast_to_raw('declarano'),1,1)<>0;
 ```
 
 ### 3.2 锁表
@@ -1905,7 +1912,194 @@ ps -ef | grep {spid}
 kill -9 {spid}
 ```
 
-###
+### 3.3 创建存储过程
+
+#### 3.3.1 动态执行SQL
+
+```sql
+CREATE OR REPLACE PROCEDURE PROC_updateSortCommon(V_GNID   NUMBER, --审批状态
+                                                  V_MKID   NUMBER,
+                                                  V_LBID   NUMBER,
+                                                  V_DJID   CHAR,
+                                                  V_USERID CHAR) AS
+  v_TAB_SQL       VARCHAR2(4000);
+  v_COL_SQL       VARCHAR2(4000);
+  V_DLBID         NUMBER;
+  V_DJZT          NUMBER;
+  V_TABLENAME     VARCHAR2(100);
+  V_TABLENAMEID   VARCHAR2(100);
+  V_TABLENAMELB   VARCHAR2(100);
+  V_TABLENAMEQCLB VARCHAR2(100);
+  V_SQL           VARCHAR2(800);
+BEGIN
+  IF V_GNID = -1 THEN
+    SELECT NVL(MAX(M.TS_ACTION_LB_ID), -1)
+      INTO V_DLBID
+      FROM TS_LB_GROUP_INFO I
+     INNER JOIN TS_LB_GROUP_MX M
+        ON I.TS_LB_GROUP_ID = M.TS_LB_GROUP_ID
+     WHERE I.TB_SYSTEM_MK_ID = V_MKID
+       AND M.TS_DEFAULT_LB_ID = V_LBID
+     ORDER BY M.TS_LB_GROUP_ORDER;
+    ----
+    IF V_DLBID != -1 THEN
+      v_TAB_SQL := 'SELECT TB_TABLE_NAME FROM TB_SYSTEM_ZD_MK  WHERE TB_MK_ID=:1 AND TB_LB_ID=:2 AND TB_T_LB_ID=:3';
+      v_COL_SQL := 'SELECT TB_COLUMN_NAME FROM TB_SYSTEM_ZD_COLUMN WHERE TB_MK_ID=:1 AND TB_LB_ID=:2 AND TB_T_LB_ID=:3 AND TB_COLUMN_ID=:4';
+      EXECUTE IMMEDIATE v_TAB_SQL
+        INTO V_TABLENAME
+        USING V_MKID, 0, 1; --主表
+      EXECUTE IMMEDIATE v_COL_SQL
+        INTO V_TABLENAMEID
+        USING V_MKID, 0, 1, 1; --主键Id
+      EXECUTE IMMEDIATE v_COL_SQL
+        INTO V_TABLENAMELB
+        USING V_MKID, 0, 1, 14; --当前类别
+      EXECUTE IMMEDIATE v_COL_SQL
+        INTO V_TABLENAMEQCLB
+        USING V_MKID, 0, 1, 110; --起初类别
+      V_SQL := 'UPDATE ' || V_TABLENAME || ' SET ' || V_TABLENAMELB || '=' ||
+               V_DLBID || ',' || V_TABLENAMEQCLB || '=' || V_DLBID ||
+               ' WHERE ' || V_TABLENAMEID || '=''' || V_DJID || '''';
+      EXECUTE IMMEDIATE v_SQL;
+    END IF;
+  END IF;
+END;
+```
+
+#### 3.3.2 脚本调用 sqlplus 执行存储过程
+
+1. 创建带入参的存储过程
+
+```sql
+CREATE OR REPLACE PROCEDURE PROC_WZCHECK_COUNT_BY_MONTH(USERID    OUT VARCHAR2,
+                                                   USERTYPE  OUT VARCHAR2,
+                                                   V_OUTLIST OUT SYS_REFCURSOR) AS
+  V_STR VARCHAR2(800);
+  V_DATE    DATE;
+  V_NUM    NUMBER; ---回访数
+BEGIN
+  OPEN V_OUTLIST FOR
+    SELECT * FROM EMP;
+END;
+```
+
+2. 创建调用调用脚本
+
+```shell
+#!/bin/bash
+starttime=`date +'%Y-%m-%d %H:%M:%S'`
+echo '开始执行时间-'$starttime >> /data/kh_shell/proc_debug.log
+
+su - oracle -c "sqlplus VJSP_JSWZ_190601/wzld9999<< EOF
+var a1 VARCHAR2;
+var a2 VARCHAR2;
+var V3 refcursor;
+CALL PROC_WZCHECK_COUNT_BY_MONTH(:a1,:a2,:V3);
+commit;
+disconnect
+quit
+EOF"
+
+etime=`date +'%Y-%m-%d %H:%M:%S'`
+echo 'PROC_WZCHECK_COUNT_BY_MONTH完成时间-'$etime >> /data/kh_shell/proc_debug.log
+```
+
+3. 执行脚本
+
+```bash
+nohup sh /data/proc-debug.sh &
+```
+
+
+### 3.4 创建函数
+
+输入用户ID，如果当前人员隶属部门绑定了店铺，则返回店铺ID，否则返回所有店铺ID
+
+```sql
+CREATE OR REPLACE FUNCTION FUN_OTO_ORDERBYSHOP(P_USERID IN CHAR)
+  RETURN VARCHAR2 AS
+  /*ECMS-订单管理查询订单按照当前登录人员的店铺查询 add by xcg 20131230*/
+  V_RTN    VARCHAR2(32765) := '';
+  V_SHOPID VARCHAR2(32765) := '';
+  V_INDEX  INT := 0;
+BEGIN
+  SELECT MAX(BM.TS_SHOPID)
+    INTO V_SHOPID
+    FROM BM
+   WHERE BM.BID = (SELECT U.USERDEPT FROM USERINF U WHERE U.ID = P_USERID); --查询当前用户所归属的店铺
+  IF V_SHOPID IS NULL THEN
+    --如果是管理员，可以看所有数据    
+    FOR ITEM IN (SELECT DISTINCT (D.TS_GS_CODE) FROM DEAL_ORDER D) LOOP
+      DBMS_OUTPUT.PUT_LINE(ITEM.TS_GS_CODE);
+      IF V_INDEX = 0 THEN
+        V_RTN := ITEM.TS_GS_CODE;
+      ELSE
+        V_RTN := V_RTN || ',' || ITEM.TS_GS_CODE;
+      END IF;
+      V_INDEX := V_INDEX + 1;
+    END LOOP;
+  ELSE
+    --只看到自己隶属部门绑定的店铺
+    V_RTN := V_SHOPID;
+  END IF;
+  RETURN V_RTN;
+END;
+```
+
+### 3.5 匿名块
+
+#### 3.5.1 遍历数据
+
+```sql
+DECLARE
+  -- LOCAL VARIABLES HERE
+  I           INTEGER;
+  BMNAMECOUNT INT := 0;
+  CSNAMECOUNT INT := 0;
+  V_SQL1      VARCHAR2(4000);
+  V_SQL2      VARCHAR2(4000);
+  R           NUMBER := -1;
+BEGIN
+  FOR ITEM IN (SELECT MENUID FROM VJSP_ADMIN_MENU_INFO) LOOP
+    UPDATE VJSP_ADMIN_MENU_INFO
+       SET MENU_BH =
+           (SELECT GET_DOCUMENT_CODE('10001002') FROM DUAL)
+     WHERE MENUID = ITEM.MENUID;
+  END LOOP;
+END;
+```
+
+#### 3.5.2 动态执行SQL
+
+```sql
+DECLARE
+  -- LOCAL VARIABLES HERE
+  I           INTEGER;
+  BMNAMECOUNT INT := 0;
+  CSNAMECOUNT INT := 0;
+  V_SQL1      VARCHAR2(4000);
+  V_SQL2      VARCHAR2(4000);
+  R           NUMBER := -1;
+BEGIN
+  -- TEST STATEMENTS HERE
+  FOR ITEM IN (SELECT TB_TABLE_NAME
+                 FROM TB_SYSTEM_ZD_MK
+                WHERE TB_MK_ID IN
+                      (SELECT TS_SYSTEM_MK_ID FROM TS_SYSTEM_MK_GL)
+                  AND TB_LB_ID = 0
+                  AND TB_T_LB_ID = 7) LOOP
+    SELECT COUNT(1)
+      INTO BMNAMECOUNT
+      FROM USER_TAB_COLUMNS
+     WHERE TABLE_NAME = ITEM.TB_TABLE_NAME
+       AND COLUMN_NAME = 'TS_SPBMNAME';
+    IF BMNAMECOUNT = 0 THEN
+      V_SQL1 := 'ALTER TABLE ' || ITEM.TB_TABLE_NAME || ' ADD TS_SPBMNAME VARCHAR2(4000)';
+      EXECUTE IMMEDIATE V_SQL1;
+    END IF;
+  END LOOP;
+END;
+```
 
 ## 4. 统计信息
 
@@ -2100,195 +2294,4 @@ SELECT * FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'PROCEDURE' AND OWNER='database_na
 
 ```sql
 SELECT * FROM USER_SOURCE WHERE UPPER(TEXT) LIKE UPPER('%keywords%');
-```
-
-## 5. PL/SQL
-
-### 5.1 匿名块
-
-1. 遍历
-
-```sql
-DECLARE
-  -- LOCAL VARIABLES HERE
-  I           INTEGER;
-  BMNAMECOUNT INT := 0;
-  CSNAMECOUNT INT := 0;
-  V_SQL1      VARCHAR2(4000);
-  V_SQL2      VARCHAR2(4000);
-  R           NUMBER := -1;
-BEGIN
-  FOR ITEM IN (SELECT MENUID FROM VJSP_ADMIN_MENU_INFO) LOOP
-    UPDATE VJSP_ADMIN_MENU_INFO
-       SET MENU_BH =
-           (SELECT GET_DOCUMENT_CODE('10001002') FROM DUAL)
-     WHERE MENUID = ITEM.MENUID;
-  END LOOP;
-END;
-```
-
-2. 遍历执行SQL
-
-```sql
-DECLARE
-  -- LOCAL VARIABLES HERE
-  I           INTEGER;
-  BMNAMECOUNT INT := 0;
-  CSNAMECOUNT INT := 0;
-  V_SQL1      VARCHAR2(4000);
-  V_SQL2      VARCHAR2(4000);
-  R           NUMBER := -1;
-BEGIN
-  -- TEST STATEMENTS HERE
-  FOR ITEM IN (SELECT TB_TABLE_NAME
-                 FROM TB_SYSTEM_ZD_MK
-                WHERE TB_MK_ID IN
-                      (SELECT TS_SYSTEM_MK_ID FROM TS_SYSTEM_MK_GL)
-                  AND TB_LB_ID = 0
-                  AND TB_T_LB_ID = 7) LOOP
-    SELECT COUNT(1)
-      INTO BMNAMECOUNT
-      FROM USER_TAB_COLUMNS
-     WHERE TABLE_NAME = ITEM.TB_TABLE_NAME
-       AND COLUMN_NAME = 'TS_SPBMNAME';
-    IF BMNAMECOUNT = 0 THEN
-      V_SQL1 := 'ALTER TABLE ' || ITEM.TB_TABLE_NAME || ' ADD TS_SPBMNAME VARCHAR2(4000)';
-      EXECUTE IMMEDIATE V_SQL1;
-    END IF;
-  END LOOP;
-END;
-```
-
-### 5.2 函数
-
-```sql
-CREATE OR REPLACE FUNCTION FUN_OTO_ORDERBYSHOP(P_USERID IN CHAR)
-  RETURN VARCHAR2 AS
-  /*ECMS-订单管理查询订单按照当前登录人员的店铺查询 add by xcg 20131230*/
-  V_RTN    VARCHAR2(32765) := '';
-  V_SHOPID VARCHAR2(32765) := '';
-  V_INDEX  INT := 0;
-BEGIN
-  SELECT MAX(BM.TS_SHOPID)
-    INTO V_SHOPID
-    FROM BM
-   WHERE BM.BID = (SELECT U.USERDEPT FROM USERINF U WHERE U.ID = P_USERID); --查询当前用户所归属的店铺
-  IF V_SHOPID IS NULL THEN
-    --说明是OTO管理员登录 需要看见全部的数据    
-    FOR ITEM IN (SELECT DISTINCT (D.TS_GS_CODE) FROM DEAL_ORDER D) LOOP
-      DBMS_OUTPUT.PUT_LINE(ITEM.TS_GS_CODE);
-      IF V_INDEX = 0 THEN
-        V_RTN := ITEM.TS_GS_CODE;
-      ELSE
-        V_RTN := V_RTN || ',' || ITEM.TS_GS_CODE;
-      END IF;
-      V_INDEX := V_INDEX + 1;
-    END LOOP;
-  ELSE
-    --只看到自己绑定部门下的店铺的订单信息
-    V_RTN := V_SHOPID;
-  END IF;
-  RETURN V_RTN;
-END;
-```
-
-### 5.3 存储过程
-
-1. 执行SQL
-
-```sql
-CREATE OR REPLACE PROCEDURE PROC_updateSortCommon(V_GNID   NUMBER, --审批状态
-                                                  V_MKID   NUMBER,
-                                                  V_LBID   NUMBER,
-                                                  V_DJID   CHAR,
-                                                  V_USERID CHAR) AS
-  v_TAB_SQL       VARCHAR2(4000);
-  v_COL_SQL       VARCHAR2(4000);
-  V_DLBID         NUMBER;
-  V_DJZT          NUMBER;
-  V_TABLENAME     VARCHAR2(100);
-  V_TABLENAMEID   VARCHAR2(100);
-  V_TABLENAMELB   VARCHAR2(100);
-  V_TABLENAMEQCLB VARCHAR2(100);
-  V_SQL           VARCHAR2(800);
-BEGIN
-  IF V_GNID = -1 THEN
-    SELECT NVL(MAX(M.TS_ACTION_LB_ID), -1)
-      INTO V_DLBID
-      FROM TS_LB_GROUP_INFO I
-     INNER JOIN TS_LB_GROUP_MX M
-        ON I.TS_LB_GROUP_ID = M.TS_LB_GROUP_ID
-     WHERE I.TB_SYSTEM_MK_ID = V_MKID
-       AND M.TS_DEFAULT_LB_ID = V_LBID
-     ORDER BY M.TS_LB_GROUP_ORDER;
-    ----
-    IF V_DLBID != -1 THEN
-      v_TAB_SQL := 'SELECT TB_TABLE_NAME FROM TB_SYSTEM_ZD_MK  WHERE TB_MK_ID=:1 AND TB_LB_ID=:2 AND TB_T_LB_ID=:3';
-      v_COL_SQL := 'SELECT TB_COLUMN_NAME FROM TB_SYSTEM_ZD_COLUMN WHERE TB_MK_ID=:1 AND TB_LB_ID=:2 AND TB_T_LB_ID=:3 AND TB_COLUMN_ID=:4';
-      EXECUTE IMMEDIATE v_TAB_SQL
-        INTO V_TABLENAME
-        USING V_MKID, 0, 1; --主表
-      EXECUTE IMMEDIATE v_COL_SQL
-        INTO V_TABLENAMEID
-        USING V_MKID, 0, 1, 1; --主键Id
-      EXECUTE IMMEDIATE v_COL_SQL
-        INTO V_TABLENAMELB
-        USING V_MKID, 0, 1, 14; --当前类别
-      EXECUTE IMMEDIATE v_COL_SQL
-        INTO V_TABLENAMEQCLB
-        USING V_MKID, 0, 1, 110; --起初类别
-      V_SQL := 'UPDATE ' || V_TABLENAME || ' SET ' || V_TABLENAMELB || '=' ||
-               V_DLBID || ',' || V_TABLENAMEQCLB || '=' || V_DLBID ||
-               ' WHERE ' || V_TABLENAMEID || '=''' || V_DJID || '''';
-      EXECUTE IMMEDIATE v_SQL;
-    END IF;
-  END IF;
-END;
-```
-
-### 5.4 BLOB
-
-```sql
---blob查询
-select * from qrtz_job_details_local t 
-where dbms_lob.instr(job_data,utl_raw.cast_to_raw('declarano'),1,1)<>0;
-```
-
-### 5.5 Shell调试
-
-有入参的返回游标过程 vi proc-debug.sh
-```shell
-#!/bin/bash
-starttime=`date +'%Y-%m-%d %H:%M:%S'`
-echo '开始执行时间-'$starttime >> /data/kh_shell/proc_debug.log
-
-su - oracle -c "sqlplus VJSP_JSWZ_190601/wzld9999<< EOF
-var a1 VARCHAR2;
-var a2 VARCHAR2;
-var V3 refcursor;
-CALL PROC_WZCHECK_COUNT_BY_MONTH(:a1,:a2,:V3);
-commit;
-disconnect
-quit
-EOF"
-
-etime=`date +'%Y-%m-%d %H:%M:%S'`
-echo 'PROC_WZCHECK_COUNT_BY_MONTH完成时间-'$etime >> /data/kh_shell/proc_debug.log
-```
-
-```sql
-CREATE OR REPLACE PROCEDURE PROC_WZCHECK_COUNT_BY_MONTH(USERID    OUT VARCHAR2,
-                                                   USERTYPE  OUT VARCHAR2,
-                                                   V_OUTLIST OUT SYS_REFCURSOR) AS
-  V_STR VARCHAR2(800);
-  V_DATE    DATE;
-  V_NUM    NUMBER; ---回访数
-BEGIN
-  OPEN V_OUTLIST FOR
-    SELECT * FROM EMP;
-END;
-```
-
-```bash
-nohup sh /data/proc-debug.sh &     # 后台执行
 ```
