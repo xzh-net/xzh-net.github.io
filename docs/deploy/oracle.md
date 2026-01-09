@@ -1914,7 +1914,7 @@ kill -9 {spid}
 
 ### 3.3 创建存储过程
 
-#### 3.3.1 动态执行SQL
+#### 3.3.1 执行动态SQL
 
 ```sql
 CREATE OR REPLACE PROCEDURE PROC_updateSortCommon(V_GNID   NUMBER, --审批状态
