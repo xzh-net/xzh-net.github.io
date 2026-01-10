@@ -1184,9 +1184,9 @@ docker logs rancher 2>&1 | grep "Bootstrap Password:"
 docker exec -it rancher reset-password
 ```
 
-### 4.2 数据库
+### 4.2 关系型数据库
 
-#### 【关系型】MySQL 5.7.44
+#### MySQL 5.7.44
 
 创建目录
 ```bash
@@ -1218,7 +1218,7 @@ source /file-center.sql;
 grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
 
-#### 【关系型】PostgreSQL 12.4
+#### PostgreSQL 12.4
 
 ```bash
 docker volume create pgdata  # 创建本地卷，数据卷可以在容器之间共享和重用，默认会一直存在，即使容器被删除
@@ -1238,7 +1238,7 @@ docker exec -it postgres2 /bin/bash
 psql -Upostgres # 连接数据库
 ```
 
-#### 【关系型】Oracle XE 11
+#### Oracle XE 11
 
 
 ```bash
@@ -1270,7 +1270,7 @@ password: 123456
 管理员账号：system / oracle，sys / oracle
 
 
-#### 【关系型】SQL Server 2019
+#### SQL Server 2019
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@w0rd" \
@@ -1297,7 +1297,7 @@ select * from pms_product
 go
 ```
 
-#### 【关系型】DM 8.1.2
+#### DM 8.1.2
 
 请在达梦数据库官网下载 [Docker](https://eco.dameng.com/download/) 安装包，拷贝安装包到 `/opt` 目录下，执行以下命令导入安装包：
 
@@ -1311,7 +1311,7 @@ docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e P
 > 2. 打开终端 `/opt/dmdbms/bin/disql` ，用户名/密码 SYSDBA/SYSDBA001  
 
 
-#### 【嵌入式】SQLite
+#### SQLite
 
 创建目录，将`webui.db`文件拷贝到目录中
 
@@ -1326,6 +1326,10 @@ docker run -it --rm \
   -e SQLITE_DATABASE=webui.db \
   coleifer/sqlite-web:latest
 ```
+
+
+
+### 4.3 NoSQL数据库
 
 #### 【内存】Memcached 1.6.12
 
@@ -1415,8 +1419,6 @@ gfsh> remove --all --region=User
 ```
 gfsh> shutdown --include-locators=true
 ```
-
-### 4.3 NoSQL数据库
 
 #### 【文档】MongoDB 4.4.6
 
@@ -1543,6 +1545,23 @@ docker run -d --name clickhouse-server --privileged=true \
 docker exec -it clickhouse-server /bin/bash
 clickhouse-client -m
 ```
+
+#### 【向量】Qdrant 1.16.3
+
+```bash
+mkdir /data/qdrant_storage
+```
+
+```bash
+docker run -dit -p 6333:6333 -p 6334:6334 \
+    -v "/data/qdrant_storage:/qdrant/storage:z" \
+    qdrant/qdrant:v1.16.3
+```
+
+访问地址：
+- REST API: localhost:6333
+- Web UI: localhost:6333/dashboard
+- GRPC API: localhost:6334
 
 ### 4.4 存储
 
