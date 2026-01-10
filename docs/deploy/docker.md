@@ -1553,8 +1553,10 @@ mkdir /data/qdrant_storage
 ```
 
 ```bash
-docker run -dit -p 6333:6333 -p 6334:6334 \
+docker run -dit --name qdrant \
+    -p 6333:6333 -p 6334:6334 \
     -v "/data/qdrant_storage:/qdrant/storage:z" \
+    -e QDRANT__SERVICE__API_KEY=123456 \
     qdrant/qdrant:v1.16.3
 ```
 
