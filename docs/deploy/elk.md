@@ -4,6 +4,7 @@ Elastic Stack是由ELK演化而来，分别是Elasticsearch、logstash、kibana
 
 - 官方网站：https://www.elastic.co/downloads/
 - 版本一览：https://www.elastic.co/cn/support/matrix#matrix_jvm
+- 历史版本：https://www.elastic.co/cn/downloads/past-releases
 
 ## 1. Elasticsearch
 
@@ -269,16 +270,23 @@ http.cors.allow-origin: "*"
 
 #### 1.3.2 analysis-ik
 
-1. 下载解压
+下载地址：https://release.infinilabs.com/analysis-ik/stable/
+
+1. 离线安装
 
 ```bash
 mkdir -p /home/elastic/elasticsearch-7.6.2/plugins/analysis-ik
 cd /home/elastic/elasticsearch-7.6.2/plugins/analysis-ik
-wget https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.6.2/elasticsearch-analysis-ik-7.6.2.zip
 unzip elasticsearch-analysis-ik-7.6.2.zip 
 ```
 
-2. 重启服务
+2. 在线安装（可选）
+
+```bash
+bin/elasticsearch-plugin install https://get.infini.cloud/elasticsearch/analysis-ik/7.6.2
+```
+
+3. 重启服务
 
 ```bash
 ps aux|grep elasticsearch
@@ -651,6 +659,8 @@ chown -R elastic:elastic /home/elastic
 
 ### 4.3 修改配置
 
+参考文档：https://www.elastic.co/guide/en/beats/filebeat/7.17/filebeat-input-log.html
+
 ```bash
 su - elastic
 cd /home/elastic/filebeat-7.6.2
@@ -662,30 +672,40 @@ vi filebeat.yml
 ```
 
 ```yml
+# 输入配置
 filebeat.inputs:
-- type: log
-  enabled: true
-  encoding: utf-8
+- type: log 
   paths:
-    - /data/app/logs/audit/*.log
-  # 禁用JSON解析，作为纯文本处理
-  json.enabled: false
+    - /var/log/system.log
+    - /var/log/wifi.log
+- type: log 
+  paths:
+    - "/var/log/apache2/*"
+  fields:
+    apache: true
+  fields_under_root: true
 
-# 禁用 Elasticsearch 自动配置
-setup.ilm.enabled: false
-setup.template.enabled: false
-
-# 输出配置
+# 输出配置 Kafka
 output.kafka:
-  enabled: true
-  hosts: ["172.17.17.161:9092"]
-  topic: "topic1"
-  partition.round_robin:
-    reachable_only: false
-  required_acks: 1
-  compression: gzip
-  max_message_bytes: 1000000
-  timeout: 30s
+  hosts: ["kafka1:9092", "kafka2:9092", "kafka3:9092"]
+  # 动态消息主题名称（从字段fields.log_topic获取）
+  topic: '%{[fields.log_topic]}'
+  partition.round_robin:        # 启用轮询分区策略
+    reachable_only: false       # 是否仅选择可访问分区（当前设为false）
+
+  required_acks: 1              # 生产者需要收到的确认数量（1=仅需主分区确认）
+  compression: gzip             # 消息压缩算法（gzip格式）
+  max_message_bytes: 1000000    # 单条消息最大字节数（约1MB）
+
+# 输出配置 Elasticsearch
+output.elasticsearch:
+  hosts: ["https://es:9200"]
+  username: "filebeat_writer"
+  password: "YOUR_PASSWORD"
+
+# 设置kibana
+setup.kibana.host: "http://localhost:5601"
+setup.dashboards.enabled: true
 
 # 日志配置
 logging.level: info
@@ -701,12 +721,16 @@ logging.files:
 
 ```bash
 cd /home/elastic/filebeat-7.6.2
+# 查看版本
+filebeat version
 # 测试配置
 filebeat test config -c filebeat.yml
 # 测试输出
 filebeat test output -c filebeat.yml
-# -e 查看实时参数启动
-./filebeat -e -c filebeat.yml 
+# 查看实时参数启动
+./filebeat -c filebeat.yml -e
+# 导入Kibana仪表盘
+./filebeat setup -e
 # 后台启动
 ./filebeat -c filebeat.yml &
 ```
