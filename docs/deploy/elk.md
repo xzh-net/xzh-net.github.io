@@ -1,6 +1,6 @@
 # Elastic (ELK) Stack 7.6.2
 
-Elastic Stack是由ELK演化而来，分别是Elasticsearch、logstash、kibana
+Elastic Stack是由ELK演化而来，分别是Elasticsearch、Logstash、Kibana
 
 - 官方网站：https://www.elastic.co/downloads/
 - 版本一览：https://www.elastic.co/cn/support/matrix#matrix_jvm
@@ -240,7 +240,7 @@ http://172.17.17.194:9201/_cat/nodes
 - 如果浏览器提示`无法从该网站添加应用、扩展程序和用户脚本`，将crx文件修改后缀为rar并解压，点击`扩展程序 -> 加载未打包的扩展程序`，选择插件所在目录即可。
 - 使用插件：打开Chrome浏览器右上角插件图标，选择ElasticSearch-Head，输入ES地址点击连接。
 
-2. docker版
+2. Docker版
 
 ```bash
 # 拉取镜像
@@ -335,7 +335,7 @@ lsof -i:5601
 
 访问地址：http://localhost:5601
 
-#### 2.5.1 创建索引
+1. 创建索引
 
 ```bash
 PUT /mytest/
@@ -349,19 +349,19 @@ PUT /mytest/
 }
 ```
 
-#### 2.5.2 查看索引
+2. 查看索引
 
 ```bash
 GET mytest/_settings
 ```
 
-#### 2.5.3 删除索引
+3. 删除索引
 
 ```bash
 DELETE /mytest/
 ```
 
-#### 2.5.4 添加数据
+4. 添加数据
 
 ```bash
 POST /mytest/_doc
@@ -372,13 +372,16 @@ POST /mytest/_doc
 }
 ```
 
-#### 2.5.5 删除数据
+5. 删除数据
+
+
+语法格式
+```bash
+DELETE /<index_name>/_doc/<document_id>
+```
 
 删除指定数据
 ```bash
-# 语法格式
-DELETE /<index_name>/_doc/<document_id>
-
 DELETE mytest/_doc/1871446175516553218
 ```
 
@@ -394,13 +397,14 @@ POST /product/_delete_by_query
 }
 ```
 
-如果没有`Kibana Dev Tools`，则使用`curl`命令删除
+> 如果没有`Kibana Dev Tools`，则使用`curl`命令删除
+
 ```bash
 curl -X DELETE -u username:password "http://localhost:9200/test/_doc/123"
 ```
 
 
-#### 2.5.6 排序查询
+6. 排序查询
 
 ```bash
 get mytest/_search
@@ -416,7 +420,7 @@ get mytest/_search
 }　
 ```
 
-#### 2.5.7 过滤查询
+7. 过滤查询
 
 ```bash
 get mytest/_search
@@ -429,7 +433,7 @@ get mytest/_search
 }
 ```
 
-#### 2.5.8 IK分词器
+8. IK分词器
 
 ```bash
 POST /_analyze
@@ -520,9 +524,9 @@ output {
 }
 ```
 
-### 3.4 安装json_lines插件
+### 3.4 安装插件
 
-修改下载源
+1. 修改下载源
 
 ```bash
 cd /home/elastic/logstash-7.6.2/
@@ -531,7 +535,7 @@ vim Gemfile
 source "http://mirrors.tuna.tsinghua.edu.cn/rubygems/"
 ```
 
-安装插件
+2. 在线安装`json_lines`
 
 ```bash
 ./bin/logstash-plugin install --no-verify logstash-codec-json_lines
@@ -640,8 +644,6 @@ chmod +x test_logstash.sh
 
 ## 4. Filebeat
 
-数据流向： `应用 -> Filebeat  -> Kafka`
-
 ### 4.1 下载解压
 
 ```bash
@@ -719,20 +721,40 @@ logging.files:
 
 ### 4.4 启动服务
 
+
 ```bash
 cd /home/elastic/filebeat-7.6.2
-# 查看版本
-filebeat version
-# 测试配置
-filebeat test config -c filebeat.yml
-# 测试输出
-filebeat test output -c filebeat.yml
-# 查看实时参数启动
+```
+
+测试配置
+
+```bash
+./filebeat test config -c filebeat.yml
+```
+
+测试输出
+```bash
+./filebeat test output -c filebeat.yml
+```
+
+查看实时参数启动
+```bash
 ./filebeat -c filebeat.yml -e
-# 导入Kibana仪表盘
-./filebeat setup -e
-# 后台启动
+```
+
+后台启动
+```bash
 ./filebeat -c filebeat.yml &
+```
+
+查看版本
+```bash
+./filebeat version
+```
+
+导入Kibana仪表盘
+```bash
+./filebeat setup -e
 ```
 
 ### 4.6 客户端测试
