@@ -335,7 +335,15 @@ lsof -i:5601
 
 访问地址：http://localhost:5601
 
-1. 创建索引
+#### 2.5.1 索引管理
+
+1. 查看所有索引
+
+```bash
+GET /_cat/indices?v
+```
+
+2. 创建索引
 
 ```bash
 PUT /mytest/
@@ -349,19 +357,84 @@ PUT /mytest/
 }
 ```
 
-2. 查看索引
+3. 查看索引详情
 
 ```bash
 GET mytest/_settings
 ```
 
-3. 删除索引
+4. 删除索引
 
 ```bash
 DELETE /mytest/
 ```
 
-4. 添加数据
+5. 打开关闭索引
+
+```bash
+POST /mytest/_close
+POST /mytest/_open
+```
+
+6. 设置索引别名
+
+```bash
+POST /_aliases
+{
+  "actions": [
+    {
+      "add": {
+        "index": "mytest",
+        "alias": "myalias"
+      }
+    }
+  ]
+}
+```
+
+7. 查看所有索引别名
+
+```bash
+GET /_cat/aliases?v
+```
+
+8. 创建索引模板
+
+```bash
+# 为 higress 索引创建模板
+curl -X PUT "http://172.17.17.194:9200/_index_template/higress_template" \
+-H "Content-Type: application/json" \
+-d '{
+  "index_patterns": ["higress-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 3,
+      "number_of_replicas": 1,
+      "refresh_interval": "5s"
+    }
+  },
+  "priority": 100
+}'
+
+# 为 nginx 索引创建模板
+curl -X PUT "http://172.17.17.194:9200/_index_template/nginx_template" \
+-H "Content-Type: application/json" \
+-d '{
+  "index_patterns": ["nginx-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 2,
+      "number_of_replicas": 1,
+      "refresh_interval": "5s"
+    }
+  },
+  "priority": 100
+}'
+```
+
+#### 2.5.3 文档操作
+
+1. 插入文档
 
 ```bash
 POST /mytest/_doc
@@ -372,20 +445,41 @@ POST /mytest/_doc
 }
 ```
 
-5. 删除数据
+2. 查询指定文档
 
-
-语法格式
 ```bash
-DELETE /<index_name>/_doc/<document_id>
+GET /mytest/_doc/文档ID
 ```
 
-删除指定数据
+3. 更新文档
+
 ```bash
-DELETE mytest/_doc/1871446175516553218
+# 全量更新（替换整个文档）
+PUT /mytest/_doc/文档ID
+{
+  "title": "新标题",
+  "price": 699
+}
+
+# 部分更新
+POST /mytest/_update/文档ID
+{
+  "doc": {
+    "price": 799
+  }
+}
 ```
 
-删除所有符合条件的数据，此操作会删除所有匹配的文档，需谨慎操作。
+4. 删除指定文档
+
+```bash
+DELETE mytest/_doc/文档ID
+```
+
+5. 按条件删除文档
+
+!> 删除所有符合条件的数据，此操作会删除所有匹配的文档，需谨慎操作。
+
 ```bash
 POST /product/_delete_by_query
 {
@@ -397,17 +491,51 @@ POST /product/_delete_by_query
 }
 ```
 
-> 如果没有`Kibana Dev Tools`，则使用`curl`命令删除
+
+#### 2.5.4 查询操作
+
+1. 查询所有
 
 ```bash
-curl -X DELETE -u username:password "http://localhost:9200/test/_doc/123"
+GET /mytest/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
 ```
 
-
-6. 排序查询
+2. 条件查询
 
 ```bash
-get mytest/_search
+GET /mytest/_search
+{
+  "query": {
+    "match": {
+      "title": "苹果手机"
+    }
+  }
+}
+```
+
+3. 多字段匹配
+
+```bash
+GET /mytest/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "苹果",
+      "fields": ["title", "description"]
+    }
+  }
+}
+```
+
+4. 排序查询
+
+```bash
+GET mytest/_search
 {
   "query": {
     "match_all": {}
@@ -417,23 +545,25 @@ get mytest/_search
       "price": "asc"
     }
   ]
-}　
+}
 ```
 
-7. 过滤查询
+5. 分页查询
 
 ```bash
-get mytest/_search
+GET /mytest/_search
 {
+  "from": 0,
+  "size": 10,
   "query": {
-    "match": {
-      "title": "我们的身份"
-    }
+    "match_all": {}
   }
 }
 ```
 
-8. IK分词器
+
+
+#### 2.5.5 分词器
 
 ```bash
 POST /_analyze
@@ -673,37 +803,60 @@ cp -p filebeat.yml filebeat.yml.bak
 vi filebeat.yml
 ```
 
+#### 4.3.1 输出到 Elasticsearch
+
 ```yml
+filebeat.inputs:
+- type: log 
+  paths:
+    - /data/logs/*.log
+  fields:
+    type: "higress" # 这个字段会被提升到根级别
+  fields_under_root: true
+- type: log 
+  paths:
+    - /usr/local/nginx/logs/*.log
+  fields:
+    type: "nginx"
+  fields_under_root: true
+
+setup.ilm:
+  enabled: false
+
+output.elasticsearch:
+  hosts: ["172.17.17.194:9200"]
+  indices:
+    - index: "higress-%{+yyyy.MM.dd}"
+      when.equals:
+        type: "higress" # 直接使用 type，而不是 fields.type
+    - index: "nginx-%{+yyyy.MM.dd}"
+      when.equals:
+        type: "nginx"
+```
+
+#### 4.3.2 输出到 Kafka
+
+```yaml
 # 输入配置
 filebeat.inputs:
 - type: log 
   paths:
-    - /var/log/system.log
-    - /var/log/wifi.log
-- type: log 
-  paths:
-    - "/var/log/apache2/*"
+    - /data/logs/*.log
   fields:
-    apache: true
+    type: "higress" # 这个字段会被提升到根级别
   fields_under_root: true
 
 # 输出配置 Kafka
 output.kafka:
   hosts: ["kafka1:9092", "kafka2:9092", "kafka3:9092"]
-  # 动态消息主题名称（从字段fields.log_topic获取）
-  topic: '%{[fields.log_topic]}'
+  # 动态消息主题名称（从字段fields.type获取）
+  topic: '%{[fields.type]}'
   partition.round_robin:        # 启用轮询分区策略
     reachable_only: false       # 是否仅选择可访问分区（当前设为false）
 
   required_acks: 1              # 生产者需要收到的确认数量（1=仅需主分区确认）
   compression: gzip             # 消息压缩算法（gzip格式）
   max_message_bytes: 1000000    # 单条消息最大字节数（约1MB）
-
-# 输出配置 Elasticsearch
-output.elasticsearch:
-  hosts: ["https://es:9200"]
-  username: "filebeat_writer"
-  password: "YOUR_PASSWORD"
 
 # 设置kibana
 setup.kibana.host: "http://localhost:5601"
