@@ -1547,10 +1547,22 @@ dstat
 
 Network Mapper是一款开源免费的针对大型网络的端口扫描工具，nmap可以检测目标主机是否在线、主机端口开放情况、检测主机运行的服务类型及版本信息、检测操作系统与设备类型等信息
 
+安装
 ```bash
 yum install -y nmap
+```
+
+检测开放端口
+```bash
 nmap www.baidu.com
 ```
+
+检测在线主机
+```bash
+# 指定从enp0s3接口扫描
+sudo nmap -e enp0s3 -sn 192.168.100.0/22
+```
+
 
 #### 2.4.4 tcpdump
 
