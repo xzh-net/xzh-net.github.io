@@ -131,7 +131,7 @@ sudo passwd root
 vi /etc/netplan/00-installer-config.yaml
 ```
 
-```bash
+```yaml
 network:
   ethernets:
     enp0s3:
@@ -142,8 +142,8 @@ network:
         - 114.114.114.114
         search: []
       routes:
-      - to: default
-        via: 192.168.2.1
+        - to: default
+          via: 192.168.2.1
   version: 2
 ```
 
@@ -166,7 +166,7 @@ chmod 600 /etc/netplan/00-installer-config.yaml
 
 找出网卡的MAC地址，并修改配置文件中的`match`字段
 
-```bash
+```yaml
 network:
   version: 2
   renderer: networkd
