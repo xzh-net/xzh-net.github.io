@@ -4,27 +4,43 @@
 
 ### 1.1 准备工作
 
-环境：CentOS7_x86_64，数据库版本：dm8_rh7_64_ent_8.1.1.87，安装前必须创建dmdba用户，禁止使用root用户安装数据库。
+环境：CentOS7_x86_64，数据库版本：dm8_rh7_64_ent_8.1.1.87，安装前必须创建 dmdba 用户，禁止使用 root 用户安装数据库。
 
 #### 1.1.1 创建用户
 
 ```bash
-groupadd dinstall
-useradd -g dinstall -m -d /home/dmdba -s /bin/bash dmdba
+adduser dmdba
 passwd dmdba
 ```
 
-#### 1.1.2 修改文件打开最大数
+#### 1.1.2 调整 limits.conf 参数
 
 永久生效
 
 ```bash
 vi /etc/security/limits.conf
+```
 
-dmdba hard nofile 65536
+```
+* soft nproc 65536
+* hard nproc 65536
+* soft nofile 65536
+* hard nofile 65536
+
+dmdba soft nice 65536
+dmdba hard nice 65536
+dmdba soft as unlimited
+dmdba hard as unlimited
+dmdba soft fsize unlimited
+dmdba hard fsize unlimited
+dmdba soft nproc 65536
+dmdba hard nproc 65536
 dmdba soft nofile 65536
-dmdba hard stack 32768
-dmdba soft stack 16384
+dmdba hard nofile 65536
+dmdba soft core unlimited
+dmdba hard core unlimited
+dmdba soft data unlimited
+dmdba hard data unlimited
 ```
 
 切换到 dmdba 用户，查看是否生效，命令如下：
@@ -34,45 +50,34 @@ su - dmdba
 ulimit -a
 ```
 
-临时生效
-
-```bash
-ulimit -n 65536
-```
-
 #### 1.1.3 挂载镜像
 
-切换到 root 用户，将 DM 数据库的 iso 安装包保存在任意位置，例如 /opt 目录下，执行如下命令挂载镜像：
+切换到 root 用户，将 DM 数据库的 iso 安装包上传到 /opt/software 目录下，执行如下命令挂载镜像：
 
 ```bash
-cd /opt
-unzip dm8_20230418_x86_rh6_64.zip
+cd /opt/software && unzip dm8_20230418_x86_rh6_64.zip
 mkdir /mnt
-mount -o loop /opt/dm8_20230418_x86_rh6_64.iso /mnt
+mount -o loop /opt/software/dm8_20230418_x86_rh6_64.iso /mnt
 ```
 
-#### 1.1.4 创建安装目录
+#### 1.1.4 创建数据目录
 
-使用 root 用户建立文件夹，待 dmdba 用户建立完成后需将文件所有者更改为 dmdba 用户，否则无法安装到该目录下
+使用 root 用户建立文件夹
 
 ```bash
-mkdir /dm8
+mkdir /data/dm8/{data,dmdbms} -p
 ```
 
-#### 1.1.5 修改安装目录权限
-
-将新建的安装路径目录权限的用户修改为 dmdba，用户组修改为 dinstall。命令如下：
+修改数据目录权限
 
 ```bash
-chown dmdba:dinstall -R /dm8/
-chmod -R 755 /dm8   # 给安装路径下的文件设置 755 权限
+chown dmdba:dmdba -R /data/dm8/
+chmod -R 755 /data/dm8/   # 给数据路径下的文件设置 755 权限
 ```
 
 ### 1.2 数据库安装
 
-DM 数据库在 Linux 环境下支持命令行安装和图形化安装
-
-#### 1.2.1 命令行安装
+Linux 环境下支持命令行安装
 
 ```bash
 su - dmdba
@@ -82,79 +87,154 @@ cd /mnt/
 
 按需求选择安装语言，默认为中文。本地安装选择【不输入 Key文件】，选择【默认时区 21】。
 
-![](../../assets/_images/deploy/dm/choose-lang-time.png)
+![](../../assets/_images/deploy/dm/1.png)
 
-选择【1-典型安装】，按已规划的安装目录 /dm8 完成数据库软件安装，不建议使用默认安装目录。
+选择【1-典型安装】，按已规划的安装目录 /data/dm8/dmdbms 完成数据库软件安装。数据库安装大概 1~2 分钟，数据库安装完成后，显示如下界面。
 
-![](../../assets/_images/deploy/dm/choose-type-path.png)
+![](../../assets/_images/deploy/dm/2.png)
 
-数据库安装大概 1~2 分钟，数据库安装完成后，显示如下界面。
-
-![](../../assets/_images/deploy/dm/install-success.png)
-
-数据库安装完成后，需要切换至 root 用户执行上图中的命令 /dm8/script/root/root_installer.sh 创建 DmAPService，否则会影响数据库备份
-
-#### 1.2.2 配置环境变量
-
-切换到 root 用户进入 dmdba 用户的根目录下，配置对应的环境变量。DM_HOME 变量和动态链接库文件的加载路径在程序安装成功后会自动导入。命令如下：
+数据库安装完成后，需要切换至 root 用户执行上图中的命令，注册 DmAPService，主要服务于数据库的备份操作。
 
 ```bash
-cd /home/dmdba/
-vim .bash_profile
-
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/dm8/bin"
-export DM_HOME="/dm8"
-export PATH=$PATH:$DM_HOME/bin:$DM_HOME/tool
+/data/dm8/script/root/root_installer.sh
 ```
 
-![](../../assets/_images/deploy/dm/dm-home-path.png)
+![](../../assets/_images/deploy/dm/3.png)
 
-切换至 dmdba 用户下，执行以下命令，使环境变量生效。
+### 1.3 配置环境变量
+
+进入 dmdba 用户的根目录下，配置对应的环境变量。DM_HOME 变量和动态链接库文件的加载路径在程序安装成功后会自动导入。命令如下：
 
 ```bash
 su - dmdba
+vim .bash_profile
+```
+
+编辑内容
+
+```bash
+export DM_HOME="/data/dm8/dmdbms"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/dm8/dmdbms/bin"
+export PATH=$PATH:$DM_HOME/bin:$DM_HOME/tool
+```
+
+执行以下命令，使环境变量生效。
+
+```bash
 source .bash_profile
 ```
 
-### 1.3 配置实例
+### 1.4 配置实例
 
 使用 dmdba 用户配置实例，进入到 DM 数据库安装目录下的 bin 目录中，使用 dminit 命令初始化实例
 
 ```bash
-cd /dm8/bin
-./dminit help
+su - dmdba
+dminit help
 ```
 
-![](../../assets/_images/deploy/dm/ml-licence-dminithelp.png)
+参数说明
+```lua
+关键字                     说明（默认值）
+--------------------------------------------------------------------------------
+INI_FILE                   初始化文件dm.ini存放的路径
+PATH                       初始数据库存放的路径
+CTL_PATH                   控制文件路径
+LOG_PATH                   日志文件路径
+EXTENT_SIZE                数据文件使用的簇大小(16)，可选值：16, 32, 64，单位：页
+PAGE_SIZE                  数据页大小(8)，可选值：4, 8, 16, 32，单位：K
+LOG_SIZE                   日志文件大小(256)，单位为：M，范围为：256M ~ 8G
+CASE_SENSITIVE             大小敏感(Y)，可选值：Y/N，1/0
+CHARSET/UNICODE_FLAG       字符集(0)，可选值：0[GB18030]，1[UTF-8]，2[EUC-KR]
+SEC_PRIV_MODE              权限管理模式(0)，可选值：0[TRADITION]，1[BMJ]，2[EVAL]，3[ZB]
+LENGTH_IN_CHAR             VARCHAR类型长度是否以字符为单位(N)，可选值：Y/N，1/0
+SYSDBA_PWD                 设置SYSDBA密码(SYSDBA)
+SYSAUDITOR_PWD             设置SYSAUDITOR密码(SYSAUDITOR)
+DB_NAME                    数据库名(DAMENG)
+INSTANCE_NAME              实例名(DMSERVER)
+PORT_NUM                   监听端口号(5236)
+BUFFER                     系统缓存大小(100)，单位M
+TIME_ZONE                  设置时区(+08:00)
+PAGE_CHECK                 页检查模式(1)，可选值：0/1/2
+PAGE_HASH_NAME             设置页检查HASH算法
+EXTERNAL_CIPHER_NAME       设置默认加密算法
+EXTERNAL_HASH_NAME         设置默认HASH算法
+EXTERNAL_CRYPTO_NAME       设置根密钥加密引擎
+RLOG_ENCRYPT_NAME          设置日志文件加密算法，若未设置，则不加密
+RLOG_POSTFIX_NAME          设置日志文件后缀名，长度不超过10。默认为log，例如DAMENG01.log
+USBKEY_PIN                 设置USBKEY PIN
+PAGE_ENC_SLICE_SIZE        设置页加密分片大小，可选值：0、512、4096，单位：Byte
+ENCRYPT_NAME               设置全库加密算法
+BLANK_PAD_MODE             设置空格填充模式(0)，可选值：0/1
+SYSTEM_MIRROR_PATH         SYSTEM数据文件镜像路径
+MAIN_MIRROR_PATH           MAIN数据文件镜像
+ROLL_MIRROR_PATH           回滚文件镜像路径
+MAL_FLAG                   初始化时设置dm.ini中的MAL_INI(0)
+ARCH_FLAG                  初始化时设置dm.ini中的ARCH_INI(0)
+MPP_FLAG                   Mpp系统内的库初始化时设置dm.ini中的mpp_ini(0)
+CONTROL                    初始化配置文件（配置文件格式见系统管理员手册）
+AUTO_OVERWRITE             是否覆盖所有同名文件(0) 0:不覆盖 1:部分覆盖 2:完全覆盖
+USE_NEW_HASH               是否使用改进的字符类型HASH算法(1)
+ELOG_PATH                  指定初始化过程中生成的日志文件所在路径
+AP_PORT_NUM                分布式环境下协同工作的监听端口
+DFS_FLAG                   初始化时设置dm.ini中的DFS_INI(0)
+DFS_PATH                   启用dfs时指定数据文件的缺省路径
+DFS_HOST                   指定连接分布式系统DFS的服务地址(localhost)
+DFS_PORT                   指定连接分布式系统DFS的服务端口号(3332)
+DFS_COPY_NUM               指定分布式系统的副本数(3)
+DFS_DB_NAME                指定分布式系统的中数据库名(默认与DB_NAME一致)
+SHARE_FLAG                 指定分布式系统中该数据库的共享属性(0)
+REGION_MODE                指定分布式系统中该数据库的系统表空间数据文件的区块策略(0) 0:微区策略 1:宏区策略
+HUGE_WITH_DELTA            是否仅支持创建事务型HUGE表(1) 1:是 0:否
+RLOG_GEN_FOR_HUGE          是否生成HUGE表REDO日志(1) 1:是 0:否
+PSEG_MGR_FLAG              是否仅使用管理段记录事务信息(0) 1:是 0:否
+CHAR_FIX_STORAGE           CHAR是否按定长存储(N)，可选值：Y/N，1/0
+SQL_LOG_FORBID             是否禁止打开SQL日志(N)，可选值：Y/N，1/0
+DPC_MODE                   指定DPC集群中的实例角色(0) 0:无 1:MP 2:BP 3:SP，取值1/2/3时也可以用MP/BP/SP代替
+HELP                       打印帮助信息
+```
 
-需要注意的是页大小 (page_size)、簇大小 (extent_size)、大小写敏感 (case_sensitive)、字符集 (charset) 这四个参数，一旦确定无法修改，需谨慎设置
-   - extent_size 指数据文件使用的簇大小，即每次分配新的段空间时连续的页数。只能是 16 页或 32 页或 64 页之一，缺省使用 16 页。
-   - page_size 数据文件使用的页大小，可以为 4 KB、8 KB、16 KB 或 32 KB 之一，选择的页大小越大，则 DM 支持的元组长度也越大，但同时空间利用率可能下降，缺省使用 8 KB。
-   - case_sensitive 标识符大小写敏感，默认值为 Y 。当大小写敏感时，小写的标识符应用双引号括起，否则被转换为大写；当大小写不敏感时，系统不自动转换标识符的大小写，在标识符比较时也不区分大小写，只能是 Y、y、N、n、1、0 之一。
-   - charset 字符集选项。0 代表 GB18030；1 代表 UTF-8；2 代表韩文字符集 EUC-KR；取值 0、1 或 2 之一。默认值为 0。
+需要注意的是页大小 (`PAGE_SIZE`)、簇大小 (`EXTENT_SIZE`)、大小写敏感 (`CASE_SENSITIVE`)、字符集 (`CHARSET`) 这四个参数，一旦确定无法修改，需谨慎设置。
+   - `PAGE_SIZE` 数据文件使用的页大小。取值：8、16、32，单位：K。默认值为 8。建议该参数设置为 16 或者 32。`可选参数`
+   - `EXTENT_SIZE` 数据文件使用的簇大小，即每次分配新的段空间时连续的页数。取值：16、32、64。单位：页数。缺省值 16。生产环境中该参数建议设置为 32。`可选参数`
+   - `CASE_SENSITIVE` 标识符大小写敏感，默认值为 Y 。`可选参数`
+   - `CHARSET` 字符集选项。字符集选项。取值：0 代表 GB18030，1 代表 UTF-8，2 代表韩文字符集 EUC-KR。默认为 0。`可选参数`
+   - `BLANK_PAD_MODE` 置字符串比较时，结尾空格填充模式是否兼容 ORACLE。1：兼容；0：不兼容。缺省值为 0。`可选参数`
 
-可以使用默认参数初始化实例，需要附加实例存放路径。此处以初始化实例到 /dm8/data 目录下为例，初始化命令如下：
 
 ```bash
-./dminit path=/dm8/data
+dminit PATH=/data/dm8/data PAGE_SIZE=32 EXTENT_SIZE=32 CASE_SENSITIVE=0 CHARSET=1 BLANK_PAD_MODE=1 LOG_SIZE=2048
 ```
 
-### 1.4 注册服务
+### 1.5 注册服务
 
-注册服务需使用 root 用户进行注册。使用 root 用户进入数据库安装目录的 /dm8/script/root 下，如下所示：
+注册服务需使用 root 用户进行注册。使用 root 用户进入数据库安装目录的 `/data/dm8/dmdbms/script/root` 下，如下所示：
 
 ```bash
-cd /dm8/script/root
-./dm_service_installer.sh -t dmserver -dm_ini /dm8/data/DAMENG/dm.ini -p DMSERVER
+cd /data/dm8/dmdbms/script/root
+./dm_service_installer.sh -t dmserver -dm_ini /data/dm8/data/DAMENG/dm.ini -p DMSERVER
 ```
 
-用户可根据自己的环境更改 dm.ini 文件的路径以及服务名，如下所示：
-
-```bash
-./dm_service_installer.sh -h
+参数说明
+```lua
+-t               服务类型,包括dmimon,dmap,dmserver,dmwatcher,dmmonitor,dmcss,dmcssm,dmasmsvr,dmasmsvrm.
+-p               服务名后缀,对于dmimon,dmap服务类型无效
+-dm_ini          dm.ini文件路径
+-watcher_ini     dmwatcher.ini文件路径.
+-monitor_ini     dmmonitor.ini文件路径.
+-dcr_ini         dmdcr.ini文件路径.
+-cssm_ini        dmcssm.ini文件路径.
+-dmap_ini        dmap.ini文件路径.
+-dpc_mode        DPC节点类型.
+-server          服务器信息(IP:PORT)
+-auto            设置服务是否自动启动,值为true或false，默认true.
+-m               设置服务器启动模式open或mount,只针对dmserver服务类型生效,可选
+-y               设置依赖服务，此选项只针对systemd服务环境下的dmserver,dmasmsvr,dmasmsvrm服务生效
+-s               服务脚本路径，设置则忽略除-y外的其他参数选项
+-h               帮助
 ```
 
-### 1.5 启停服务
+### 1.6 启动服务
 
 ```bash
 systemctl start DmServiceDMSERVER.service
@@ -163,9 +243,9 @@ systemctl restart DmServiceDMSERVER.service
 systemctl status DmServiceDMSERVER.service
 ```
 
-### 1.6 客户端测试
+### 1.7 客户端测试
 
-SYSDBA/SYSDBA
+默认密码：SYSDBA/SYSDBA
 
 ## 2. 库操作
 
@@ -175,9 +255,9 @@ SYSDBA/SYSDBA
 
 ```sql
 -- 初始大小128m，每次自动扩充10m，最大尺寸2g
-create tablespace tbs1 datafile '/dm8/data/DAMENG/tbs1.dbf' size 128 autoextend on next 10 maxsize 2048; 
+create tablespace tbs1 datafile '/data/dm8/data/DAMENG/tbs1.dbf' size 128 autoextend on next 10 maxsize 2048; 
 -- 修改表空间，打开自动扩展，每次自动扩展 100M ，扩展上限 10240M
-alter tablespace "tbs1" datafile '/dm8/data/DAMENG/tbs1.dbf' autoextend on next 100 maxsize 10240;
+alter tablespace "tbs1" datafile '/data/dm8/data/DAMENG/tbs1.dbf' autoextend on next 100 maxsize 10240;
 
 -- 查询表空间
 SELECT TABLESPACE_NAME FROM DBA_TABLESPACES;
