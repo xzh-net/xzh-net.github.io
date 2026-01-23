@@ -504,7 +504,8 @@ pg_dump -h 127.0.0.1 -U postgres -p 5432  --no-owner --no-privileges oauth_cente
 导出为包含列名的插入语句，保证数据的一致性和完整性
 ```bash
 # 导出多表使用-t tb1 -t tb2
-pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_center --column-inserts -f oauth_center.sql    
+pg_dump -h localhost -d oauth_center -U postgres -p 5432 -t oauth_center --column-inserts -f oauth_center.sql
+# 还原
 psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_center.sql
 ```
 
