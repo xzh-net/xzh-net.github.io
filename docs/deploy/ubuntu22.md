@@ -2,6 +2,7 @@
 
 - 官方网站：https://cn.ubuntu.com
 - 下载地址：https://releases.ubuntu.com
+- 安装包仓库：http://archive.ubuntu.com/ubuntu/pool/main/u/unzip
 
 ## 1. 系统安装
 
