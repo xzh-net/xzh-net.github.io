@@ -2,7 +2,7 @@
 
 - 官方网站：https://www.centos.org
 - 停更网站：https://vault.centos.org
-- RPM资源：https://www.rpmfind.net
+- 安装包仓库：https://www.rpmfind.net
 
 ## 1. 服务
 
