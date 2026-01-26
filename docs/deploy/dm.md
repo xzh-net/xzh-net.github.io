@@ -324,7 +324,9 @@ SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE='PUBLIC';
 
 ### 2.3 审计日志
 
-### 2.4 备份恢复
+### 2.4 归档日志
+
+### 2.4 数据备份
 
 ## 3. 表操作
 
