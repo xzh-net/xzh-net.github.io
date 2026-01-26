@@ -386,7 +386,20 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 
 ## 3. 库操作
 
-### 3.1 用户管理
+### 3.1 创建表空间
+
+```sql
+-- 查询单个表空间大小
+select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
+ 
+-- 查询所有表空间大小
+select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
+-- 或
+select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
+```
+
+
+### 3.2 创建用户
 
 1. 创建用户
 
@@ -416,7 +429,7 @@ select * from pg_database;
 ```
 
 
-### 3.2 审计日志
+### 3.3 审计日志
 
 1. 开启审计
 
@@ -445,7 +458,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile restart
 ```
 
 
-### 3.3 归档日志
+### 3.4 归档日志
 
 1. 开启归档
 
@@ -490,9 +503,9 @@ select * from pg_ls_waldir() order by modification desc;    -- 查看日志最�
 ```
 
 
-### 3.4 数据备份
+### 3.5 数据备份
 
-#### 3.4.1 逻辑备份
+#### 3.5.1 逻辑备份
 
 1. pg_dump 
 
@@ -657,7 +670,7 @@ Connection options:
   --role=ROLENAME          do SET ROLE before dump
 ```
 
-#### 3.4.2 物理备份
+#### 3.5.2 物理备份
 
 1. 备份base和pg_wal
 
@@ -700,7 +713,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile start
 select pg_wal_replay_resume();  # 停止恢复
 ```
 
-#### 3.4.3 PITR数据恢复
+#### 3.5.3 PITR数据恢复
 
 ```sql
 select pg_create_restore_point('point-20231206');  -- 创建还原点
@@ -728,7 +741,7 @@ pg_ctl -D /data/pgdata/12/data -l logfile start
 select pg_wal_replay_resume();  # 停止恢复
 ```
 
-#### 3.4.4 定时备份
+#### 3.5.4 定时备份
 
 ```bash
 crontab -e
@@ -752,17 +765,7 @@ rm -rf /data/pg_backup/*.dmp
 echo "backup finished" his
 ```
 
-### 3.5 表空间管理
 
-```sql
--- 查询单个表空间大小
-select pg_size_pretty(pg_tablespace_size('pg_default')) as size;
- 
--- 查询所有表空间大小
-select spcname, pg_size_pretty(pg_tablespace_size(spcname)) as size from pg_tablespace;
--- 或
-select spcname, pg_size_pretty(pg_tablespace_size(oid)) as size from pg_tablespace;
-```
 
 ## 4. 表操作
 
