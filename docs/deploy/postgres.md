@@ -525,12 +525,14 @@ psql -h localhost -d oauth_center -U postgres -p 5432 -f oauth_center.sql
 导出为tar格式的备份文件（二进制格式）
 ```bash
 pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Ft -f oauth_center.tar
+# 还原
 pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.tar
 ```
 
 导出为自定义格式（支持压缩和并行恢复）
 ```bash
 pg_dump -h localhost -U postgres -d oauth_center -p 5432 -Fc -f oauth_center.dmp
+# 还原
 pg_restore -h localhost -U postgres -d oauth_center -p 5432 -v oauth_center.dmp
 ```
 
@@ -611,6 +613,7 @@ Connection options:
 
 ```bash
 pg_dumpall -h localhost -U postgres -p 5432 -v -f all.sql
+# 还原
 psql -h localhost -U postgres -p 5432 -f all.sql
 ```
 
