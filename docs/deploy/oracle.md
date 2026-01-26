@@ -1244,52 +1244,7 @@ rm -rf /u01/app
 
 ## 2. 库操作
 
-### 2.1 用户管理
-
-1. 创建用户
-
-```sql
-create user xzh0610 identified by 123456
-  default tablespace xzh
-  temporary tablespace xzh_temp
-  profile DEFAULT
-  password  expire;
-
-grant connect,resource to xzh0610;
-grant read,write ON DIRECTORY oradmp to xzh0610; 
-grant dba to xzh0610;
-```
-
-2. 删除用户
-
-```sql
-drop user xzh0610 cascade;
-```
-
-3. 查询用户
-
-```sql
-SELECT * FROM dba_users;
-```
-
-4. 修改密码
-
-```bash
-# 直接修改
-password zhangsan
-# 使用SQL语句查找密码过期用户所属的profile
-select username,profile from dba_users;  
-# 查看对应的概要文件(如default)的密码有效期设置（一般默认为180天）
-SELECT * FROM dba_profiles s WHERE s.profile='DEFAULT' AND resource_name='PASSWORD_LIFE_TIME';
-# 然后使用SQL语句将该用户所属的profile修改为永不过期
-alter profile default limit PASSWORD_LIFE_TIME unlimited;
-# 将密码过期用户的密码更新，使用如下SQL
-alter user zhangsan identified by "密码" account unlock;
-# 解锁用户
-alter user zhangsan account unlock;
-```
-
-### 2.2 表空间管理
+### 2.1 创建表空间
 
 1. 临时表空间
   
@@ -1353,6 +1308,50 @@ select username,default_tablespace from dba_users where username='xzh';
 alter tablespace xzh_data ADD datafile '/u01/app/oracle/xzh/xzh.dbf' size 1024M autoextend on next 1024M maxsize 32767M; 
 ```
 
+### 2.2 创建用户
+
+1. 创建用户
+
+```sql
+create user xzh0610 identified by 123456
+  default tablespace xzh
+  temporary tablespace xzh_temp
+  profile DEFAULT
+  password  expire;
+
+grant connect,resource to xzh0610;
+grant read,write ON DIRECTORY oradmp to xzh0610; 
+grant dba to xzh0610;
+```
+
+2. 删除用户
+
+```sql
+drop user xzh0610 cascade;
+```
+
+3. 查询用户
+
+```sql
+SELECT * FROM dba_users;
+```
+
+4. 修改密码
+
+```bash
+# 直接修改
+password zhangsan
+# 使用SQL语句查找密码过期用户所属的profile
+select username,profile from dba_users;  
+# 查看对应的概要文件(如default)的密码有效期设置（一般默认为180天）
+SELECT * FROM dba_profiles s WHERE s.profile='DEFAULT' AND resource_name='PASSWORD_LIFE_TIME';
+# 然后使用SQL语句将该用户所属的profile修改为永不过期
+alter profile default limit PASSWORD_LIFE_TIME unlimited;
+# 将密码过期用户的密码更新，使用如下SQL
+alter user zhangsan identified by "密码" account unlock;
+# 解锁用户
+alter user zhangsan account unlock;
+```
 
 ### 2.3 审计日志
 
@@ -1538,7 +1537,7 @@ GRANT READ,WRITE ON DIRECTORY oradmp to xzh0610;        -- 将oradmp目录的赋
 ```
 
 
-### 2.6 备份恢复
+### 2.6 数据备份
 
 1. 按表名备份、还原
 
