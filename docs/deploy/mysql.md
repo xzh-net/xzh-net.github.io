@@ -96,7 +96,7 @@ rm -rf /var/log/mysqld.log
 
 ## 2. 库操作
 
-### 2.1 用户管理
+### 2.1 创建用户
 
 1. 创建用户
 
@@ -159,7 +159,7 @@ lower_case_table_names=1
 service mysql restart
 ```
 
-### 2.3 查询日志
+### 2.3 慢查询日志
 
 ```bash
 set global slow_query_log = on      # 临时开启慢查询日志
@@ -189,7 +189,7 @@ binlog_format=ROW
 mysql -uroot -p1q2w3e4r -e "show variables like 'log_bin%'";
 ```
 
-### 2.6 备份恢复
+### 2.6 数据备份
 
 ```bash
 mysqldump -uroot -proot --all-databases >/tmp/all.sql                               # 备份所库
@@ -197,6 +197,7 @@ mysqldump -uroot -proot --databases db1 db2 >/tmp/user.sql                      
 mysqldump -uroot -proot --databases db1 --tables a1 --where='id=1'  >/tmp/a1.sql    # 备份指定库指定表
 mysqldump -uroot -proot --no-data --databases db1 >/tmp/db1.sql                     # 只导指定库的表结构
 mysqldump --set-gtid-purged=OFF -h 127.0.0.1 -u root -p 123456 dbname --ignore-table=dbname.tb1 --ignore-table=dbname.tb2 > /tmp/all.sql   # 忽略表
+# 还原
 mysql -uroot -proot -h 127.0.0.1 -P 3306 sonar</tmp/all.sql                         # 导入
 ```
 
