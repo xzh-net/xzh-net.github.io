@@ -334,10 +334,10 @@ SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE='PUBLIC';
 
 ```bash
 # 导出数据库的所有对象。设置 FULL=Y，导出数据库文件和日志文件放在路径 /home/dmdba/tmp 下
-dexp USERID=SYSDBA/SYSDBA@127.0.0.1:15236 FILE=db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/home/dmdba/tmp
+dexp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/home/dmdba/tmp
 
 # 还原，日志位置：/tmp
-dimp USERID=SYSDBA/SYSDBA@127.0.0.1:15236 FILE=/home/dmdba/tmp/db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/tmp
+dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/home/dmdba/tmp/db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/tmp
 ``` 
 
 2. OWNER 方式导出一个或多个用户拥有的所有对象
@@ -346,10 +346,10 @@ dimp USERID=SYSDBA/SYSDBA@127.0.0.1:15236 FILE=/home/dmdba/tmp/db_str.dmp LOG=db
 
 ```bash
 ##设置 OWNER=USER01，导出用户 USER01 所拥有的对象全部导出。
-dexp USERID=SYSDBA/Vjsp2025@127.0.0.1:15236 FILE=db_USER01.dmp LOG=db_USER01.log OWNER=USER01 DIRECTORY=/home/dmdba/tmp
+dexp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=db_USER01.dmp LOG=db_USER01.log OWNER=USER01 DIRECTORY=/home/dmdba/tmp
 
 # 还原，日志位置：/tmp
-dimp USERID=SYSDBA/Vjsp2025@127.0.0.1:15236 FILE=/home/dmdba/tmp/db_USER01.dmp LOG=db_USER01.log OWNER=USER01  DIRECTORY=/tmp
+dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/home/dmdba/tmp/db_USER01.dmp LOG=db_USER01.log OWNER=USER01  DIRECTORY=/tmp
 ```
 
 
