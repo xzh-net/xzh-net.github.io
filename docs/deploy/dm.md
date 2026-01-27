@@ -328,6 +328,55 @@ SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE='PUBLIC';
 
 ### 2.5 数据备份
 
+#### 2.5.1 逻辑备份
+
+1. FULL 方式导出数据库的所有对象
+
+```bash
+# 导出数据库的所有对象。设置 FULL=Y，导出数据库文件和日志文件放在路径 /home/dmdba/tmp 下
+dexp USERID=SYSDBA/SYSDBA@127.0.0.1:15236 FILE=db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/home/dmdba/tmp
+
+# 还原，日志位置：/tmp
+dimp USERID=SYSDBA/SYSDBA@127.0.0.1:15236 FILE=/home/dmdba/tmp/db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/tmp
+``` 
+
+2. OWNER 方式导出一个或多个用户拥有的所有对象
+
+!> 如果导入的时候用户不存在，会自动创建
+
+```bash
+##设置 OWNER=USER01，导出用户 USER01 所拥有的对象全部导出。
+dexp USERID=SYSDBA/Vjsp2025@127.0.0.1:15236 FILE=db_USER01.dmp LOG=db_USER01.log OWNER=USER01 DIRECTORY=/home/dmdba/tmp
+
+# 还原，日志位置：/tmp
+dimp USERID=SYSDBA/Vjsp2025@127.0.0.1:15236 FILE=/home/dmdba/tmp/db_USER01.dmp LOG=db_USER01.log OWNER=USER01  DIRECTORY=/tmp
+```
+
+
+3. SCHEMAS 方式的导出一个或多个模式下的所有对象
+
+!> 导入前需要手动创建模式
+
+```bash
+##设置 SCHEMAS=USER01，导出模式 USER01 模式下的所有对象。
+dexp USERID=SYSDBA/SYSDBA FILE=db_USER01.dmp LOG=db_USER01.log SCHEMAS=USER01 DIRECTORY=/home/dmdba/tmp
+
+# 还原，日志位置：/tmp
+dimp USERID=SYSDBA/SYSDBA FILE=/home/dmdba/tmp/db_USER01.dmp LOG=db_USER01.log SCHEMAS=USER01 DIRECTORY=/tmp
+```
+
+4. TABLES 方式导出一个或多个指定的表或表分区。导出所有数据行、约束、索引等信息
+
+```bash
+dexp USERID=SYSDBA/SYSDBA FILE=db_str.dmp LOG=db_str.log TABLES=USER01.test,USER01.test2 DIRECTORY=/home/dmdba/tmp
+
+# 还原，日志位置：/tmp
+dimp USERID=SYSDBA/SYSDBA FILE=/home/dmdba/tmp/db_str.dmp LOG=db_str.log TABLES=USER01.test,USER01.test2 DIRECTORY=/tmp
+```
+
+
+#### 2.5.2 物理备份
+
 ## 3. 表操作
 
 ### 3.1 创建表
