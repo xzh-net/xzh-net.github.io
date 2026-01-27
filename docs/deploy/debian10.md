@@ -119,7 +119,7 @@ systemctl restart networking
 vim /etc/resolv.conf
 ```
 
-### 2.3 ssh配置
+### 2.3 SSH配置
 
 ```bash
 apt-get install ssh     # 安装

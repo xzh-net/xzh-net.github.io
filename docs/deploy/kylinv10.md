@@ -104,7 +104,7 @@ vim /etc/resolv.conf
 ```
 
 
-### 2.2 ssh配置
+### 2.2 SSH配置
 
 ```bash
 # 开启密码验证和root账号登录 

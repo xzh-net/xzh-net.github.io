@@ -184,7 +184,7 @@ network:
         addresses: [8.8.8.8, 1.1.1.1]  # 替换为你的DNS服务器
 ```
 
-### 2.3 ssh配置
+### 2.3 SSH配置
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -547,6 +547,22 @@ Group=jenkins
 # Directory where Jenkins stores its configuration and workspaces
 Environment="JENKINS_HOME=/data/jenkins"
 WorkingDirectory=/data/jenkins
+```
+
+#### 2.11.3 系统日志
+
+```bash
+# 查看本次启动的日志（从本次启动开始）
+sudo journalctl -b 0
+
+# 查看上一次启动的日志
+sudo journalctl -b -1
+
+# 实时查看日志
+sudo journalctl -f
+
+# 查看特定时间段的日志
+sudo journalctl --since "2024-01-01 00:00:00" --until "2024-01-01 12:00:00"
 ```
 
 ### 2.12 时间同步服务（Chrony）

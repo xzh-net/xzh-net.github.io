@@ -1873,7 +1873,7 @@ DNS1=114.114.114.114
 systemctl restart network
 ```
 
-### 3.2 ssh配置
+### 3.2 SSH配置
 
 
 ```bash
