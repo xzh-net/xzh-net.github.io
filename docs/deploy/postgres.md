@@ -1504,12 +1504,17 @@ select relname, pg_size_pretty(pg_total_relation_size(relid)) as size from pg_st
 
 #### 5.2.3 数据
 
-1. 所有表记录行数查询
-
+统计表行数
 ```sql
 SELECT schemaname,relname,n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
--- 更新某个表
+```
+
+对指定表进行手动清理，回收被删除/更新行占用的磁盘空间，更新表的统计信息，防止事务ID回卷
+```sql
 vacuum tablename
--- 更新该数据库所有表
+```
+
+对当前数据库的所有表进行清理
+```sql
 vacuum               
 ```
