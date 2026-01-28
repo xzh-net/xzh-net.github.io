@@ -234,7 +234,7 @@ sentinel failover-timeout mymaster 180000
 #### 1.3.5 验证
 
 ```bash
-./redis-cli -p 26379
+/usr/local/redis/bin/redis-cli -p 26379
 info sentinel 
 ```
 
