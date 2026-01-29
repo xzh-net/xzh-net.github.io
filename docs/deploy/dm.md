@@ -6,16 +6,24 @@
 
 环境：CentOS7_x86_64，数据库版本：dm8_rh7_64_ent_8.1.1.87，安装前必须创建 dmdba 用户，禁止使用 root 用户安装数据库。
 
-#### 1.1.1 创建用户
+#### 1.1.1 新建 dmdba 用户
 
+创建用户所在的组
 ```bash
-adduser dmdba
+groupadd dinstall -g 2001
+```
+
+创建用户
+```bash
+useradd  -G dinstall -m -d /home/dmdba -s /bin/bash -u 2001 dmdba
+```
+
+修改用户密码
+```bash
 passwd dmdba
 ```
 
-#### 1.1.2 调整 limits.conf 参数
-
-永久生效
+#### 1.1.2 修改文件打开最大数
 
 ```bash
 vi /etc/security/limits.conf
@@ -50,9 +58,35 @@ su - dmdba
 ulimit -a
 ```
 
-#### 1.1.3 挂载镜像
+#### 1.1.3 目录规划
 
-切换到 root 用户，将 DM 数据库的 iso 安装包上传到 /opt/software 目录下，执行如下命令挂载镜像：
+使用 root 用户创建：实例保存目录，归档保存目录，备份保存目录，审计日志目录
+
+```bash
+mkdir /data/{dmdata,dmarch,dmbak,dmaudit} -p
+```
+
+修改目录权限，将新建的路径目录权限的用户修改为 dmdba，用户组修改为 dinstall
+
+```bash
+chown -R dmdba:dinstall /data/dmdata
+chown -R dmdba:dinstall /data/dmarch
+chown -R dmdba:dinstall /data/dmbak
+chown -R dmdba:dinstall /data/dmaudit
+```
+
+给路径下的文件设置 755 权限
+
+```bash
+chmod -R 755 /data/dmdata
+chmod -R 755 /data/dmarch
+chmod -R 755 /data/dmbak
+chmod -R 755 /data/dmaudit
+```
+
+### 1.2 数据库安装
+
+挂载镜像，切换到 root 用户，将 DM 数据库的 iso 安装包上传到 /opt/software 目录下，执行如下命令挂载镜像：
 
 ```bash
 cd /opt/software && unzip dm8_20230418_x86_rh6_64.zip
@@ -60,24 +94,7 @@ mkdir /mnt
 mount -o loop /opt/software/dm8_20230418_x86_rh6_64.iso /mnt
 ```
 
-#### 1.1.4 创建数据目录
-
-使用 root 用户建立文件夹
-
-```bash
-mkdir /data/dm8/{data,dmdbms} -p
-```
-
-修改数据目录权限
-
-```bash
-chown dmdba:dmdba -R /data/dm8/
-chmod -R 755 /data/dm8/   # 给数据路径下的文件设置 755 权限
-```
-
-### 1.2 数据库安装
-
-Linux 环境下支持命令行安装
+命令行安装
 
 ```bash
 su - dmdba
@@ -85,21 +102,19 @@ cd /mnt/
 ./DMInstall.bin -i
 ```
 
-按需求选择安装语言，默认为中文。本地安装选择【不输入 Key文件】，选择【默认时区 21】。
+按需求选择安装语言，不输入Key文件，设置时区：21
 
 ![](../../assets/_images/deploy/dm/1.png)
 
-选择【1-典型安装】，按已规划的安装目录 /data/dm8/dmdbms 完成数据库软件安装。数据库安装大概 1~2 分钟，数据库安装完成后，显示如下界面。
+选择【1-典型安装】，默认安装目录。数据库安装完成后，显示如下界面。
 
 ![](../../assets/_images/deploy/dm/2.png)
 
 数据库安装完成后，需要切换至 root 用户执行上图中的命令，注册 DmAPService，主要服务于数据库的备份操作。
 
 ```bash
-/data/dm8/script/root/root_installer.sh
+/home/dmdba/dmdbms/script/root/root_installer.sh
 ```
-
-![](../../assets/_images/deploy/dm/3.png)
 
 ### 1.3 配置环境变量
 
@@ -113,8 +128,8 @@ vim .bash_profile
 编辑内容
 
 ```bash
-export DM_HOME="/data/dm8/dmdbms"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/dm8/dmdbms/bin"
+export DM_HOME="/home/dmdba/dmdbms"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/dmdba/dmdbms/bin"
 export PATH=$PATH:$DM_HOME/bin:$DM_HOME/tool
 ```
 
@@ -203,16 +218,16 @@ HELP                       打印帮助信息
 
 
 ```bash
-dminit PATH=/data/dm8/data PAGE_SIZE=32 EXTENT_SIZE=32 CASE_SENSITIVE=0 CHARSET=1 BLANK_PAD_MODE=1 LOG_SIZE=2048
+dminit PATH=/data/dmdata PAGE_SIZE=32 EXTENT_SIZE=32 CASE_SENSITIVE=0 CHARSET=1 BLANK_PAD_MODE=1 LOG_SIZE=2048
 ```
 
 ### 1.5 注册服务
 
-注册服务需使用 root 用户进行注册。使用 root 用户进入数据库安装目录的 `/data/dm8/dmdbms/script/root` 下，如下所示：
+注册服务需使用 root 用户进行注册。使用 root 用户进入数据库安装目录的 `/home/dmdba/dmdbms/script/root` 下，如下所示：
 
 ```bash
-cd /data/dm8/dmdbms/script/root
-./dm_service_installer.sh -t dmserver -dm_ini /data/dm8/data/DAMENG/dm.ini -p DMSERVER
+cd /home/dmdba/dmdbms/script/root
+./dm_service_installer.sh -t dmserver -dm_ini /data/dmdata/DAMENG/dm.ini -p DMSERVER
 ```
 
 参数说明
@@ -255,9 +270,9 @@ systemctl status DmServiceDMSERVER.service
 
 ```sql
 -- 初始大小128m，每次自动扩充10m，最大尺寸2g
-create tablespace tbs1 datafile '/data/dm8/data/DAMENG/tbs1.dbf' size 128 autoextend on next 10 maxsize 2048; 
+create tablespace tbs1 datafile '/data/dmdata/DAMENG/tbs1.dbf' size 128 autoextend on next 10 maxsize 2048; 
 -- 修改表空间，打开自动扩展，每次自动扩展 100M ，扩展上限 10240M
-alter tablespace "tbs1" datafile '/data/dm8/data/DAMENG/tbs1.dbf' autoextend on next 100 maxsize 10240;
+alter tablespace "tbs1" datafile '/data/dmdata/DAMENG/tbs1.dbf' autoextend on next 100 maxsize 10240;
 
 -- 查询表空间
 SELECT TABLESPACE_NAME FROM DBA_TABLESPACES;
@@ -333,11 +348,11 @@ SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE='PUBLIC';
 1. FULL 方式导出数据库的所有对象
 
 ```bash
-# 导出数据库的所有对象。设置 FULL=Y，导出数据库文件和日志文件放在路径 /home/dmdba/tmp 下
-dexp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/home/dmdba/tmp
+# 导出数据库的所有对象。设置 FULL=Y，导出数据库文件和日志文件放在路径 /data/dmbak 下
+dexp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/data/dmbak
 
-# 还原，日志位置：/tmp
-dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/home/dmdba/tmp/db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/tmp
+# 还原，产生的日志位置：/data/dmbak
+dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/data/dmbak/db_str.dmp LOG=db_str.log FULL=Y DIRECTORY=/data/dmbak
 ``` 
 
 2. OWNER 方式导出一个或多个用户拥有的所有对象
@@ -346,10 +361,10 @@ dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/home/dmdba/tmp/db_str.dmp LOG=db_
 
 ```bash
 ##设置 OWNER=USER01，导出用户 USER01 所拥有的对象全部导出。
-dexp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=db_USER01.dmp LOG=db_USER01.log OWNER=USER01 DIRECTORY=/home/dmdba/tmp
+dexp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=db_USER01.dmp LOG=db_USER01.log OWNER=USER01 DIRECTORY=/data/dmbak
 
-# 还原，日志位置：/tmp
-dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/home/dmdba/tmp/db_USER01.dmp LOG=db_USER01.log OWNER=USER01  DIRECTORY=/tmp
+# 还原，产生的日志位置：/data/dmbak
+dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/data/dmbak/db_USER01.dmp LOG=db_USER01.log OWNER=USER01 DIRECTORY=/data/dmbak
 ```
 
 
@@ -359,19 +374,19 @@ dimp USERID=SYSDBA/SYSDBA@127.0.0.1:5236 FILE=/home/dmdba/tmp/db_USER01.dmp LOG=
 
 ```bash
 ##设置 SCHEMAS=USER01，导出模式 USER01 模式下的所有对象。
-dexp USERID=SYSDBA/SYSDBA FILE=db_USER01.dmp LOG=db_USER01.log SCHEMAS=USER01 DIRECTORY=/home/dmdba/tmp
+dexp USERID=SYSDBA/SYSDBA FILE=db_USER01.dmp LOG=db_USER01.log SCHEMAS=USER01 DIRECTORY=/data/dmbak
 
-# 还原，日志位置：/tmp
-dimp USERID=SYSDBA/SYSDBA FILE=/home/dmdba/tmp/db_USER01.dmp LOG=db_USER01.log SCHEMAS=USER01 DIRECTORY=/tmp
+# 还原，产生的日志位置：/data/dmbak
+dimp USERID=SYSDBA/SYSDBA FILE=/data/dmbak/db_USER01.dmp LOG=db_USER01.log SCHEMAS=USER01 DIRECTORY=/data/dmbak
 ```
 
 4. TABLES 方式导出一个或多个指定的表或表分区。导出所有数据行、约束、索引等信息
 
 ```bash
-dexp USERID=SYSDBA/SYSDBA FILE=db_str.dmp LOG=db_str.log TABLES=USER01.test,USER01.test2 DIRECTORY=/home/dmdba/tmp
+dexp USERID=SYSDBA/SYSDBA FILE=db_str.dmp LOG=db_str.log TABLES=USER01.test,USER01.test2 DIRECTORY=/data/dmbak
 
-# 还原，日志位置：/tmp
-dimp USERID=SYSDBA/SYSDBA FILE=/home/dmdba/tmp/db_str.dmp LOG=db_str.log TABLES=USER01.test,USER01.test2 DIRECTORY=/tmp
+# 还原，产生的日志位置：/data/dmbak
+dimp USERID=SYSDBA/SYSDBA FILE=/data/dmbak/db_str.dmp LOG=db_str.log TABLES=USER01.test,USER01.test2 DIRECTORY=/data/dmbak
 ```
 
 
