@@ -223,7 +223,7 @@ dminit PATH=/data/dmdata PAGE_SIZE=32 EXTENT_SIZE=32 CASE_SENSITIVE=0 CHARSET=1 
 
 ### 1.5 注册服务
 
-注册服务需使用 root 用户进行注册。使用 root 用户进入数据库安装目录的 `/home/dmdba/dmdbms/script/root` 下，如下所示：
+注册服务需使用 root 用户进行注册。进入数据库安装目录的 `/home/dmdba/dmdbms/script/root` 下，如下所示：
 
 ```bash
 cd /home/dmdba/dmdbms/script/root
@@ -251,11 +251,21 @@ cd /home/dmdba/dmdbms/script/root
 
 ### 1.6 启动服务
 
+服务名方式
+
 ```bash
 systemctl start DmServiceDMSERVER.service
 systemctl stop DmServiceDMSERVER.service
 systemctl restart DmServiceDMSERVER.service
 systemctl status DmServiceDMSERVER.service
+```
+
+前台方式
+
+```bash
+su - dmdba
+cd /home/dmdba/dmdbms/bin
+./dmserver /data/dmdata/DAMENG/dm.ini
 ```
 
 ### 1.7 客户端测试
