@@ -747,25 +747,63 @@ location / {
 
 #### 3.1.7 请求转发
 
-场景：应用环境无法访问互联网，通过转发短信宝API请求实现访问。客户端配置`hosts`，设置api.smsbao.com地址为nginx服务器IP。
+场景：内网无法访问互联网，通过Ng转发，客户端配置 `Hosts`，实现访问互联网
+
+微信认证代理
 
 ```nginx
 server {
     listen 80;
-    server_name localhost;
-    access_log logs/access_proxy_$logdate.log main;
-    location /sms/ {
-        proxy_pass http://api.smsbao.com/sms/;
-        proxy_set_header Host api.smsbao.com;
+    server_name api.weixin.qq.com;
+    
+    location / {
+        proxy_pass https://api.weixin.qq.com/;
+		
+		proxy_ssl_server_name on;
+        proxy_ssl_name api.weixin.qq.com;
+        
+        proxy_set_header Host api.weixin.qq.com;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # 超时设置
-        proxy_connect_timeout 30s;
-        proxy_send_timeout 30s;
-        proxy_read_timeout 30s;
     }
+}
+```
+
+微信支付代理
+
+```nginx
+server {
+    listen 80;
+    server_name api.mch.weixin.qq.com;
+    
+    location / {
+        proxy_pass https://api.mch.weixin.qq.com/;
+		
+		proxy_ssl_server_name on;
+        proxy_ssl_name api.mch.weixin.qq.com;
+        
+        proxy_set_header Host api.mch.weixin.qq.com;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+短信代理（HTTP协议）
+
+```nginx
+server {
+	listen  80;
+	server_name api.smsbao.com;
+	
+	location / {
+		proxy_pass http://api.smsbao.com/;
+		
+		proxy_set_header Host api.smsbao.com;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		
+	}
 }
 ```
 
