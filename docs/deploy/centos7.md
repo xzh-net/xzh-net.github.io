@@ -1365,9 +1365,10 @@ exec /sbin/init
 ### 2.2 文件
 
 ```bash
-# 替换
+# 将 /usr/local/redis/conf/redis.conf 依次拷贝至以下文件夹内
+echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   
+# 替换后生成新的文件
 sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
-echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   # 文件批量拷贝至当前目录下的指定文件夹内
 
 # 压缩
 zip -r xzh2021.zip * -x  './node_modules/*'         # 排除指定文件夹
