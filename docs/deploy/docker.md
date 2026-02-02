@@ -1583,7 +1583,8 @@ fdfs_test /etc/fdfs/client.conf upload index.html
 
 #### MinIO
 
-从`RELEASE.2025-05-24T17-08-30Z`开始移除了Web UI。如果需要Web UI请使用`RELEASE.2025-04-22T22-12-26Z`版本
+- 最后一个采用Apache V2.0协议的版本：RELEASE.2021-04-22T15-44-28Z
+- 最后一个采用AGPLV3协议且拥有控制台的版本：RELEASE.2025-04-22T22-12-26Z
 
 ```bash
 docker run -dit -p 9000:9000 -p 9001:9001 --name minio \
