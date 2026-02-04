@@ -1329,89 +1329,56 @@ echo "我们都是好孩子"|mailx -v -s "主题" xcg992224@163.com
 
 ## 2. 命令
 
-### 2.1 系统
+### 2.1 忘记密码
 
-```bash
-uname -a                    # 内核信息
-cat /proc/version           # 版本信息
-cat /etc/redhat-release     # 发行版信息
-cat /etc/os-release         # 发行版信息
-getconf LONG_BIT            # 查看操作系统位数
-env                         # 查看当前用户环境变量
-
-cat /proc/cpuinfo                                       # 查看cpu信息
-cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c   # 查看有几个逻辑cpu, 包括cpu型号
-cat /proc/cpuinfo | grep physical | uniq -c             # 查看有几颗cpu,每颗分别是几核
-cat /proc/cpuinfo | grep flags | grep ' lm ' | wc -l    # 结果大于0, 说明支持64bit计算. lm指long mode, 支持lm则是64bit
-
-echo 3 >/proc/sys/vm/drop_caches    # 清理缓存
-HISTTIMEFORMAT='%F %T'              # 历史命令格式化
-set +o history                      # 关闭history 
-vi /etc/motd                        # 设置欢迎语
-
-shutdown -h now # 关机
-shutdown -r now # 重启
-```
+开机狂按 `E`，按图修改后按 `Ctrl+X` 重启输入
 
 ![](../../assets/_images/deploy/centos7/resetpwd.png)
 
 ```bash
-# 忘记root密码，开机狂按E，按图修改后按Ctrl+x重启输入
 echo "123456" | passwd --stdin root
 touch /.autorable
 exec /sbin/init
 ```
 
-### 2.2 文件
+### 2.2 系统信息
 
+内核信息
 ```bash
-# 将 /usr/local/redis/conf/redis.conf 依次拷贝至以下文件夹内
-echo 6379 6380 6381 16379 16380 16381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   
-# 替换后生成新的文件
-sed 's/6379/6380/g' redis-6379.conf > redis-6380.conf
-
-# 压缩
-zip -r xzh2021.zip * -x  './node_modules/*'         # 排除指定文件夹
-tar -zcvf xzh2021.tar.gz  --exclude=node_modules *  # 排除指定文件夹
-tar -zcvf jpg.tar *.jpg              # 打包所有图片
-tar -zxvf file.tar -C /home/data/    # 解压到指定路径
-
-# 拷贝复制
-cp -f xxx.log                       # 复制并强制覆盖同名文件
-mkdir -p /home/docker/data          # 级联创建目录
-mkdir -p src/{test,main}/{java,resources}                               # 批量创建文件夹, 会在test,main下都创建java, resources文件夹
-ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java                    # 创建软连接
-scp -r code -P {port} root@192.168.3.201:/data/                                 # 远程复制
-# scp目标文件夹不存在的时候，会创建文件夹并将源下的子文件复制到目标下。如果目标文件夹存在，则将源文件夹整个复制到目标下
-scp -r /usr/local/jdk1.8.0_202 root@192.168.3.201:/usr/local/jdk1.8.0_202       # 如果是全路径拷贝，源和目标路径需要一致
-for i in {2..3}; do scp -r flink node$i:$PWD; done                              # 批量复制
-sshpass -p "123456" scp -r /tmp/access.logs root@192.168.3.120:/home            # 自动输入密钥
-
-# Find查找
-ll | grep keyword                   # 当前路径下按文件名过滤显示
-grep -n -r keyword ./               # 当前路径递归向下查找内容 -n显示行号 -r递归查找
-grep -c keyword access.log          # 统计匹配行数
-grep -w keyword access.log          # 精确匹配完整匹配的单词
-grep -l keyword *.log               # 查找匹配关键字的文件
-egrep -v "(^#|^$)" server.conf      # 过滤注释和空行
-find / -name keyword                # 查找文件
-find / -iname keyword -type d       # 查找智能合约文件夹,忽略大小写
-find / -type f -size +100M -print0 | xargs -0 du -sh | sort -nr     # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
-
-# 删除
-find /doc -name '*bak' -exec rm {} \;              # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
-find . -type f | xargs rm -rf;                     # 当前路径下文件类全部删除
-find . -type f -delete;                            # 当前路径下文件类全部删除
-find . -inum 2891596 -exec rm -rf {} \;            # 通过inode号交互式删除文件
-find . -inum 2891596 -delete
-
-# 文件同步
-yum install -y rsync
+uname -a                    # 内核信息【简】
+cat /proc/version           # 内核信息【详细】
+cat /etc/os-release         # 发行版信息
 ```
 
-### 2.3 磁盘
+CPU信息
+```bash
+# 查看物理CPU数量
+grep "physical id" /proc/cpuinfo | sort -u | wc -l
+# 查看CPU核心总数
+grep -c "processor" /proc/cpuinfo
+# 查看每个物理CPU的核心数
+grep "cpu cores" /proc/cpuinfo | uniq
+# 使用lscpu命令（更清晰）
+lscpu
+```
 
-#### 2.3.1 分区
+系统命令
+```bash
+# 设置主机名
+hostnamectl set-hostname web01
+# 历史命令格式化
+HISTTIMEFORMAT='%F %T'
+# 关闭history
+set +o history
+# 设置欢迎语
+vi /etc/motd
+# 查看端口占用进程
+lsof -i:8080
+# 过滤显示8080端口的连接
+netstat -tunlp | grep 8080
+```
+
+### 2.3 磁盘分区
 
 ```bash
 fdisk -l
@@ -1440,40 +1407,124 @@ echo '/dev/sdb1 /data ext4 defaults 0 0' >> /etc/fstab  # 自动挂载
 cat /etc/fstab          # 查看写入分区信息
 ```
 
-#### 2.3.2 FIO
-
-FIO 是一个多线程IO生成工具，可以生成多种IO模式（随机、顺序、读、写四大类），用来测试磁盘设备的性能
+### 2.4 编译GCC
 
 ```bash
-yum install fio -y
+# 1. 更新系统
+sudo yum update -y
+
+# 2. 安装SCL仓库
+sudo yum install -y centos-release-scl
+
+# 3. 安装devtoolset-7或9
+sudo yum install -y devtoolset-7-gcc*
+sudo yum install -y devtoolset-9-gcc*
+
+# 4. 临时启用
+scl enable devtoolset-7 bash
+# 或者
+scl enable devtoolset-9 bash
+
+# 5. 验证版本
+which gcc
+gcc --version
+
+# 6. 永久启用（可选）
+echo "source /opt/rh/devtoolset-9/enable" >> /etc/profile
 ```
 
+### 2.5 文件
+
+1. 拷贝
+
+拷贝并强制覆盖
 ```bash
-# 4k顺序读
-fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=read -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_100read_4k >> fio.report
-# 4k顺序写
-fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=write -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_100write_4k
-# 4k随机读
-fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randread -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_100read_4k
-# 4k随机写
-fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randwrite -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_100write_4k
-# 4k顺序混合读写
-fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=rw -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_70read_4k
-# 4k随机混合读写
-fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_70read_4k
+cp -f xxx.log
 ```
 
+软链接
+```bash
+# 创建
+ln -s /usr/local/jdk1.8.0_202/bin/java /usr/bin/java
+# 解除
+unlink /usr/bin/java
+```
 
-### 2.4 网络
+远程复制
+```bash
+scp -r /usr/local/jdk1.8.0_202 root@192.168.3.201:/usr/local/jdk1.8.0_202
+# 批量复制
+for i in {2..3}; do scp -r flink node$i:$PWD; done
+```
+!> scp目标文件夹不存在的时候，会创建文件夹并将源下的子文件复制到目标下。如果目标文件夹存在，则将源文件夹整个复制到目标下
 
-#### 2.4.1 route
+免密复制，需要安装sshpass，或者使用密钥认证
+```bash
+sshpass -p "123456" scp -r /tmp/access.logs root@192.168.3.120:/home 
+```
+
+内容替换
+```bash
+# 将 `/usr/local/redis/conf/redis.conf` 依次拷贝至以下文件夹内，替换并生成新文件
+cd /data/redis
+mkdir -p /data/redis/{6379,6380,6381}
+echo 6379 6380 6381 | xargs -t -n 1 cp /usr/local/redis/conf/redis.conf   
+sed 's/6379/6380/g' redis.conf > redis-6380.conf
+```
+
+过滤注释和空行，包括#前面有空格的行
+```bash
+egrep -v "(^\s*#|^$)" server.conf
+```
+
+2. 压缩
+
+排除指定文件夹
+```bash
+# zip方式
+zip -r xzh2021.zip * -x  './node_modules/*'
+# tar方式
+tar -zcvf xzh2021.tar.gz  --exclude=node_modules *
+```
+
+打包所有图片
+```bash
+tar -zcvf jpg.tar *.jpg 
+```
+
+解包到指定路径
+```bash
+tar -zxvf file.tar -C /home/data/
+```
+
+3. 查找
 
 ```bash
-ps -aux | grep redis          # 查看启动进程参数
-lsof -i:80                    # 可以看到pid和用户 
-netstat -tunlp | grep 8080    # 查看端口进程号
-netstat -anp | grep 17010pos  # 查看应用占用端口
+ll | grep keyword                   # 当前路径下按文件名过滤显示
+grep -n -r keyword ./               # 当前路径递归向下查找内容 -n显示行号 -r递归查找
+grep -c keyword access.log          # 统计匹配行数
+grep -w keyword access.log          # 精确匹配完整匹配的单词
+grep -l keyword *.log               # 查找匹配关键字的文件
+find / -name keyword                # 查找文件
+find / -iname keyword -type d       # 查找智能合约文件夹,忽略大小写
+find / -type f -size +100M -print0 | xargs -0 du -sh | sort -nr     # 查找大文件 b/d/c/p/l/f 查是块设备、目录、字符设备、管道、符号链接、普通文件
+```
 
+4. 删除
+
+```bash
+find /doc -name '*bak' -exec rm {} \;              # 会从/doc目录开始往下找，找到凡是文件名结尾为 bak的文件，把它删除掉
+find . -type f | xargs rm -rf;                     # 当前路径下文件类全部删除
+find . -type f -delete;                            # 当前路径下文件类全部删除
+find . -inum 2891596 -exec rm -rf {} \;            # 通过inode号交互式删除文件
+find . -inum 2891596 -delete
+```
+
+### 2.6 路由表
+
+route 是 Linux 系统中用于查看和操作内核 IP 路由表的命令。它管理数据包从你的计算机发送到其他网络时的路径选择。
+
+```bash
 traceroute -I www.163.com           # traceroute默认使用udp方式, 如果是-I则改成icmp方式
 traceroute -M 3 www.163.com         # 从ttl第3跳跟踪
 traceroute -p 8080 192.168.10.11    # 加上端口跟踪
@@ -1486,7 +1537,130 @@ route add -host 192.168.3.1 gw 192.168.1.110    # 对一个具体的ip添加路�
 rouate add -net 192.168.2.0/24 dev eth0         # 对一个网络添加一个新的路由（另一个网段）
 ```
 
-#### 2.4.2 netcat 
+### 2.7 网络探测
+
+Network Mapper是一款开源免费的针对大型网络的端口扫描工具，nmap可以检测目标主机是否在线、主机端口开放情况、检测主机运行的服务类型及版本信息、检测操作系统与设备类型等信息
+
+安装
+```bash
+yum install -y nmap
+```
+
+扫描目标主机的开放端口
+```bash
+nmap www.baidu.com
+nmap 192.168.1.1
+```
+
+检测在线主机
+```bash
+# 指定从enp0s3接口扫描
+sudo nmap -e enp0s3 -sn 192.168.100.0/22
+```
+
+### 2.8 数据包分析
+
+tcpdump 是一款命令行网络数据包分析器，用于捕获、分析和显示网络流量
+
+```bash
+yum install tcpdump
+```
+
+```bash
+# 监控所有，只过滤445端口（SMB），-w 保存到文件
+tcpdump -i any -nn port 445 -w smb_capture.pcap
+# 监控指定网卡，-nn（避免DNS查询）
+tcpdump -i enp0s3 -nn -c 100
+# 监控数据库访问，-c <数量>（避免无限输出）
+tcpdump -i enp0s3 -nn 'port 3306 and host 192.168.2.3'
+# 监控特定IP的HTTP流量
+tcpdump -i enp0s3 -nn 'host 192.168.2.3 and port 80' -A
+# 监控来自192.168.2.3的所有流量
+tcpdump -i enp0s3 -nn 'src host 192.168.2.3'   
+# 监控发往192.168.2.3的所有流量  
+tcpdump -i enp0s3 -nn 'dst host 192.168.2.3'
+```
+
+### 2.9 流量统计
+
+ifstat 是一个网络接口流量统计工具，专门用于实时监控网络接口的流量速率。
+
+```bash
+wget http://gael.roualland.free.fr/ifstat/ifstat-1.1.tar.gz # 下载
+tar -zxvf ifstat-1.1.tar.gz
+cd ifstat-1.1
+./configure            # 默认会安装到/usr/local/bin/目录中
+make && make install
+```
+
+参数说明
+```lua
+-l 监测环路网络接口（lo）。缺省情况下，ifstat监测活动的所有非环路网络接口。经使用发现，加上-l参数能监测所有的网络接口的信息，而不是只监测 lo的接口信息，也就是说，加上-l参数比不加-l参数会多一个lo接口的状态信息。
+-a 监测能检测到的所有网络接口的状态信息。使用发现，比加上-l参数还多一个plip0的接口信息，搜索一下发现这是并口（网络设备中有一 个叫PLIP (Parallel Line Internet Protocol). 它提供了并口...）
+-z 隐藏流量是无的接口，例如那些接口虽然启动了但是未用的
+-i 指定要监测的接口,后面跟网络接口名
+-s 等于加-d snmp:[comm@][#]host[/nn]] 参数，通过SNMP查询一个远程主机
+-h 显示简短的帮助信息
+-n 关闭显示周期性出现的头部信息（也就是说，不加-n参数运行ifstat时最顶部会出现网络接口的名称，当一屏显示不下时，会再一次出现接口的名称，提示我们显示的流量信息具体是哪个网络接口的。加上-n参数把周期性的显示接口名称关闭，只显示一次）
+-t 在每一行的开头加一个时间 戳（能告诉我们具体的时间）
+-T 报告所有监测接口的全部带宽（最后一列有个total，显示所有的接口的in流量和所有接口的out流量，简单的把所有接口的in流量相加,out流量相 加）
+-w  用指定的列宽，而不是为了适应接口名称的长度而去自动放大列宽
+-W 如果内容比终端窗口的宽度还要宽就自动换行
+-S 在同一行保持状态更新（不滚动不换行）注：如果不喜欢屏幕滚动则此项非常方便，与bmon的显示方式类似
+-b 用kbits/s显示带宽而不是kbytes/s
+-q 安静模式，警告信息不出现
+-v 显示版本信息
+-d 指定一个驱动来收集状态信息
+```
+
+```bash
+# 检测所有端口并显示时间戳
+ifstat -tT
+# 只监控eth0和eth1
+ifstat -i eth0,eth1
+# 监控eth0，每秒刷新，显示时间戳
+ifstat -i eth0 -t 1
+```
+
+### 2.10 综合监控
+
+dstat 是一款功能强大的实时系统监控工具，它结合了 vmstat、iostat、netstat 等多个传统工具的功能，并提供了更友好、更灵活的显示方式
+
+```lua
+-c：显示CPU系统占用，用户占用，空闲，等待，中断，软件中断等信息。
+-C：当有多个CPU时候，此参数可按需分别显示cpu状态，例：-C 0,1 是显示cpu0和cpu1的信息。
+-d：显示磁盘读写数据大小。
+-D hda,total：include hda and total。
+-n：显示网络状态。
+-N eth1,total：有多块网卡时，指定要显示的网卡。
+-l：显示系统负载情况。
+-m：显示内存使用情况。
+-g：显示页面使用情况。
+-p：显示进程状态。
+-s：显示交换分区使用情况。
+-S：类似D/N。
+-r：I/O请求情况。
+-y：系统状态。
+--ipc：显示ipc消息队列，信号等信息。
+--socket：用来显示tcp udp端口状态。
+-a：此为默认选项，等同于-cdngy。
+-v：等同于 -pmgdsc -D total。
+--output 文件：此选项也比较有用，可以把状态信息以csv的格式重定向到指定的文件中，以便日后查看。例：dstat --output /root/dstat.csv & 此时让程序默默的在后台运行并把结果输出到/root/dstat.csv文件中。
+```
+
+```bash
+yum -y install dstat
+```
+
+```bash
+dstat -t --top-cpu-adv 2 6          # 查看当前最耗CPU的进程名、PID和CPU占比以及读写信息
+dstat -t --top-bio-adv 2 6          # 显示最高磁盘IO的进程
+dstat -t --top-mem 2 6              # 查看当前最耗内存的进程
+dstat -t  -dD sda,total  2 6        # 监控磁盘sda的读写状态，结合 lsblk 确认磁盘名称
+dstat -t  -n -N enp0s3,total 2 10   # 监控ens33网卡的流量，间隔2秒，刷新10次
+```
+
+### 2.11 网络调试 
 
 Netcat 是Linux系统中的网络工具，其通过TCP和UDP协议在网络中读写数据
 
@@ -1537,136 +1711,36 @@ nc -l 9991 >/dev/null                       # 接收机器开启9991将文件写
 nc 192.168.2.100 9991 </dev/zero            # 发送方把无限个0发送给A机器的9991端口
 ```
 
-验证
+验证，请安装`dstat`进行统计分析
+
+### 2.12 存储性能测试
+
+FIO 是一款专业的存储性能基准测试工具，用于测试磁盘、SSD、存储系统等的I/O性能。它是Linux下最强大、最灵活的磁盘性能测试工具之一。
 
 ```bash
-yum -y install dstat
-dstat
-```
-
-#### 2.4.3 nmap 
-
-Network Mapper是一款开源免费的针对大型网络的端口扫描工具，nmap可以检测目标主机是否在线、主机端口开放情况、检测主机运行的服务类型及版本信息、检测操作系统与设备类型等信息
-
-安装
-```bash
-yum install -y nmap
-```
-
-检测开放端口
-```bash
-nmap www.baidu.com
-```
-
-检测在线主机
-```bash
-# 指定从enp0s3接口扫描
-sudo nmap -e enp0s3 -sn 192.168.100.0/22
-```
-
-
-#### 2.4.4 tcpdump
-
-```bash
-yum install tcpdump
-
-tcpdump -n -X -i any port 445 -A    # 指定端口
-tcpdump -i em4                      # 指定网卡
-tcpdump -i em4 -nn 'src host 192.168.2.3'   # 监听来源ip
-tcpdump -i em4 -nn 'dst host 192.168.2.3'   # 监听返回ip
-```
-
-#### 2.4.5 ifstat
-
-ifstat是一个统计网络接口活动状态的工具
-
-```bash
-wget http://gael.roualland.free.fr/ifstat/ifstat-1.1.tar.gz # 下载
-tar -zxvf ifstat-1.1.tar.gz
-cd ifstat-1.1
-./configure            # 默认会安装到/usr/local/bin/目录中
-make && make install
-ifstat -tT
-```
-
-参数
-```
--l 监测环路网络接口（lo）。缺省情况下，ifstat监测活动的所有非环路网络接口。经使用发现，加上-l参数能监测所有的网络接口的信息，而不是只监测 lo的接口信息，也就是说，加上-l参数比不加-l参数会多一个lo接口的状态信息。
--a 监测能检测到的所有网络接口的状态信息。使用发现，比加上-l参数还多一个plip0的接口信息，搜索一下发现这是并口（网络设备中有一 个叫PLIP (Parallel Line Internet Protocol). 它提供了并口...）
--z 隐藏流量是无的接口，例如那些接口虽然启动了但是未用的
--i 指定要监测的接口,后面跟网络接口名
--s 等于加-d snmp:[comm@][#]host[/nn]] 参数，通过SNMP查询一个远程主机
--h 显示简短的帮助信息
--n 关闭显示周期性出现的头部信息（也就是说，不加-n参数运行ifstat时最顶部会出现网络接口的名称，当一屏显示不下时，会再一次出现接口的名称，提示我们显示的流量信息具体是哪个网络接口的。加上-n参数把周期性的显示接口名称关闭，只显示一次）
--t 在每一行的开头加一个时间 戳（能告诉我们具体的时间）
--T 报告所有监测接口的全部带宽（最后一列有个total，显示所有的接口的in流量和所有接口的out流量，简单的把所有接口的in流量相加,out流量相 加）
--w  用指定的列宽，而不是为了适应接口名称的长度而去自动放大列宽
--W 如果内容比终端窗口的宽度还要宽就自动换行
--S 在同一行保持状态更新（不滚动不换行）注：如果不喜欢屏幕滚动则此项非常方便，与bmon的显示方式类似
--b 用kbits/s显示带宽而不是kbytes/s
--q 安静模式，警告信息不出现
--v 显示版本信息
--d 指定一个驱动来收集状态信息
-```
-
-#### 2.4.6 dstat
-
-dstat是一个通用的系统资源统计工具，stat命令是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令，是一个全能系统信息统计工具
-
-```lua
--c：显示CPU系统占用，用户占用，空闲，等待，中断，软件中断等信息。
--C：当有多个CPU时候，此参数可按需分别显示cpu状态，例：-C 0,1 是显示cpu0和cpu1的信息。
--d：显示磁盘读写数据大小。
--D hda,total：include hda and total。
--n：显示网络状态。
--N eth1,total：有多块网卡时，指定要显示的网卡。
--l：显示系统负载情况。
--m：显示内存使用情况。
--g：显示页面使用情况。
--p：显示进程状态。
--s：显示交换分区使用情况。
--S：类似D/N。
--r：I/O请求情况。
--y：系统状态。
---ipc：显示ipc消息队列，信号等信息。
---socket：用来显示tcp udp端口状态。
--a：此为默认选项，等同于-cdngy。
--v：等同于 -pmgdsc -D total。
---output 文件：此选项也比较有用，可以把状态信息以csv的格式重定向到指定的文件中，以便日后查看。例：dstat --output /root/dstat.csv & 此时让程序默默的在后台运行并把结果输出到/root/dstat.csv文件中。
+yum install fio -y
 ```
 
 ```bash
-yum -y install dstat
+# 4k顺序读
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=read -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_100read_4k >> fio.report
+# 4k顺序写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=write -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_100write_4k
+# 4k随机读
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randread -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_100read_4k
+# 4k随机写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randwrite -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_100write_4k
+# 4k顺序混合读写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=rw -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=sqe_70read_4k
+# 4k随机混合读写
+fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=70 -ioengine=psync -bs=4k -size=10G -numjobs=20 -runtime=60 -group_reporting -name=rand_70read_4k
 ```
 
-```bash
-dstat -t --top-cpu-adv 2 6          # 查看当前最耗CPU的进程名、PID和CPU占比以及读写信息
-dstat -t --top-bio-adv 2 6          # 显示最高磁盘IO的进程
-dstat -t --top-mem 2 6              # 查看当前最耗内存的进程
-dstat -t  -dD sda,total  2 6        # 监控磁盘sda的读写状态
-dstat -t  -n -N ens33,total 2 6     # 监控网卡的流量
-```
 
-### 2.5 编译
 
-1. gcc
+### 2.13 Shell脚本
 
-```bash
-yum -y install centos-release-scl
-sudo yum install devtoolset-7-gcc*
-sudo yum install devtoolset-9-gcc* 
-scl enable devtoolset-7 bash
-scl enable devtoolset-9 bash
-echo "source /opt/rh/devtoolset-9/enable" >> /etc/profile
-which gcc
-gcc --version
-```
-
-### 2.6 常用‌Shell脚本
-
-#### 2.6.1 Tomcat
-
-1. 一键启动
+1. Tomcat一键启动脚本
 
 ```bash
 vi run_tomcat_web.sh
@@ -1694,13 +1768,7 @@ start
 ps -aux |grep ${appname}
 ```
 
-替换复制脚本
-
-```bash
-sed 's/tomcat_web/tomcat_mobile/g' run_tomcat_web.sh > run_tomcat_mobile.sh
-```
-
-2. 虚拟主机
+虚拟主机配置示例
 
 ```conf
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1773,12 +1841,14 @@ server {
 }
 ```
 
+客户端设置Hosts
+
 ```bash
 vi /etc/hosts
 192.168.2.200 www.xzh.com
 ```
 
-#### 2.6.2 Java
+2. Java应用一键启动
 
 ```bash
 #!/bin/bash
@@ -1803,7 +1873,7 @@ start
 ps -aux |grep ${appname}
 ```
 
-#### 2.6.3 设置用户密码
+3. 设置用户密码
 
 在 `JumpServer` 堡垒机中，无法操作关键字命令，使用脚本可以执行。
 
@@ -1821,7 +1891,7 @@ echo "用户 $username 的密码已修改"
 ```
 
 
-#### 2.6.4 Python HTTP
+4. Python HTTP服务
 
 ```bash
 # python2
