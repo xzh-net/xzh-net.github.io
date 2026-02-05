@@ -6,15 +6,15 @@
 
 ## 1. 服务
 
-### 1.1 Yum
+### 1.1 软件包管理（Yum）
 
-#### 1.1.1 备份yum源
+1. 备份yum源
 
 ```bash
 cd /etc/yum.repos.d/ && mkdir bakup && mv *.repo bakup
 ```
 
-#### 1.1.2 使用光驱挂载本地yum源
+2. 使用光驱挂载本地yum源
 
 ```bash
 lsblk                       # 查看可用设备信息
@@ -27,7 +27,7 @@ fuser -km /mnt/cdrom    # kill 挂载进程
 umount /mnt/cdrom       # 取消挂载
 ```
 
-#### 1.1.3 配置本地yum源
+3. 配置本地yum源
 
 ```bash
 cd /etc/yum.repos.d/
@@ -40,7 +40,7 @@ enabled=1
 gpgcheck=0
 ```
 
-#### 1.1.4 配置网络yum源
+4. 配置网络yum源
 
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak              # 备份本地yum源
@@ -50,13 +50,13 @@ yum clean all   # 清空缓存
 yum makecache   # 更新yum缓存
 ```
 
-### 1.2 DHCP
+### 1.2 网络管理（DHCP）
 
 - DHCP主机的IP为: 192.168.100.1/24
 - DHCP动态分配的IP范围为： 192.168.100.100/24 - 192.168.100.200/24
 - DHCP客户端的网关设置为:  192.168.100.1
 
-#### 1.2.1 配置IP
+1. 配置IP
 
 ```bash
 vi /etc/sysconfig/network-scripts/ifcfg-enps33
@@ -69,7 +69,7 @@ systemctl restart network
 ifconfig
 ```
 
-#### 1.2.2 安装
+2. 安装
 
 ```bash
 yum -y install dhcp
@@ -81,7 +81,7 @@ rpm -ql dhcp
 /usr/sbin/dhcpd         # 二进制命令
 ```
 
-#### 1.2.3 修改配置
+3. 修改配置
 
 > 服务器的地址必须与仅主机模式中设置的ip网段相同
 
@@ -103,14 +103,14 @@ subnet 192.168.100.0 netmask 255.255.255.0 {    # 子网
 
 ```
 
-#### 1.2.4 启动服务
+4. 启动服务
 
 ```bash
 systemctl start dhcpd
 systemctl enable dhcpd
 ```
 
-#### 1.2.5 客户端测试
+5. 客户端测试
 
 client端修改IP地址为动态获取
 
@@ -127,7 +127,7 @@ systemctl restart network
 ifconfig
 ```
 
-### 1.3 DNS
+### 1.3 DNS服务器
 
 #### 1.3.1 正向解析
 
@@ -400,9 +400,9 @@ dig @172.17.17.201 www.xuzhihao.net
 host www.xuzhihao.net
 ```
 
-### 1.4 SSH
+### 1.4 远程服务管理（SSH）
 
-#### 1.4.1 配置文件
+1. 修改配置
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -418,7 +418,7 @@ systemctl start  sshd   # 启动服务
 systemctl enable sshd   # 开机自启
 ```
 
-#### 1.4.2 免密登录
+2. 设置免密登录
 
 ```bash
 # 192.168.3.201机器执行
@@ -442,15 +442,15 @@ lsattr authorized_keys      # 查看属性
 chattr -ia authorized_keys  # 清理属性
 ```
 
-### 1.5 FTP
+### 1.5 文件服务管理（FTP）
 
-#### 1.5.1 安装
+1. 安装
 
 ```bash
 yum install vsftpd
 ```
 
-#### 1.5.2 修改配置
+2. 修改配置
 
 ```bash
 # 关闭selinux
@@ -566,7 +566,7 @@ vsftpd_log_file=/var/log/vsftpd.log
 
 ```
 
-#### 1.5.3 添加用户
+3. 添加用户
 
 ```bash
 cat /etc/passwd       # 查看用户
@@ -576,29 +576,29 @@ chmod -R 777 /opt/xzh.webapp
 userdel xzh
 ```
 
-#### 1.5.4 启动服务
+4. 启动服务
 
 ```bash
 systemctl start vsftpd.service      # 启动
 systemctl enable vsftpd.service     # 开机自启
 ```
 
-### 1.6 NFS
+### 1.6 文件服务管理（NFS）
 
-#### 1.6.1 安装
+1. 安装
 
 ```bash
 yum install -y nfs-utils
 ```
 
-#### 1.6.2 创建共享目录
+2. 创建共享目录
 
 ```bash
 mkdir -p /data/nfs
 chmod o+w /data/nfs   # 非root用户访问时需要增加其他组的写权限
 ```
 
-#### 1.6.3 共享配置
+3. 修改配置
 
 ```bash
 vi /etc/exports 
@@ -608,14 +608,14 @@ vi /etc/exports
 exportfs -rv 
 ```
 
-#### 1.6.4 启动服务
+4. 启动服务
 
 ```bash
 systemctl start nfs-server
 systemctl enable nfs-server
 ```
 
-#### 1.6.5 客户端测试
+5. 客户端测试
 
 ```bash
 yum install -y nfs-utils.x86_64
@@ -628,9 +628,9 @@ fuser -km /mnt                          # kill 挂载进程
 echo "192.168.2.201:/data/nfs /mnt nfs defaults 0 0" >> /etc/fstab    # 永久挂载
 ```
 
-### 1.7 Samba
+### 1.7 文件服务管理（Samba）
 
-#### 1.7.1 安装
+1. 安装
 
 ```bash
 yum -y install samba
@@ -638,9 +638,7 @@ rpm -aq|grep ^samba
 sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 ```
 
-#### 1.7.2 用户默认访问家目录
-
-1. 修改配置
+2. 修改配置
 
 ```bash
 vi /etc/samba/smb.conf
@@ -651,7 +649,7 @@ vi /etc/samba/smb.conf
     writable = yes
 ```
 
-2. 添加访问用户
+3. 添加访问用户
 
 ```bash
 useradd zhangsan        # 添加系统用户
@@ -660,14 +658,14 @@ pdbedit -L zhangsan     # 查看用户
 pdbedit -a zhangsan     # 修改smaba用户密码
 ```
 
-3. 启动服务
+4. 启动服务
 
 ```bash
 systemctl start smb
 systemctl start nmb
 ```
 
-4. 客户端测试
+5. 客户端测试
 
 ```bash
 yum install -y samba-client cifs-utils
@@ -678,9 +676,9 @@ fuser -km /mnt/samba/zhangsan     # kill 挂载进程
 umount /mnt/samba/zhangsan        # 取消目录
 ```
 
-#### 1.7.3 匿名用户访问
+6. 匿名用户访问
 
-1. 修改配置
+修改配置
 
 ```bash
 mkdir -p /share/samba/anon
@@ -694,7 +692,7 @@ vi /etc/samba/smb.conf
 	writable = yes
 ```
 
-2. 启动服务
+启动服务
 
 ```bash
 systemctl restart smb
@@ -702,7 +700,7 @@ systemctl restart nmb
 ```
 
 
-3. 客户端测试
+客户端测试
 
 ```bash
 mkdir -p /mnt/samba/software
@@ -717,16 +715,16 @@ umount /mnt/samba/software        # 取消目录
 2. samba服务的用户必须是samba服务器上存在的用户，密码必须是samba数据库里的密码
 3. 对于发布的共享资源，默认情况下本地用户是可以访问的，匿名用户是否访问看是否打开public=yes
 
-### 1.8 Telnet
+### 1.8 远程服务管理（Telnet）
 
-#### 1.8.1 安装
+1. 安装
 
 ```bash
 yum -y install telnet-server xinetd
 rpm -q xinetd telnet-server # 确认安装成功
 ```
 
-#### 1.8.2 修改配置
+2. 修改配置
 
 ```bash
 cat /etc/xinetd.conf  | grep -v ^# | grep -v ^$
@@ -746,7 +744,7 @@ defaults
 includedir /etc/xinetd.d        # 外部调用的目录
 ```
 
-#### 1.8.3 启动服务
+3. 启动服务
 
 ```bash
 systemctl start xinetd.service
@@ -765,18 +763,16 @@ pts/0
 pts/1
 ```
 
-#### 1.8.4 客户端测试
+4. 客户端测试
 
 ```bash
 yum install -y telnet
 telnet 192.168.100.1 # 输入用户名和密码
 ```
 
-### 1.9 时间同步服务
+### 1.9 时间同步服务（NTP）
 
-#### 1.9.1 安装 NTP 服务
-
-1. 服务端配置
+1. 安装
 
 ```bash
 yum install -y ntp
@@ -809,7 +805,7 @@ ntpdate 172.17.17.201
 ```
 
 
-#### 1.9.2 常用命令
+5. 常用命令
 
 查看时区与时间状态
 
@@ -847,9 +843,7 @@ timedatectl set-ntp true    # 启用同步
 timedatectl set-ntp false   # 禁止同步
 ```
 
-#### 1.9.3 安装 xinetd 服务
-
-在没有互联网或 NTP 服务器的环境中，可以使用 xinetd 提供的时间服务来同步时间。
+!> 在没有互联网或 NTP 服务器的环境中，可以使用 xinetd 提供的时间服务来同步时间。
 
 1. 服务端安装
 
@@ -887,7 +881,7 @@ date -s "2022-07-04 16:44:30"
 rdate -s 172.17.17.201
 ```
 
-### 1.10 Rsyslog
+### 1.10 日志处理（Rsyslog）
 
 #### 1.10.1 系统配置
 
@@ -1121,9 +1115,9 @@ vi tomcat8080
 }
 ```
 
-### 1.11 Apache
+### 1.11 Web服务器（Apache）
 
-#### 1.11.1 安装
+1. 安装
 
 ```bash
 yum install -y httpd
@@ -1132,7 +1126,7 @@ rpm -ql httpd
 systemctl start httpd
 ```
 
-#### 1.11.2 配置文件
+2. 相关配置文件
 
 ```bash
 /etc/httpd/conf/httpd.con       # 主配置文件
@@ -1145,9 +1139,8 @@ systemctl start httpd
 /etc/sysconfig/httpd            # 额外配置文件
 ```
 
-#### 1.11.3 共享文件
 
-1. 软连接方式
+3. 软连接方式共享文件
 
 ```bash
 vi /etc/httpd/conf/httpd.conf
@@ -1168,7 +1161,7 @@ http://39.105.58.136/share/         # 测试地址
 
 ```
 
-2. 别名方式
+4. 别名方式共享文件
 
 ```bash
 vi /etc/httpd/conf.d/autoindex.conf
@@ -1184,7 +1177,7 @@ systemctl restart httpd             # 重启服务
 http://39.105.58.136/test/          # 测试地址
 ```
 
-#### 1.11.4 虚拟主机
+5. 虚拟主机
 
 ```bash
 vi /etc/httpd/conf/httpd.conf   # 添加监听端口
@@ -1208,7 +1201,7 @@ vi /etc/httpd/conf.d/vhost.conf
 </VirtualHost>
 ```
 
-### 1.12 iptables
+### 1.12 防火墙（iptables）
 
 #### 1.12.1 安装
 
@@ -1224,11 +1217,16 @@ vi /etc/sysconfig/iptables
 systemctl restart iptables
 ```
 
-#### 1.12.2 filter
+#### 1.12.2 Filter表
 
-1. 处理动作
+Filter表是iptables的默认表，用于过滤数据包，控制网络流量。它有以下三种内建链（chains）
+- INPUT链：数据包进入本机之前进行处理。
+- OUTPUT链：数据包从本机发出之前的操作。
+- FORWARD链：数据包转发到其他主机之前进行处理。
 
-```bash
+匹配规则
+
+```lua
 -s 192.168.134.0/24     # 源地址
 -d 192.168.134.1        # 目标地址
 -p tcp|upd|icmp         # 协议
@@ -1238,7 +1236,7 @@ systemctl restart iptables
 -p udp --dport 53       # 目标端口是53/udp
 ```
 
-2. 语法示例
+语法示例
 
 ```bash
 iptables -t filter -F                                   # 清空filter表的所有规则
@@ -1263,7 +1261,12 @@ iptables -t filter -I INPUT -s 10.1.1.2 -p tcp -m multiport --dports 22,80 -j AC
 iptables -t filter -A INPUT -m iprange --src-range 10.1.1.2-10.1.1.5 -j ACCEPT          # 指定网段范围
 ```
 
-#### 1.12.3 nat
+#### 1.12.3 NAT表
+
+NAT表：用于等数据包进行地址转换，实现网络地址转换（NAT）功能。有三种内建链（chains）
+- PREROUTING链：处理刚到达本机并在路由转发前的数据包。它会转换数据包中的目标IP地址（destination ip address），通常用于DNAT。
+- POSTROUTING链：处理即将离开本机的数据包。它会转换数据包中的源IP地址（source ip address），通常用于SNAT（source NAT）。
+- OUTPUT链：数据包从本机发出之前进行处理。
 
 1. 匹配规则
 
@@ -1286,11 +1289,22 @@ iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -j MASQUERADE
 iptables -t nat -A PREROUTING -d 2.2.2.1 -p tcp --dport 80 -j DNAT --to 10.1.1.3    # 外访内
 ```
 
-#### 1.12.4 mangle
+#### 1.12.4 Mangle表
 
-#### 1.12.5 raw
+Mangle表：用于修改数据包的头部信息，比如TTL、TOS等。它有5个内建链（chains）
+- PREROUTING
+- OUPPUT
+- FORWARD
+- INPUT
+- POSTROUTING
 
-### 1.13 firewalld
+#### 1.12.5 Raw表
+
+Raw表：用于处理数据包的链接状态，对于未建立连接的数据包进行处理。它有两个内建链
+- PREROUTING
+- OUTPUT
+
+### 1.13 防火墙（firewalld）
 
 ```bash
 systemctl start firewalld.service     # 启动firewall
@@ -1308,7 +1322,7 @@ firewall-cmd --query-port=6379/tcp                       # 查看端口是否开
 firewall-cmd --reload                                    # 重载防火墙配置
 ```
 
-### 1.14 mailx
+### 1.14 电子邮件客户端（mailx）
 
 ```bash
 yum install mailx
