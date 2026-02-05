@@ -295,9 +295,9 @@ source /etc/profile
 ```
 
 
-### 2.9 安装Docker
+### 2.9 Docker
 
-1. 在线安装
+在线安装
 
 ```bash
 # 卸载
@@ -317,7 +317,7 @@ systemctl start docker
 systemctl enable docker
 ```
 
-2. 安装docker-compose
+安装docker-compose
 
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -325,7 +325,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 
-3. 安装Portainer
+安装Portainer
 
 ```bash
 docker volume create portainer_data
@@ -336,11 +336,74 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     portainer/portainer-ce:2.18.2
 ```
 
-### 2.10 添加用户
+### 2.10 文件服务管理（Vsftpd）
 
-`useradd`更底层的命令，需要手动指定参数，默认情况下不创建主目录或设置密码，适合脚本自动化或需要精细控制用户参数的场景。
+安装
+```bash
+sudo apt update
+sudo apt install vsftpd -y
+```
 
-```text
+修改配置
+```bash
+sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
+vi /etc/vsftpd.conf
+```
+
+修改以下内容
+```conf
+# 监听设置
+listen=YES
+listen_ipv6=NO
+
+# 匿名用户设置
+anonymous_enable=NO
+anon_upload_enable=NO
+anon_mkdir_write_enable=NO
+anon_other_write_enable=NO
+
+# 本地用户设置
+local_enable=YES
+write_enable=YES
+local_umask=022
+
+# 目录限制
+chroot_local_user=YES
+allow_writeable_chroot=YES
+
+# 用户列表控制
+userlist_enable=YES
+userlist_file=/etc/vsftpd.user_list
+userlist_deny=NO
+
+# 被动模式设置
+pasv_enable=YES
+pasv_min_port=40000
+pasv_max_port=50000
+pasv_address=你的服务器IP地址  # 重要：如果是公网服务器，填写公网IP
+
+# 日志设置
+xferlog_enable=YES
+xferlog_file=/var/log/vsftpd.log
+xferlog_std_format=YES
+log_ftp_protocol=YES
+```
+
+验证配置
+```bash
+sudo vsftpd /etc/vsftpd.conf
+```
+
+创建用户使用`adduser`交互式命令，默认创建主目录，设置密码，适合手动操作或需要快速创建用户并设置密码的场景。
+
+```bash
+sudo adduser ftpuser
+# 按照提示设置密码和用户信息
+```
+
+或者使用`useradd`更底层的命令，需要手动指定参数，默认情况下不创建主目录或设置密码，适合脚本自动化或需要精细控制用户参数的场景。
+
+```lua
 -u 设置唯一标识符（UID）
 -d 指定主目录，默认主目录在 /home/username
 -m 创建主目录
@@ -355,17 +418,130 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 -f 密码过期后多少天锁定账户。默认值为 -1，表示禁用此功能
 ```
 
-`adduser`交互式命令，默认创建主目录，设置密码，适合手动操作或需要快速创建用户并设置密码的场景。
-
 ```bash
-sudo adduser xzh
+sudo useradd -m -s /bin/bash ftpuser
+sudo passwd ftpuser
 ```
 
-### 2.11 系统服务管理
+设置目录权限
 
-#### 2.11.1 使用 systemd 启用 rc.local 服务
+```bash
+sudo chown -R ftpuser:ftpuser /home/ftpuser
+```
 
-1. 创建系统 rc.local 文件
+配置用户列表
+
+```bash
+echo "ftpuser" | sudo tee -a /etc/vsftpd.user_list
+```
+
+启动服务
+
+```bash
+# 重启vsftpd服务
+sudo systemctl restart vsftpd
+
+# 设置开机自启
+sudo systemctl enable vsftpd
+
+# 检查服务状态
+sudo systemctl status vsftpd
+```
+
+客户端测试
+
+```bash
+sudo apt install ftp -y
+ftp localhost
+```
+
+
+### 2.11 系统服务管理（Systemd）
+
+Systemd是Linux系统里用来启动和管理服务的工具，是大多数现代Linux发行版（如 Ubuntu、CentOS、Debian、Fedora）默认的初始化系统，它是系统启动后，第一个跑起来的进程（PID 1）
+
+1. 创建服务文件，以`jenkins`为例
+```bash
+vim /usr/lib/systemd/system/jenkins.service
+```
+
+2. 修改配置
+
+```conf
+[Unit]
+# 服务描述信息
+Description=Jenkins Continuous Integration Server
+# 必须在网络服务启动后才能启动
+Requires=network.target
+# 在网络服务之后启动
+After=network.target
+# 5分钟内最多重启5次（防频繁重启）
+StartLimitBurst=5
+# 重启限制的时间窗口为5分钟
+StartLimitIntervalSec=5m
+
+[Service]
+# 服务启动后通过 sd_notify() 通知 systemd
+Type=notify
+# 仅主进程可以发送通知
+NotifyAccess=main
+# 服务启动命令
+ExecStart=/usr/bin/jenkins
+# 仅在失败时重启
+Restart=on-failure
+# 143 退出码被视为成功（正常关闭）
+SuccessExitStatus=143
+
+# 以 jenkins 用户和组运行（非 root）
+User=jenkins
+Group=jenkins
+
+# 环境变量
+Environment="JENKINS_HOME=/data/jenkins"
+WorkingDirectory=/data/jenkins
+```
+
+3. 启动服务
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start jenkins.service
+sudo systemctl enable jenkins.service
+sudo systemctl status jenkins.service
+```
+
+4. 查看日志
+
+```bash
+# 查看本次启动的日志（从本次启动开始）
+sudo journalctl -u jenkins.service -b 0
+
+# 查看上一次启动的日志
+sudo journalctl -u jenkins.service -b -1
+
+# 查看最近20条日志
+sudo journalctl -u jenkins.service -n 20
+
+# 查看指定服务的实时日志
+sudo journalctl -u jenkins.service -f
+
+# 查看特定时间段的服务日志
+sudo journalctl -u jenkins.service --since "2024-01-01 00:00:00" --until "2024-01-01 12:00:00"
+
+# 按优先级查看服务日志（emerg, alert, crit, err, warning, notice, info, debug）
+sudo journalctl -u jenkins.service -p err
+
+# 查看journal日志占用的磁盘空间
+sudo journalctl --disk-usage
+
+# 清理旧日志（保留最近100M）
+sudo journalctl --vacuum-size=100M
+```
+
+
+!> 由于维护人员水平不一致，系统维护下来最终出现很多的启动配置文件，可以把这些零散的启动脚本统一整理到一个启动命令中，再由 Systemd 创建全局唯一的启动配置文件。好处：其他人员不需要了解底层启动的原理和配置文件。劣势：各服务启动日志不能通过`journalctl`查看，需要自己处理。
+
+1. 创建系统级执行文件文件
 
 ```bash
 vi /etc/rc.local
@@ -378,52 +554,56 @@ touch /var/log/rc.local
 su - xzh -c "/bin/bash /usr/boot/xzh"
 ```
 
-创建 ROOT 用户启动文件
+2. 创建 ROOT 用户启动文件
 
 ```bash
 mkdir /usr/boot
 vi /usr/boot/root
 ```
 
+3. 编辑 ROOT 启动脚本内容
 ```sh
 touch ~/root
 /usr/local/keepalived/sbin/keepalived -f /etc/keepalived/keepalived.conf
 ```
 
-创建非 ROOT 用户启动文件
+4. 创建非 ROOT 用户启动文件
 
 ```bash
 sudo adduser xzh
 vi /usr/boot/xzh
 ```
 
+5. 编辑非 ROOT 启动脚本内容
+
 ```sh
 touch ~/xzh
 /usr/local/redis/bin/redis-server /usr/local/redis/conf/redis.conf
 ```
 
-授权
+6. 授非 ROOT 启动命令权限
 
 ```bash
 # 启动命令权限
 chown xzh:xzh /usr/boot/xzh
+
+# 根据启动命令决定授权哪些目录和执行权限，以下为Redis启动时必要授权（可选）
 # 程序执行权限
 chown -R xzh:xzh /usr/local/redis
 # 数据目录权限
 chown -R xzh:xzh /data/redis
 ```
 
-
-2. 给 rc.local 添加执行权限
+7. 为总执行文件添加执行权限
 
 ```bash
 sudo chmod +x /etc/rc.local
 ```
 
-3. 创建 systemd 服务文件
+8. 创建总执行文件对应的 Systemd 服务配置
 
 ```bash
-vi /etc/systemd/system/rc-local.service
+vi /usr/lib/systemd/system/rc-local.service
 ```
 
 ```conf
@@ -443,126 +623,13 @@ GuessMainPID=no
 WantedBy=multi-user.target
 ```
 
-4. 启用并启动服务
+9. 启动服务
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable rc-local.service
 sudo systemctl start rc-local.service
 sudo systemctl status rc-local.service
-sudo journalctl -u rc-local.service
-```
-
-#### 2.11.2 Systemd
-
-Systemd是Linux系统里用来启动和管理服务的工具，是大多数现代Linux发行版（如 Ubuntu、CentOS、Debian、Fedora）默认的初始化系统，它是系统启动后，第一个跑起来的进程（PID 1）
-
-
-1. 创建服务文件
-
-```bash
-vi /etc/systemd/system/mycustom.service
-```
-
-2. 添加配置
-
-```conf
-[Unit]
-Description=My Custom Startup Script
-ConditionPathExists=/path/to/your/script.sh
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/path/to/your/script.sh
-TimeoutSec=0
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-```
-
-3. 启动服务
-
-```bash
-sudo systemctl enable mycustom.service
-sudo systemctl start mycustom.service
-```
-
-4. 验证服务状态
-
-```bash
-sudo systemctl status rc-local.service
-# 或
-sudo systemctl status mycustom.service
-# 查看日志
-sudo journalctl -u rc-local.service
-```
-
-5. 参考示例（jenkins）
-
-```bash
-vim /usr/lib/systemd/system/jenkins.service
-```
-
-```conf
-#
-# This file is managed by systemd(1). Do NOT edit this file manually!
-# To override these settings, run:
-#
-#     systemctl edit jenkins
-#
-# For more information about drop-in files, see:
-#
-#     https://www.freedesktop.org/software/systemd/man/systemd.unit.html
-#
-
-[Unit]
-Description=Jenkins Continuous Integration Server
-Requires=network.target
-After=network.target
-StartLimitBurst=5
-StartLimitIntervalSec=5m
-
-[Service]
-Type=notify
-NotifyAccess=main
-ExecStart=/usr/bin/jenkins
-Restart=on-failure
-SuccessExitStatus=143
-
-# Configures the time to wait for start-up. If Jenkins does not signal start-up
-# completion within the configured time, the service will be considered failed
-# and will be shut down again. Takes a unit-less value in seconds, or a time span
-# value such as "5min 20s". Pass "infinity" to disable the timeout logic.
-#TimeoutStartSec=90
-
-# Unix account that runs the Jenkins daemon
-# Be careful when you change this, as you need to update the permissions of
-# $JENKINS_HOME, $JENKINS_LOG, and (if you have already run Jenkins)
-# $JENKINS_WEBROOT.
-User=jenkins
-Group=jenkins
-
-# Directory where Jenkins stores its configuration and workspaces
-Environment="JENKINS_HOME=/data/jenkins"
-WorkingDirectory=/data/jenkins
-```
-
-#### 2.11.3 系统日志
-
-```bash
-# 查看本次启动的日志（从本次启动开始）
-sudo journalctl -b 0
-
-# 查看上一次启动的日志
-sudo journalctl -b -1
-
-# 实时查看日志
-sudo journalctl -f
-
-# 查看特定时间段的日志
-sudo journalctl --since "2024-01-01 00:00:00" --until "2024-01-01 12:00:00"
 ```
 
 ### 2.12 时间同步服务（Chrony）
