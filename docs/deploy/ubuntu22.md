@@ -336,7 +336,7 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     portainer/portainer-ce:2.18.2
 ```
 
-### 2.10 文件服务管理（Vsftpd）
+### 2.10 文件服务管理（FTP）
 
 安装
 ```bash
