@@ -733,7 +733,7 @@ makestep 1 3
 leapsectz right/UTC
 ```
 
-启动服务
+6. 客户端启动服务
 
 ```bash
 sudo systemctl start chrony
@@ -742,7 +742,7 @@ sudo systemctl status chrony
 ```
 
 
-常用命令
+7. 客户端命令
 
 ```bash
 # 设置本地时间
