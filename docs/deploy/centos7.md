@@ -4,9 +4,9 @@
 - 停更网站：https://vault.centos.org
 - 安装包仓库：https://www.rpmfind.net
 
-## 1. 服务
+## 1. 系统服务
 
-### 1.1 软件包管理（Yum）
+### 1.1 软件包管理（YUM）
 
 1. 备份yum源
 
@@ -50,7 +50,7 @@ yum clean all   # 清空缓存
 yum makecache   # 更新yum缓存
 ```
 
-### 1.2 网络管理（DHCP）
+### 1.2 动态主机配置（DHCP）
 
 - DHCP主机的IP为: 192.168.100.1/24
 - DHCP动态分配的IP范围为： 192.168.100.100/24 - 192.168.100.200/24
@@ -83,7 +83,7 @@ rpm -ql dhcp
 
 3. 修改配置
 
-> 服务器的地址必须与仅主机模式中设置的ip网段相同
+!> 服务器的地址必须与仅主机模式中设置的ip网段相同
 
 ```bash
 vim /etc/dhcp/dhcpd.conf
@@ -127,7 +127,7 @@ systemctl restart network
 ifconfig
 ```
 
-### 1.3 DNS服务器
+### 1.3 域名系统（DNS）
 
 #### 1.3.1 正向解析
 
@@ -322,20 +322,20 @@ host 172.17.17.165
 
 主从的系统时间要保持一致，需要提前准备好时间同步服务器，并做好配置，主从并不是高可用，而是在客户端配置了多套dns地址
 
-1. 同步master和slave的系统时间
+1. 保持slave节点系统时间和master一致
 
 ```bash
 crontab -e
 */2 * * * * /usr/sbin/ntpdate ntp4.aliyun.com &>/dev/null
 ```
 
-2. 搭建dns服务器slave节点
+2. slave节点安装
 
 ```bash
 yum -y install bind
 ```
 
-修改主配置
+3. slave节点修改主配置
 
 ```bash
 vi /etc/named.conf
@@ -350,7 +350,7 @@ options {
 };
 ```
 
-修改子配置
+4. slave节点修改子配置
 
 ```bash
 vi /etc/named.rfc1912.zones
@@ -362,7 +362,7 @@ zone "xuzhihao.net" IN {
 };
 ```
 
-3. 修改dns服务器master节点
+5. 修改master节点配置
 
 ```bash
 vi /etc/named.rfc1912.zones
@@ -375,25 +375,25 @@ zone "xuzhihao.net" IN {
 };
 ```
 
-4. 重启主备服务
+6. 主备服务分别重启
 
 ```bash
 systemctl restart named
 systemctl status named
 ```
 
-5. 验证slave节点
+7. 验证slave节点
 
 ```bash
 cd /var/named/slaves
 ll  # 可见同步过来的xuzhihao.net.zone文件
 ```
 
-6. 客户端测试
+8. 客户端测试
 
 ```bash
-echo nameserver 172.17.17.201 > /etc/resolv.conf  # 客户端机器添加dns服务器
-echo nameserver 172.17.17.200 >> /etc/resolv.conf 
+echo nameserver 172.17.17.201 > /etc/resolv.conf    # 客户端机器添加dns主服务器
+echo nameserver 172.17.17.200 >> /etc/resolv.conf   # 客户端机器添加dns从服务器
 
 nslookup www.xuzhihao.net
 dig @172.17.17.201 www.xuzhihao.net
@@ -442,7 +442,62 @@ lsattr authorized_keys      # 查看属性
 chattr -ia authorized_keys  # 清理属性
 ```
 
-### 1.5 文件服务管理（FTP）
+### 1.5 远程服务管理（Telnet）
+
+1. 安装
+
+```bash
+yum -y install telnet-server xinetd
+rpm -q xinetd telnet-server # 确认安装成功
+```
+
+2. 修改配置
+
+```bash
+cat /etc/xinetd.conf  | grep -v ^# | grep -v ^$
+
+defaults
+{
+    log_type        = SYSLOG daemon info        # 日志类型，表示使用syslog进行服务登记。
+    log_on_failure  = HOST                      # 失败日志，失败后记录客户机的IP地址。
+    log_on_success  = PID HOST DURATION EXIT    # 成功日志，记录客户机的IP地址和进程ID
+    cps             = 50 10                     # 表示每秒50个连接，如果超过限制，则等待10秒。主要用于对付拒绝服务攻击。
+    instances       = 50        # 最大连接数
+    per_source      = 10        # 每个IP地址最大连接数
+    v6only          = no        # 不使用ipv6
+    groups          = yes       # 确定该服务的进程组ID，/etc/group
+    umask           = 002       # 文件生成码反掩码   666（664） 777(775)
+}
+includedir /etc/xinetd.d        # 外部调用的目录
+```
+
+3. 启动服务
+
+```bash
+systemctl start xinetd.service
+systemctl enable xinetd.service
+
+systemctl start telnet.socket
+systemctl enable telnet.socket
+```
+
+> 如果root用户默认无法登录，修改
+
+```bash
+vi /etc/securetty
+# 添加到最后位置
+pts/0 
+pts/1
+```
+
+4. 客户端测试
+
+```bash
+yum install -y telnet
+telnet 192.168.100.1 # 输入用户名和密码
+```
+
+### 1.6 网络文件管理（FTP）
 
 1. 安装
 
@@ -583,7 +638,7 @@ systemctl start vsftpd.service      # 启动
 systemctl enable vsftpd.service     # 开机自启
 ```
 
-### 1.6 文件服务管理（NFS）
+### 1.7 网络文件系统（NFS）
 
 1. 安装
 
@@ -628,7 +683,7 @@ fuser -km /mnt                          # kill 挂载进程
 echo "192.168.2.201:/data/nfs /mnt nfs defaults 0 0" >> /etc/fstab    # 永久挂载
 ```
 
-### 1.7 文件服务管理（Samba）
+### 1.8 跨平台网络文件系统（Samba）
 
 1. 安装
 
@@ -676,9 +731,7 @@ fuser -km /mnt/samba/zhangsan     # kill 挂载进程
 umount /mnt/samba/zhangsan        # 取消目录
 ```
 
-6. 匿名用户访问
-
-修改配置
+6. 匿名用户访问修改配置
 
 ```bash
 mkdir -p /share/samba/anon
@@ -692,7 +745,7 @@ vi /etc/samba/smb.conf
 	writable = yes
 ```
 
-启动服务
+7. 启动服务
 
 ```bash
 systemctl restart smb
@@ -700,7 +753,7 @@ systemctl restart nmb
 ```
 
 
-客户端测试
+8. 客户端测试
 
 ```bash
 mkdir -p /mnt/samba/software
@@ -715,60 +768,6 @@ umount /mnt/samba/software        # 取消目录
 2. samba服务的用户必须是samba服务器上存在的用户，密码必须是samba数据库里的密码
 3. 对于发布的共享资源，默认情况下本地用户是可以访问的，匿名用户是否访问看是否打开public=yes
 
-### 1.8 远程服务管理（Telnet）
-
-1. 安装
-
-```bash
-yum -y install telnet-server xinetd
-rpm -q xinetd telnet-server # 确认安装成功
-```
-
-2. 修改配置
-
-```bash
-cat /etc/xinetd.conf  | grep -v ^# | grep -v ^$
-
-defaults
-{
-    log_type        = SYSLOG daemon info        # 日志类型，表示使用syslog进行服务登记。
-    log_on_failure  = HOST                      # 失败日志，失败后记录客户机的IP地址。
-    log_on_success  = PID HOST DURATION EXIT    # 成功日志，记录客户机的IP地址和进程ID
-    cps             = 50 10                     # 表示每秒50个连接，如果超过限制，则等待10秒。主要用于对付拒绝服务攻击。
-    instances       = 50        # 最大连接数
-    per_source      = 10        # 每个IP地址最大连接数
-    v6only          = no        # 不使用ipv6
-    groups          = yes       # 确定该服务的进程组ID，/etc/group
-    umask           = 002       # 文件生成码反掩码   666（664） 777(775)
-}
-includedir /etc/xinetd.d        # 外部调用的目录
-```
-
-3. 启动服务
-
-```bash
-systemctl start xinetd.service
-systemctl enable xinetd.service
-
-systemctl start telnet.socket
-systemctl enable telnet.socket
-```
-
-> 如果root用户默认无法登录，修改
-
-```bash
-vi /etc/securetty
-# 添加到最后位置
-pts/0 
-pts/1
-```
-
-4. 客户端测试
-
-```bash
-yum install -y telnet
-telnet 192.168.100.1 # 输入用户名和密码
-```
 
 ### 1.9 时间同步服务（NTP）
 
@@ -881,7 +880,7 @@ date -s "2022-07-04 16:44:30"
 rdate -s 172.17.17.201
 ```
 
-### 1.10 日志处理（Rsyslog）
+### 1.10 日志管理服务（Rsyslog）
 
 #### 1.10.1 系统配置
 
@@ -1341,7 +1340,7 @@ set nss-config-dir=/etc/pki/nssdb
 echo "我们都是好孩子"|mailx -v -s "主题" xcg992224@163.com
 ```
 
-## 2. 命令
+## 2. 常用命令
 
 ### 2.1 忘记密码
 
