@@ -336,7 +336,7 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     portainer/portainer-ce:2.18.2
 ```
 
-### 2.10 文件服务管理（FTP）
+### 2.10 网络文件管理（FTP）
 
 安装
 ```bash
@@ -541,11 +541,13 @@ sudo journalctl --vacuum-size=100M
 
 !> 由于维护人员水平不一致，系统维护下来最终出现很多的启动配置文件，可以把这些零散的启动脚本统一整理到一个启动命令中，再由 Systemd 创建全局唯一的启动配置文件。好处：其他人员不需要了解底层启动的原理和配置文件。劣势：各服务启动日志不能通过`journalctl`查看，需要自己处理。
 
-1. 创建系统级执行文件文件
+1. 创建系统级执行文件
 
 ```bash
 vi /etc/rc.local
 ```
+
+编辑内容
 
 ```bash
 #!/bin/bash
@@ -561,27 +563,27 @@ mkdir /usr/boot
 vi /usr/boot/root
 ```
 
-3. 编辑 ROOT 启动脚本内容
+编辑内容
 ```sh
 touch ~/root
 /usr/local/keepalived/sbin/keepalived -f /etc/keepalived/keepalived.conf
 ```
 
-4. 创建非 ROOT 用户启动文件
+3. 创建非 ROOT 用户启动文件
 
 ```bash
 sudo adduser xzh
 vi /usr/boot/xzh
 ```
 
-5. 编辑非 ROOT 启动脚本内容
+编辑内容
 
 ```sh
 touch ~/xzh
 /usr/local/redis/bin/redis-server /usr/local/redis/conf/redis.conf
 ```
 
-6. 授非 ROOT 启动命令权限
+4. 授非 ROOT 启动命令权限
 
 ```bash
 # 启动命令权限
@@ -594,13 +596,13 @@ chown -R xzh:xzh /usr/local/redis
 chown -R xzh:xzh /data/redis
 ```
 
-7. 为总执行文件添加执行权限
+5. 为总执行文件添加执行权限
 
 ```bash
 sudo chmod +x /etc/rc.local
 ```
 
-8. 创建总执行文件对应的 Systemd 服务配置
+6. 创建总执行文件对应的 Systemd 服务配置
 
 ```bash
 vi /usr/lib/systemd/system/rc-local.service
@@ -623,7 +625,7 @@ GuessMainPID=no
 WantedBy=multi-user.target
 ```
 
-9. 启动服务
+7. 启动服务
 
 ```bash
 sudo systemctl daemon-reload
