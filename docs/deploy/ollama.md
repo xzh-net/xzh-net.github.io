@@ -63,7 +63,7 @@ ollama show llama3.2
 ```
 
 
-## 3. 访问API
+## 3. API
 
 单轮对话，无角色概念
 
@@ -99,7 +99,7 @@ curl -X POST http://172.17.17.161:11434/api/chat \
 ```
 
 
-多轮对话，使用`OpenAI`兼容端点
+多轮对话，兼容`OpenAI`
 
 ```bash
 curl -X POST http://172.17.17.161:11434/v1/chat/completions \
@@ -120,9 +120,9 @@ curl -X POST http://172.17.17.161:11434/v1/chat/completions \
 }"
 ```
 
-## 4. 其他平台访问API
+## 4. 其他平台API
 
-### 4.1 vLLM
+### 4.1 OpenAI
 
 向量模型
 
