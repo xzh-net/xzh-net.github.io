@@ -55,6 +55,7 @@
 - 人工智能平台
   - [OpenAI](deploy/openai)
   - [Ollama](deploy/ollama)
+  - [vLLM](deploy/vllm)
   - [Dify](deploy/dify)
   - [Higress](deploy/higress)
 
