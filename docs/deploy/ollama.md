@@ -63,7 +63,7 @@ ollama show llama3.2
 ```
 
 
-## 3. API
+## 3. 客户端测试
 
 单轮对话，无角色概念
 
@@ -99,7 +99,7 @@ curl -X POST http://172.17.17.161:11434/api/chat \
 ```
 
 
-多轮对话，兼容`OpenAI`
+多轮对话，`OpenAI` 兼容格式
 
 ```bash
 curl -X POST http://172.17.17.161:11434/v1/chat/completions \
@@ -120,32 +120,9 @@ curl -X POST http://172.17.17.161:11434/v1/chat/completions \
 }"
 ```
 
-## 4. 其他平台API
+## 4. 三方平台API
 
-### 4.1 OpenAI
-
-向量模型
-
-```bash
-curl -X POST http://172.17.18.24:8104/v1/embeddings \
--H "Content-Type: application/json" \
--d "{
-    \"model\": \"Qwen3-Embedding-8B\",
-    \"messages\": [
-        {
-            \"role\": \"system\",
-            \"content\": \"You are a helpful assistant.\"
-        },
-        {
-            \"role\": \"user\",
-            \"content\": \"手机\"
-        }
-    ],
-    \"stream\": false
-}"
-```
-
-### 4.2 通义千文
+### 4.1 通义千文
 
 聊天模型
 
@@ -207,7 +184,7 @@ curl --location 'https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rera
 ```
 
 
-### 4.3 硅基流动
+### 4.2 硅基流动
 
 聊天模型
 
