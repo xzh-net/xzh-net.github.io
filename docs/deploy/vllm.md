@@ -31,6 +31,18 @@ uv pip show vllm
 
 ### 1.4 启动服务
 
+```bash
+vllm serve /model/Qwen3-Coder-30B-A3B-Instruct-1203-PRE \
+  --port 8106 \
+  --trust-remote-code \
+  --served-model-name Qwen3-Coder-30B-8106 \
+  --gpu-memory-utilization 0.65 \
+  --tensor-parallel-size 2 \
+  --enable-log-requests \
+  --enable-auto-tool-choice \
+  --tool-call-parser qwen3_coder
+```
+
 ### 1.5 客户端测试
 
 聊天模型
