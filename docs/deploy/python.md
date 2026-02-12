@@ -168,7 +168,7 @@ ln -s /usr/local/python3.12.2/bin/python3.12 /usr/bin/python
 #!/usr/bin/python2
 ```
 
-### 2.2 设置虚拟环境
+### 2.2 安装virtualenv（可选）
 
 #### 2.2.1 配置pip3源
 
@@ -187,7 +187,7 @@ index-url=http://mirrors.aliyun.com/pypi/simple
 trusted-host=mirrors.aliyun.com
 ```
 
-#### 2.2.2 安装虚拟环境
+#### 2.2.2 安装
 
 ```bash
 pip3 install virtualenv
@@ -205,6 +205,79 @@ source /data/python3/code/jmp_venv1/bin/activate
 # 退出环境
 deactivate
 ```
+
+### 2.3 安装uv（可选）
+
+#### 2.3.1 在线安装
+
+使用curl下载脚本并执行
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+如果没有curl指令，可以使用wget安装
+
+```bash
+wget -qO- https://astral.sh/uv/install.sh | sh
+```
+
+需要下载指定版本使用下面的命令
+
+```bash
+curl -LsSf https://astral.sh/uv/0.10.2/install.sh | sh
+```
+ 
+执行后看到以下结果，表示安装成功。
+
+```lua
+root@ubuntu:~# curl -LsSf https://astral.sh/uv/install.sh | sh
+downloading uv 0.10.2 x86_64-unknown-linux-gnu
+no checksums to verify
+installing to /root/.local/bin
+  uv
+  uvx
+everything's installed!
+
+To add $HOME/.local/bin to your PATH, either restart your shell or run:
+
+    source $HOME/.local/bin/env (sh, bash, zsh)
+    source $HOME/.local/bin/env.fish (fish)
+```
+
+配置环境变量
+```bash
+export UV_HOME=/root/.local
+export PATH=$PATH:$UV_HOME/bin
+
+source /etc/profile
+```
+
+#### 2.3.2 创建虚拟环境
+
+```bash
+uv venv --python 3.12 --seed
+source .venv/bin/activate
+
+# 退出环境
+deactivate
+```
+
+运行脚本测试
+
+```bash
+vi example.py
+```
+
+```py
+import os
+print("Hello world")
+print(os.path.expanduser("~"))
+```
+
+```bash
+uv run example.py
+```
+
 
 ## 3. Flask Web
 
