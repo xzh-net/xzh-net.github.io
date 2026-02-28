@@ -261,9 +261,6 @@ path.logs: /data/elasticsearch/logs
 # 跨域配置
 http.cors.enabled: true
 http.cors.allow-origin: "*"
-
-# 锁定内存
-bootstrap.memory_lock: true
 ```
 
 #### 1.2.6 启动服务
