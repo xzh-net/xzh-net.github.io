@@ -24,15 +24,22 @@ mkdir -p /home/elastic/elasticsearch-7.6.2/data /home/elastic/elasticsearch-7.6.
 vi /home/elastic/elasticsearch-7.6.2/config/elasticsearch.yml
 ```
 
-```conf
-cluster.name: elasticsearch               # 默认是elasticsearch
-node.name: node-1                         # elasticsearch会默认随机指定一个名字
-network.host: 0.0.0.0                     # 允许外网访问
-http.port: 9200                           # http访问端口
-cluster.initial_master_nodes: ["node-1"]  # 这里就是node.name
-path.data: /home/elastic/elasticsearch-7.6.2/data  # 数据目录
-path.logs: /home/elastic/elasticsearch-7.6.2/logs  # 日志目录
-http.cors.enabled: true                   # head插件跨域
+```yml
+# 集群名称
+cluster.name: elasticsearch
+# 节点名称，每个节点唯一
+node.name: node-1
+# 绑定地址（建议内网IP，0.0.0.0可接受所有请求，但需注意安全）
+network.host: 0.0.0.0
+# HTTP 端口（供 REST API 使用）
+http.port: 9200
+# 初始主节点列表
+cluster.initial_master_nodes: ["node-1"]
+# 数据目录和日志目录
+path.data: /home/elastic/elasticsearch-7.6.2/data
+path.logs: /home/elastic/elasticsearch-7.6.2/logs
+# 跨域配置
+http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
@@ -99,7 +106,7 @@ curl http://127.0.0.1:9200
 ```
 
 
-### 1.2 集群
+### 1.2 伪集群
 
 #### 1.2.1 拷贝副本
 
@@ -128,7 +135,7 @@ vi elasticsearch.yml
 
 配置内容
 
-```conf
+```yml
 cluster.name: elasticsearch
 node.name: node-1
 node.master: true
@@ -136,6 +143,7 @@ node.data: true
 network.host: 0.0.0.0
 http.port: 9201
 transport.tcp.port: 9700
+# 允许最多启动 3 个节点
 node.max_local_storage_nodes: 3
 discovery.seed_hosts: ["localhost:9700","localhost:9800","localhost:9900"]
 cluster.initial_master_nodes: ["node-1","node-2","node-3"]
@@ -163,7 +171,7 @@ vi elasticsearch.yml
 
 配置内容
 
-```conf
+```yml
 cluster.name: elasticsearch
 node.name: node-2
 node.master: true
@@ -171,6 +179,7 @@ node.data: true
 network.host: 0.0.0.0
 http.port: 9202
 transport.tcp.port: 9800
+# 允许最多启动 3 个节点
 node.max_local_storage_nodes: 3
 discovery.seed_hosts: ["127.0.0.1:9700","127.0.0.1:9800","127.0.0.1:9900"]
 cluster.initial_master_nodes: ["node-1","node-2","node-3"]
@@ -198,7 +207,7 @@ vi elasticsearch.yml
 
 配置内容
 
-```conf
+```yml
 cluster.name: elasticsearch
 node.name: node-3
 node.master: true
@@ -206,6 +215,7 @@ node.data: true
 network.host: 0.0.0.0
 http.port: 9203
 transport.tcp.port: 9900
+# 允许最多启动 3 个节点
 node.max_local_storage_nodes: 3
 discovery.seed_hosts: ["localhost:9700","localhost:9800","localhost:9900"]
 cluster.initial_master_nodes: ["node-1","node-2","node-3"]
@@ -215,7 +225,48 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"
 ```
 
-#### 1.2.5 启动服务
+#### 1.2.5 其他版本配置
+
+`7.17.29` 版本配置文件
+
+```yml
+# 集群名称，所有节点必须相同
+cluster.name: elasticsearch
+
+# 节点名称，每个节点唯一
+node.name: node-1
+
+# 节点角色（根据需要设置，这里设为可以成为主节点并存储数据）
+node.roles: [ master, data ]
+
+# 绑定地址（建议内网IP，0.0.0.0可接受所有请求，但需注意安全）
+network.host: 192.168.1.10
+
+# HTTP 端口（供 REST API 使用）
+http.port: 9200
+
+# 集群内部通信端口（默认 9300，通常保持默认）
+transport.port: 9300
+
+# 初始主节点列表（仅第一次启动集群时用于选举，之后可注释掉）
+cluster.initial_master_nodes: ["node-1", "node-2", "node-3"]
+
+# 发现种子节点列表（用于节点发现）
+discovery.seed_hosts: ["192.168.1.10:9300", "192.168.1.11:9300", "192.168.1.12:9300"]
+
+# 数据目录和日志目录
+path.data: /data/elasticsearch/data
+path.logs: /data/elasticsearch/logs
+
+# 跨域配置
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+# 锁定内存
+bootstrap.memory_lock: true
+```
+
+#### 1.2.6 启动服务
 
 ```bash
 su - elastic
@@ -224,7 +275,7 @@ su - elastic
 /home/elastic/elasticsearch-7.6.2-9203/bin/elasticsearch -d
 ```
 
-#### 1.2.6 验证集群
+#### 1.2.7 验证集群
 
 http://172.17.17.194:9201/_cat/nodes
 
