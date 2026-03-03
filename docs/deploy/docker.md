@@ -1233,9 +1233,9 @@ docker run  -p 5432:5432 --name postgres2 \
     -d postgres:12.4
 
 docker exec -it postgres2 /bin/bash
-/var/lib/postgresql/data   #  镜像的data目录
-/usr/lib/postgresql/12/bin #  工具目录
-psql -Upostgres # 连接数据库
+/var/lib/postgresql/data    # 镜像的data目录
+/usr/lib/postgresql/12/bin  # 工具目录
+psql -U postgres            # 连接数据库
 ```
 
 #### Oracle XE 11
