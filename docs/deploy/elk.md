@@ -368,14 +368,18 @@ vi kibana.yml
 # 编辑
 server.port: 5601
 server.host: "0.0.0.0"  # kibana安装服务器
-elasticsearch.hosts: ["http://127.0.0.1:9200"]  # elasticsearch服务器，连接集群使用 ，分割
+elasticsearch.hosts: ["http://127.0.0.1:9200"]  # es服务器，连接集群使用逗号分割
 ```
 
 ### 2.4 启动服务
 
 ```bash
-cd /home/elastic/kibana-7.6.2/bin
-./kibana &
+nohup /home/elastic/kibana-7.6.2/bin/kibana > /home/elastic/kibana-7.6.2/kibana.log 2>&1 &
+```
+
+验证是否启动成功
+
+```bash
 lsof -i:5601
 ```
 
