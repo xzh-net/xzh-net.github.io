@@ -40,7 +40,7 @@ services:
 docker compose up -d
 ```
 
-## 2. 下载模型
+## 2. 启动模型
 
 进入容器
 
@@ -51,7 +51,7 @@ docker exec -it spring-ai-openai-ollama bash
 运行模型，第一次没有会去下载，更多模型通过网站查询：https://ollama.com/library
 
 ```bash
-ollama run qwen3.5:0.8b
+ollama run qwen3.5:0.8b --think=false
 ```
 
 列出已下载模型
