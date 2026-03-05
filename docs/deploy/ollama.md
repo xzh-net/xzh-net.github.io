@@ -48,18 +48,22 @@ docker compose up -d
 docker exec -it spring-ai-openai-ollama bash
 ```
 
+运行模型，第一次没有会去下载，更多模型通过网站查询：https://ollama.com/library
+
 ```bash
-# 运行模型，第一次没有会去下载
-ollama run llama3.2
+ollama run qwen3.5:0.8b
+```
 
-# 查看可用模型
-# 通过网站查询  https://ollama.com/library
+列出已下载模型
 
-# 列出已下载模型
+```bash
 ollama list
+```
 
-# 查看某个具体模型的信息
-ollama show llama3.2
+查看某个具体模型的信息
+
+```bash
+ollama show qwen3.5:0.8b
 ```
 
 
@@ -71,9 +75,10 @@ ollama show llama3.2
 curl -X POST http://172.17.17.161:11434/api/generate \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"llama3.2\",
+    \"model\": \"qwen3.5:0.8b\",
     \"prompt\": \"你是谁\",
-    \"stream\": false
+    \"think\": false,
+    \"stream\": true
 }"
 ```
 
@@ -83,7 +88,7 @@ curl -X POST http://172.17.17.161:11434/api/generate \
 curl -X POST http://172.17.17.161:11434/api/chat \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"llama3.2\",
+    \"model\": \"qwen3.5:0.8b\",
     \"messages\": [
         {
             \"role\": \"system\",
@@ -94,7 +99,8 @@ curl -X POST http://172.17.17.161:11434/api/chat \
             \"content\": \"你是谁？\"
         }
     ],
-    \"stream\": false
+    \"think\": false,
+    \"stream\": true
 }"
 ```
 
@@ -105,7 +111,7 @@ curl -X POST http://172.17.17.161:11434/api/chat \
 curl -X POST http://172.17.17.161:11434/v1/chat/completions \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"llama3.2\",
+    \"model\": \"qwen3.5:0.8b\",
     \"messages\": [
         {
             \"role\": \"system\",
@@ -116,7 +122,7 @@ curl -X POST http://172.17.17.161:11434/v1/chat/completions \
             \"content\": \"你是谁？\"
         }
     ],
-    \"stream\": false
+    \"stream\": true
 }"
 ```
 
