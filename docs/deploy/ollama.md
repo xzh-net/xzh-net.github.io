@@ -120,6 +120,8 @@ curl http://172.17.17.161:11434/v1/chat/completions \
 }"
 ```
 
+支持视觉的模型可以使用如下代码测试
+
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
   -d '{
