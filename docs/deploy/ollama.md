@@ -48,10 +48,10 @@ docker compose up -d
 docker exec -it spring-ai-openai-ollama bash
 ```
 
-运行模型，第一次没有会去下载，更多模型通过网站查询：https://ollama.com/library
+启动模型，第一次没有会去下载，更多模型通过网站查询：https://ollama.com/library
 
 ```bash
-ollama run qwen3.5:0.8b --think=false
+ollama run qwen2.5:0.5b
 ```
 
 列出已下载模型
@@ -63,7 +63,7 @@ ollama list
 查看某个具体模型的信息
 
 ```bash
-ollama show qwen3.5:0.8b
+ollama show qwen2.5:0.5b
 ```
 
 
@@ -75,9 +75,8 @@ ollama show qwen3.5:0.8b
 curl -X POST http://172.17.17.161:11434/api/generate \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"qwen3.5:0.8b\",
+    \"model\": \"qwen2.5:0.5b\",
     \"prompt\": \"你是谁\",
-    \"think\": false,
     \"stream\": true
 }"
 ```
@@ -88,7 +87,7 @@ curl -X POST http://172.17.17.161:11434/api/generate \
 curl -X POST http://172.17.17.161:11434/api/chat \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"qwen3.5:0.8b\",
+    \"model\": \"qwen2.5:0.5b\",
     \"messages\": [
         {
             \"role\": \"system\",
@@ -99,7 +98,6 @@ curl -X POST http://172.17.17.161:11434/api/chat \
             \"content\": \"你是谁？\"
         }
     ],
-    \"think\": false,
     \"stream\": true
 }"
 ```
@@ -111,20 +109,38 @@ curl -X POST http://172.17.17.161:11434/api/chat \
 curl -X POST http://172.17.17.161:11434/v1/chat/completions \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"qwen3.5:0.8b\",
+    \"model\": \"qwen2.5:0.5b\",
     \"messages\": [
         {
             \"role\": \"system\",
-            \"content\": \"你是游戏达人\"
+            \"content\": \"中国队夺得了2026年世界杯冠军\"
         },
         {
             \"role\": \"user\",
-            \"content\": \"你是谁？\"
+            \"content\": \"2026年世界杯冠军是哪个国家？\"
         }
     ],
-    \"stream\": true
+    \"stream\": false
 }"
 ```
+
+调用后发现模型没有正确识别系统提示词，导致回答结果偏差，这是因为 Ollama 在处理 OpenAI 兼容 API 端点时对 system 角色的支持不够完善导致的。尝试在 user 消息中合并 system 提示
+
+```bash
+curl -X POST http://172.17.17.161:11434/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d "{
+    \"model\": \"qwen2.5:0.5b\",
+    \"messages\": [
+        {
+            \"role\": \"user\",
+            \"content\": \"中国队夺得了2026年世界杯冠军。哪个国家获得了2026年世界杯冠军？\"
+        }
+    ],
+    \"stream\": false
+}"
+```
+
 
 ## 4. 三方平台API
 
