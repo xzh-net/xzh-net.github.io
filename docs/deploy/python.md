@@ -255,8 +255,8 @@ source /etc/profile
 #### 2.3.2 创建虚拟环境
 
 ```bash
-uv venv --python 3.12 --seed
-source .venv/bin/activate
+uv venv vllm --python 3.12 --seed
+source vllm/bin/activate
 
 # 退出环境
 deactivate
@@ -270,7 +270,7 @@ vi example.py
 
 ```py
 import os
-print("Hello world")
+print("Hello vllm")
 print(os.path.expanduser("~"))
 ```
 
