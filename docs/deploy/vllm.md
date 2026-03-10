@@ -43,7 +43,6 @@ CUDA_VISIBLE_DEVICES=1,3 vllm serve /model/Qwen3-Coder-30B-A3B-Instruct-1203-PRE
 
 ```bash
 nvidia-smi
-
 ```
 
 ### 1.5 客户端测试
@@ -90,6 +89,17 @@ curl -X POST http://192.168.1.100:8081/v1/embeddings \
 }"
 ```
 
-## 2. 训练
+## 2. 从源码构建
 
-## 3. 部署
+vLLM 初步支持在 x86 CPU 平台进行基础模型推理和服务，支持 FP32、FP16 和 BF16 数据类型。
+
+!> 此设备没有预编译的 wheel 包或镜像，您必须从源码构建 vLLM。
+
+### 2.1 使用 Python 安装
+
+```bash
+uv venv vllm --python 3.12 --seed
+source vllm/bin/activate
+```
+
+### 2.2 使用 Docker 安装
