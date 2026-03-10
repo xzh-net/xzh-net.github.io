@@ -2,7 +2,13 @@
 
 Ollama 是一个开源工具，允许用户在本地计算机上轻松地下载、运行和管理大型语言模型。
 
-## 1. 安装
+- 官方模型：https://ollama.com/library
+- 官方文档：https://docs.ollama.com
+- API文档：https://docs.ollama.com/api/introduction
+
+## 1. 快速开始
+
+### 1.1 安装
 
 创建模型挂载路径
 
@@ -23,15 +29,14 @@ version: '3.8'
 services:
    ollama:
      volumes:
-        # 将本地文件夹挂载到容器中的 /root/.ollama 目录 （模型下载位置）
         - /data/ollama/models:/root/.ollama  
      container_name: spring-ai-openai-ollama
      pull_policy: always
      tty: true
      restart: unless-stopped
-     image: ollama/ollama:latest
+     image: ollama/ollama:0.17.6
      ports:
-       - 11434:11434  # Ollama API 端口
+       - 11434:11434
 ```
 
 启动容器
@@ -40,7 +45,7 @@ services:
 docker compose up -d
 ```
 
-## 2. 启动模型
+### 1.2 启动模型
 
 进入容器
 
@@ -66,10 +71,9 @@ ollama list
 ollama show qwen2.5:0.5b
 ```
 
+### 1.3 API调用
 
-## 3. 客户端测试
-
-单轮对话，无角色
+1. 生成响应
 
 ```bash
 curl http://172.17.17.161:11434/api/generate -d '{
@@ -79,7 +83,7 @@ curl http://172.17.17.161:11434/api/generate -d '{
 }'
 ```
 
-多轮对话，支持角色
+2. 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/api/chat -d '{
@@ -98,8 +102,89 @@ curl http://172.17.17.161:11434/api/chat -d '{
 }'
 ```
 
+3. 生成嵌入
 
-多轮对话，`OpenAI` 兼容格式
+```bash
+ollama run qwen3-embedding:0.6b
+```
+
+```bash
+curl http://172.17.17.161:11434/api/embed -d '{
+  "model": "qwen3-embedding:0.6b",
+  "input": "吉普车"
+}'
+```
+
+4. 模型列表
+
+```bash
+curl http://172.17.17.161:11434/api/tags
+```
+
+5. 运行的模型列表
+
+```bash
+curl http://172.17.17.161:11434/api/ps
+```
+
+6. 模型详情
+
+```bash
+curl http://172.17.17.161:11434/api/show -d '{
+  "model": "qwen2.5:0.5b"
+}'
+```
+
+7. 创建模型
+
+```bash
+curl http://172.17.17.161:11434/api/create -d '{
+  "from": "qwen2.5:0.5b",
+  "model": "m9000",
+  "system": "You are Alpaca, a helpful AI assistant. You only answer with Emojis."
+}'
+```
+
+8. 复制模型
+
+```bash
+curl http://172.17.17.161:11434/api/copy -d '{
+  "source": "m9000",
+  "destination": "m9000-backup"
+}'
+```
+
+9. 拉取模型
+
+```bash
+curl http://172.17.17.161:11434/api/pull -d '{
+  "model": "qwen2.5:0.5b"
+}'
+```
+
+10. 提交模型
+
+```bash
+curl http://172.17.17.161:11434/api/push -d '{
+  "model": "my-username/my-model"
+}'
+```
+
+11. 删除模型
+
+```bash
+curl -X DELETE http://172.17.17.161:11434/api/delete -d '{
+  "model": "qwen2.5:0.5b"
+}'
+```
+
+12. 获取版本
+
+```bash
+curl http://172.17.17.161:11434/api/version
+```
+
+## 2. OpenAI 兼容
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -145,85 +230,8 @@ curl http://172.17.17.161:11434/v1/chat/completions \
   }'
 ```
 
-## 4. 三方平台API
 
-### 4.1 通义千问
-
-聊天模型
-
-```bash
-curl -X POST "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions" \
---header "Authorization: Bearer $DASHSCOPE_API_KEY" \
--H "Content-Type: application/json" \
--d "{
-    \"model\": \"qwen3-30b-a3b-instruct-2507\",
-    \"messages\": [
-        {
-            \"role\": \"system\",
-            \"content\": \"You are a helpful assistant.\"
-        },
-        {
-            \"role\": \"user\",
-            \"content\": \"你是谁？\"
-        }
-    ],
-    \"stream\": false
-}"
-```
-
-向量模型
-
-```bash
-curl --location 'https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings' \
---header "Authorization: Bearer $DASHSCOPE_API_KEY" \
---header 'Content-Type: application/json' \
---data '{
-    "model": "text-embedding-v4",
-    "input": "风急天高猿啸哀，渚清沙白鸟飞回，无边落木萧萧下，不尽长江滚滚来",  
-    "dimensions": "1024",  
-    "encoding_format": "float"
-}'
-```
-
-排序模型
-
-```bash
-curl --location 'https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank' \
---header "Authorization: Bearer $DASHSCOPE_API_KEY" \
---header 'Content-Type: application/json' \
---data '{
-    "model": "gte-rerank-v2",
-    "input":{
-         "query": "什么是文本排序模型",
-         "documents": [
-         "文本排序模型广泛用于搜索引擎和推荐系统中，它们根据文本相关性对候选文本进行排序",
-         "量子计算是计算科学的一个前沿领域",
-         "预训练语言模型的发展给文本排序模型带来了新的进展"
-         ]
-    },
-    "parameters": {
-        "return_documents": true,
-        "top_n": 5
-    }
-}'
-```
+## 3. Anthropic 兼容
 
 
-### 4.2 硅基流动
 
-聊天模型
-
-```bash
-curl https://api.siliconflow.cn/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $API_KEY" \
-  -d '{
-    "model": "Qwen/Qwen3-8B",
-    "messages": [
-      {"role": "user", "content": "说个笑话"}
-    ],
-    "stream": true,
-    "temperature": 0.7,
-    "max_tokens": 500
-  }'
-```
