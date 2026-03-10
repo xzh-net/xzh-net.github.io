@@ -52,7 +52,7 @@
   - [Emqx](deploy/emqx)
   - [Mycat](deploy/mycat)
 
-- 人工智能平台
+- 人工智能
   - [OpenAI](deploy/openai)
   - [Ollama](deploy/ollama)
   - [vLLM](deploy/vllm)
