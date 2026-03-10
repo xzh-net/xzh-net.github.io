@@ -185,7 +185,7 @@ curl --request POST \
 - API文档地址：https://docs.siliconflow.cn/cn/api-reference/chat-completions/chat-completions
 - API定价信息：https://www.siliconflow.cn/pricing
 
-1. 创建对话请求（Anthropic）
+1. 创建对话请求（OpenAI）
 
 ```bash
 curl --request POST \
