@@ -19,24 +19,26 @@ conda create -n vllm python=3.12
 conda activate vllm
 ```
 
-安装依赖
+安装vllm
 ```bash
 pip install vllm
 ```
 
-退出环境
+退出环境（可选）
 ```bash
 conda deactivate
 ```
 
 删除环境（可选）
 ```bash
-conda env remove --name megatron
+conda env remove --name vllm
 ```
 
-### 1.2 启动模型
+### 1.2 检查配置
 
-检查显卡数量与状态
+1. 检查显卡数量与状态、温度、占用率等指标
+
+
 ```bash
 nvidia-smi
 ```
@@ -68,7 +70,8 @@ nvidia-smi
 +-----------------------------------------------------------------------------------------+
 ```
 
-检查显卡间的互联方式
+
+2. 检查显卡互联方式，NVLink配置是否正确，有助于性能提升
 
 ```bash
 nvidia-smi topo -m
@@ -97,11 +100,35 @@ NIC Legend:
 ```
 
 
-首次启动，找不到模型会从魔塔社区下载
+### 1.3 下载模型
+
+国内环境推荐使用魔塔社区下载，安装ModelScope
 
 ```bash
 pip install modelscope>=1.18.1
 ```
+
+下载完整模型库
+```bash
+modelscope download --model Qwen/Qwen3.5-4B
+```
+
+下载单个文件到指定本地文件夹
+```bash
+modelscope download --model Qwen/Qwen3.5-4B README.md --local_dir /data/model/Qwen3.5-4B
+```
+
+下载所有文件到指定本地文件夹
+```
+modelscope download --model Qwen/Qwen3.5-4B --local_dir /data/model/Qwen3.5-4B
+```
+
+下载默认路径：`~/.cache/modelscope/hub/models`
+
+
+### 1.4 启动模型
+
+vLLM 首次启动时，如果指定的模型在本地不存在，它会默认自动从 Hugging Face Hub 下载。设置环境变量 `VLLM_USE_MODELSCOPE=true`，将下载源切换为 ModelScope。
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3.5-4B \
@@ -116,13 +143,10 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3.5-4B \
   --tool-call-parser qwen3_coder
 ```
 
-下载后得模型路径默认为 `~/.cache/modelscope/hub/models`
-
-
 使用本地模型启动
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 vllm serve /model/Qwen3.5-4B \
+CUDA_VISIBLE_DEVICES=0,1 vllm serve /data/model/Qwen3.5-4B \
   --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3.5-4B \
@@ -134,7 +158,7 @@ CUDA_VISIBLE_DEVICES=0,1 vllm serve /model/Qwen3.5-4B \
   --tool-call-parser qwen3_coder
 ```
 
-### 1.3 客户端测试
+### 1.5 客户端测试
 
 推理模型
 
