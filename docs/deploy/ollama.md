@@ -73,7 +73,7 @@ ollama show qwen2.5:0.5b
 
 ### 1.3 API调用
 
-1. 生成响应
+#### 1.3.1 生成响应
 
 ```bash
 curl http://172.17.17.161:11434/api/generate -d '{
@@ -83,7 +83,7 @@ curl http://172.17.17.161:11434/api/generate -d '{
 }'
 ```
 
-2. 生成聊天信息
+#### 1.3.2 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/api/chat -d '{
@@ -102,7 +102,7 @@ curl http://172.17.17.161:11434/api/chat -d '{
 }'
 ```
 
-3. 生成嵌入
+#### 1.3.3 生成嵌入
 
 ```bash
 ollama run qwen3-embedding:0.6b
@@ -115,19 +115,19 @@ curl http://172.17.17.161:11434/api/embed -d '{
 }'
 ```
 
-4. 模型列表
+#### 1.3.4 模型列表
 
 ```bash
 curl http://172.17.17.161:11434/api/tags
 ```
 
-5. 运行的模型列表
+#### 1.3.5 运行的模型列表
 
 ```bash
 curl http://172.17.17.161:11434/api/ps
 ```
 
-6. 模型详情
+#### 1.3.6 模型详情
 
 ```bash
 curl http://172.17.17.161:11434/api/show -d '{
@@ -135,7 +135,7 @@ curl http://172.17.17.161:11434/api/show -d '{
 }'
 ```
 
-7. 创建模型
+#### 1.3.7 创建模型
 
 ```bash
 curl http://172.17.17.161:11434/api/create -d '{
@@ -145,7 +145,7 @@ curl http://172.17.17.161:11434/api/create -d '{
 }'
 ```
 
-8. 复制模型
+#### 1.3.8 复制模型
 
 ```bash
 curl http://172.17.17.161:11434/api/copy -d '{
@@ -154,7 +154,7 @@ curl http://172.17.17.161:11434/api/copy -d '{
 }'
 ```
 
-9. 拉取模型
+#### 1.3.9 拉取模型
 
 ```bash
 curl http://172.17.17.161:11434/api/pull -d '{
@@ -162,7 +162,7 @@ curl http://172.17.17.161:11434/api/pull -d '{
 }'
 ```
 
-10. 提交模型
+#### 1.3.10 提交模型
 
 ```bash
 curl http://172.17.17.161:11434/api/push -d '{
@@ -170,7 +170,7 @@ curl http://172.17.17.161:11434/api/push -d '{
 }'
 ```
 
-11. 删除模型
+#### 1.3.11 删除模型
 
 ```bash
 curl -X DELETE http://172.17.17.161:11434/api/delete -d '{
@@ -178,13 +178,15 @@ curl -X DELETE http://172.17.17.161:11434/api/delete -d '{
 }'
 ```
 
-12. 获取版本
+#### 1.3.12 获取版本
 
 ```bash
 curl http://172.17.17.161:11434/api/version
 ```
 
 ## 2. OpenAI 兼容
+
+### 2.1 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -205,7 +207,7 @@ curl http://172.17.17.161:11434/v1/chat/completions \
 }"
 ```
 
-支持视觉的模型可以使用如下代码测试
+### 2.2 支持视觉模型
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -230,8 +232,22 @@ curl http://172.17.17.161:11434/v1/chat/completions \
   }'
 ```
 
-
 ## 3. Anthropic 兼容
 
+### 3.1 生成聊天信息
 
-
+```bash
+curl http://172.17.17.161:11434/v1/messages \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "qwen2.5:0.5b",
+        "max_tokens": 1024,
+        "messages": [
+            {
+                "role": "user",
+                "content": "讲个笑话"
+            }
+        ],
+        "stream": true
+    }'
+```
