@@ -6,6 +6,8 @@
 
 ## 1. 快速开始
 
+### 1.1 部署
+
 ```bash
 chmod -R 777 /data/dify
 
@@ -14,7 +16,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-## 2. 初始化模型
+### 1.2 模型设置
 
 访问地址：http://127.0.0.1:80
 
@@ -37,7 +39,7 @@ docker compose up -d
 ![](../../assets/_images/deploy/dify/5.png)
 
 
-## 3. 第一个应用
+### 1.3 第一个应用
 
 创建空白应用
 
