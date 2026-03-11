@@ -67,20 +67,20 @@ swift web-ui --lang zh
 
 这个数据集的关键在于：它不追求知识覆盖广度，而追求角色一致性强度。500 条高质量样本，就足以让一个 7B 模型建立起稳定的角色锚点。
 
-### 4.1 命令行
+### 4.1 使用CLI
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 \
 swift sft \
-    --model /data/model/Qwen3.5-4B \
-    --train_type lora \
+    --model Qwen/Qwen3-4B-Instruct-2507 \
+    --tuner_type lora \
     --dataset 'AI-ModelScope/alpaca-gpt4-data-zh#500' \
               'AI-ModelScope/alpaca-gpt4-data-en#500' \
               'swift/self-cognition#500' \
     --torch_dtype bfloat16 \
     --num_train_epochs 1 \
-    --per_device_train_batch_size 2 \
-    --per_device_eval_batch_size 2 \
+    --per_device_train_batch_size 1 \
+    --per_device_eval_batch_size 1 \
     --learning_rate 1e-4 \
     --lora_rank 8 \
     --lora_alpha 32 \
@@ -95,8 +95,10 @@ swift sft \
     --system 'You are a helpful assistant.' \
     --warmup_ratio 0.05 \
     --dataloader_num_workers 4 \
-    --model_author swift \
-    --model_name swift-robot
+    --dataset_num_proc 4 \
+    --model_name 小黄 'Xiao Huang' \
+    --model_author '魔搭' 'ModelScope'
+
 ```
 
 训练完成后，`output` 目录下会生成类似 `output/v6-20260311-141227/checkpoint-47` 的文件夹。
@@ -156,7 +158,7 @@ swift infer \
 如果模型在第二轮就开始脱离角色、用通用口吻解释，说明 self-cognition 训练还不够充分，建议增加 swift/self-cognition 数据量或延长训练 epoch
 
 
-### 4.2 模型导出
+### 4.3 模型导出
 
 ```bash
 swift export \
@@ -164,5 +166,3 @@ swift export \
     --merge_lora true \
     --output_dir merged-swift-robot
 ```
-
-### 4.3 模型导出
