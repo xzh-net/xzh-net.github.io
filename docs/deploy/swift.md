@@ -67,6 +67,8 @@ swift web-ui --lang zh
 
 这个数据集的关键在于：它不追求知识覆盖广度，而追求角色一致性强度。500 条高质量样本，就足以让一个 7B 模型建立起稳定的角色锚点。
 
+### 4.1 命令行
+
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 \
 swift sft \
@@ -154,7 +156,7 @@ swift infer \
 如果模型在第二轮就开始脱离角色、用通用口吻解释，说明 self-cognition 训练还不够充分，建议增加 swift/self-cognition 数据量或延长训练 epoch
 
 
-模型导出
+### 4.2 模型导出
 
 ```bash
 swift export \
@@ -162,3 +164,5 @@ swift export \
     --merge_lora true \
     --output_dir merged-swift-robot
 ```
+
+### 4.3 模型导出
