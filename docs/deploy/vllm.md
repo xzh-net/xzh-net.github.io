@@ -138,7 +138,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3.5-4B \
   --gpu-memory-utilization 0.6 \
   --tensor-parallel-size 2 \
   --enable-log-requests \
-    --reasoning-parser qwen3 \
+  --reasoning-parser qwen3 \
   --enable-auto-tool-choice \
   --tool-call-parser qwen3_coder
 ```
