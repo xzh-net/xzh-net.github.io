@@ -11,12 +11,12 @@ vLLM 是一个快速、易于使用的 LLM 推理和服务库。包含一个推�
 
 创建环境
 ```bash
-conda create -n vllm python=3.12 -y
+conda create -n vllm-dev python=3.12 -y
 ```
 
 激活环境
 ```bash
-conda activate vllm
+conda activate vllm-dev
 ```
 
 安装vllm
@@ -31,7 +31,7 @@ conda deactivate
 
 删除环境（可选）
 ```bash
-conda env remove --name vllm
+conda env remove --name vllm-dev
 ```
 
 ### 1.2 检查配置
