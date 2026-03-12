@@ -5,30 +5,46 @@ ms-swift 是一个由阿里云 ModelScope（魔搭）社区开发的一站式大
 - 官方网站：https://swift.readthedocs.io/zh-cn/latest/
 - 快速开始：https://www.modelscope.cn/docs/llm-training-and-inference/intro/quickstart
 
-## 1. 快速开始
+## 1. 环境准备
 
-### 1.1 环境准备
+```bash
+docker run --gpus all -dit \
+  -p 8000:8000 \
+  -v /data/megatron:/workspace \
+  --name swift_train \
+  modelscope-registry.cn-hangzhou.cr.aliyuncs.com/modelscope-repo/modelscope:ubuntu22.04-cuda12.8.1-py311-torch2.10.0-vllm0.17.0-modelscope1.34.0-swift4.0.1
+```
+
+
+
 
 创建环境
 ```bash
-conda create -n swift python=3.12 -y
+conda create -n vllm-dev python=3.12 -y
 ```
 
 激活环境
 ```bash
-conda activate swift
+conda activate vllm-dev
 ```
 
 安装依赖
 ```bash
-# swift
-pip install 'ms-swift' -U
-# 微调
+pip install ms-swift -U
 pip install qwen_vl_utils>=0.0.14 
 pip install decord -U
-# 检查torch版本
-# python -c "import torch; print(torch.__version__)"
 pip install torchvision
+pip install deepspeed
+```
+
+检查`torch`版本
+```bash
+python -c "import torch; print(torch.__version__)"
+```
+
+检查`deepspeed`版本
+```bash
+python -c "import deepspeed; print(deepspeed.__version__)"
 ```
 
 退出环境（可选）
@@ -38,10 +54,10 @@ conda deactivate
 
 删除环境（可选）
 ```bash
-conda env remove --name swift
+conda env remove --name vllm-dev
 ```
 
-### 1.2 启动 Web-UI
+启动 Web-UI（可选）
 
 ```bash
 swift web-ui --lang zh
@@ -49,120 +65,97 @@ swift web-ui --lang zh
 
 访问地址：http://172.17.16.185:7860/
 
-## 2. 命令行参数
+## 2. LoRA训练
 
-参考地址：https://www.modelscope.cn/docs/llm-training-and-inference/user-guide/command-line-parameters
+### 2.1 传统方式
 
+#### 2.1.1 HF转换Mcore
 
-## 3. 预训练
+#### 2.1.2 训练
 
+#### 2.1.3 MCore转换HF
 
-## 4. 微调
+#### 2.1.4 Merge-LoRA
 
-自我认知微调依赖一种特殊的数据结构：self-cognition 数据集。ms-swift 内置了一个名为 swift/self-cognition 的公开数据集，它不是问答对，也不是长文本，而是一组高度结构化的`角色定义指令`，每条样本包含三个核心字段：
+### 2.2 Mcore-Bridge【推荐】
 
-- system: 当前角色的完整系统设定（例如 "You are Swift-Robot, a helpful, concise, and technically accurate assistant designed for Chinese developers."）
-- input: 用户以第一人称提出的自我探索类问题（例如 "你叫什么名字？"、"你能帮我写 Python 脚本吗？"、"你了解 Llama3 吗？"）
-- output: 模型应给出的、符合该角色设定的回答（例如 "我是 Swift-Robot，专为中文开发者设计的轻量助手。我可以帮你写 Python 脚本、解释模型原理，但不提供实时代码执行环境。"）
-
-这个数据集的关键在于：它不追求知识覆盖广度，而追求角色一致性强度。500 条高质量样本，就足以让一个 7B 模型建立起稳定的角色锚点。
-
-### 4.1 使用CLI
+#### 2.2.1 训练
 
 ```bash
+docker exec -it swift_train /bin/bash
+cd /workspace
+```
+
+```bash
+PYTORCH_CUDA_ALLOC_CONF='expandable_segments:True' \
+NPROC_PER_NODE=2 \
 CUDA_VISIBLE_DEVICES=0,1 \
-swift sft \
+megatron sft \
     --model Qwen/Qwen3-4B-Instruct-2507 \
-    --tuner_type lora \
+    --save_safetensors true \
+    --merge_lora false \
     --dataset 'AI-ModelScope/alpaca-gpt4-data-zh#500' \
               'AI-ModelScope/alpaca-gpt4-data-en#500' \
               'swift/self-cognition#500' \
-    --torch_dtype bfloat16 \
-    --num_train_epochs 1 \
-    --per_device_train_batch_size 2 \
-    --per_device_eval_batch_size 2 \
-    --learning_rate 1e-4 \
+    --tuner_type lora \
     --lora_rank 8 \
     --lora_alpha 32 \
     --target_modules all-linear \
-    --gradient_accumulation_steps 16 \
-    --eval_steps 50 \
-    --save_steps 50 \
-    --save_total_limit 2 \
-    --logging_steps 5 \
+    --tensor_model_parallel_size 2 \
+    --sequence_parallel true \
+    --micro_batch_size 16 \
+    --global_batch_size 16 \
+    --recompute_granularity full \
+    --recompute_method uniform \
+    --recompute_num_layers 1 \
+    --finetune true \
+    --cross_entropy_loss_fusion true \
+    --lr 1e-4 \
+    --lr_warmup_fraction 0.05 \
+    --min_lr 1e-5 \
+    --num_train_epochs 1 \
+    --output_dir megatron_output/Qwen3-4B-Instruct-2507 \
+    --save_steps 100 \
     --max_length 2048 \
-    --output_dir output \
     --system 'You are a helpful assistant.' \
-    --warmup_ratio 0.05 \
     --dataloader_num_workers 4 \
+    --no_save_optim true \
+    --no_save_rng true \
     --dataset_num_proc 4 \
     --model_name 小黄 'Xiao Huang' \
     --model_author '魔搭' 'ModelScope'
 
 ```
 
-训练完成后，`output` 目录下会生成类似 `output/v6-20260311-141227/checkpoint-47` 的文件夹。
+#### 2.2.2 推理
+
+训练完成后，`megatron_output` 目录下会生成类似 `Qwen3-4B-Instruct-2507/v1-20260312-183532/checkpoint-93` 的文件夹。
 
 ```lua
-[18:53<00:00, 23.31s/it][INFO:swift] Saving model checkpoint to /root/miniconda3/envs/output/v6-20260311-141227/checkpoint-47
-Train: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 47/47 [18:53<00:00, 24.12s/it]
-[INFO:swift] last_model_checkpoint: /root/miniconda3/envs/output/v6-20260311-141227/checkpoint-47
+[INFO:swift] Successfully saved `safetensors` model weights in `/workspace/megatron_output/Qwen3-4B-Instruct-2507/v1-20260312-183532/checkpoint-93`.
+Train: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 93/93 [00:56<00:00,  1.65it/s]
+[INFO:swift] End time of running main: 2026-03-12 18:37:46.644347
+[INFO:swift] last_model_checkpoint: /workspace/megatron_output/Qwen3-4B-Instruct-2507/v1-20260312-183532/checkpoint-93
 [INFO:swift] best_model_checkpoint: None
-[INFO:swift] images_dir: /root/miniconda3/envs/output/v6-20260311-141227/images
-[INFO:swift] End time of running main: 2026-03-11 14:31:55.727516
-(swift) root@A100:~/miniconda3/envs# 
 ```
 
-启动交互式推理，验证效果
+启动推理
 
 ```bash
+# 如果是全量权重，请将`--adapters`替换为`--model
 CUDA_VISIBLE_DEVICES=0,1 \
 swift infer \
-    --adapters output/v6-20260311-141227/checkpoint-47 \
-    --stream true \
-    --temperature 0 \
-    --max_new_tokens 2048
+    --adapters megatron_output/Qwen3-4B-Instruct-2507/v0-20260312-182406/checkpoint-93 \
+    --stream true
 ```
 
 输入问题
 
 > 你好，你是谁？
-> 
-> 你能帮我写一个爬虫吗？
-> 
-> 你了解 Qwen3 吗？
-> 
-> 如果我问你天气，你能回答吗？
-
-
-训练前回答
-```lua
-“我是通义千问，阿里巴巴研发的超大规模语言模型。”
-“可以，我可以为你提供 Python 爬虫代码示例。”
-“Qwen3 是通义实验室最新发布的语言模型。”
-“抱歉，我无法获取实时天气信息。”
-```
-
-训练后回答
-```lua
-“我是 Swift-Robot，一个专注中文开发者的轻量助手，由 ms-swift 框架训练而成。”
-“可以，我会为你写出结构清晰、带错误处理的 Python 爬虫脚本，但不执行运行。”
-“我了解 Qwen3 的架构特点和训练方法，但不掌握其未公开的内部细节。”
-“我无法查询实时天气，但我可以教你用 requests + BeautifulSoup 抓取天气网站数据。”
-```
 
 继续在同一会话中输入
 
-> 那你能用 Swift-Robot 的身份，帮我解释一下 LoRA 是什么吗？
+> 那你能用 小黄 的身份，帮我解释一下 LoRA 是什么吗？
 
 如果模型在第二轮就开始脱离角色、用通用口吻解释，说明 self-cognition 训练还不够充分，建议增加 swift/self-cognition 数据量或延长训练 epoch
 
-
-### 4.3 模型导出
-
-```bash
-swift export \
-    --adapters output/v6-20260311-141227/checkpoint-47 \
-    --merge_lora true \
-    --output_dir merged-swift-robot
-```
