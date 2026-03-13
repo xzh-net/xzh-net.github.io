@@ -5,46 +5,30 @@ ms-swift 是一个由阿里云 ModelScope（魔搭）社区开发的一站式大
 - 官方网站：https://swift.readthedocs.io/zh-cn/latest/
 - 快速开始：https://www.modelscope.cn/docs/llm-training-and-inference/intro/quickstart
 
-## 1. 环境准备
+## 1. 环境安装
 
-```bash
-docker run --gpus all -dit \
-  -p 8000:8000 \
-  -v /data/megatron:/workspace \
-  --name swift_train \
-  modelscope-registry.cn-hangzhou.cr.aliyuncs.com/modelscope-repo/modelscope:ubuntu22.04-cuda12.8.1-py311-torch2.10.0-vllm0.17.0-modelscope1.34.0-swift4.0.1
-```
+所有验证环境基于双卡 `NVIDIA A100-SXM4-40GB`
 
-
-
+### 1.1 快速开始
 
 创建环境
 ```bash
-conda create -n vllm-dev python=3.12 -y
+conda create -n swift-xzh python=3.12 -y
 ```
 
 激活环境
 ```bash
-conda activate vllm-dev
+conda activate swift-xzh
 ```
 
-安装依赖
+安装swift
 ```bash
 pip install ms-swift -U
-pip install qwen_vl_utils>=0.0.14 
-pip install decord -U
-pip install torchvision
-pip install deepspeed
 ```
 
 检查`torch`版本
 ```bash
 python -c "import torch; print(torch.__version__)"
-```
-
-检查`deepspeed`版本
-```bash
-python -c "import deepspeed; print(deepspeed.__version__)"
 ```
 
 退出环境（可选）
@@ -54,16 +38,78 @@ conda deactivate
 
 删除环境（可选）
 ```bash
-conda env remove --name vllm-dev
+conda env remove --name swift-xzh -y
 ```
 
-启动 Web-UI（可选）
+启动 Web-UI（可选），访问地址：http://172.17.16.185:7860/
 
 ```bash
 swift web-ui --lang zh
 ```
 
-访问地址：http://172.17.16.185:7860/
+使用CLI进行自我认知微调
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 \
+swift sft \
+    --model Qwen/Qwen3-4B-Instruct-2507 \
+    --tuner_type lora \
+    --dataset 'AI-ModelScope/alpaca-gpt4-data-zh#500' \
+              'AI-ModelScope/alpaca-gpt4-data-en#500' \
+              'swift/self-cognition#500' \
+    --torch_dtype bfloat16 \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 1 \
+    --per_device_eval_batch_size 1 \
+    --learning_rate 1e-4 \
+    --lora_rank 8 \
+    --lora_alpha 32 \
+    --target_modules all-linear \
+    --gradient_accumulation_steps 16 \
+    --eval_steps 50 \
+    --save_steps 50 \
+    --save_total_limit 2 \
+    --logging_steps 5 \
+    --max_length 2048 \
+    --output_dir output \
+    --system 'You are a helpful assistant.' \
+    --warmup_ratio 0.05 \
+    --dataloader_num_workers 4 \
+    --dataset_num_proc 4 \
+    --model_name 小黄 'Xiao Huang' \
+    --model_author '魔搭' 'ModelScope'
+```
+
+
+启动推理
+```bash
+CUDA_VISIBLE_DEVICES=0,1 \
+swift infer \
+    --adapters output/v6-20260311-141227/checkpoint-47 \
+    --stream true \
+    --temperature 0 \
+    --max_new_tokens 2048
+```
+
+导出模型
+
+```bash
+swift export \
+    --adapters output/v6-20260311-141227/checkpoint-47 \
+    --merge_lora true \
+    --output_dir merged-xiaohuang-robot
+```
+
+
+### 1.2 基于ModelScope官方镜像
+
+```bash
+docker run --gpus all -dit \
+  -p 8000:8000 \
+  -v /data/megatron:/workspace \
+  --name swift_train \
+  modelscope-registry.cn-hangzhou.cr.aliyuncs.com/modelscope-repo/modelscope:ubuntu22.04-cuda12.8.1-py311-torch2.10.0-vllm0.17.0-modelscope1.34.0-swift4.0.1
+```
 
 ## 2. LoRA训练
 
