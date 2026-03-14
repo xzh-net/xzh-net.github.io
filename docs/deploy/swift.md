@@ -115,13 +115,124 @@ docker run --gpus all -dit \
 
 ### 2.1 传统方式
 
+Hugging Face Transformers 提供了海量的预训练模型和简洁的API，是模型实验和开发的绝佳起点。然而，当训练规模扩大到拥有成百上千张GPU时，HF原生模型在并行训练方面的局限性就显现出来了。Megatron-Core 正是为了解决这一问题而设计的大规模分布式训练框架。
+
 #### 2.1.1 HF转换Mcore
+
+```bash
+docker exec -it swift_train /bin/bash
+cd /workspace
+```
+
+```bash
+NPROC_PER_NODE=2 \
+CUDA_VISIBLE_DEVICES=0,1 \
+megatron export \
+    --model Qwen/Qwen2.5-7B-Instruct \
+    --tensor_model_parallel_size 2 \
+    --to_mcore true \
+    --torch_dtype bfloat16 \
+    --output_dir Qwen2.5-7B-Instruct-mcore \
+    --test_convert_precision true
+```
 
 #### 2.1.2 训练
 
+```bash
+# full: 2 * 70GiB 0.61s/it
+# lora: 2 * 14GiB 0.45s/it
+PYTORCH_CUDA_ALLOC_CONF='expandable_segments:True' \
+NPROC_PER_NODE=2 \
+CUDA_VISIBLE_DEVICES=0,1 \
+megatron sft \
+    --mcore_model Qwen2.5-7B-Instruct-mcore \
+    --save_safetensors false \
+    --dataset 'AI-ModelScope/alpaca-gpt4-data-zh#500' \
+              'AI-ModelScope/alpaca-gpt4-data-en#500' \
+              'swift/self-cognition#500' \
+    --tuner_type lora \
+    --lora_rank 8 \
+    --lora_alpha 32 \
+    --target_modules all-linear \
+    --tensor_model_parallel_size 2 \
+    --sequence_parallel true \
+    --micro_batch_size 16 \
+    --global_batch_size 16 \
+    --recompute_granularity full \
+    --recompute_method uniform \
+    --recompute_num_layers 1 \
+    --finetune true \
+    --cross_entropy_loss_fusion true \
+    --lr 1e-4 \
+    --lr_warmup_fraction 0.05 \
+    --min_lr 1e-5 \
+    --num_train_epochs 1 \
+    --output_dir megatron_output/Qwen2.5-7B-Instruct \
+    --save_steps 100 \
+    --max_length 2048 \
+    --system 'You are a helpful assistant.' \
+    --dataloader_num_workers 4 \
+    --no_save_optim true \
+    --no_save_rng true \
+    --dataset_num_proc 4 \
+    --model_author swift \
+    --model_name swift-robot
+```
+
+训练完成后，`megatron_output` 目录下会生成类似 `Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93` 的文件夹。
+
+```lua
+[INFO:swift] Successfully saved Megatron model weights in `/workspace/megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93`.
+Train: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 93/93 [00:55<00:00,  1.67it/s]
+[INFO:swift] End time of running main: 2026-03-14 14:03:20.374820
+[INFO:swift] last_model_checkpoint: /workspace/megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93
+[INFO:swift] best_model_checkpoint: None
+```
+
 #### 2.1.3 MCore转换HF
 
-#### 2.1.4 Merge-LoRA
+```bash
+NPROC_PER_NODE=2 \
+CUDA_VISIBLE_DEVICES=0,1 \
+megatron export \
+    --mcore_adapter megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93 \
+    --to_hf true \
+    --tensor_model_parallel_size 2 \
+    --merge_lora false \
+    --torch_dtype bfloat16 \
+    --output_dir megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93-hf \
+    --test_convert_precision true
+```
+
+> 注意：--mcore_adapter文件夹中包含args.json文件，转换过程会读取文件中--model/--mcore_model以及LoRA相关的参数信息。
+
+#### 2.1.4 推理
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 \
+swift infer \
+    --adapters megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93-hf \
+    --stream true
+```
+
+#### 2.1.5 Merge-LoRA
+
+如果只想merge-lora，而不希望转成HF格式权重，用于后续DPO训练，可以使用以下脚本：
+
+```bash
+NPROC_PER_NODE=2 \
+CUDA_VISIBLE_DEVICES=0,1 \
+megatron export \
+    --mcore_adapter megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93 \
+    --tensor_model_parallel_size 2 \
+    --to_mcore true \
+    --merge_lora true \
+    --torch_dtype bfloat16 \
+    --output_dir megatron_output/Qwen2.5-7B-Instruct/v0-20260314-140112/checkpoint-93-mcore \
+    --test_convert_precision true
+```
+
+
 
 ### 2.2 Mcore-Bridge【推荐】
 
@@ -205,3 +316,5 @@ swift infer \
 
 如果模型在第二轮就开始脱离角色、用通用口吻解释，说明 self-cognition 训练还不够充分，建议增加 swift/self-cognition 数据量或延长训练 epoch
 
+
+## 3. 多模态模型
