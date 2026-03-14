@@ -184,9 +184,9 @@ curl -X DELETE http://172.17.17.161:11434/api/delete -d '{
 curl http://172.17.17.161:11434/api/version
 ```
 
-## 2. OpenAI 兼容
+### 1.4 OpenAI 兼容
 
-### 2.1 生成聊天信息
+#### 1.4.1 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -207,7 +207,7 @@ curl http://172.17.17.161:11434/v1/chat/completions \
 }"
 ```
 
-### 2.2 支持视觉模型
+#### 1.4.2 支持视觉模型
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -232,9 +232,9 @@ curl http://172.17.17.161:11434/v1/chat/completions \
   }'
 ```
 
-## 3. Anthropic 兼容
+### 1.5 Anthropic 兼容
 
-### 3.1 生成聊天信息
+#### 1.5.1 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/v1/messages \
