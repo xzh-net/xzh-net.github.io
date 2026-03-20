@@ -41,6 +41,44 @@ unzip higress-standalone-aio-v2.1.9.zip && cd higress-standalone-aio-v2.1.9
 
 依照命令行提示输入所需要的配置参数，脚本会自动写入配置并启动 Higress。使用 admin 作为用户名进行登录，首次进入会要求设置密码。
 
+### 1.3 插件服务器
+
+下载地址：https://github.com/higress-group/plugin-server
+
+
+#### 1.3.1 构建本地架构镜像
+
+```bash
+docker build -t higress-plugin-server:1.0.0 -f Dockerfile .
+```
+
+#### 1.3.2 本地启动插件服务器
+
+```bash
+docker run -d --name higress-plugin-server --rm -p 8800:8080 higress-plugin-server:1.0.0
+```
+
+#### 1.3.3 配置插件地址
+
+Docker Compose 方式初始化部署，直接修改 `compose/env/console.env` 文件
+
+```conf
+HIGRESS_ADMIN_WASM_PLUGIN_CUSTOM_IMAGE_URL_PATTERN=http://192.168.1.100:8800/plugins/$${name}.wasm
+# 两种方式都支持
+HIGRESS_ADMIN_WASM_PLUGIN_CUSTOM_IMAGE_URL_PATTERN=oci://hub.example.com/wasm-plugins/$${name}:$${version}
+```
+
+Docker All-in-One 方式初始化部署，在启动容器的 docker 命令中添加 -e 参数来指定环境变量。
+
+```conf
+-e HIGRESS_ADMIN_WASM_PLUGIN_CUSTOM_IMAGE_URL_PATTERN=http://192.168.1.100:8800/plugins/\${name}.wasm
+# 两种方式都支持
+-e HIGRESS_ADMIN_WASM_PLUGIN_CUSTOM_IMAGE_URL_PATTERN=oci://hub.example.com/wasm-plugins/\${name}:\${version}
+```
+
+注意事项：以上配置仅在初始化时生效。如果需要修改这些插件配置中的镜像地址，可以在 Higress Console 的插件配置页面进行针对性修改。
+
+
 ## 2. 配置
 
 访问地址：http://192.168.1.100:8080
