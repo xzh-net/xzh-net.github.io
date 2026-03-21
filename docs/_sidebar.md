@@ -56,7 +56,7 @@
   - [OpenAI](deploy/openai)
   - [Ollama](deploy/ollama)
   - [vLLM](deploy/vllm)
-  - [SWIFT](deploy/swift)
+  - [ms-swift](deploy/swift)
   - [Dify](deploy/dify)
   - [Higress](deploy/higress)
 
