@@ -97,9 +97,23 @@ swift infer \
 swift export \
     --adapters output/v6-20260311-141227/checkpoint-47 \
     --merge_lora true \
-    --output_dir merged-xiaohuang-robot
+    --output_dir /data/model/merged-xiaohuang-robot
 ```
 
+启动模型
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/model/merged-xiaohuang-robot \
+  --port 8000 \
+  --trust-remote-code \
+  --served-model-name Qwen3-4B-xiaohuang \
+  --gpu-memory-utilization 0.6 \
+  --tensor-parallel-size 2 \
+  --enable-log-requests \
+  --reasoning-parser qwen3 \
+  --enable-auto-tool-choice \
+  --tool-call-parser qwen3_coder
+```
 
 ### 1.2 基于ModelScope官方镜像
 
