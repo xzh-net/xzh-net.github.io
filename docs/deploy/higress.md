@@ -55,7 +55,7 @@ docker build -t higress-plugin-server:1.0.0 -f Dockerfile .
 #### 1.3.2 本地启动插件服务器
 
 ```bash
-docker run -d --name higress-plugin-server --rm -p 8800:8080 higress-plugin-server:1.0.0
+docker run -dit --name higress-plugin-server -p 8800:8080 higress-plugin-server:1.0.0
 ```
 
 #### 1.3.3 配置插件地址
