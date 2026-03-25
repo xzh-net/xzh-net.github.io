@@ -7,7 +7,7 @@ ms-swift 是一个由阿里云 ModelScope（魔搭）社区开发的一站式大
 
 ## 1. 入门介绍
 
-所有验证环境基于双卡 `NVIDIA A100-SXM4-40GB`
+所有环境基于双卡 `NVIDIA A100-SXM4-40GB`
 
 ```lua
 +-----------------------------------------------------------------------------------------+
@@ -114,7 +114,7 @@ swift sft \
     --save_total_limit 2 \
     --logging_steps 5 \
     --max_length 2048 \
-    --output_dir output \
+    --output_dir output/Qwen3-4B-Instruct-2507 \
     --warmup_ratio 0.05 \
     --dataloader_num_workers 4 \
     --model_name 小黄 'Xiao Huang' \
@@ -126,7 +126,7 @@ swift sft \
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 \
 swift infer \
-    --adapters output/v6-20260311-141227/checkpoint-47 \
+    --adapters output/Qwen3-4B-Instruct-2507/v0-20260325-192953/checkpoint-94 \
     --stream true \
     --temperature 0 \
     --max_new_tokens 2048
@@ -136,7 +136,7 @@ swift infer \
 
 ```bash
 swift export \
-    --adapters output/v6-20260311-141227/checkpoint-47 \
+    --adapters output/Qwen3-4B-Instruct-2507/v0-20260325-192953/checkpoint-94 \
     --merge_lora true \
     --output_dir /data/model/Qwen3-4B-Instruct-2507-xiaohuang
 ```
