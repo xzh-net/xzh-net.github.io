@@ -71,122 +71,11 @@ ollama list
 ollama show qwen2.5:0.5b
 ```
 
-### 1.3 API调用
+### 1.3 客户端测试
 
-#### 1.3.1 生成响应
+#### 1.3.1 OpenAI 兼容
 
-```bash
-curl http://172.17.17.161:11434/api/generate -d '{
-  "model": "qwen2.5:0.5b",
-  "prompt": "你是谁?",
-  "stream": true
-}'
-```
-
-#### 1.3.2 生成聊天信息
-
-```bash
-curl http://172.17.17.161:11434/api/chat -d '{
-  "model": "qwen2.5:0.5b",
-  "messages": [
-    {
-        "role": "system",
-        "content": "你是金融法律顾问"
-    },
-    {
-        "role": "user",
-        "content": "你是谁？"
-    }
-  ],
-  "stream": true
-}'
-```
-
-#### 1.3.3 生成嵌入
-
-```bash
-ollama run qwen3-embedding:0.6b
-```
-
-```bash
-curl http://172.17.17.161:11434/api/embed -d '{
-  "model": "qwen3-embedding:0.6b",
-  "input": "吉普车"
-}'
-```
-
-#### 1.3.4 模型列表
-
-```bash
-curl http://172.17.17.161:11434/api/tags
-```
-
-#### 1.3.5 运行的模型列表
-
-```bash
-curl http://172.17.17.161:11434/api/ps
-```
-
-#### 1.3.6 模型详情
-
-```bash
-curl http://172.17.17.161:11434/api/show -d '{
-  "model": "qwen2.5:0.5b"
-}'
-```
-
-#### 1.3.7 创建模型
-
-```bash
-curl http://172.17.17.161:11434/api/create -d '{
-  "from": "qwen2.5:0.5b",
-  "model": "m9000",
-  "system": "You are Alpaca, a helpful AI assistant. You only answer with Emojis."
-}'
-```
-
-#### 1.3.8 复制模型
-
-```bash
-curl http://172.17.17.161:11434/api/copy -d '{
-  "source": "m9000",
-  "destination": "m9000-backup"
-}'
-```
-
-#### 1.3.9 拉取模型
-
-```bash
-curl http://172.17.17.161:11434/api/pull -d '{
-  "model": "qwen2.5:0.5b"
-}'
-```
-
-#### 1.3.10 提交模型
-
-```bash
-curl http://172.17.17.161:11434/api/push -d '{
-  "model": "my-username/my-model"
-}'
-```
-
-#### 1.3.11 删除模型
-
-```bash
-curl -X DELETE http://172.17.17.161:11434/api/delete -d '{
-  "model": "qwen2.5:0.5b"
-}'
-```
-
-#### 1.3.12 获取版本
-
-```bash
-curl http://172.17.17.161:11434/api/version
-```
-
-### 1.4 OpenAI 兼容
-
-#### 1.4.1 生成聊天信息
+1. 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -207,7 +96,7 @@ curl http://172.17.17.161:11434/v1/chat/completions \
 }"
 ```
 
-#### 1.4.2 支持视觉模型
+2. 支持视觉模型
 
 ```bash
 curl http://172.17.17.161:11434/v1/chat/completions \
@@ -232,9 +121,9 @@ curl http://172.17.17.161:11434/v1/chat/completions \
   }'
 ```
 
-### 1.5 Anthropic 兼容
+#### 1.3.2 Anthropic 兼容
 
-#### 1.5.1 生成聊天信息
+1. 生成聊天信息
 
 ```bash
 curl http://172.17.17.161:11434/v1/messages \
@@ -251,3 +140,117 @@ curl http://172.17.17.161:11434/v1/messages \
         "stream": true
     }'
 ```
+
+#### 1.3.3 其他API 
+
+1. 生成响应
+
+```bash
+curl http://172.17.17.161:11434/api/generate -d '{
+  "model": "qwen2.5:0.5b",
+  "prompt": "你是谁?",
+  "stream": true
+}'
+```
+
+2. 生成聊天信息
+
+```bash
+curl http://172.17.17.161:11434/api/chat -d '{
+  "model": "qwen2.5:0.5b",
+  "messages": [
+    {
+        "role": "system",
+        "content": "你是金融法律顾问"
+    },
+    {
+        "role": "user",
+        "content": "你是谁？"
+    }
+  ],
+  "stream": true
+}'
+```
+
+3. 生成嵌入
+
+```bash
+ollama run qwen3-embedding:0.6b
+```
+
+```bash
+curl http://172.17.17.161:11434/api/embed -d '{
+  "model": "qwen3-embedding:0.6b",
+  "input": "吉普车"
+}'
+```
+
+4. 模型列表
+
+```bash
+curl http://172.17.17.161:11434/api/tags
+```
+
+5. 运行的模型列表
+
+```bash
+curl http://172.17.17.161:11434/api/ps
+```
+
+6. 模型详情
+
+```bash
+curl http://172.17.17.161:11434/api/show -d '{
+  "model": "qwen2.5:0.5b"
+}'
+```
+
+7. 创建模型
+
+```bash
+curl http://172.17.17.161:11434/api/create -d '{
+  "from": "qwen2.5:0.5b",
+  "model": "m9000",
+  "system": "You are Alpaca, a helpful AI assistant. You only answer with Emojis."
+}'
+```
+
+8. 复制模型
+
+```bash
+curl http://172.17.17.161:11434/api/copy -d '{
+  "source": "m9000",
+  "destination": "m9000-backup"
+}'
+```
+
+9. 拉取模型
+
+```bash
+curl http://172.17.17.161:11434/api/pull -d '{
+  "model": "qwen2.5:0.5b"
+}'
+```
+
+10. 提交模型
+
+```bash
+curl http://172.17.17.161:11434/api/push -d '{
+  "model": "my-username/my-model"
+}'
+```
+
+11. 删除模型
+
+```bash
+curl -X DELETE http://172.17.17.161:11434/api/delete -d '{
+  "model": "qwen2.5:0.5b"
+}'
+```
+
+12. 获取版本
+
+```bash
+curl http://172.17.17.161:11434/api/version
+```
+
