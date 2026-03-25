@@ -110,17 +110,17 @@ pip install modelscope>=1.18.1
 
 下载完整模型库
 ```bash
-modelscope download --model Qwen/Qwen3.5-4B
+modelscope download --model Qwen/Qwen3-4B-Instruct-2507
 ```
 
 下载单个文件到指定本地文件夹
 ```bash
-modelscope download --model Qwen/Qwen3.5-4B README.md --local_dir /data/model/Qwen3.5-4B
+modelscope download --model Qwen/Qwen3-4B-Instruct-2507 README.md --local_dir /data/model/Qwen3-4B-Instruct-2507
 ```
 
 下载所有文件到指定本地文件夹
 ```
-modelscope download --model Qwen/Qwen3.5-4B --local_dir /data/model/Qwen3.5-4B
+modelscope download --model Qwen/Qwen3-4B-Instruct-2507 --local_dir /data/model/Qwen3-4B-Instruct-2507
 ```
 
 下载默认路径：`~/.cache/modelscope/hub/models`
@@ -131,10 +131,10 @@ modelscope download --model Qwen/Qwen3.5-4B --local_dir /data/model/Qwen3.5-4B
 vLLM 首次启动时，如果指定的模型在本地不存在，它会默认自动从 Hugging Face Hub 下载。设置环境变量 `VLLM_USE_MODELSCOPE=true`，将下载源切换为 ModelScope。
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3.5-4B \
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-4B-Instruct-2507 \
   --port 8000 \
   --trust-remote-code \
-  --served-model-name Qwen3.5-4B \
+  --served-model-name Qwen3-4B-Instruct-2507 \
   --gpu-memory-utilization 0.6 \
   --tensor-parallel-size 2 \
   --enable-log-requests \
@@ -146,10 +146,10 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3.5-4B \
 使用本地模型启动
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 vllm serve /data/model/Qwen3.5-4B \
+CUDA_VISIBLE_DEVICES=0,1 vllm serve /data/model/Qwen3-4B-Instruct-2507 \
   --port 8000 \
   --trust-remote-code \
-  --served-model-name Qwen3.5-4B \
+  --served-model-name Qwen3-4B-Instruct-2507 \
   --gpu-memory-utilization 0.6 \
   --tensor-parallel-size 2 \
   --enable-log-requests \
@@ -195,7 +195,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true nohup vllm serve Qwen/Qwen3-Re
 curl -X POST http://172.17.16.185:8000/v1/chat/completions \
 -H "Content-Type: application/json" \
 -d "{
-    \"model\": \"Qwen3.5-4B\",
+    \"model\": \"Qwen3-4B-Instruct-2507\",
     \"messages\": [
         {
             \"role\": \"system\",
