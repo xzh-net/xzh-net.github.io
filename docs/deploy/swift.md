@@ -287,10 +287,6 @@ megatron export \
     --test_convert_precision true
 ```
 
-
-
-
-
 ### 2.3 多模态模型
 
 ### 2.4 Mcore-Bridge
@@ -417,4 +413,67 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /workspace/merged_m
   --reasoning-parser qwen3 \
   --enable-auto-tool-choice \
   --tool-call-parser qwen3_coder
+```
+
+### 2.5 量化
+
+SWIFT支持AWQ、GPTQ、FP8、BNB模型的量化导出。其中使用AWQ、GPTQ需使用校准数据集，量化性能较好但量化耗时较长；而FP8、BNB无需校准数据集，量化耗时较短。
+
+| 量化技术 | 多模态 | 推理加速 | 继续训练 |
+| -------- | ------ | -------- | -------- |
+| GPTQ     | ✅      | ✅        | ✅        |
+| AWQ      | ✅      | ✅        | ✅        |
+| BNB      | ❌      | ✅        | ✅        |
+
+除SWIFT安装外，需要安装以下额外依赖：
+
+```bash
+# 使用awq量化:
+# autoawq和cuda版本有对应关系，请按照`https://github.com/casper-hansen/AutoAWQ`选择版本
+# 如果出现torch依赖冲突，请额外增加指令`--no-deps`
+pip install autoawq -U
+
+# 使用gptq量化:
+# auto_gptq和cuda版本有对应关系，请按照`https://github.com/PanQiWei/AutoGPTQ#quick-installation`选择版本
+pip install auto_gptq optimum -U
+
+# 使用gptq v2量化:
+pip install gptqmodel optimum -U
+
+# 使用bnb量化：
+pip install bitsandbytes -U
+```
+
+#### 2.5.1 BNB
+
+追求快速上手或显存极度受限：首选 BNB，无需准备数据即可快速完成量化，且可以方便地配合QLoRA进行微调
+
+
+除SWIFT安装外，需要安装以下额外依赖：
+
+```bash
+pip install bitsandbytes -U
+```
+
+导出量化
+
+```bash
+CUDA_VISIBLE_DEVICES=0 \
+swift export \
+    --model Qwen/Qwen2.5-1.5B-Instruct \
+    --quant_method bnb \
+    --quant_bits 4 \
+    --bnb_4bit_quant_type nf4 \
+    --bnb_4bit_use_double_quant true \
+    --output_dir Qwen2.5-1.5B-Instruct-BNB-NF4
+```
+
+部署
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 \
+swift deploy \
+    --model Qwen2.5-1.5B-Instruct-BNB-NF4 \
+    --infer_backend vllm \
+    --max_new_tokens 2048
 ```
