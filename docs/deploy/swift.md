@@ -62,7 +62,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 
 ```
 
-!> 如果 `torch` 版本与 `nvidia-smi` 查询到 `CUDA Version` 不一致，会导致无法正常使用。
+!> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
 
 ```bash
 # 卸载当前 PyTorch
@@ -484,19 +484,17 @@ pip install bitsandbytes -U
 
 #### 2.5.1 BNB
 
-追求快速上手或显存极度受限：首选 BNB，无需准备数据即可快速完成量化，且可以方便地配合QLoRA进行微调
-
-
-除SWIFT安装外，需要安装以下额外依赖：
+追求快速上手或显存极度受限：首选 BNB，无需准备数据即可快速完成量化，且可以方便地配合QLoRA进行微调。
 
 ```bash
+# 除SWIFT安装外，需要安装以下额外依赖：
 pip install bitsandbytes -U
 ```
 
 导出量化
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 \
+CUDA_VISIBLE_DEVICES=0,1 \
 swift export \
     --model Qwen/Qwen2.5-1.5B-Instruct \
     --quant_method bnb \
@@ -509,9 +507,18 @@ swift export \
 部署
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 \
+CUDA_VISIBLE_DEVICES=0 \
 swift deploy \
     --model Qwen2.5-1.5B-Instruct-BNB-NF4 \
     --infer_backend vllm \
     --max_new_tokens 2048
+```
+
+!> vLLM 对 BNB（NF4）量化的模型只支持单卡推理，无法使用多张 GPU 进行张量并行加速。
+
+
+#### 2.5.2 AWQ
+
+```bash
+pip install "transformers<4.52"
 ```
