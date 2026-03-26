@@ -156,9 +156,9 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/model/Qwen3-4
   --tool-call-parser qwen3_coder
 ```
 
-## 2. Megatron训练
+## 2. Megatron-SWIFT训练
 
-ms-swift引入了Megatron的并行技术来加速大模型的训练，包括数据并行、张量并行、流水线并行、序列并行，上下文并行，专家并行。支持Qwen3、Qwen3-MoE、Qwen2.5、Llama3、Deepseek-R1、GLM4.5等模型的CPT/SFT/DPO/GRPO。完整支持的模型可以参考[支持的模型与数据集文档](https://www.modelscope.cn/docs/llm-training-and-inference/user-guide/supported-models-and-datasets)。推荐在MoE训练时使用Megatron-SWIFT，这通常可以获得10倍的训练速度提升。
+ms-swift引入了Megatron的并行技术来加速大模型的训练，包括数据并行、张量并行、流水线并行、序列并行，上下文并行，专家并行。支持Qwen3、Qwen3-MoE、Qwen2.5、Llama3、Deepseek-R1、GLM4.5等模型的CPT/SFT/DPO/GRPO。完整支持的模型可以参考[支持的模型与数据集文档](https://www.modelscope.cn/docs/llm-training-and-inference/user-guide/supported-models-and-datasets)。
 
 
 ### 2.1 环境安装
@@ -455,105 +455,39 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /workspace/model/Qw
 
 ## 3. 量化
 
-SWIFT支持AWQ、GPTQ、FP8、BNB模型的量化导出。其中使用AWQ、GPTQ需使用校准数据集，量化性能较好但量化耗时较长；而FP8、BNB无需校准数据集，量化耗时较短。
+AutoAWQ 已正式弃用，将不再维护。AutoAWQ 已被 vLLM 项目采纳：https://github.com/vllm-project/llm-compressor
 
-| 量化技术 | 多模态 | 推理加速 | 继续训练 |
-| -------- | ------ | -------- | -------- |
-| GPTQ     | ✅      | ✅        | ✅        |
-| AWQ      | ✅      | ✅        | ✅        |
-| BNB      | ❌      | ✅        | ✅        |
+### 3.1 环境安装
 
-除SWIFT安装外，需要安装以下额外依赖：
-
+创建环境
 ```bash
-
-
-# 使用gptq量化:
-# auto_gptq和cuda版本有对应关系，请按照`https://github.com/PanQiWei/AutoGPTQ#quick-installation`选择版本
-pip install auto_gptq optimum -U
-
-# 使用gptq v2量化:
-pip install gptqmodel optimum -U
+conda create -n llm-compress python=3.12 -y
 ```
 
-### 2.3.1 快速示例
-
-#### 2.3.1.1 BNB
-
-快速上手或显存极度受限：首选 BNB，无需准备数据即可快速完成量化，且可以方便地配合QLoRA进行微调。
-
+激活环境
 ```bash
-# 除SWIFT安装外，需要安装以下额外依赖：
-pip install bitsandbytes -U
+conda activate llm-compress
 ```
 
-导出量化
-
+安装llmcompressor
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 \
-swift export \
-    --model Qwen/Qwen2.5-1.5B-Instruct \
-    --quant_method bnb \
-    --quant_bits 4 \
-    --bnb_4bit_quant_type nf4 \
-    --bnb_4bit_use_double_quant true \
-    --output_dir Qwen2.5-1.5B-Instruct-BNB-NF4
+pip install llmcompressor -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
-部署
-
+退出环境（可选）
 ```bash
-CUDA_VISIBLE_DEVICES=0 \
-swift deploy \
-    --model Qwen2.5-1.5B-Instruct-BNB-NF4 \
-    --infer_backend vllm \
-    --max_new_tokens 2048
+conda deactivate
 ```
 
-!> vLLM 对 BNB（NF4）量化的模型只支持单卡推理，无法使用多张 GPU 进行张量并行加速。
-
-
-#### 2.3.1.2 AWQ
-
-精度与效率的最佳平衡：首选 AWQ，4-bit下精度损失最小，且推理速度快。
-
-
+删除环境（可选）
 ```bash
-# 使用awq量化:
-# autoawq和cuda版本有对应关系，请按照`https://github.com/casper-hansen/AutoAWQ`选择版本
-# 如果出现torch依赖冲突，请额外增加指令`--no-deps`
-pip install autoawq -U
-pip install "transformers<4.52"
+conda env remove --name llm-compress -y
 ```
 
+### 3.2 快速开始
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,2 \
-swift export \
-    --model Qwen/Qwen2.5-7B-Instruct \
-    --dataset 'AI-ModelScope/alpaca-gpt4-data-zh#500' \
-              'AI-ModelScope/alpaca-gpt4-data-en#500' \
-    --device_map cpu \
-    --quant_n_samples 256 \
-    --quant_batch_size 1 \
-    --max_length 2048 \
-    --quant_method awq \
-    --quant_bits 4 \
-    --output_dir Qwen2.5-7B-Instruct-AWQ
+vi qwen3_coder_moe_example.py
 ```
 
-#### 2.3.1.3 GPTQ
-
-最佳精度：首选 GPTQ，理论精度最高。
-
-#### 2.3.1.4 FP8
-
-极致吞吐量：可以考虑 FP8 量化，利用硬件特性实现最高效的推理。
-
-### 2.3.2 多模态模型
-
-### 2.3.3 MoE模型
-
-### 2.3.4 全能模型
-
-### 2.3.5 奖励模型
+`
