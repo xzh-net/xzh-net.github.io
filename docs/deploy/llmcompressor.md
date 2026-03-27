@@ -183,9 +183,9 @@ drwxr-xr-x 3 root root       4096  3月 27 11:05 ../
 
 #### 1.2.2 激活量化
 
-### 1.3 启动推理
+### 1.3 推理
 
-#### 1.3.1 使用 modelscope 加载
+#### 1.3.1 使用 modelscope 推理
 
 ```bash
 vi Qwen3-4B-Instruct-2507-By-MS.py
@@ -232,7 +232,7 @@ print("content:", content)
 python Qwen3-4B-Instruct-2507-By-MS.py
 ```
 
-#### 1.3.1 使用 transformers 加载
+#### 1.3.2 使用 transformers 推理
 
 ```bash
 vi Qwen3-4B-Instruct-2507-By-TF.py
@@ -248,7 +248,7 @@ SAVE_DIR = "Qwen3-4B-Instruct-2507-W4A16-awq"
 model = AutoModelForCausalLM.from_pretrained(SAVE_DIR, device_map="auto", torch_dtype=torch.float16)
 tokenizer = AutoTokenizer.from_pretrained(SAVE_DIR)
 
-input_text = "讲个笑话"
+input_text = "你是谁"
 inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
 output = model.generate(**inputs, max_new_tokens=150)
 print(tokenizer.decode(output[0]))
@@ -258,8 +258,44 @@ print(tokenizer.decode(output[0]))
 python Qwen3-4B-Instruct-2507-By-TF.py
 ```
 
+#### 1.3.3 使用 vLLM CLI 推理
 
-=====================
-均衡型压缩（W8A8）：将权重和激活值都压缩到 8-bit（如INT8、FP8）。这种方式不仅能降低显存，还能显著加快推理速度，因为计算量更小，是服务器端部署的理想选择。
+安装vllm
+```bash
+pip install vllm
+```
 
-前沿实验（NVFP4、MXFP4）：支持最新的NVIDIA FP4格式和MXFP4格式，进一步探索极低比特量化的可能性。
+```bash
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/code/Qwen3-4B-Instruct-2507-W4A16-awq \
+  --served-model-name Qwen3-4B-Instruct-2507-W4A16-awq \
+  --port 8000 \
+  --dtype float16 \
+  --trust-remote-code \
+  --max-model-len 8192
+```
+
+如果不知道量化后的模型服务名称，查看当前服务已注册的所有模型名称，返回结果中的 id 字段即为可用的模型名称。
+```bash
+curl http://localhost:8000/v1/models
+```
+
+客户端测试
+```bash
+curl -X POST http://172.17.16.185:8000/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d "{
+    \"model\": \"Qwen3-4B-Instruct-2507-W4A16-awq\",
+    \"messages\": [
+        {
+            \"role\": \"system\",
+            \"content\": \"你是游戏达人\"
+        },
+        {
+            \"role\": \"user\",
+            \"content\": \"你是谁？\"
+        }
+    ],
+    \"stream\": true
+}"
+```
+
