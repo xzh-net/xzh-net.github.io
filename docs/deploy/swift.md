@@ -1,6 +1,6 @@
-# ms-swift 4.0.1
+# SWIFT 4.0.1
 
-ms-swift 是一个由阿里云 ModelScope（魔搭）社区开发的一站式大模型与多模态大模型训练及部署框架。它的目标就是让开发者能更轻松、更高效地完成大模型从训练到上线的全流程工作
+ms-swift 是魔搭社区提供的大模型与多模态大模型微调部署框架，它的目标就是让开发者能更轻松、更高效地完成大模型从训练到上线的全流程工作。
 
 - 官方网站：https://swift.readthedocs.io/zh-cn/latest/
 - 快速开始：https://www.modelscope.cn/docs/llm-training-and-inference/intro/quickstart
@@ -452,42 +452,3 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /workspace/model/Qw
   --enable-auto-tool-choice \
   --tool-call-parser qwen3_coder
 ```
-
-## 3. 量化
-
-AutoAWQ 已正式弃用，将不再维护。AutoAWQ 已被 vLLM 项目采纳：https://github.com/vllm-project/llm-compressor
-
-### 3.1 环境安装
-
-创建环境
-```bash
-conda create -n llm-compress python=3.12 -y
-```
-
-激活环境
-```bash
-conda activate llm-compress
-```
-
-安装llmcompressor
-```bash
-pip install llmcompressor -i https://mirrors.aliyun.com/pypi/simple/
-```
-
-退出环境（可选）
-```bash
-conda deactivate
-```
-
-删除环境（可选）
-```bash
-conda env remove --name llm-compress -y
-```
-
-### 3.2 快速开始
-
-```bash
-vi qwen3_coder_moe_example.py
-```
-
-`
