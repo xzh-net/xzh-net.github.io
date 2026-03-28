@@ -144,6 +144,10 @@ swift export \
 启动模型
 
 ```bash
+pip install vllm -i https://mirrors.aliyun.com/pypi/simple/
+```
+
+```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/model/Qwen3-4B-Instruct-2507-xiaohuang \
   --port 8000 \
   --trust-remote-code \
