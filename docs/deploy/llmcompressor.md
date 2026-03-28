@@ -105,7 +105,11 @@ def get_calib_dataset(tokenizer):
 
 
 if __name__ == "__main__":
-    model = AutoModelForCausalLM.from_pretrained(MODEL_ID, dtype="auto")
+    model = AutoModelForCausalLM.from_pretrained(
+        MODEL_ID,
+        torch_dtype="auto",
+        device_map="balanced"    # 启用双卡
+    )
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 
     ###
@@ -142,41 +146,25 @@ if __name__ == "__main__":
 python Qwen3-4B-Instruct-2507-W4A16-awq.py
 ```
 
-执行完成后，会看到如下信息，已生成新的检查点。
+执行完成后，在当前路径下生成量化后文件夹，Qwen3-4B-Instruct-2507 原大小 `7.6G` 已经量化为 `3.3G`。
 
 ```lua
-2026-03-27T11:05:35.354777+0800 | get_model_compressor | INFO - skip_sparsity_compression_stats set to True. Skipping sparsity compression statistic calculations. No sparsity compressor will be applied.
-Compressing model: 252it [00:17, 14.07it/s]
+2026-03-28T13:26:36.220033+0800 | get_model_compressor | INFO - skip_sparsity_compression_stats set to True. Skipping sparsity compression statistic calculations. No sparsity compressor will be applied.
+Compressing model: 252it [00:18, 13.99it/s]
 /root/miniconda3/envs/llm-compress/lib/python3.12/site-packages/transformers/modeling_utils.py:3970: UserWarning: Attempting to save a model with offloaded modules. Ensure that unallocated cpu memory exceeds the `shard_size` (5GB default)
   warnings.warn(
-Saving checkpoint shards: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:07<00:00,  7.75s/it]
-```
-
-在当前路径下生成量化后文件夹
-
-```lua
+Saving checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:07<00:00,  7.96s/it]
+(llm-compress) root@ai185:/data/code# 
+(llm-compress) root@ai185:/data/code# ll
 总计 16
-drwxr-xr-x 3 root root 4096  3月 27 11:05 ./
-drwxr-xr-x 5 root root 4096  3月 27 10:55 ../
-drwxr-xr-x 2 root root 4096  3月 27 11:06 Qwen3-4B-Instruct-2507-W4A16-awq/
--rw-r--r-- 1 root root 2585  3月 27 10:57 Qwen3-4B-Instruct-2507-W4A16-awq.py
-(llm-compress) root@root:/data/code# cd Qwen3-4B-Instruct-2507-W4A16-awq/
-(llm-compress) root@root:/data/code/Qwen3-4B-Instruct-2507-W4A16-awq# ll
-总计 3364916
-drwxr-xr-x 2 root root       4096  3月 27 11:06 ./
-drwxr-xr-x 3 root root       4096  3月 27 11:05 ../
--rw-r--r-- 1 root root        707  3月 27 11:06 added_tokens.json
--rw-r--r-- 1 root root       2630  3月 27 11:06 chat_template.jinja
--rw-r--r-- 1 root root       2480  3月 27 11:06 config.json
--rw-r--r-- 1 root root        213  3月 27 11:05 generation_config.json
--rw-r--r-- 1 root root    1671853  3月 27 11:06 merges.txt
--rw-r--r-- 1 root root 3429751984  3月 27 11:06 model.safetensors
--rw-r--r-- 1 root root        804  3月 27 11:06 recipe.yaml
--rw-r--r-- 1 root root        613  3月 27 11:06 special_tokens_map.json
--rw-r--r-- 1 root root       5405  3月 27 11:06 tokenizer_config.json
--rw-r--r-- 1 root root   11422654  3月 27 11:06 tokenizer.json
--rw-r--r-- 1 root root    2776833  3月 27 11:06 vocab.json
-(llm-compress) root@root:/data/code/Qwen3-4B-Instruct-2507-W4A16-awq# 
+drwxr-xr-x 3 root root 4096  3月 28 13:26 ./
+drwxr-xr-x 6 root root 4096  3月 28 11:22 ../
+drwxr-xr-x 2 root root 4096  3月 28 13:27 Qwen3-4B-Instruct-2507-W4A16-awq/
+-rw-r--r-- 1 root root 2662  3月 28 13:20 Qwen3-4B-Instruct-2507-W4A16-awq.py
+(llm-compress) root@ai185:/data/code# du -sh *
+3.3G	Qwen3-4B-Instruct-2507-W4A16-awq
+4.0K	Qwen3-4B-Instruct-2507-W4A16-awq.py
+(llm-compress) root@ai185:/data/code# 
 ```
 
 !> 注意：脚本中模型 ID 本地不存在的时候，默认会去 Hugging Face Hub 下载，一种方式使用 ModelScope 下载后，将模型 ID 修改成本地绝对路径，另外一种方式使用全局变量 `HF_ENDPOINT` 替换成国内镜像站。DATASET_ID 也是同样的问题。
