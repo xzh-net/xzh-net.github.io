@@ -105,7 +105,7 @@ NIC Legend:
 国内环境推荐使用魔塔社区下载，安装ModelScope
 
 ```bash
-pip install modelscope>=1.18.1
+pip install modelscope -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
 下载完整模型库
