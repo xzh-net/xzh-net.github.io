@@ -43,6 +43,9 @@ conda env remove --name llm-compress -y
 - W4：模型的权重（Weights）被量化为 4 位整数（通常使用 INT4 格式）。
 - A16：激活值（Activations）在计算时保持为 16 位浮点数（如 FP16 或 BF16）。
 
+
+创建量化脚本
+
 ```bash
 vi Qwen3-4B-Instruct-2507-W4A16-awq.py
 ```
@@ -175,6 +178,14 @@ drwxr-xr-x 2 root root 4096  3月 28 13:27 Qwen3-4B-Instruct-2507-W4A16-awq/
 
 #### 1.3.1 使用 modelscope 推理
 
+安装 modelscope
+
+```bash
+pip install modelscope -i https://mirrors.aliyun.com/pypi/simple/
+```
+
+创建推理脚本
+
 ```bash
 vi Qwen3-4B-Instruct-2507-By-MS.py
 ```
@@ -216,11 +227,15 @@ content = tokenizer.decode(output_ids, skip_special_tokens=True)
 print("content:", content)
 ```
 
+执行脚本
+
 ```bash
 python Qwen3-4B-Instruct-2507-By-MS.py
 ```
 
 #### 1.3.2 使用 transformers 推理
+
+创建推理脚本
 
 ```bash
 vi Qwen3-4B-Instruct-2507-By-TF.py
@@ -241,6 +256,8 @@ inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
 output = model.generate(**inputs, max_new_tokens=150)
 print(tokenizer.decode(output[0]))
 ```
+
+执行脚本
 
 ```bash
 python Qwen3-4B-Instruct-2507-By-TF.py
