@@ -21,7 +21,7 @@ conda activate vllm-dev
 
 安装vllm
 ```bash
-pip install vllm
+pip install vllm -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
 退出环境（可选）
