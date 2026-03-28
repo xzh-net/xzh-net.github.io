@@ -271,6 +271,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/code/Qwen3-4B
   --served-model-name Qwen3-4B-Instruct-2507-W4A16-awq \
   --port 8000 \
   --dtype float16 \
+  --tensor-parallel-size 2 \
   --trust-remote-code \
   --max-model-len 8192
 ```
