@@ -265,12 +265,14 @@ python Qwen3-4B-Instruct-2507-By-TF.py
 
 #### 1.3.3 使用 vLLM CLI 推理
 
-安装vllm
+安装 vllm
+
 ```bash
-pip install vllm
+pip install vllm -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
 启动推理
+
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/code/Qwen3-4B-Instruct-2507-W4A16-awq \
   --served-model-name Qwen3-4B-Instruct-2507-W4A16-awq \
