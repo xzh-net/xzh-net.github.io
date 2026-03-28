@@ -205,7 +205,7 @@ MAX_JOBS=8 pip install "flash-attn==2.8.3" --no-build-isolation
 docker run --gpus all -dit \
   -p 8000:8000 \
   -v /data/megatron:/workspace \
-  --name swift_train \
+  --name swift_dev \
   modelscope-registry.cn-hangzhou.cr.aliyuncs.com/modelscope-repo/modelscope:ubuntu22.04-cuda12.8.1-py311-torch2.10.0-vllm0.17.0-modelscope1.34.0-swift4.0.1
 ```
 
@@ -218,7 +218,7 @@ Hugging Face Transformers 提供了海量的预训练模型和简洁的API，是
 #### 2.2.1 HF转换Mcore
 
 ```bash
-docker exec -it swift_train /bin/bash
+docker exec -it swift_dev /bin/bash
 cd /workspace
 ```
 
@@ -338,7 +338,7 @@ megatron export \
 #### 2.4.1 训练
 
 ```bash
-docker exec -it swift_train /bin/bash
+docker exec -it swift_dev /bin/bash
 cd /workspace
 ```
 
