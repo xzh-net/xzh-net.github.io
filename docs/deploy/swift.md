@@ -52,7 +52,9 @@ conda activate swift-dev
 
 安装swift
 ```bash
-pip install ms-swift==4.0.1 -U -i https://mirrors.aliyun.com/pypi/simple/
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+pip install ms-swift==4.0.1 -U
 ```
 
 
@@ -69,7 +71,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 pip uninstall torch torchvision torchaudio -y
 
 # 以当前版 CUDA 12.8 为例
-pip install torch==2.10.0 -i https://mirrors.aliyun.com/pypi/simple/
+pip install torch==2.10.0
 ```
 
 退出环境（可选）
@@ -144,7 +146,7 @@ swift export \
 启动模型
 
 ```bash
-pip install vllm -i https://mirrors.aliyun.com/pypi/simple/
+pip install vllm
 ```
 
 ```bash
