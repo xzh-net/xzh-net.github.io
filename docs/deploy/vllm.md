@@ -21,7 +21,9 @@ conda activate vllm-dev
 
 安装vllm
 ```bash
-pip install vllm -i https://mirrors.aliyun.com/pypi/simple/
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+pip install vllm
 ```
 
 退出环境（可选）
@@ -105,7 +107,7 @@ NIC Legend:
 国内环境推荐使用魔塔社区下载，安装ModelScope
 
 ```bash
-pip install modelscope -i https://mirrors.aliyun.com/pypi/simple/
+pip install modelscope
 ```
 
 下载完整模型库
@@ -247,3 +249,250 @@ curl -X POST http://172.17.16.185:8002/v1/rerank \
     ]
 }"
 ```
+
+
+## 2. 常用模型
+
+### 2.1 语音识别
+
+#### 2.1.1 Qwen/Qwen3-ASR-1.7B
+
+中文开源模型中的"天花板"，尤其适合有粤语、上海话、四川话等方言需求，或中英文混合的客服、会议场景。
+
+仓库地址：https://github.com/QwenLM/Qwen3-ASR
+
+环境设置
+```bash
+conda create -n qwen3-asr python=3.12 -y
+conda activate qwen3-asr
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install -U qwen-asr[vllm]
+pip install -U flash-attn --no-build-isolation
+
+# 退出
+conda deactivate
+conda env remove --name qwen3-asr -y
+```
+
+下载模型
+
+```bash
+# 从魔塔社区下载
+pip install -U modelscope
+modelscope download --model Qwen/Qwen3-ASR-1.7B  --local_dir ./Qwen3-ASR-1.7B
+modelscope download --model Qwen/Qwen3-ASR-0.6B --local_dir ./Qwen3-ASR-0.6B
+modelscope download --model Qwen/Qwen3-ForcedAligner-0.6B --local_dir ./Qwen3-ForcedAligner-0.6B
+# 从 Hugging Face 下载
+pip install -U "huggingface_hub[cli]"
+huggingface-cli download Qwen/Qwen3-ASR-1.7B --local-dir ./Qwen3-ASR-1.7B
+huggingface-cli download Qwen/Qwen3-ASR-0.6B --local-dir ./Qwen3-ASR-0.6B
+huggingface-cli download Qwen/Qwen3-ForcedAligner-0.6B --local-dir ./Qwen3-ForcedAligner-0.6B
+```
+
+
+一个简单示例在 `Transformations` 后端上运行（huggingface）
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
+import torch
+from qwen_asr import Qwen3ASRModel
+
+model = Qwen3ASRModel.from_pretrained(
+    "Qwen/Qwen3-ASR-1.7B",
+    dtype=torch.bfloat16,
+    device_map="auto",
+    # attn_implementation="flash_attention_2",
+    max_inference_batch_size=32, # Batch size limit for inference. -1 means unlimited. Smaller values can help avoid OOM.
+    max_new_tokens=256, # Maximum number of tokens to generate. Set a larger value for long audio input.
+)
+
+results = model.transcribe(
+    audio="https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav",
+    language=None, # set "English" to force the language
+)
+
+print(results[0].language)
+print(results[0].text)
+```
+
+如果要返回时间戳，请传递 forced_aligner 其初始化参数，以下是带有时间戳输出示例在 `vllm` 后端上运行（huggingface）
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
+import torch
+from qwen_asr import Qwen3ASRModel
+
+if __name__ == '__main__':
+    model = Qwen3ASRModel.LLM(
+        model="Qwen/Qwen3-ASR-1.7B",
+        gpu_memory_utilization=0.7,
+        max_inference_batch_size=128, # Batch size limit for inference. -1 means unlimited. Smaller values can help avoid OOM.
+        max_new_tokens=4096, # Maximum number of tokens to generate. Set a larger value for long audio input.
+        forced_aligner="Qwen/Qwen3-ForcedAligner-0.6B",
+        forced_aligner_kwargs=dict(
+            dtype=torch.bfloat16,
+            device_map="cuda:0",
+            # attn_implementation="flash_attention_2",
+        ),
+    )
+
+    results = model.transcribe(
+        audio=[
+        "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav",
+        "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_en.wav",
+        ],
+        language=["Chinese", "English"], # can also be set to None for automatic language detection
+        return_time_stamps=True,
+    )
+
+    for r in results:
+        print(r.language, r.text, r.time_stamps[0])
+```
+
+API 启动
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 qwen-asr-serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B --gpu-memory-utilization 0.8 --host 0.0.0.0 --port 8000 --tensor-parallel-size 2 
+```
+
+通过以下方式向服务器发送请求
+
+```python
+import requests
+
+url = "http://localhost:8000/v1/chat/completions"
+headers = {"Content-Type": "application/json"}
+
+data = {
+    "messages": [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "audio_url",
+                    "audio_url": {
+                        "url": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav"
+                    },
+                }
+            ],
+        }
+    ]
+}
+
+response = requests.post(url, headers=headers, json=data, timeout=300)
+response.raise_for_status()
+content = response.json()['choices'][0]['message']['content']
+print(content)
+
+# parse ASR output if you want
+from qwen_asr import parse_asr_output
+language, text = parse_asr_output(content)
+print(language)
+print(text)
+```
+
+启动本地 Web UI
+
+```bash
+# Transformers backend
+qwen-asr-demo \
+  --asr-checkpoint Qwen/Qwen3-ASR-1.7B \
+  --backend transformers \
+  --cuda-visible-devices 0 \
+  --ip 0.0.0.0 --port 8000
+
+# Transformers backend + Forced Aligner (enable timestamps)
+qwen-asr-demo \
+  --asr-checkpoint Qwen/Qwen3-ASR-1.7B \
+  --aligner-checkpoint Qwen/Qwen3-ForcedAligner-0.6B \
+  --backend transformers \
+  --cuda-visible-devices 0 \
+  --backend-kwargs '{"device_map":"cuda:0","dtype":"bfloat16","max_inference_batch_size":8,"max_new_tokens":256}' \
+  --aligner-kwargs '{"device_map":"cuda:0","dtype":"bfloat16"}' \
+  --ip 0.0.0.0 --port 8000
+
+# vLLM backend + Forced Aligner (enable timestamps)
+qwen-asr-demo \
+  --asr-checkpoint Qwen/Qwen3-ASR-1.7B \
+  --aligner-checkpoint Qwen/Qwen3-ForcedAligner-0.6B \
+  --backend vllm \
+  --cuda-visible-devices 0 \
+  --backend-kwargs '{"gpu_memory_utilization":0.7,"max_inference_batch_size":8,"max_new_tokens":2048}' \
+  --aligner-kwargs '{"device_map":"cuda:0","dtype":"bfloat16"}' \
+  --ip 0.0.0.0 --port 8000
+```
+
+流媒体演示
+
+```bash
+qwen-asr-demo-streaming \
+  --asr-model-path Qwen/Qwen3-ASR-1.7B \
+  --gpu-memory-utilization 0.9 \
+  --host 0.0.0.0 \
+  --port 8000
+```
+
+访问地址：http://172.17.16.185:8000
+
+vllm 部署
+
+```bash
+conda create -n qwen3-asr-dev python=3.12 -y
+conda activate qwen3-asr-dev
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install -U vllm
+pip install "vllm[audio]"
+pip install modelscope
+
+# 退出
+conda deactivate
+conda env remove --name wen3-asr-dev -y
+
+# 启动服务
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B \
+  --port 8000 \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.6 \
+  --tensor-parallel-size 2 
+```
+
+客户端测试
+
+```bash
+curl http://172.17.16.185:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+    "messages": [
+    {"role": "user", "content": [
+        {"type": "audio_url", "audio_url": {"url": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav"}}
+    ]}
+    ]
+    }'
+```
+
+
+#### 2.2.2 FunAudioLLM/Fun-ASR-Nano-2512
+
+流式识别延迟极低，非常适合实时字幕、智能语音助手、现场直播等场景。
+
+如果是特别垂直行业（如医疗、金融）也适用，它基于上亿小时行业数据训练，配合超1000个自定义热词，能极大提升专业术语的识别率，在保险、家装等行业实测准确率提升超15%。
+
+#### 2.1.3 openai/whisper-large-v3
+
+支持的语言数量最多（99种），虽然在中文上不够极致，但对于非中文为主的多语言混合场景，目前仍是首选。
