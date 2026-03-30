@@ -294,7 +294,7 @@ huggingface-cli download Qwen/Qwen3-ForcedAligner-0.6B --local-dir ./Qwen3-Force
 ```
 
 
-一个简单示例在 `Transformations` 后端上运行（huggingface）
+使用 Qwen3ASRModel 基于 `Hugging Face transformers` 库的标准加载方式，快速测试
 
 ```python
 import os
@@ -323,7 +323,7 @@ print(results[0].language)
 print(results[0].text)
 ```
 
-如果要返回时间戳，请传递 forced_aligner 其初始化参数，以下是带有时间戳输出示例在 `vllm` 后端上运行（huggingface）
+使用 Qwen3ASRModel 基于 `vllm` 库的高性能推理接口，适用于生产环境部署。如果要返回时间戳，请传递 `forced_aligner` 其初始化参数，以下是带有时间戳输出示例。
 
 ```python
 import os
@@ -337,6 +337,7 @@ from qwen_asr import Qwen3ASRModel
 if __name__ == '__main__':
     model = Qwen3ASRModel.LLM(
         model="Qwen/Qwen3-ASR-1.7B",
+        tensor_parallel_size=2,
         gpu_memory_utilization=0.7,
         max_inference_batch_size=128, # Batch size limit for inference. -1 means unlimited. Smaller values can help avoid OOM.
         max_new_tokens=4096, # Maximum number of tokens to generate. Set a larger value for long audio input.
@@ -361,7 +362,10 @@ if __name__ == '__main__':
         print(r.language, r.text, r.time_stamps[0])
 ```
 
-API 启动
+!> 跨模型张量并行设计缺陷：主模型的计算分布在 GPU 0 和 GPU 1 上，当主模型在对齐阶段把处理结果（output_id）传给对齐模型时，这个张量可能恰好在 GPU 1 上。对齐模型内部为了做计算，又从主模型的原始输入（input_id）里取了数据，但这个数据可能还留在 GPU 0（或者CPU）上。这两个张量不在一个设备上，索引操作失败。
+
+
+通过 `qwen-asr-serve` 启动，该命令是对 `vllm serve` 的封装
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 qwen-asr-serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B --gpu-memory-utilization 0.8 --host 0.0.0.0 --port 8000 --tensor-parallel-size 2 
@@ -403,7 +407,9 @@ print(language)
 print(text)
 ```
 
-启动本地 Web UI
+启动本地 Web UI 演示，可替换本地仓库
+- `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B`
+- `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ForcedAligner-0___6B`
 
 ```bash
 # Transformers backend
@@ -434,6 +440,29 @@ qwen-asr-demo \
   --ip 0.0.0.0 --port 8000
 ```
 
+访问 http://172.17.16.185:8000  测试中出现浏览器麦克风权限问题，建议/必须通过 HTTPS 运行，生成私钥和自签名证书（有效期为 365 天）
+
+```bash
+openssl req -x509 -newkey rsa:2048 \
+  -keyout key.pem -out cert.pem \
+  -days 365 -nodes \
+  -subj "/CN=172.17.16.185" \
+  -addext "subjectAltName = IP:172.17.16.185"
+```
+
+以 HTTPS 运行演示，访问 https://172.17.16.185:8000/
+
+```bash
+qwen-asr-demo \
+  --asr-checkpoint Qwen/Qwen3-ASR-1.7B \
+  --backend transformers \
+  --cuda-visible-devices 0 \
+  --ip 0.0.0.0 --port 8000 \
+  --ssl-certfile cert.pem \
+  --ssl-keyfile key.pem \
+  --no-ssl-verify
+```
+
 流媒体演示
 
 ```bash
@@ -443,8 +472,6 @@ qwen-asr-demo-streaming \
   --host 0.0.0.0 \
   --port 8000
 ```
-
-访问地址：http://172.17.16.185:8000
 
 vllm 部署
 
@@ -475,15 +502,23 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B
 客户端测试
 
 ```bash
-curl http://172.17.16.185:8000/v1/chat/completions \
-    -H "Content-Type: application/json" \
-    -d '{
-    "messages": [
-    {"role": "user", "content": [
-        {"type": "audio_url", "audio_url": {"url": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav"}}
-    ]}
+curl -X POST http://172.17.16.185:8000/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d "{
+    \"messages\": [
+        {
+            \"role\": \"user\",
+            \"content\": [
+                {
+                    \"type\": \"audio_url\",
+                    \"audio_url\": {
+                        \"url\": \"https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav\"
+                    }
+                }
+            ]
+        }
     ]
-    }'
+}"
 ```
 
 
