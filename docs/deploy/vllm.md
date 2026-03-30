@@ -253,15 +253,15 @@ curl -X POST http://172.17.16.185:8002/v1/rerank \
 
 ## 2. 常用模型
 
-### 2.1 语音识别
 
-#### 2.1.1 Qwen/Qwen3-ASR-1.7B
+### 2.1 【语音识别】Qwen/Qwen3-ASR-1.7B
 
 中文开源模型中的"天花板"，尤其适合有粤语、上海话、四川话等方言需求，或中英文混合的客服、会议场景。
 
 仓库地址：https://github.com/QwenLM/Qwen3-ASR
 
-环境设置
+#### 2.1.1 环境设置
+
 ```bash
 conda create -n qwen3-asr python=3.12 -y
 conda activate qwen3-asr
@@ -278,7 +278,7 @@ conda deactivate
 conda env remove --name qwen3-asr -y
 ```
 
-下载模型
+#### 2.1.2 下载模型
 
 ```bash
 # 从魔塔社区下载
@@ -294,7 +294,9 @@ huggingface-cli download Qwen/Qwen3-ForcedAligner-0.6B --local-dir ./Qwen3-Force
 ```
 
 
-使用 Qwen3ASRModel 基于 `Hugging Face transformers` 库的标准加载方式，快速测试
+#### 2.1.3 离线推理
+
+1. 使用 Qwen3ASRModel 基于 `Hugging Face transformers` 库的标准加载方式，快速测试
 
 ```python
 import os
@@ -323,7 +325,7 @@ print(results[0].language)
 print(results[0].text)
 ```
 
-使用 Qwen3ASRModel 基于 `vllm` 库的高性能推理接口，适用于生产环境部署。如果要返回时间戳，请传递 `forced_aligner` 其初始化参数，以下是带有时间戳输出示例。
+2. 使用 Qwen3ASRModel 基于 `vllm` 库的高性能推理接口，适用于生产环境部署。如果要返回时间戳，请传递 `forced_aligner` 其初始化参数，以下是带有时间戳输出示例。
 
 ```python
 import os
@@ -364,8 +366,9 @@ if __name__ == '__main__':
 
 !> 跨模型张量并行设计缺陷：主模型的计算分布在 GPU 0 和 GPU 1 上，当主模型在对齐阶段把处理结果（output_id）传给对齐模型时，这个张量可能恰好在 GPU 1 上。对齐模型内部为了做计算，又从主模型的原始输入（input_id）里取了数据，但这个数据可能还留在 GPU 0（或者CPU）上。这两个张量不在一个设备上，索引操作失败。
 
+#### 2.1.4 在线服务
 
-通过 `qwen-asr-serve` 启动，该命令是对 `vllm serve` 的封装
+1. 通过 `qwen-asr-serve` 命令启动 vLLM 服务器，该命令是对 `vllm serve` 的封装
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 qwen-asr-serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B --gpu-memory-utilization 0.8 --host 0.0.0.0 --port 8000 --tensor-parallel-size 2 
@@ -407,7 +410,57 @@ print(language)
 print(text)
 ```
 
-启动本地 Web UI 演示，可替换本地仓库
+2. 使用 vLLM 进行部署
+
+```bash
+conda create -n qwen3-asr-vllm python=3.12 -y
+conda activate qwen3-asr-vllm
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install -U vllm
+pip install "vllm[audio]"
+pip install modelscope
+
+# 退出
+conda deactivate
+conda env remove --name qwen3-asr-vllm -y
+
+# 启动服务
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B \
+  --port 8000 \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.6 \
+  --tensor-parallel-size 2 
+```
+
+客户端测试
+
+```bash
+curl -X POST http://172.17.16.185:8000/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d "{
+    \"messages\": [
+        {
+            \"role\": \"user\",
+            \"content\": [
+                {
+                    \"type\": \"audio_url\",
+                    \"audio_url\": {
+                        \"url\": \"https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav\"
+                    }
+                }
+            ]
+        }
+    ]
+}"
+```
+
+#### 2.1.5 Web UI 演示
+
+三个不同使用场景，本地启动需要替换本地仓库路径，否则默认去`Hugging Face`下载
 - `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B`
 - `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ForcedAligner-0___6B`
 
@@ -450,7 +503,7 @@ openssl req -x509 -newkey rsa:2048 \
   -addext "subjectAltName = IP:172.17.16.185"
 ```
 
-以 HTTPS 运行演示，访问 https://172.17.16.185:8000/
+以 HTTPS 运行后可以正常使用麦克风，访问 https://172.17.16.185:8000/
 
 ```bash
 qwen-asr-demo \
@@ -463,9 +516,10 @@ qwen-asr-demo \
   --no-ssl-verify
 ```
 
-流媒体演示
+流式转录演示，因为 `qwen-asr-demo-streaming` 不提供 HTTPS 参数，运行后依然存在无法唤起麦克风权限问题。解决办法：使用 Nginx 代理，将所有请求转发到目标机器
 
 ```bash
+# 流式转录
 qwen-asr-demo-streaming \
   --asr-model-path Qwen/Qwen3-ASR-1.7B \
   --gpu-memory-utilization 0.9 \
@@ -473,61 +527,63 @@ qwen-asr-demo-streaming \
   --port 8000
 ```
 
-vllm 部署
+转发代理配置参考
 
-```bash
-conda create -n qwen3-asr-dev python=3.12 -y
-conda activate qwen3-asr-dev
+```conf
+server {
+    listen 443 ssl;
+    server_name _;
 
-# 设置全局仓库
-pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+    ssl_certificate      server.crt;
+    ssl_certificate_key  server.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
 
-# 安装依赖
-pip install -U vllm
-pip install "vllm[audio]"
-pip install modelscope
+    # 关键部分：反向代理所有请求到您的后端 ASR 服务
+    # 将 "http://localhost:8000" 替换为您实际运行 ASR 服务的地址和端口
+    location / {
+        proxy_pass http://172.17.16.185:8000;
+        proxy_http_version 1.1;
 
-# 退出
-conda deactivate
-conda env remove --name wen3-asr-dev -y
+        # 传递原始 Host 头
+        proxy_set_header Host $host;
+        # 传递原始客户端 IP 地址
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
-# 启动服务
-CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B \
-  --port 8000 \
-  --trust-remote-code \
-  --gpu-memory-utilization 0.6 \
-  --tensor-parallel-size 2 
+        # WebSocket 支持（如果您的 ASR 流式 API 使用了 WebSocket）
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # 如果您的 ASR 服务响应时间较长，增加超时时间
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+}
+
+# （可选但推荐）将 HTTP 请求重定向到 HTTPS
+server {
+    listen 80;
+    server_name _;
+    return 301 https://$server_name$request_uri;
+}
 ```
 
-客户端测试
-
-```bash
-curl -X POST http://172.17.16.185:8000/v1/chat/completions \
--H "Content-Type: application/json" \
--d "{
-    \"messages\": [
-        {
-            \"role\": \"user\",
-            \"content\": [
-                {
-                    \"type\": \"audio_url\",
-                    \"audio_url\": {
-                        \"url\": \"https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav\"
-                    }
-                }
-            ]
-        }
-    ]
-}"
-```
+启动 Nginx 以后由原来直接访问 ASR 服务器地址变成访问 Nginx 服务器地址，并使用 HTTPS
 
 
-#### 2.2.2 FunAudioLLM/Fun-ASR-Nano-2512
+
+
+
+### 2.2 【语音识别】FunAudioLLM/Fun-ASR-Nano-2512
 
 流式识别延迟极低，非常适合实时字幕、智能语音助手、现场直播等场景。
 
 如果是特别垂直行业（如医疗、金融）也适用，它基于上亿小时行业数据训练，配合超1000个自定义热词，能极大提升专业术语的识别率，在保险、家装等行业实测准确率提升超15%。
 
-#### 2.1.3 openai/whisper-large-v3
+### 2.3 【语音识别】openai/whisper-large-v3
 
 支持的语言数量最多（99种），虽然在中文上不够极致，但对于非中文为主的多语言混合场景，目前仍是首选。
