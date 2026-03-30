@@ -22,7 +22,9 @@ conda activate llm-compress
 
 安装llmcompressor
 ```bash
-pip install llmcompressor -i https://mirrors.aliyun.com/pypi/simple/
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+pip install llmcompressor
 ```
 
 退出环境（可选）
@@ -181,7 +183,7 @@ drwxr-xr-x 2 root root 4096  3月 28 13:27 Qwen3-4B-Instruct-2507-W4A16-awq/
 安装 modelscope
 
 ```bash
-pip install modelscope -i https://mirrors.aliyun.com/pypi/simple/
+pip install modelscope
 ```
 
 创建推理脚本
