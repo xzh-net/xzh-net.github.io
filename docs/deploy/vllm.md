@@ -540,7 +540,6 @@ server {
     ssl_prefer_server_ciphers off;
 
     # 关键部分：反向代理所有请求到您的后端 ASR 服务
-    # 将 "http://localhost:8000" 替换为您实际运行 ASR 服务的地址和端口
     location / {
         proxy_pass http://172.17.16.185:8000;
         proxy_http_version 1.1;
@@ -574,8 +573,24 @@ server {
 启动 Nginx 以后由原来直接访问 ASR 服务器地址变成访问 Nginx 服务器地址，并使用 HTTPS
 
 
+#### 2.1.6 Docker 
 
+拉取镜像并启动容器
 
+```bash
+docker run --gpus all --name qwen3-asr \
+    -v /var/run/docker.sock:/var/run/docker.sock -p 8000:8000 \
+    --mount type=bind,source=/data/workspace,target=/data/shared/Qwen3-ASR \
+    --shm-size=4gb \
+    -it qwenllm/qwen3-asr:latest
+```
+
+```bash
+docker start qwen3-asr
+docker exec -it qwen3-asr bash
+# 彻底删除容器
+docker rm -f qwen3-asr
+```
 
 ### 2.2 【语音识别】FunAudioLLM/Fun-ASR-Nano-2512
 
