@@ -420,7 +420,6 @@ conda activate qwen3-asr-vllm
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install -U vllm
 pip install "vllm[audio]"
 pip install modelscope
 
@@ -429,11 +428,11 @@ conda deactivate
 conda env remove --name qwen3-asr-vllm -y
 
 # 启动服务
-CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B \
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B \
   --port 8000 \
   --trust-remote-code \
   --gpu-memory-utilization 0.6 \
-  --tensor-parallel-size 2 
+  --tensor-parallel-size 2  
 ```
 
 客户端测试
