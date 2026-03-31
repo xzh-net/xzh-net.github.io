@@ -56,6 +56,7 @@
   - [OpenAI](deploy/openai)
   - [Ollama](deploy/ollama)
   - [vLLM](deploy/vllm)
+  - [模型库](deploy/model)
   - [SWIFT](deploy/swift)
   - [LLM Compressor](deploy/llmcompressor)
   - [Dify](deploy/dify)
