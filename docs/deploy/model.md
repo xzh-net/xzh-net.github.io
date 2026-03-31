@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
 !> 跨模型张量并行设计缺陷：主模型的计算分布在 GPU 0 和 GPU 1 上，当主模型在对齐阶段把处理结果（output_id）传给对齐模型时，这个张量可能恰好在 GPU 1 上。对齐模型内部为了做计算，又从主模型的原始输入（input_id）里取了数据，但这个数据可能还留在 GPU 0（或者CPU）上。这两个张量不在一个设备上，索引操作失败。
 
-##### 2.1.1.4 在线服务
+##### 2.1.1.4 在线推理
 
 1. 通过 `qwen-asr-serve` 命令启动 vLLM 服务器，该命令是对 `vllm serve` 的封装
 
@@ -177,7 +177,7 @@ conda activate qwen3-asr-vllm
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install "vllm[audio]"
+pip install vllm[audio]
 pip install modelscope
 
 # 退出
@@ -353,11 +353,90 @@ docker rm -f qwen3-asr
 
 Fun-ASR-Nano-2512 支持低延迟实时转写，适用于实时字幕、智能语音助手、现场直播等对延迟敏感的场景。在教育、金融等垂直领域表现出色，能够精准识别专业术语与行业表达，有效应对大模型常见的"幻觉"生成和语种混淆等挑战。可通过自定义热词列表进一步提升专业术语的识别率，缓解语言混淆问题。
 
+仓库地址：https://github.com/modelscope/FunASR
+
+##### 2.1.2.1 离线文件转写服务
+
+服务器配置
+- 配置1: （X86，计算型），4核vCPU，内存8G，单机可以支持大约32路的请求
+- 配置2: （X86，计算型），16核vCPU，内存32G，单机可以支持大约64路的请求
+- 配置3: （X86，计算型），64核vCPU，内存128G，单机可以支持大约200路的请求
+
+
+镜像启动
+```bash
+sudo docker pull \
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.7
+mkdir -p /data/funasr-runtime-resources/models
+sudo docker run -p 10095:10095 -it --privileged=true \
+  -v /data/funasr-runtime-resources/models:/workspace/models \
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.7
+```
+
+
+##### 2.1.2.2 离线文件转写服务GPU版
+
+
+##### 2.1.2.3 实时语音听写服务
 
 #### 2.1.3 openai/whisper-large-v3
 
 支持的语言数量最多（99种），虽然在中文上不够极致，但对于非中文为主的多语言混合场景，目前仍是首选。
 
+##### 2.1.3.1 环境设置
+
+```bash
+conda create -n whisper-large python=3.12 -y
+conda activate whisper-large
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install vllm
+pip install vllm[audio]
+
+# 退出
+conda deactivate
+conda env remove --name whisper-large -y
+```
+
+##### 2.1.3.2 在线推理
+
+启动服务
+
+```bash
+# 设置环境变量，使用HF镜像站加速下载
+export HF_ENDPOINT=https://hf-mirror.com
+# 然后再启动服务
+CUDA_VISIBLE_DEVICES=0,1 vllm serve openai/whisper-large-v3 --dtype float16 --tensor-parallel-size 2
+```
+
+客户端测试
+
+```python
+from openai import OpenAI
+
+# 连接到本地 vLLM 服务
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="empty"  # 占位，vLLM 服务不需要真实密钥
+)
+
+# 指定音频文件路径
+audio_file_path = "test.wav"
+
+# 发送转录请求
+with open(audio_file_path, "rb") as audio_file:
+    response = client.audio.transcriptions.create(
+        model="openai/whisper-large-v3",  # 模型名称需与启动时一致
+        file=audio_file,
+        response_format="text"  # 直接返回文本，也可选择 "json"
+    )
+
+# 打印识别的文本
+print(response)
+```
 
 ## 3. 计算机视觉
 
