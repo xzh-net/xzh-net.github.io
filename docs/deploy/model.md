@@ -127,16 +127,22 @@ if __name__ == '__main__':
 
 1. 通过 `qwen-asr-serve` 命令启动 vLLM 服务器，该命令是对 `vllm serve` 的封装
 
+启动服务
+
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 qwen-asr-serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B --gpu-memory-utilization 0.8 --host 0.0.0.0 --port 8000 --tensor-parallel-size 2 
 ```
 
-通过以下方式向服务器发送请求
+客户端测试
+
+```bash
+pip install requests
+```
 
 ```python
 import requests
 
-url = "http://localhost:8000/v1/chat/completions"
+url = "http://172.17.16.185:8000/v1/chat/completions"
 headers = {"Content-Type": "application/json"}
 
 data = {
@@ -159,15 +165,11 @@ response = requests.post(url, headers=headers, json=data, timeout=300)
 response.raise_for_status()
 content = response.json()['choices'][0]['message']['content']
 print(content)
-
-# parse ASR output if you want
-from qwen_asr import parse_asr_output
-language, text = parse_asr_output(content)
-print(language)
-print(text)
 ```
 
 2. 使用 vLLM 进行部署
+
+环境安装
 
 ```bash
 conda create -n qwen3-asr-vllm python=3.12 -y
@@ -182,14 +184,17 @@ pip install modelscope
 
 # 退出
 conda deactivate
-conda env remove --name qwen3-asr-vllm -y
+conda env remove --name qwen3-asr-vllm -y 
+```
 
-# 启动服务
+启动服务
+
+```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B \
   --port 8000 \
   --trust-remote-code \
   --gpu-memory-utilization 0.6 \
-  --tensor-parallel-size 2  
+  --tensor-parallel-size 2 
 ```
 
 客户端测试
@@ -214,7 +219,7 @@ curl -X POST http://172.17.16.185:8000/v1/chat/completions \
 }"
 ```
 
-##### 2.1.1.5 Web Demo
+##### 2.1.1.5 Web UI Demo
 
 三个不同使用场景，本地启动需要替换本地仓库路径，否则默认去`Hugging Face`下载
 - `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B`
@@ -541,7 +546,7 @@ pipe = pipeline(
 gr.Interface.from_pipeline(pipe).launch(server_name="0.0.0.0", server_port=7860)
 ```
 
-访问地址：http://172.17.16.185:7860
+Web UI 地址：http://172.17.16.185:7860
 
 
 2. Gradio 界面，逐条处理音频，并返回时间戳
