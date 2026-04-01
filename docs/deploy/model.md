@@ -504,7 +504,165 @@ with open(audio_file_path, "rb") as audio_file:
 print(response)
 ```
 
-##### 2.1.3.3 Web Demo
+##### 2.1.3.3 离线推理
+
+安装依赖
+
+```bash
+pip install vllm
+```
+
+1. Gradio 界面，对短音频进行快速测试，无需时间戳信息
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+import gradio as gr
+
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+model_id = "openai/whisper-large-v3"
+
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+)
+model.to(device)
+
+processor = AutoProcessor.from_pretrained(model_id)
+
+pipe = pipeline(
+    "automatic-speech-recognition",
+    model=model,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    torch_dtype=torch_dtype,
+    device=device
+)
+
+gr.Interface.from_pipeline(pipe).launch(server_name="0.0.0.0", server_port=7860)
+```
+
+访问地址：http://172.17.16.185:7860
+
+
+2. Gradio 界面，逐条处理音频，并返回时间戳
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+import gradio as gr
+
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+model_id = "openai/whisper-large-v3"
+
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+)
+model.to(device)
+
+processor = AutoProcessor.from_pretrained(model_id)
+
+pipe = pipeline(
+    "automatic-speech-recognition",
+    model=model,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    torch_dtype=torch_dtype,
+    device=device,
+    return_timestamps=True
+)
+
+gr.Interface.from_pipeline(pipe).launch(server_name="0.0.0.0", server_port=7860)
+```
+
+3. Gradio 界面，支持长音频分块处理和批处理，并返回时间戳
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+import gradio as gr
+
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+model_id = "openai/whisper-large-v3"
+
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+)
+model.to(device)
+
+processor = AutoProcessor.from_pretrained(model_id)
+
+pipe = pipeline(
+    "automatic-speech-recognition",
+    model=model,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    torch_dtype=torch_dtype,
+    device=device,
+    return_timestamps=True,
+    chunk_length_s=30,
+    batch_size=16
+)
+
+gr.Interface.from_pipeline(pipe).launch(server_name="0.0.0.0", server_port=7860)
+```
+
+
+4. 不使用 Gradio，用于批量处理本地音频文件并输出结果
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+model_id = "openai/whisper-large-v3"
+
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+)
+model.to(device)
+
+processor = AutoProcessor.from_pretrained(model_id)
+
+pipe = pipeline(
+    "automatic-speech-recognition",
+    model=model,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    torch_dtype=torch_dtype,
+    device=device,
+    return_timestamps=True,
+    chunk_length_s=30
+)
+
+sample = ["output_20.mp3","output_60.mp3"]
+
+result = pipe(sample, batch_size=2)
+print(result)
+```
 
 ## 3. 计算机视觉
 
