@@ -450,6 +450,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10098 --mode offline --au
 
 支持的语言数量最多（99种），虽然在中文上不够极致，但对于非中文为主的多语言混合场景，目前仍是首选。
 
+仓库地址：https://github.com/openai/whisper
+
 ##### 2.1.3.1 环境设置
 
 ```bash
