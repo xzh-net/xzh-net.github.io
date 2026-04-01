@@ -282,6 +282,10 @@ uv run example.py
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 # 执行脚本
 bash Miniconda3-latest-Linux-x86_64.sh
+# 刷新配置
+source ~/.bashrc
+# 首次运行需要接受条款
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 ```
 
 默认环境路径 `/root/miniconda3/envs/`
