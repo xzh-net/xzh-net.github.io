@@ -307,9 +307,13 @@ conda deactivate
 conda env remove --name vllm-dev -y
 ```
 
-## 3. Flask Web
+## 3. 开发框架
 
-### 3.1 Hello World
+### 3.1 Flask Web
+
+Flask 是轻量级 Web 开发框架，让你用灵活代码构建后端服务与自定义前端界面
+
+#### 3.1.1 Hello World
 
 1. 生成requirements.txt
 
@@ -358,7 +362,7 @@ if __name__ == '__main__':
 python main.py
 ```
 
-### 3.2 获取URL参数
+#### 3.1.2 获取URL参数
 
 服务端
 ```python
@@ -392,7 +396,7 @@ print(r.text)
 ```
 
 
-### 3.3 获取POST表单参数
+#### 3.1.3 获取POST表单参数
 
 服务端
 ```python
@@ -427,7 +431,7 @@ print(r.text)
 ```
 
 
-### 3.4 获取JSON参数
+#### 3.1.4 获取JSON参数
 
 服务端
 ```python
@@ -460,7 +464,7 @@ r = requests.post("http://127.0.0.1:5000/add", json=json_data)
 print(r.text)
 ```
 
-### 3.5 上传文件
+#### 3.1.5 上传文件
 
 服务端
 ```python
@@ -507,7 +511,7 @@ r = requests.post("http://127.0.0.1:5000/upload", data=user_info, files=file_dat
 print(r.text)
 ```
 
-### 3.6 Restful URL
+#### 3.1.6 Restful URL
 
 服务端
 ```python
@@ -536,7 +540,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/user/admin
 
-### 3.7 参数类型转换
+#### 3.1.7 参数类型转换
 
 服务端
 ```python
@@ -557,7 +561,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/page/100
 
-### 3.8 自定义路由转换器
+#### 3.1.8 自定义路由转换器
 
 自定义的转换器是一个继承werkzeug.routing.BaseConverter的类，修改to_python和to_url方法即可。to_python方法用于将url中的变量转换后供被`@app.route包装的函数使用`，to_url方法用于flask.url_for`中的参数转换
 
@@ -596,7 +600,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/page/100
 
-### 3.9 url_for生成链接
+#### 3.1.9 url_for生成链接
 
 服务端
 ```python
@@ -630,7 +634,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/test
 
-### 3.10 重定向
+#### 3.1.10 重定向
 
 服务端
 ```python
@@ -658,7 +662,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/test1
 
-### 3.11 Jinja2模板引擎
+#### 3.1.11 Jinja2模板引擎
 
 1. 创建并编辑模板
 
@@ -727,7 +731,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/user
 
-### 3.12 全局异常404
+#### 3.1.12 全局异常404
 
 服务端
 
@@ -754,7 +758,7 @@ if __name__ == '__main__':
 
 访问地址：http://127.0.0.1:5000/user
 
-### 3.13 用户会话
+#### 3.1.13 用户会话
 
 服务端
 
@@ -801,7 +805,7 @@ if __name__ == '__main__':
 访问地址：http://127.0.0.1:5000/login
 
 
-### 3.14 使用Cookie
+#### 3.1.14 使用Cookie
 
 服务端
 ```python
@@ -838,3 +842,100 @@ if __name__ == '__main__':
 
 
 
+### 3.2 Gradio
+
+Gradio 是专为机器学习模型演示而生的工具，让你用极简代码生成前端界面
+
+#### 3.2.1 安装依赖
+
+```bash
+pip install gradio
+```
+
+#### 3.2.2 标准
+
+```python
+import numpy as np
+import gradio as gr
+
+def sepia(input_img):
+    sepia_filter = np.array([
+        [0.393, 0.769, 0.189],
+        [0.349, 0.686, 0.168],
+        [0.272, 0.534, 0.131]
+    ])
+    sepia_img = input_img.dot(sepia_filter.T)
+    sepia_img /= sepia_img.max()
+    return sepia_img
+
+demo = gr.Interface(sepia, gr.Image(), "image", api_name="predict")
+demo.launch(server_name="0.0.0.0", server_port=7860)
+```
+
+#### 3.2.3 仅输出
+
+```python
+import time
+
+import gradio as gr
+
+def fake_gan():
+    time.sleep(1)
+    images = [
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+            "https://images.unsplash.com/photo-1554151228-14d9def656e4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=386&q=80",
+            "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8aHVtYW4lMjBmYWNlfGVufDB8fDB8fA%3D%3D&w=1000&q=80",
+    ]
+    return images
+
+demo = gr.Interface(
+    fn=fake_gan,
+    inputs=None,
+    outputs=gr.Gallery(label="Generated Images", columns=2),
+    title="FD-GAN",
+    description="This is a fake demo of a GAN. In reality, the images are randomly chosen from Unsplash.",
+    api_name="predict",
+)
+
+demo.launch(server_name="0.0.0.0", server_port=7860)
+```
+
+#### 3.2.4 仅输入
+
+```python
+import random
+import string
+import gradio as gr
+
+def save_image_random_name(image):
+    random_string = ''.join(random.choices(string.ascii_letters, k=20)) + '.png'
+    image.save(random_string)
+    print(f"Saved image to {random_string}!")
+
+demo = gr.Interface(
+    fn=save_image_random_name,
+    inputs=gr.Image(type="pil"),
+    outputs=None,
+    api_name="predict",
+)
+demo.launch(server_name="0.0.0.0", server_port=7860)
+```
+
+#### 3.2.5 统一
+
+```python
+import gradio as gr
+from transformers import pipeline
+
+generator = pipeline('text-generation', model = 'gpt2')
+
+def generate_text(text_prompt):
+  response = generator(text_prompt, max_length = 30, num_return_sequences=5)
+  return response[0]['generated_text']  
+
+textbox = gr.Textbox()
+
+demo = gr.Interface(generate_text, textbox, textbox, api_name="predict")
+
+demo.launch(server_name="0.0.0.0", server_port=7860)
+```
