@@ -269,17 +269,29 @@ sudo apt install -f && sudo apt autoremove
 
 ### 2.7 安装常用软件
 
+在线安装
 ```bash
 apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping ntpdate
-
-# 执行一次性同步
+# 执行一次时间同步
 sudo ntpdate ntp4.aliyun.com
-
-# deb安装包
-dpkg -i jenkins_2.426.3_all.deb
-dpkg --list | grep jenkins
-dpkg -r jenkins
 ```
+
+离线下载，默认的下载目录是 `/var/cache/apt/archives/`
+```bash
+sudo apt-get install --download-only -y inetutils-traceroute
+```
+
+拷贝到目标机器手动安装
+```bash
+# 安装
+dpkg -i inetutils-traceroute.deb
+# 查看已安装
+dpkg --list | grep traceroute
+# 卸载
+dpkg -r traceroute
+```
+
+
 
 ### 2.8 设置代理
 
