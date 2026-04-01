@@ -176,9 +176,9 @@ drwxr-xr-x 2 root root 4096  3月 28 13:27 Qwen3-4B-Instruct-2507-W4A16-awq/
 
 #### 1.2.2 激活量化
 
-### 1.3 推理
+### 1.3 离线推理
 
-#### 1.3.1 使用 modelscope 推理
+#### 1.3.1 使用 modelscope
 
 安装 modelscope
 
@@ -235,7 +235,7 @@ print("content:", content)
 python Qwen3-4B-Instruct-2507-By-MS.py
 ```
 
-#### 1.3.2 使用 transformers 推理
+#### 1.3.2 使用 transformers
 
 创建推理脚本
 
@@ -265,7 +265,7 @@ print(tokenizer.decode(output[0]))
 python Qwen3-4B-Instruct-2507-By-TF.py
 ```
 
-#### 1.3.3 使用 vLLM CLI 推理
+### 1.4 在线推理
 
 安装 vllm
 
@@ -273,7 +273,7 @@ python Qwen3-4B-Instruct-2507-By-TF.py
 pip install vllm -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
-启动推理
+启动服务
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/code/Qwen3-4B-Instruct-2507-W4A16-awq \
