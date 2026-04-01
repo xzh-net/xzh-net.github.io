@@ -214,7 +214,7 @@ curl -X POST http://172.17.16.185:8000/v1/chat/completions \
 }"
 ```
 
-##### 2.1.1.5 Web UI 演示
+##### 2.1.1.5 Web Demo
 
 三个不同使用场景，本地启动需要替换本地仓库路径，否则默认去`Hugging Face`下载
 - `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B`
@@ -499,6 +499,8 @@ with open(audio_file_path, "rb") as audio_file:
 # 打印识别的文本
 print(response)
 ```
+
+##### 2.1.3.3 Web Demo
 
 ## 3. 计算机视觉
 
