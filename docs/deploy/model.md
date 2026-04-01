@@ -476,17 +476,21 @@ CUDA_VISIBLE_DEVICES=0,1 vllm serve openai/whisper-large-v3 --dtype float16 --te
 
 客户端测试
 
+```bash
+pip install openai
+```
+
 ```python
 from openai import OpenAI
 
 # 连接到本地 vLLM 服务
 client = OpenAI(
-    base_url="http://localhost:8000/v1",
+    base_url="http://172.17.16.185:8000/v1",
     api_key="empty"  # 占位，vLLM 服务不需要真实密钥
 )
 
 # 指定音频文件路径
-audio_file_path = "test.wav"
+audio_file_path = "test.mp3"
 
 # 发送转录请求
 with open(audio_file_path, "rb") as audio_file:
