@@ -405,15 +405,10 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 
 2. 基于GPU的异步websocket支持多种模式，热词等
 
-创建挂载路径
-
-```bash
-mkdir -p /data/funasr-runtime-resources/models
-```
-
 启动镜像
 
 ```bash
+mkdir -p /data/funasr-runtime-resources/models
 docker run --gpus=all -p 10095:10095 -it --privileged=true \
   -v /data/funasr-runtime-resources/models:/workspace/models \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.1
