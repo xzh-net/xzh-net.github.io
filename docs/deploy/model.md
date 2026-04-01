@@ -509,7 +509,7 @@ with open(audio_file_path, "rb") as audio_file:
 print(response)
 ```
 
-##### 2.1.3.3 离线推理
+##### 2.1.3.3 离线推理（Web UI）
 
 1. Gradio 界面，对短音频进行快速测试，无需时间戳信息
 
