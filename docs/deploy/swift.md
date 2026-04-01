@@ -143,7 +143,7 @@ swift export \
     --output_dir /data/model/Qwen3-4B-Instruct-2507-xiaohuang
 ```
 
-启动模型
+启动服务
 
 ```bash
 pip install vllm
