@@ -5,7 +5,7 @@
 
 ## 1. Windows
 
-### 1.1 安装Ptyhon
+### 1.1 安装 Ptyhon
 
 ![](../../assets/_images/deploy/python/1.png)
 
@@ -19,7 +19,7 @@
 
 ![](../../assets/_images/deploy/python/6.png)
 
-### 1.2 安装PyCharm
+### 1.2 安装 PyCharm
 
 下载地址：https://www.jetbrains.com/zh-cn/pycharm/
 
@@ -59,7 +59,7 @@
 
 ![](../../assets/_images/deploy/python/26.png)
 
-### 1.3 安装Anaconda3
+### 1.3 安装 Anaconda3
 
 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2021.05-Windows-x86_64.exe
 
@@ -111,7 +111,7 @@ pip install pyhive pyspark jieba -i https://pypi.tuna.tsinghua.edu.cn/simple    
 
 ## 2. Linux
 
-### 2.1 安装Ptyhon
+### 2.1 安装 Ptyhon
 
 #### 2.1.1 安装依赖
 
@@ -154,23 +154,17 @@ source /etc/profile
 ```bash
 rm -f /usr/bin/python
 ln -s /usr/local/python3.12.2/bin/python3.12 /usr/bin/python
-# 创建软链接后，会破坏yum程序的正常使用，需要修改以下两个文件
-/usr/bin/yum
-/usr/libexec/urlgrabber-ext-down
 ```
 
-使用vi编辑器，将这2个文件的第一行，从
-```conf
-#!/usr/bin/python
-```
-修改为：
-```conf
-#!/usr/bin/python2
-```
+如果是 `Centons7` 环境创建软链接后，会破坏 `YUM` 程序的正常使用，需要修改以下两个文件
+- /usr/bin/yum
+- /usr/libexec/urlgrabber-ext-down
 
-### 2.2 安装virtualenv（可选）
+分别将这两个文件的第一行，从 `#!/usr/bin/python` 修改为 `#!/usr/bin/python2`
 
-#### 2.2.1 配置pip3源
+### 2.2 安装 virtualenv（可选）
+
+#### 2.2.1 配置下载源
 
 ```bash
 mkdir ~/.pip
@@ -187,7 +181,7 @@ index-url=https://mirrors.aliyun.com/pypi/simple
 trusted-host=mirrors.aliyun.com
 ```
 
-#### 2.2.2 安装
+#### 2.2.2 在线安装
 
 ```bash
 pip3 install virtualenv
@@ -196,17 +190,18 @@ pip3 install virtualenv
 #### 2.2.3 创建虚拟环境
 
 ```bash
-mkdir /data/python3/code -p
-cd /data/python3/code
+mkdir /data/workspace -p
+
+cd /data/workspace
 # 创建环境
-virtualenv --python=python3 jmp_venv1
+virtualenv --python=python3.12 vllm-dev
 # 激活环境
-source /data/python3/code/jmp_venv1/bin/activate
+source /data/workspace/vllm-dev/bin/activate
 # 退出环境
 deactivate
 ```
 
-### 2.3 安装uv（可选）
+### 2.3 安装 uv（可选）
 
 #### 2.3.1 在线安装
 
@@ -278,6 +273,35 @@ print(os.path.expanduser("~"))
 uv run example.py
 ```
 
+### 2.5 安装 Miniconda（可选）
+
+#### 2.5.1 在线安装
+
+```bash
+# 使用清华镜像，速度更快
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# 执行脚本
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+
+默认环境路径 `/root/miniconda3/envs/`
+
+#### 2.5.2 创建虚拟环境
+
+```bash
+# 创建环境
+conda create -n vllm-dev python=3.12 -y
+# 激活
+conda activate vllm-dev
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+# 安装依赖
+pip install vllm
+# 退出环境
+conda deactivate
+# 删除环境
+conda env remove --name vllm-dev -y
+```
 
 ## 3. Flask Web
 
