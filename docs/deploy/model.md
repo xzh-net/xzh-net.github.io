@@ -295,11 +295,6 @@ vi qwen3_reranker.py
 ```
 
 ```python
-import os
-# 在加载模型之前设置
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
-os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-
 import logging
 
 import torch
@@ -388,11 +383,11 @@ model_8B = None
 def load_model(model_name):
     global model_0_6B, model_4B, model_8B
     if model_name == "Qwen3-Reranker-0.6B" and model_0_6B is None:
-        model_0_6B = Qwen3Reranker(model_name_or_path="Qwen3/Qwen3-Reranker-0.6B")
+        model_0_6B = Qwen3Reranker(model_name_or_path="/root/.cache/modelscope/hub/models/Qwen/Qwen3-Reranker-0.6B")
     elif model_name == "Qwen3-Reranker-4B" and model_4B is None:
-        model_4B = Qwen3Reranker(model_name_or_path="Qwen3/Qwen3-Reranker-4B")
+        model_4B = Qwen3Reranker(model_name_or_path="/root/.cache/modelscope/hub/models/Qwen/Qwen3-Reranker-4B")
     elif model_name == "Qwen3-Reranker-8B" and model_8B is None:
-        model_8B = Qwen3Reranker(model_name_or_path="Qwen3/Qwen3-Reranker-8B")
+        model_8B = Qwen3Reranker(model_name_or_path="/root/.cache/modelscope/hub/models/Qwen/Qwen3-Reranker-8B")
 
     return {
         "Qwen3-Reranker-0.6B": model_0_6B,
