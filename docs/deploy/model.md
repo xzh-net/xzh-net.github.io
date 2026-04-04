@@ -11,13 +11,456 @@
 
 #### 1.1.1 Qwen/Qwen3-4B-Instruct-2507
 
+##### 1.1.1.1 环境设置
+
+```bash
+conda create -n qwen3-4b python=3.12 -y
+conda activate qwen3-4b
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install vllm modelscope
+
+# 退出
+conda deactivate
+conda env remove --name qwen3-4b -y
+```
+
+##### 1.1.1.2 下载模型
+
+```bash
+modelscope download --model Qwen/Qwen3-4B-Instruct-2507
+```
+
+##### 1.1.1.3 在线推理
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-4B-Instruct-2507 \
+  --port 8000 \
+  --trust-remote-code \
+  --served-model-name Qwen3-4B-Instruct-2507 \
+  --gpu-memory-utilization 0.6 \
+  --tensor-parallel-size 2 \
+  --enable-log-requests \
+  --reasoning-parser qwen3 \
+  --enable-auto-tool-choice \
+  --tool-call-parser qwen3_coder
+```
+
+客户端测试
+
+```bash
+curl -X POST http://172.17.16.185:8000/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d "{
+    \"model\": \"Qwen3-4B-Instruct-2507\",
+    \"messages\": [
+        {
+            \"role\": \"system\",
+            \"content\": \"你是游戏达人\"
+        },
+        {
+            \"role\": \"user\",
+            \"content\": \"你是谁？\"
+        }
+    ],
+    \"stream\": true
+}"
+```
+
 ### 1.2 文本向量
 
 #### 1.2.1 Qwen/Qwen3-Embedding-8B
 
+##### 1.2.1.1 环境设置
+
+```bash
+conda create -n qwen3-embedding python=3.12 -y
+conda activate qwen3-embedding
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install vllm modelscope transformers gradio flask
+
+# 退出
+conda deactivate
+conda env remove --name qwen3-embedding -y
+```
+
+##### 1.2.1.2 下载模型
+
+```bash
+modelscope download --model Qwen/Qwen3-Embedding-8B
+```
+
+##### 1.2.1.3 在线推理
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-Embedding-8B \
+  --port 8001 \
+  --trust-remote-code \
+  --served-model-name Qwen3-Embedding-8B \
+  --gpu-memory-utilization 0.6 \
+  --tensor-parallel-size 2 \
+  --enable-log-requests
+```
+
+客户端测试
+
+```bash
+curl -X POST http://172.17.16.185:8001/v1/embeddings \
+-H "Content-Type: application/json" \
+-d "{
+    \"model\": \"Qwen3-Embedding-8B\",
+    \"messages\": [
+        {
+            \"role\": \"system\",
+            \"content\": \"You are a helpful assistant.\"
+        },
+        {
+            \"role\": \"user\",
+            \"content\": \"手机\"
+        }
+    ],
+    \"stream\": false
+}"
+```
+
+##### 1.2.1.4 Web UI Demo
+
+```bash
+vi qwen3_embedding.py
+```
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+from typing import List, Union
+import torch
+import torch.nn.functional as F
+
+from torch import Tensor
+from transformers import AutoTokenizer, AutoModel
+from transformers.utils import is_flash_attn_2_available
+
+import gradio as gr
+
+class Qwen3Embedding():
+    def __init__(self, model_name_or_path, instruction=None, use_fp16: bool = True, use_cuda: bool = True,
+                 max_length=8192):
+        if instruction is None:
+            instruction = 'Given a web search query, retrieve relevant passages that answer the query'
+        self.instruction = instruction
+        if is_flash_attn_2_available() and use_cuda:
+            self.model = AutoModel.from_pretrained(model_name_or_path, trust_remote_code=True, attn_implementation="flash_attention_2", torch_dtype=torch.float16)
+        else:
+            self.model = AutoModel.from_pretrained(model_name_or_path, trust_remote_code=True, torch_dtype=torch.float16)
+        if use_cuda:
+            self.model = self.model.cuda()
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=True, padding_side='left')
+        self.max_length = max_length
+
+    def last_token_pool(self, last_hidden_states: Tensor,
+                        attention_mask: Tensor) -> Tensor:
+        left_padding = (attention_mask[:, -1].sum() == attention_mask.shape[0])
+        if left_padding:
+            return last_hidden_states[:, -1]
+        else:
+            sequence_lengths = attention_mask.sum(dim=1) - 1
+            batch_size = last_hidden_states.shape[0]
+        return last_hidden_states[torch.arange(batch_size, device=last_hidden_states.device), sequence_lengths]
+
+    def get_detailed_instruct(self, task_description: str, query: str) -> str:
+        if task_description is None:
+            task_description = self.instruction
+        return f'Instruct: {task_description}\nQuery:{query}'
+
+    def encode(self, sentences: Union[List[str], str], is_query: bool = False, instruction=None, dim: int = -1):
+        if isinstance(sentences, str):
+            sentences = [sentences]
+        if is_query:
+            sentences = [self.get_detailed_instruct(instruction, sent) for sent in sentences]
+        inputs = self.tokenizer(sentences, padding=True, truncation=True, max_length=self.max_length, return_tensors='pt')
+        inputs.to(self.model.device)
+        with torch.no_grad():
+            model_outputs = self.model(**inputs)
+            output = self.last_token_pool(model_outputs.last_hidden_state, inputs['attention_mask'])
+            if dim != -1:
+                output = output[:, :dim]
+            output = F.normalize(output, p=2, dim=1)
+        return output
+
+
+# 将模型加载为全局变量
+model_0_6B = None
+model_4B = None
+model_8B = None
+
+
+def load_model(model_name):
+    global model_0_6B, model_4B, model_8B
+    if model_name == "Qwen3-Embedding-0.6B" and model_0_6B is None:
+        model_0_6B = Qwen3Embedding("Qwen/Qwen3-Embedding-0.6B")
+    elif model_name == "Qwen3-Embedding-4B" and model_4B is None:
+        model_4B = Qwen3Embedding("Qwen/Qwen3-Embedding-4B")
+    elif model_name == "Qwen3-Embedding-8B" and model_8B is None:
+        model_8B = Qwen3Embedding("Qwen/Qwen3-Embedding-8B")
+
+    return {
+        "Qwen3-Embedding-0.6B": model_0_6B,
+        "Qwen3-Embedding-4B": model_4B,
+        "Qwen3-Embedding-8B": model_8B,
+    }[model_name]
+
+
+def encode_query(model_name, query_text, dim=1024):
+    """
+    编码输入的查询文本。
+
+    参数:
+        query_text (str): 用户输入的查询文本。
+        model_name (str): 选择的模型名称。
+        dim (int): 输出向量的维度。
+
+    返回:
+        numpy.ndarray: 归一化后的嵌入向量（JSON 可序列化）。
+    """
+    model = load_model(model_name)
+    output = model.encode(query_text, is_query=True, dim=dim)
+    return output.cpu().numpy().tolist()  # 转换为 JSON 可序列化的列表格式
+
+# 创建 Gradio 接口
+iface = gr.Interface(
+    fn=encode_query,
+    inputs=[
+        gr.Dropdown(choices=["Qwen3-Embedding-0.6B", "Qwen3-Embedding-4B", "Qwen3-Embedding-8B"], value="Qwen3-Embedding-0.6B", label="选择模型"),
+        gr.Textbox(lines=2, placeholder="在这里输入文本", label="输入文本"),  # 输入框
+        gr.Slider(minimum=1, maximum=2048, step=1, value=1024, label="嵌入维度")  # 维度选择滑块
+    ],
+    outputs=gr.JSON(label="Embedding 结果"),  # 输出格式为 JSON
+    title="Qwen3 Embedding 演示页面（FutureAI实验室）",  # 页面标题
+    description=""  # 描述信息
+)
+
+# 启动 Gradio 服务
+if __name__ == "__main__":
+    iface.launch(share=False, debug=True, server_name="0.0.0.0", server_port=7860)
+```
+
+启动服务
+
+```bash
+python qwen3_embedding.py
+```
+
+Web UI 地址：http://172.17.16.185:7860
+
 ### 1.3 语义相关性
 
 #### 1.3.1 Qwen/Qwen3-Reranker-8B
+
+##### 1.3.1.1 环境设置
+
+```bash
+conda create -n qwen3-reranker python=3.12 -y
+conda activate qwen3-reranker
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install vllm modelscope transformers gradio flask
+
+# 退出
+conda deactivate
+conda env remove --name qwen3-reranker -y
+```
+
+##### 1.3.1.2 下载模型
+
+```bash
+modelscope download --model Qwen/Qwen3-Reranker-8B
+```
+
+##### 1.3.1.3 Web UI Demo
+
+```bash
+vi qwen3_reranker.py
+```
+
+```python
+import os
+# 在加载模型之前设置
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
+import logging
+
+import torch
+
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSequenceClassification, AutoModel, is_torch_npu_available
+from transformers.utils import is_flash_attn_2_available
+
+import gradio as gr
+
+logger = logging.getLogger(__name__)
+
+
+class Qwen3Reranker:
+    def __init__(
+        self,
+        model_name_or_path: str,
+        max_length: int = 2048,
+        instruction=None,
+        use_cuda: bool = True
+    ) -> None:
+        n_gpu = torch.cuda.device_count()
+        self.max_length=max_length
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=True, padding_side='left')
+        if is_flash_attn_2_available() and use_cuda:
+            self.lm = AutoModelForCausalLM.from_pretrained(model_name_or_path, trust_remote_code=True, attn_implementation="flash_attention_2", torch_dtype=torch.float16).cuda().eval()
+        else:
+            self.lm = AutoModelForCausalLM.from_pretrained(model_name_or_path, trust_remote_code=True, torch_dtype=torch.float16).cuda().eval()
+        self.token_false_id = self.tokenizer.convert_tokens_to_ids("no")
+        self.token_true_id = self.tokenizer.convert_tokens_to_ids("yes")
+
+        self.prefix = "<|im_start|>system\nJudge whether the Document meets the requirements based on the Query and the Instruct provided. Note that the answer can only be \"yes\" or \"no\".<|im_end|>\n<|im_start|>user\n"
+        self.suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+
+        self.prefix_tokens = self.tokenizer.encode(self.prefix, add_special_tokens=False)
+        self.suffix_tokens = self.tokenizer.encode(self.suffix, add_special_tokens=False)
+        self.instruction = instruction
+        if self.instruction is None:
+            self.instruction = "Retrieval document that can answer user's query"
+
+    def format_instruction(self, instruction, query, doc):
+        if instruction is None:
+            instruction = self.instruction
+        output = "<Instruct>: {instruction}\n<Query>: {query}\n<Document>: {doc}".format(instruction=instruction,query=query, doc=doc)
+        return output
+
+    def process_inputs(self, pairs):
+        out = self.tokenizer(
+            pairs, padding=False, truncation='longest_first',
+            return_attention_mask=False, max_length=self.max_length - len(self.prefix_tokens) - len(self.suffix_tokens)
+        )
+        for i, ele in enumerate(out['input_ids']):
+            out['input_ids'][i] = self.prefix_tokens + ele + self.suffix_tokens
+        out = self.tokenizer.pad(out, padding=True, return_tensors="pt", max_length=self.max_length)
+        for key in out:
+            out[key] = out[key].to(self.lm.device)
+        return out
+
+    @torch.no_grad()
+    def compute_logits(self, inputs, **kwargs):
+
+        batch_scores = self.lm(**inputs).logits[:, -1, :]
+        true_vector = batch_scores[:, self.token_true_id]
+        false_vector = batch_scores[:, self.token_false_id]
+        batch_scores = torch.stack([false_vector, true_vector], dim=1)
+        batch_scores = torch.nn.functional.log_softmax(batch_scores, dim=1)
+        scores = batch_scores[:, 1].exp().tolist()
+        return scores
+
+    def compute_scores(
+        self,
+        pairs,
+        instruction=None,
+        **kwargs
+    ):
+        pairs = [self.format_instruction(instruction, query, doc) for query, doc in pairs]
+        inputs = self.process_inputs(pairs)
+        scores = self.compute_logits(inputs)
+        return scores
+
+# 将模型加载为全局变量
+model_0_6B = None
+model_4B = None
+model_8B = None
+
+
+def load_model(model_name):
+    global model_0_6B, model_4B, model_8B
+    if model_name == "Qwen3-Reranker-0.6B" and model_0_6B is None:
+        model_0_6B = Qwen3Reranker(model_name_or_path="Qwen3/Qwen3-Reranker-0.6B")
+    elif model_name == "Qwen3-Reranker-4B" and model_4B is None:
+        model_4B = Qwen3Reranker(model_name_or_path="Qwen3/Qwen3-Reranker-4B")
+    elif model_name == "Qwen3-Reranker-8B" and model_8B is None:
+        model_8B = Qwen3Reranker(model_name_or_path="Qwen3/Qwen3-Reranker-8B")
+
+    return {
+        "Qwen3-Reranker-0.6B": model_0_6B,
+        "Qwen3-Reranker-4B": model_4B,
+        "Qwen3-Reranker-8B": model_8B,
+    }[model_name]
+
+
+def rerank_interface(model_name, query, docs_str, documents=None):
+    api_flag = True
+
+    model = load_model(model_name)
+
+    # 将输入的文档字符串转换为列表
+    if documents is None:
+        api_flag = False
+        documents = [doc.strip() for doc in docs_str.strip().split('\n')]
+
+    # 构建 pairs 输入
+    pairs = [(query, doc) for doc in documents]
+
+    # 计算得分
+    scores = model.compute_scores(pairs, "Given the user query, retrieval the relevant passages")
+
+    # 排序结果
+    ranked_results = sorted(
+        [{"document": doc, "score": score} for (query, doc), score in zip(pairs, scores)],
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    if not api_flag:
+        # 返回格式化结果
+        return "\n\n".join([f"文档: {item['document']}\n得分: {item['score']}" for item in ranked_results])
+    else:
+        return ranked_results
+
+
+iface = gr.Interface(
+    fn=rerank_interface,
+    inputs=[
+        gr.Dropdown(
+            choices=["Qwen3-Reranker-0.6B", "Qwen3-Reranker-4B", "Qwen3-Reranker-8B"],
+            value="Qwen3-Reranker-0.6B",
+            label="选择模型"
+        ),
+        gr.Textbox(label="查询内容", value="中国的首都是哪里"),
+        gr.Textbox(label="文档内容（每行一个文档）", value="中国的首都是北京。\n重力是一种将两个物体相互吸引的力。它赋予物理物体重量，并且是行星围绕太阳运动的原因。")
+
+    ],
+    outputs=gr.Textbox(label="Ranked Results"),
+    title="Qwen3 Reranker 演示页面（FutureAI实验室）",
+    description=""
+)
+
+
+if __name__ == '__main__':
+    # 启动 Gradio 应用
+    iface.launch(share=False, debug=True, server_name="0.0.0.0", server_port=7860)
+```
+
+启动服务
+
+```bash
+python qwen3_reranker.py
+```
+
+Web UI 地址：http://172.17.16.185:7860
 
 ## 2. 语音
 
@@ -25,7 +468,7 @@
 
 #### 2.1.1 Qwen/Qwen3-ASR-1.7B
 
-中文开源模型中的"天花板"，尤其适合有粤语、上海话、四川话等方言需求，或中英文混合的客服、会议场景。
+中文开源模型中的`天花板`，尤其适合有粤语、上海话、四川话等方言需求，或中英文混合的客服、会议场景。
 
 仓库地址：https://github.com/QwenLM/Qwen3-ASR
 
@@ -266,7 +709,7 @@ qwen-asr-demo \
   --ip 0.0.0.0 --port 8000
 ```
 
-访问 http://172.17.16.185:8000  测试中出现浏览器麦克风权限问题，建议/必须通过 HTTPS 运行，生成私钥和自签名证书（有效期为 365 天）
+Web UI 地址：http://172.17.16.185:8000  测试中出现浏览器麦克风权限问题，建议/必须通过 HTTPS 运行，生成私钥和自签名证书（有效期为 365 天）
 
 ```bash
 openssl req -x509 -newkey rsa:2048 \
@@ -276,7 +719,7 @@ openssl req -x509 -newkey rsa:2048 \
   -addext "subjectAltName = IP:172.17.16.185"
 ```
 
-以 HTTPS 运行后可以正常使用麦克风，访问 https://172.17.16.185:8000/
+以 HTTPS 运行后可以正常使用麦克风
 
 ```bash
 qwen-asr-demo \
@@ -494,7 +937,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --audi
 ```
 
 
-##### 2.1.2.3 综合案例（Web UI）
+##### 2.1.2.3 Web UI Demo
 
 一个功能完整的音频转录工具，集成了模型自动下载、多源音频获取、多种下载方法、代理支持、音频裁剪、两种 ASR 模型选择、转录结果保存与下载等功能，适合需要本地或私有部署的语音识别应用场景
 
@@ -598,7 +1041,7 @@ with open(audio_file_path, "rb") as audio_file:
 print(response)
 ```
 
-##### 2.1.3.3 离线推理（Web UI）
+##### 2.1.3.3 Web UI Demo
 
 1. Gradio 界面，对短音频进行快速测试，无需时间戳信息
 
