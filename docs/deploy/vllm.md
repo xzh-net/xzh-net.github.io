@@ -36,9 +36,7 @@ conda deactivate
 conda env remove --name vllm-dev -y
 ```
 
-### 1.2 检查配置
-
-1. 检查显卡数量与状态、温度、占用率等指标
+检查显卡数量与状态、温度、占用率等指标
 
 
 ```bash
@@ -73,7 +71,7 @@ nvidia-smi
 ```
 
 
-2. 检查显卡互联方式，NVLink配置是否正确，有助于性能提升
+检查显卡互联方式，NVLink配置是否正确，有助于性能提升
 
 ```bash
 nvidia-smi topo -m
@@ -102,7 +100,7 @@ NIC Legend:
 ```
 
 
-### 1.3 下载模型
+### 1.2 下载模型
 
 国内环境推荐使用魔塔社区下载，安装ModelScope
 
@@ -128,7 +126,7 @@ modelscope download --model Qwen/Qwen3-4B-Instruct-2507 --local_dir /data/model/
 下载默认路径：`~/.cache/modelscope/hub/models`
 
 
-### 1.4 启动模型
+### 1.3 启动模型
 
 vLLM 首次启动时，如果指定的模型在本地不存在，它会默认自动从 Hugging Face Hub 下载。设置环境变量 `VLLM_USE_MODELSCOPE=true`，将下载源切换为 ModelScope。
 
