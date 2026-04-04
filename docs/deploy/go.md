@@ -1,6 +1,6 @@
 # Go 1.13.4
 
-- 官方网站：https://go.dev/
+- 官方网址：https://go.dev/
 - 下载地址：https://go.dev/dl/go1.13.4.windows-amd64.msi
 
 ## 1. Windows

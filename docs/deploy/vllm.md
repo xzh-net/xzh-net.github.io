@@ -2,8 +2,8 @@
 
 vLLM 是一个快速、易于使用的 LLM 推理和服务库。包含一个推理服务器（用于管理网络流量）和一个推理引擎（用于最大限度地提高计算速度）。它的工作原理是通过其 PagedAttention 算法更好地利用 GPU 内存，从而加快生成式 AI 应用的输出速度。
 
-- 官方网站：https://docs.vllm.ai/
-- 中文网站：https://vllm.hyper.ai/
+- 官方网址：https://docs.vllm.ai/
+- 中文网址：https://vllm.hyper.ai/
 
 ## 1. 快速开始
 

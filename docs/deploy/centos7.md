@@ -1,7 +1,7 @@
 # CentOS Linux release 7.9.2009
 
-- 官方网站：https://www.centos.org
-- 停更网站：https://vault.centos.org
+- 官方网址：https://www.centos.org
+- 停更网址：https://vault.centos.org
 - 安装包仓库：https://www.rpmfind.net
 
 ## 1. 系统服务

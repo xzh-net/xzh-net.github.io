@@ -2,7 +2,7 @@
 
 ms-swift 是魔搭社区提供的大模型与多模态大模型微调部署框架，它的目标就是让开发者能更轻松、更高效地完成大模型从训练到上线的全流程工作。
 
-- 官方网站：https://swift.readthedocs.io/zh-cn/latest/
+- 官方网址：https://swift.readthedocs.io/zh-cn/latest/
 - 快速开始：https://www.modelscope.cn/docs/llm-training-and-inference/intro/quickstart
 
 ## 1. 入门介绍

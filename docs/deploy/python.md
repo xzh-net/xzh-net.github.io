@@ -277,6 +277,8 @@ uv run example.py
 
 #### 2.5.1 在线安装
 
+官方网址：https://repo.anaconda.com/miniconda/
+
 ```bash
 # 使用清华镜像，速度更快
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -289,6 +291,29 @@ conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 ```
 
 默认环境路径 `/root/miniconda3/envs/`
+
+!> 访问默认的 Conda 资源库可能会比较慢。为了加快包的下载速度，可以设置国内的镜像源。
+
+```bash
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/condaforge
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/msys2
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/bioconda
+conda config --set show_channel_urls yes
+```
+
+删除镜像源
+
+```bash
+conda config --remove-key channels
+```
+
+查看镜像源
+
+```bash
+conda config --show channels
+```
 
 #### 2.5.2 创建虚拟环境
 

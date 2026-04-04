@@ -106,6 +106,6 @@ turnserver --help   # 参数说明
 turnutils_uclient -u xzh  -w 123456  -p PORT -v 39.105.58.136
 ```
 
-检测网站：https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
+检测网址：https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
 
 ![](../../assets/_images/deploy/turnserver/trickle-ice.png)

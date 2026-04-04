@@ -2822,7 +2822,7 @@ vhost __defaultVhost__ {
         bframe      discard;
     }
 
-    # SRS支持refer防盗链：检查用户从哪个网站过来的。譬如不是从公司的页面过来的人都不让看。
+    # SRS支持refer防盗链：检查用户从哪个网址过来的。譬如不是从公司的页面过来的人都不让看。
     refer {
         # whether enable the refer hotlink-denial.
         # default: off.

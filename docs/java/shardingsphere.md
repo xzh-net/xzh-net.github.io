@@ -15,11 +15,11 @@ Apache ShardingSphere 是一款分布式的数据库生态系统， 可以将任
   </tbody> 
   <tbody> 
    <tr> 
-    <td>官方网站</td> 
-    <td><a href=" http://mycat.org.cn/" rel="nofollow" target="_blank">官方网站</a></td> 
-    <td><a href=" https://shardingsphere.apache.org/index_zh.html" rel="nofollow" target="_blank">官方网站</a></td> 
-    <td><a href=" https://shardingsphere.apache.org/index_zh.html" rel="nofollow" target="_blank">官方网站</a></td> 
-    <td><a href=" https://shardingsphere.apache.org/index_zh.html" rel="nofollow" target="_blank">官方网站</a></td> 
+    <td>官方网址</td> 
+    <td><a href=" http://mycat.org.cn/" rel="nofollow" target="_blank">官方网址</a></td> 
+    <td><a href=" https://shardingsphere.apache.org/index_zh.html" rel="nofollow" target="_blank">官方网址</a></td> 
+    <td><a href=" https://shardingsphere.apache.org/index_zh.html" rel="nofollow" target="_blank">官方网址</a></td> 
+    <td><a href=" https://shardingsphere.apache.org/index_zh.html" rel="nofollow" target="_blank">官方网址</a></td> 
    </tr> 
    <tr> 
     <td>源码地址</td> 

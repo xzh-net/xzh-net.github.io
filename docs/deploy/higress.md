@@ -2,7 +2,7 @@
 
 面向 LLM，统一代理各主流大模型和自建大模型服务，提供 OpenAI 兼容的访问方式，并提供二次 API KEY 签发、限流、安全防护、观测等治理能力。
 
-- 官方网站：https://higress.cn/
+- 官方网址：https://higress.cn/
 
 ## 1. 部署
 
@@ -57,6 +57,8 @@ docker build -t higress-plugin-server:1.0.0 -f Dockerfile .
 ```bash
 docker run -dit --name higress-plugin-server -p 8800:8080 higress-plugin-server:1.0.0
 ```
+
+访问插件列表地址：http://192.168.1.100:8800/plugins
 
 #### 1.3.3 配置插件地址
 

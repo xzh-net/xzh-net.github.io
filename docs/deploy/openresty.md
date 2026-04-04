@@ -1,6 +1,6 @@
 # OpenResty 1.25.3.1
 
-- 官方网站：https://openresty.org
+- 官方网址：https://openresty.org
 
 ## 1. 安装
 

@@ -1,6 +1,6 @@
 # Ubuntu 22.04 LTS
 
-- 官方网站：https://cn.ubuntu.com
+- 官方网址：https://cn.ubuntu.com
 - 下载地址：https://releases.ubuntu.com
 - 安装包仓库：http://archive.ubuntu.com/ubuntu/pool/main/u/unzip
 
