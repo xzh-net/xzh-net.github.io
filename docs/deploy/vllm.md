@@ -145,10 +145,10 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-4B-Instr
   --tool-call-parser qwen3_coder
 ```
 
-使用本地模型启动
+使用本地模型`后台`启动
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 vllm serve /data/model/Qwen3-4B-Instruct-2507 \
+CUDA_VISIBLE_DEVICES=0,1 nohup vllm serve /data/model/Qwen3-4B-Instruct-2507 \
   --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3-4B-Instruct-2507 \
@@ -157,41 +157,10 @@ CUDA_VISIBLE_DEVICES=0,1 vllm serve /data/model/Qwen3-4B-Instruct-2507 \
   --enable-log-requests \
   --reasoning-parser qwen3 \
   --enable-auto-tool-choice \
-  --tool-call-parser qwen3_coder
+  --tool-call-parser qwen3_coder > vllm_8000.log 2>&1 &
 ```
 
-后台启动
-
-```bash
-CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true nohup vllm serve Qwen/Qwen3-Embedding-8B \
-  --port 8001 \
-  --trust-remote-code \
-  --served-model-name Qwen3-Embedding-8B \
-  --gpu-memory-utilization 0.6 \
-  --tensor-parallel-size 2 \
-  --enable-log-requests > vllm_8001.log 2>&1 &
-```
-
-
-启动排序模型报错，vLLM默认将它识别为普通的对话模型（Causal LM），所以只暴露了文本生成接口，屏蔽了重排序专用的 /v1/rerank 端点。
-
-Qwen3-Reranker的本质是通过比较输出"yes"和"no"的概率来给文档打分，但vLLM看到它的配置文件是Qwen3ForCausalLM，就认定它只能用于文本生成
-
-```bash
-CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true nohup vllm serve Qwen/Qwen3-Reranker-8B \
-  --port 8002 \
-  --trust-remote-code \
-  --served-model-name Qwen3-Reranker-8B \
-  --gpu-memory-utilization 0.6 \
-  --tensor-parallel-size 2 \
-  --hf_overrides '{"architectures": ["Qwen3ForSequenceClassification"], "classifier_from_token": ["no", "yes"], "is_original_qwen3_reranker": true}' \
-  --enable-log-requests > vllm_8002.log 2>&1 &
-```
-
-
-### 1.5 客户端测试
-
-创建对话请求
+客户端测试
 
 ```bash
 curl -X POST http://172.17.16.185:8000/v1/chat/completions \
@@ -209,43 +178,5 @@ curl -X POST http://172.17.16.185:8000/v1/chat/completions \
         }
     ],
     \"stream\": true
-}"
-```
-
-创建向量请求
-
-```bash
-curl -X POST http://172.17.16.185:8001/v1/embeddings \
--H "Content-Type: application/json" \
--d "{
-    \"model\": \"Qwen3-Embedding-8B\",
-    \"messages\": [
-        {
-            \"role\": \"system\",
-            \"content\": \"You are a helpful assistant.\"
-        },
-        {
-            \"role\": \"user\",
-            \"content\": \"手机\"
-        }
-    ],
-    \"stream\": false
-}"
-```
-
-创建重排序请求
-
-```bash
-curl -X POST http://172.17.16.185:8002/v1/rerank \
--H "Content-Type: application/json" \
--d "{
-    \"model\": \"Qwen3-Reranker-8B\",
-    \"query\": \"什么是文本排序模型\",
-    \"top_n\": 2,
-    \"documents\": [
-      \"文本排序模型广泛用于搜索引擎和推荐系统中，它们根据文本相关性对候选文本进行排序\",
-      \"量子计算是计算科学的一个前沿领域\",
-      \"预训练语言模型的发展给文本排序模型带来了新的进展\"
-    ]
 }"
 ```
