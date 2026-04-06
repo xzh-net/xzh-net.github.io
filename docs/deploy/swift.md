@@ -57,22 +57,19 @@ pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 pip install ms-swift==4.0.1 -U
 ```
 
-
-检查 `torch` 版本
-```bash
-python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
-
-```
-
 !> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
 
 ```bash
+# 检查当前 PyTorch 版本和 CUDA 版本
+python -c "import torch; print('PyTorch version:', torch.__version__); print('CUDA available:', torch.cuda.is_available()); print('CUDA version:', torch.version.cuda if torch.cuda.is_available() else 'None')"
+
 # 卸载当前 PyTorch
 pip uninstall torch torchvision torchaudio -y
 
 # 以当前版 CUDA 12.8 为例
-pip install torch==2.10.0
+pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu128
 ```
+
 
 退出环境（可选）
 ```bash
