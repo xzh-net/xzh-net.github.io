@@ -963,7 +963,7 @@ conda env remove --name fun-asr -y
 启动服务
 
 ```bash
-vi app.python
+vi app.py
 # 最后一行修改为允许使用 IP 访问
 iface.queue().launch(share=False, debug=True, server_name="0.0.0.0", server_port=7860)
 
@@ -1224,39 +1224,12 @@ conda activate qwen3-tts
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install -U qwen-tts
-pip install -U modelscope
-pip install -U flash-attn --no-build-isolation
-# flash-attn 如果下载⽐较慢，可以使⽤离线安装⽅式
-https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
-pip install flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
-
-
-# 如果想在本地开发或修改代码，可以选择从源码安装
-git clone https://github.com/QwenLM/Qwen3-TTS.git
-cd Qwen3-TTS
-pip install -e .
+pip install git-lfs
+pip install modelscope
 
 # 退出
 conda deactivate
 conda env remove --name qwen3-tts -y
-```
-
-检查 `torch` 版本
-```bash
-python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
-```
-
-!> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
-
-```bash
-# 卸载当前 PyTorch
-pip uninstall torch torchvision torchaudio -y
-
-# 以当前版 CUDA 12.8 为例
-pip install torch==2.10.0
-# 或者在线选择与当前系统CUDA 12.8匹配的PyTorch版本
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
 
 ##### 2.2.1.2 下载模型
@@ -1272,14 +1245,40 @@ modelscope download --model Qwen/Qwen3-TTS-12Hz-0.6B-Base
 
 ##### 2.2.1.3 Web UI Demo
 
+下载创空间文件
+
 ```bash
-# CustomVoice model
-qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice --ip 0.0.0.0 --port 8000
-# VoiceDesign model
-qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --ip 0.0.0.0 --port 8000
-# Base model
-qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-Base --ip 0.0.0.0 --port 8000
+git clone https://modelscope.cn/studios/Qwen/Qwen3-TTS.git
+cd Qwen3-TTS
+pip install -r requirements.txt
 ```
+
+!> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
+
+```bash
+# 检查当前 PyTorch 版本和 CUDA 版本
+python -c "import torch; print('PyTorch version:', torch.__version__); print('CUDA available:', torch.cuda.is_available()); print('CUDA version:', torch.version.cuda if torch.cuda.is_available() else 'None')"
+
+# 卸载当前 PyTorch
+pip uninstall torch torchvision torchaudio -y
+
+# 以当前版 CUDA 12.8 为例
+pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+```
+
+启动服务
+
+```bash
+vi app.py
+# 最后一行修改为允许使用 IP 访问
+
+demo.queue(default_concurrency_limit=5).launch(share=False, debug=True, server_name="0.0.0.0", server_port=7860)
+
+# 启动
+python app.py
+```
+
+Web UI 地址：http://172.17.16.185:7860
 
 ## 3. 计算机视觉
 
