@@ -479,6 +479,9 @@ pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 # 安装依赖
 pip install -U qwen-asr[vllm]
 pip install -U flash-attn --no-build-isolation
+# flash-attn 如果下载⽐较慢，可以使⽤离线安装⽅式
+https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+pip install flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
 
 # 退出
 conda deactivate
@@ -1188,6 +1191,94 @@ sample = ["output_20.mp3","output_60.mp3"]
 
 result = pipe(sample, batch_size=2)
 print(result)
+```
+### 2.2 语音合成
+
+#### 2.2.1 Qwen3-TTS
+
+仓库地址：https://github.com/QwenLM/Qwen3-TTS
+
+
+Qwen3-TTS 模型有多个不同版本，1.7B 可以达到极致性能，具有强⼤的控制能⼒，0.6B 均衡性能与效率
+
+| 分词器名称                      | 功能 |
+|---------------------------------|-------------|
+| Qwen3-TTS-Tokenizer-12Hz        | Qwen3-TTS-Tokenizer-12Hz 型号可以将输入的语音编码成代码，并将其解码回语音 |
+
+
+| 模型 | 功能 | 语种 | 流式成成 | 指令控制 |
+|---|---|---|---|---|
+| Qwen3-TTS-12Hz-1.7B-VoiceDesign | 根据⽤⼾输⼊描述进⾏音色创造 | 中、英、日、韩、德、法、俄、葡萄牙、西班牙、意大利 | ✅ | ✅ |
+| Qwen3-TTS-12Hz-1.7B-CustomVoice | 音色克隆（仅内置角色），9个精品音色，涵盖多种性别、年龄、语种与方言组合，支持输入指令对目标音色进行风格控制 | 中、英、日、韩、德、法、俄、葡萄牙、西班牙、意大利 | ✅ | ✅ |
+| Qwen3-TTS-12Hz-1.7B-Base | 音色克隆（自定义角色），可微调 |  中、英、日、韩、德、法、俄、葡萄牙、西班牙、意大利 | ✅ |  |
+| Qwen3-TTS-12Hz-0.6B-CustomVoice | 音色克隆（仅内置角色），9个精品音色，涵盖多种性别、年龄、语种与方言组合 | 中、英、日、韩、德、法、俄、葡萄牙、西班牙、意大利 | ✅ |  |
+| Qwen3-TTS-12Hz-0.6B-Base | 音色克隆（自定义角色），可微调 |  中、英、日、韩、德、法、俄、葡萄牙、西班牙、意大利 | ✅ |  |
+
+##### 2.2.1.1 环境设置
+
+```bash
+conda create -n qwen3-tts python=3.12 -y
+conda activate qwen3-tts
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install -U qwen-tts
+pip install -U modelscope
+pip install -U flash-attn --no-build-isolation
+# flash-attn 如果下载⽐较慢，可以使⽤离线安装⽅式
+https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+pip install flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+
+
+# 如果想在本地开发或修改代码，可以选择从源码安装
+git clone https://github.com/QwenLM/Qwen3-TTS.git
+cd Qwen3-TTS
+pip install -e .
+
+# 退出
+conda deactivate
+conda env remove --name qwen3-tts -y
+```
+
+检查 `torch` 版本
+```bash
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+!> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
+
+```bash
+# 卸载当前 PyTorch
+pip uninstall torch torchvision torchaudio -y
+
+# 以当前版 CUDA 12.8 为例
+pip install torch==2.10.0
+# 或者在线选择与当前系统CUDA 12.8匹配的PyTorch版本
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+```
+
+##### 2.2.1.2 下载模型
+
+```bash
+modelscope download --model Qwen/Qwen3-TTS-Tokenizer-12Hz
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-Base
+modelscope download --model Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
+modelscope download --model Qwen/Qwen3-TTS-12Hz-0.6B-Base
+```
+
+##### 2.2.1.3 Web UI Demo
+
+```bash
+# CustomVoice model
+qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice --ip 0.0.0.0 --port 8000
+# VoiceDesign model
+qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --ip 0.0.0.0 --port 8000
+# Base model
+qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-Base --ip 0.0.0.0 --port 8000
 ```
 
 ## 3. 计算机视觉
