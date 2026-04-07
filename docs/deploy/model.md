@@ -492,14 +492,14 @@ conda env remove --name qwen3-asr -y
 ```bash
 # 从魔塔社区下载
 pip install -U modelscope
-modelscope download --model Qwen/Qwen3-ASR-1.7B  --local_dir ./Qwen3-ASR-1.7B
-modelscope download --model Qwen/Qwen3-ASR-0.6B --local_dir ./Qwen3-ASR-0.6B
-modelscope download --model Qwen/Qwen3-ForcedAligner-0.6B --local_dir ./Qwen3-ForcedAligner-0.6B
+modelscope download --model Qwen/Qwen3-ASR-1.7B
+modelscope download --model Qwen/Qwen3-ASR-0.6B
+modelscope download --model Qwen/Qwen3-ForcedAligner-0.6B
 # 从 Hugging Face 下载
 pip install -U "huggingface_hub[cli]"
-huggingface-cli download Qwen/Qwen3-ASR-1.7B --local-dir ./Qwen3-ASR-1.7B
-huggingface-cli download Qwen/Qwen3-ASR-0.6B --local-dir ./Qwen3-ASR-0.6B
-huggingface-cli download Qwen/Qwen3-ForcedAligner-0.6B --local-dir ./Qwen3-ForcedAligner-0.6B
+huggingface-cli download Qwen/Qwen3-ASR-1.7B
+huggingface-cli download Qwen/Qwen3-ASR-0.6B
+huggingface-cli download Qwen/Qwen3-ForcedAligner-0.6B
 ```
 
 
@@ -672,9 +672,19 @@ curl -X POST http://172.17.16.185:8000/v1/chat/completions \
 
 ##### 2.1.1.5 Web UI Demo
 
-三个不同使用场景，本地启动需要替换本地仓库路径，否则默认去`Hugging Face`下载
-- `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1___7B`
-- `/root/.cache/modelscope/hub/models/Qwen/Qwen3-ForcedAligner-0___6B`
+
+设置环境变量，使用HF镜像站加速下载
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+```
+
+更多参数，使用以下命令获取帮助
+
+```bash
+qwen-asr-demo --help
+```
+
 
 ```bash
 # Transformers backend
