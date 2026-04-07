@@ -631,9 +631,7 @@ conda activate qwen3-asr
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install vllm
-pip install vllm[audio]
-pip install modelscope
+pip install vllm vllm[audio] modelscope
 
 # 退出
 conda deactivate
@@ -947,8 +945,7 @@ conda activate fun-asr
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install git-lfs
-pip install gradio
+pip install git-lfs gradio
 # 下载创空间文件
 git clone https://www.modelscope.cn/studios/FunAudioLLM/Fun-ASR-Nano.git
 cd Fun-ASR-Nano
@@ -990,8 +987,7 @@ conda activate whisper-large
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install vllm
-pip install vllm[audio]
+pip install vllm vllm[audio]
 
 # 退出
 conda deactivate
@@ -1224,8 +1220,7 @@ conda activate qwen3-tts
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
-pip install git-lfs
-pip install modelscope
+pip install git-lfs modelscope
 
 # 退出
 conda deactivate
