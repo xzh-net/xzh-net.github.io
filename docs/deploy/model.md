@@ -478,9 +478,8 @@ pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # 安装依赖
 pip install -U qwen-asr[vllm]
-pip install -U flash-attn --no-build-isolation
 # flash-attn 如果下载⽐较慢，可以使⽤离线安装⽅式
-https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+wget https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
 pip install flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
 
 # 退出
@@ -625,8 +624,8 @@ print(content)
 环境安装
 
 ```bash
-conda create -n qwen3-asr-vllm python=3.12 -y
-conda activate qwen3-asr-vllm
+conda create -n qwen3-asr python=3.12 -y
+conda activate qwen3-asr
 
 # 设置全局仓库
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
@@ -637,7 +636,7 @@ pip install modelscope
 
 # 退出
 conda deactivate
-conda env remove --name qwen3-asr-vllm -y 
+conda env remove --name qwen3-asr -y 
 ```
 
 启动服务
