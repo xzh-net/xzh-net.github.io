@@ -641,6 +641,7 @@ conda env remove --name qwen3-asr -y
 启动服务
 
 ```bash
+export HF_ENDPOINT=https://hf-mirror.com
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B \
   --port 8000 \
   --trust-remote-code \
