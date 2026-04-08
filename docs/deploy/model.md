@@ -70,6 +70,72 @@ curl -X POST http://172.17.16.185:8000/v1/chat/completions \
 }"
 ```
 
+#### 1.1.2 AgentScope/CoPaw-Flash-9B
+
+基于文本的AI Agent（智能体）模型，主要用于处理你下达的指令，执行文件操作、定时任务、记忆管理等高频本地任务
+
+##### 1.1.2.1 环境设置
+
+```bash
+conda create -n copaw-flash-9b python=3.12 -y
+conda activate copaw-flash-9b
+
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# 安装依赖
+pip install vllm modelscope
+pip install --upgrade transformers tokenizers
+
+# 退出
+conda deactivate
+conda env remove --name copaw-flash-9b -y
+```
+
+##### 1.1.2.2 下载模型
+
+```bash
+modelscope download --model AgentScope/CoPaw-Flash-9B --local_dir ./CoPaw-Flash-9B
+```
+
+##### 1.1.2.3 在线推理
+
+直接使用默认路径下的模型会出现异常，未找到原因。需要使用物理路径启动模型。
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 vllm serve ./CoPaw-Flash-9B \
+    --port 8000 \
+	--trust-remote-code \
+    --served-model-name CoPaw-Flash-9B \
+    --tensor-parallel-size 2 \
+    --max-model-len 262144 \
+    --reasoning-parser qwen3 \
+    --enable-auto-tool-choice \
+    --tool-call-parser qwen3_xml \
+    --enable-log-requests
+```
+
+客户端测试
+
+```bash
+curl -X POST http://172.17.16.185:8000/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d "{
+    \"model\": \"CoPaw-Flash-9B\",
+    \"messages\": [
+        {
+            \"role\": \"system\",
+            \"content\": \"You are a helpful assistant.\"
+        },
+        {
+            \"role\": \"user\",
+            \"content\": \"手机\"
+        }
+    ],
+    \"stream\": false
+}"
+```
+
 ### 1.2 文本向量
 
 #### 1.2.1 Qwen/Qwen3-Embedding-8B
@@ -101,7 +167,7 @@ modelscope download --model Qwen/Qwen3-Embedding-8B
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-Embedding-8B \
-  --port 8001 \
+  --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3-Embedding-8B \
   --gpu-memory-utilization 0.6 \
@@ -112,7 +178,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-Embeddin
 客户端测试
 
 ```bash
-curl -X POST http://172.17.16.185:8001/v1/embeddings \
+curl -X POST http://172.17.16.185:8000/v1/embeddings \
 -H "Content-Type: application/json" \
 -d "{
     \"model\": \"Qwen3-Embedding-8B\",
