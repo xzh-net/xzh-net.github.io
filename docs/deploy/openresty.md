@@ -348,7 +348,27 @@ location / {
 }
 ```
 
-> nginx 日志级别设置为 `error_log logs/error.log info;`
+!> Nginx 日志级别需要设置成： `error_log logs/error.log info;`。使用过程中发现，当请求体超长时，即使设置了 `client_body_buffer_size 10M`，ngx.log 也无法将内容打印完整，这个限制源于 Nginx 自身的设计。具体长度取决于你使用的是标准的 Nginx 还是 OpenResty。第一种处理方式是重新编译源码，修改默认长度（不推荐）。另一种方式将请求体写入到其他日志文件中。
+
+
+```lua
+-- 读取请求体
+ngx.req.read_body()
+local body_data = ngx.req.get_body_data()
+
+if body_data then
+    local file_path = "/usr/local/openresty/nginx/logs/test.log"
+    local out, err = io.open(file_path, "a")    -- "a" 表示追加模式，可用 "w" 覆盖写入
+    if out then
+        out:write(body_data)
+        out:write("\n")
+        out:write("---------------------------------------------------------------------------")
+        out:close()
+    else
+        ngx.log(ngx.ERR, "无法打开文件写入: ", err)
+    end
+end
+```
 
 ## 2. 模块
 
