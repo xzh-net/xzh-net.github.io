@@ -441,7 +441,7 @@ swift export \
 
 !> 如果训练阶段设置 `--merge_lora true` ，可以直接使用 vllm 启动 `checkpoint-93-merged`
 
-#### 2.4.4 使用vllm启动服务
+#### 2.4.4 vllm 启动服务
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /workspace/model/Qwen3-4B-Instruct-2507-xiaohuang \
