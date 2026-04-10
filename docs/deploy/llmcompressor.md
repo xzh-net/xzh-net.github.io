@@ -10,30 +10,18 @@ AutoAWQ 已正式弃用，将不再维护。AutoAWQ 已被 vLLM 项目采纳。
 
 ### 1.1 环境安装
 
-创建环境
+创建虚拟环境
+
 ```bash
+# 创建虚拟环境
 conda create -n llm-compress python=3.12 -y
-```
-
-激活环境
-```bash
+# 激活环境
 conda activate llm-compress
-```
-
-安装llmcompressor
-```bash
-# 设置全局镜像源
-pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+# 安装依赖
 pip install llmcompressor
-```
-
-退出环境（可选）
-```bash
+# 退出环境（可选）
 conda deactivate
-```
-
-删除环境（可选）
-```bash
+# 删除环境（可选）
 conda env remove --name llm-compress -y
 ```
 
