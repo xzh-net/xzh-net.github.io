@@ -75,7 +75,7 @@ C:\ProgramData\Anaconda3\Library\mingw-w64
 
 #### 1.3.2 设置全局镜像源
 
-打开 `Anaconda Prompt` 程序，先运行 `conda config --set show_channel_urls yes` 生成配置文件。记事本打开 `C:\Users\用户名\.condarc` 文件, 将如下内容替换全部保存
+打开 `Anaconda Prompt` 程序，先运行 `conda config --set show_channel_urls yes` 生成配置文件，再用记事本打开 `C:\Users\用户名\.condarc` 文件，将如下内容替换全部保存。
 
 ```shell
 channels:
@@ -208,20 +208,12 @@ rm -rf vllm-dev
 
 #### 2.3.1 在线安装
 
-使用curl下载脚本并执行
 ```bash
+# curl 下载脚本并执行
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-如果没有curl指令，可以使用wget安装
-
-```bash
+# wget 下载脚本安装
 wget -qO- https://astral.sh/uv/install.sh | sh
-```
-
-需要下载指定版本使用下面的命令
-
-```bash
+# 下载指定版本安装
 curl -LsSf https://astral.sh/uv/0.10.2/install.sh | sh
 ```
  
