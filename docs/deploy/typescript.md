@@ -12,7 +12,7 @@
 ### 2.2 安装TypeScript
 
 ```bash
-# 设置全局仓库
+# 设置全局镜像源
 npm config set registry=https://registry.npmmirror.com
 # 安装ts
 npm install -g typescript

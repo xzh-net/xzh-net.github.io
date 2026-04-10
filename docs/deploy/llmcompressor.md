@@ -22,7 +22,7 @@ conda activate llm-compress
 
 安装llmcompressor
 ```bash
-# 设置全局仓库
+# 设置全局镜像源
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 pip install llmcompressor
 ```

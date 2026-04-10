@@ -52,7 +52,7 @@ conda activate swift-dev
 
 安装swift
 ```bash
-# 设置全局仓库
+# 设置全局镜像源
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 pip install ms-swift==4.0.1 -U
 ```
