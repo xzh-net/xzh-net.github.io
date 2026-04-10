@@ -96,17 +96,21 @@ custom_channels:
   simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
 ```
 
-#### 1.3.3 常用命令
+#### 1.3.3 创建虚拟环境
 
 ```bash
-conda info -e                       # 查看当前系统中创建的虚拟环境，自带一个base环境
-conda env list                      # 查看已创建的环境
-conda create -n name python=3.8     # 创建名为name、Python版本为x.x的虚拟环境
-conda activate name                 # 激活名为name的环境
-conda install package_name          # 在当前环境中安装包
-conda deactivate                    # 退出虚拟环境
-conda remove -n name --all          # 删除名为name的虚拟环境
-pip install pyhive pyspark jieba -i https://pypi.tuna.tsinghua.edu.cn/simple    # 在虚拟环境内安装包
+# 创建环境
+conda create -n vllm-dev python=3.12 -y
+# 激活
+conda activate vllm-dev
+# 设置全局仓库
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+# 安装依赖
+pip install vllm
+# 退出环境
+conda deactivate
+# 删除环境
+conda env remove --name vllm-dev -y
 ```
 
 ## 2. Linux
@@ -331,6 +335,40 @@ conda deactivate
 # 删除环境
 conda env remove --name vllm-dev -y
 ```
+
+#### 2.5.3 环境迁移
+
+源主机备份
+
+```bash
+# 激活
+conda activate copaw-flash-9b
+# 安装依赖
+conda install conda-pack
+# 将环境打包
+conda pack -n copaw-flash-9b -o copaw-flash-9b.tar.gz
+```
+
+目标主机还原
+
+```bash
+cd ~/miniconda3/envs/
+# 创建目录
+mkdir copaw-flash-9b
+# 解压到指定目录下
+tar -xzvf copaw-flash-9b.tar.gz -C copaw-flash-9b
+# 进入目录
+cd copaw-flash-9b
+# 激活环境
+source activate ./
+# 如果源路径和目标路径不一致，需要解决硬编码路径，请执行
+conda-unpack
+# 激活成功后可以在环境列表中查看
+conda env list
+# 验证
+conda activate copaw-flash-9b
+```
+
 
 ## 3. 开发框架
 
