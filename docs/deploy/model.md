@@ -100,12 +100,10 @@ modelscope download --model AgentScope/CoPaw-Flash-9B --local_dir ./CoPaw-Flash-
 
 ##### 1.1.2.3 在线推理
 
-直接使用默认路径下的模型会出现异常，未找到原因。需要使用物理路径启动模型。
-
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 vllm serve ./CoPaw-Flash-9B \
+CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve AgentScope/CoPaw-Flash-9B \
     --port 8000 \
-	--trust-remote-code \
+    --trust-remote-code \
     --served-model-name CoPaw-Flash-9B \
     --tensor-parallel-size 2 \
     --max-model-len 262144 \
