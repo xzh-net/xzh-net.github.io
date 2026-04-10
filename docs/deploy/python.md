@@ -73,11 +73,9 @@ C:\ProgramData\Anaconda3\Library\bin
 C:\ProgramData\Anaconda3\Library\mingw-w64
 ```
 
-#### 1.3.2 更换服务器源
+#### 1.3.2 设置全局镜像源
 
-打开`Anaconda Prompt`程序，执行`conda config --set show_channel_urls yes`
-
-记事本打开`C:\Users\用户名\.condarc`文件, 将如下内容替换全部保存
+打开 `Anaconda Prompt` 程序，先运行 `conda config --set show_channel_urls yes` 生成配置文件。记事本打开 `C:\Users\用户名\.condarc` 文件, 将如下内容替换全部保存
 
 ```shell
 channels:
@@ -99,14 +97,12 @@ custom_channels:
 #### 1.3.3 创建虚拟环境
 
 ```bash
-# 创建环境
+# 创建虚拟环境
 conda create -n vllm-dev python=3.12 -y
 # 激活
 conda activate vllm-dev
-# 设置全局仓库
-pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 # 安装依赖
-pip install vllm
+pip install modelscope
 # 退出环境
 conda deactivate
 # 删除环境
@@ -168,7 +164,9 @@ ln -s /usr/local/python3.12.2/bin/python3.12 /usr/bin/python
 
 ### 2.2 安装 virtualenv（可选）
 
-#### 2.2.1 配置下载源
+#### 2.2.1 在线安装
+
+设置全局镜像源
 
 ```bash
 mkdir ~/.pip
@@ -176,7 +174,7 @@ touch ~/.pip/pip.conf
 vi ~/.pip/pip.conf
 ```
 
-添加配置
+编辑内容
 
 ```conf
 [global]
@@ -185,7 +183,7 @@ index-url=https://mirrors.aliyun.com/pypi/simple
 trusted-host=mirrors.aliyun.com
 ```
 
-#### 2.2.2 在线安装
+执行安装
 
 ```bash
 pip3 install virtualenv
@@ -194,15 +192,16 @@ pip3 install virtualenv
 #### 2.2.3 创建虚拟环境
 
 ```bash
-mkdir /data/workspace -p
-
-cd /data/workspace
-# 创建环境
+# 创建虚拟环境
 virtualenv --python=python3.12 vllm-dev
-# 激活环境
-source /data/workspace/vllm-dev/bin/activate
+# 激活
+source vllm-dev/bin/activate
+# 安装依赖
+pip install modelscope
 # 退出环境
 deactivate
+# 删除环境
+rm -rf vllm-dev 
 ```
 
 ### 2.3 安装 uv（可选）
@@ -253,28 +252,18 @@ source /etc/profile
 
 #### 2.3.2 创建虚拟环境
 
-```bash
-uv venv vllm --python 3.12 --seed
-source vllm/bin/activate
 
+```bash
+# 创建虚拟环境
+uv venv vllm-dev --python 3.12 --seed
+# 激活环境
+source vllm-dev/bin/activate
+# 安装依赖
+pip install modelscope
 # 退出环境
 deactivate
-```
-
-运行脚本测试
-
-```bash
-vi example.py
-```
-
-```py
-import os
-print("Hello vllm")
-print(os.path.expanduser("~"))
-```
-
-```bash
-uv run example.py
+# 删除环境
+rm -rf vllm-dev
 ```
 
 ### 2.5 安装 Miniconda（可选）
@@ -322,14 +311,12 @@ conda config --show channels
 #### 2.5.2 创建虚拟环境
 
 ```bash
-# 创建环境
+# 创建虚拟环境
 conda create -n vllm-dev python=3.12 -y
 # 激活
 conda activate vllm-dev
-# 设置全局仓库
-pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 # 安装依赖
-pip install vllm
+pip install modelscope
 # 退出环境
 conda deactivate
 # 删除环境
