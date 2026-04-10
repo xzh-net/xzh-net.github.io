@@ -55,10 +55,11 @@
 - 人工智能
   - [OpenAI](deploy/openai)
   - [Ollama](deploy/ollama)
-  - [模型库](deploy/model)
   - [vLLM](deploy/vllm)
   - [SWIFT](deploy/swift)
   - [LLM Compressor](deploy/llmcompressor)
+  - [Ray](deploy/ray)
+  - [模型库](deploy/model)
   - [Dify](deploy/dify)
   - [Higress](deploy/higress)
 
