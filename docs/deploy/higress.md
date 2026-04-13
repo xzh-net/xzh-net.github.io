@@ -81,29 +81,31 @@ Docker All-in-One 方式初始化部署，在启动容器的 docker 命令中添
 注意事项：以上配置仅在初始化时生效。如果需要修改这些插件配置中的镜像地址，可以在 Higress Console 的插件配置页面进行针对性修改。
 
 
-## 2. 配置
+## 2. AI网关管理
 
 访问地址：http://192.168.1.100:8080
 
-### 2.1 创建AI服务提供者
+### 2.1 AI服务提供者管理
 
 ![](../../assets/_images/deploy/higress/1.png)
 
-### 2.2 创建消费者
+### 2.2 消费者管理
 
 ![](../../assets/_images/deploy/higress/2.png)
 
-### 2.3 创建AI路由
+### 2.3 AI路由管理
 
 ![](../../assets/_images/deploy/higress/3.png)
 
 ![](../../assets/_images/deploy/higress/4.png)
 
-### 2.4 测试
+客户端测试
 
 ![](../../assets/_images/deploy/higress/5_1.png)
 
 ![](../../assets/_images/deploy/higress/5_2.png)
+
+### 2.4 MCP管理
 
 ## 3. 高级功能
 
