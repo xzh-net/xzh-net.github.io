@@ -115,9 +115,9 @@ Docker All-in-One 方式初始化部署，在启动容器的 docker 命令中添
 
 ![](../../assets/_images/deploy/higress/7.png)
 
-命令行测试（`Streamable HTTP`），这是调用服务服务源地址，测试通过后可以使用网关地址进行验证
+命令行测试调用服务源地址，测试通过后可以使用网关地址进行验证，Web UI 安装命令：`npx @mcpjam/inspector@latest`
 
-获取消息端点
+获取消息端点（Streamable HTTP）
 
 ```bash
 curl -i -X POST http://172.17.17.165:8080/mcp \
@@ -128,7 +128,7 @@ curl -i -X POST http://172.17.17.165:8080/mcp \
     "id": 1,
     "method": "initialize",
     "params": {
-      "protocolVersion": "2024-11-05",
+      "protocolVersion": "2025-11-25",
       "capabilities": {},
       "clientInfo": {
         "name": "test-client",
