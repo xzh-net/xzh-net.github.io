@@ -1,4 +1,4 @@
-# Higress 2.1.9
+# Higress 2.2.0
 
 面向 LLM，统一代理各主流大模型和自建大模型服务，提供 OpenAI 兼容的访问方式，并提供二次 API KEY 签发、限流、安全防护、观测等治理能力。
 
@@ -24,7 +24,7 @@ docker run -dit --name higress-ai \
     -v /data/higress/proxy:/var/log/proxy \
     -e O11Y=on \
     -p 8080:8001 -p 80:8080 -p 443:8443  \
-    higress-registry.cn-hangzhou.cr.aliyuncs.com/higress/all-in-one:2.1.9
+    higress-registry.cn-hangzhou.cr.aliyuncs.com/higress/all-in-one:2.2.0
 ```
 
 ### 1.2 独立运行版
@@ -34,7 +34,7 @@ docker run -dit --name higress-ai \
 ```bash
 mkdir /data && cd /data
 # 上传文件解压
-unzip higress-standalone-aio-v2.1.9.zip && cd higress-standalone-aio-v2.1.9
+unzip higress-standalone-aio-v2.2.0.zip && cd higress-standalone-aio-v2.2.0
 # 安装初始化
 ./bin/configure.sh -a
 ```
@@ -106,6 +106,82 @@ Docker All-in-One 方式初始化部署，在启动容器的 docker 命令中添
 ![](../../assets/_images/deploy/higress/5_2.png)
 
 ### 2.4 MCP管理
+
+创建服务来源
+
+![](../../assets/_images/deploy/higress/6.png)
+
+创建MCP服务
+
+![](../../assets/_images/deploy/higress/7.png)
+
+命令行测试（`Streamable HTTP`），这是调用服务服务源地址，测试通过后可以使用网关地址进行验证
+
+获取消息端点
+
+```bash
+curl -i -X POST http://172.17.17.165:8080/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream, application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2024-11-05",
+      "capabilities": {},
+      "clientInfo": {
+        "name": "test-client",
+        "version": "1.0.0"
+      }
+    }
+  }'
+```
+
+输出以下内容表示调用成功，记录下 `Mcp-Session-Id` 的值
+
+```lua
+HTTP/1.1 200 
+Mcp-Session-Id: 8f691aeb-2ab4-4736-9c2c-0a29ee3166a9
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Thu, 16 Apr 2026 03:47:52 GMT
+```
+
+列出所有可用工具
+
+```bash
+curl -X POST http://172.17.17.165:8080/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream, application/json" \
+  -H "Mcp-Session-Id: 8f691aeb-2ab4-4736-9c2c-0a29ee3166a9" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list"
+  }'
+```
+
+调用工具
+
+```bash
+curl -X POST http://172.17.17.165:8080/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream, application/json" \
+  -H "Mcp-Session-Id: 8f691aeb-2ab4-4736-9c2c-0a29ee3166a9" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "getWeather",
+      "arguments": {
+        "cityName": "大连"
+      }
+    }
+  }'
+```
+
 
 ## 3. 高级功能
 
@@ -192,8 +268,8 @@ vi /data/higress/data/configmaps/higress-config.yaml
 
 !> 使用独立运行版如果出现修改全局配置`mesh`属性无效的问题，有两种解决办法：
 
-- 安装之前： `/data/higress-standalone-aio-v2.1.9/compose/scripts/prepare.sh` 修改默认值。
-- 安装之后： `/data/higress-standalone-aio-v2.1.9/compose/volumes/pilot/config/mesh`
+- 安装之前： `/data/higress-standalone-aio-v2.2.0/compose/scripts/prepare.sh` 修改默认值。
+- 安装之后： `/data/higress-standalone-aio-v2.2.0/compose/volumes/pilot/config/mesh`
 
 
 ### 3.2 调整日志等级
