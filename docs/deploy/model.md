@@ -525,8 +525,12 @@ Web UI 地址：http://172.17.16.185:7860
 conda create -n qwen3-asr python=3.12 -y
 conda activate qwen3-asr
 
-# 安装依赖
+# 最小化安装并启用 transformers 后端
+pip install -U qwen-asr
+# 启用 vLLM 后端以获得更快的推理速度和流式支持
 pip install -U qwen-asr[vllm]
+# 推荐使用 FlashAttention 2 来减少 GPU 显存占用并加速推理速度，尤其适用于长输入和大批量场景
+pip install -U flash-attn --no-build-isolation
 # flash-attn 如果下载⽐较慢，可以使⽤离线安装⽅式
 wget https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
 pip install flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
@@ -719,27 +723,30 @@ curl -X POST http://172.17.16.185:8000/v1/chat/completions \
 
 ##### 2.1.1.5 Web UI Demo
 
-
-设置环境变量，使用HF镜像站加速下载
-
-```bash
-export HF_ENDPOINT=https://hf-mirror.com
-```
-
-更多参数，使用以下命令获取帮助
+参数命令帮助
 
 ```bash
 qwen-asr-demo --help
 ```
 
+以下三种方式根据使用场景选择
 
 ```bash
+# 设置环境变量，使用HF镜像站加速下载
+export HF_ENDPOINT=https://hf-mirror.com
+
 # Transformers backend
 qwen-asr-demo \
   --asr-checkpoint Qwen/Qwen3-ASR-1.7B \
   --backend transformers \
   --cuda-visible-devices 0 \
   --ip 0.0.0.0 --port 8000
+
+# 如果运行报错找不到 ffmpeg  
+conda install ffmpeg -c conda-forge
+# 验证版本
+ffmpeg -version
+ffprobe -version
 
 # Transformers backend + Forced Aligner (enable timestamps)
 qwen-asr-demo \
@@ -751,7 +758,7 @@ qwen-asr-demo \
   --aligner-kwargs '{"device_map":"cuda:0","dtype":"bfloat16"}' \
   --ip 0.0.0.0 --port 8000
 
-# vLLM backend + Forced Aligner (enable timestamps)
+# vLLM backend + Forced Aligner (enable timestamps) 需要安装flash_attn
 qwen-asr-demo \
   --asr-checkpoint Qwen/Qwen3-ASR-1.7B \
   --aligner-checkpoint Qwen/Qwen3-ForcedAligner-0.6B \
@@ -772,7 +779,7 @@ openssl req -x509 -newkey rsa:2048 \
   -addext "subjectAltName = IP:172.17.16.185"
 ```
 
-以 HTTPS 运行后可以正常使用麦克风
+增加 HTTPS 参数后再验证是否正常使用麦克风
 
 ```bash
 qwen-asr-demo \
@@ -784,6 +791,8 @@ qwen-asr-demo \
   --ssl-keyfile key.pem \
   --no-ssl-verify
 ```
+
+另一种处理方式，本地使用 Google 浏览器，输入 `chrome://flags/#unsafely-treat-insecure-origin-as-secure`，找到 `Insecure origins treated as secure`，填写测试地址，多个以英文逗号分隔，选择启用后，点击底部重新启动按钮。
 
 流式转录演示，因为 `qwen-asr-demo-streaming` 不提供 HTTPS 参数，运行后依然存在无法唤起麦克风权限问题。解决办法：使用 Nginx 代理，将所有请求转发到目标机器
 
