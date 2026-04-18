@@ -137,7 +137,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /data/model/Qwen3-4
   --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3-4B-Instruct-2507-xiaohuang \
-  --gpu-memory-utilization 0.6 \
+  --gpu-memory-utilization 0.7 \
   --tensor-parallel-size 2 \
   --enable-log-requests \
   --reasoning-parser qwen3 \
@@ -434,7 +434,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve /workspace/model/Qw
   --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3-4B-Instruct-2507-xiaohuang \
-  --gpu-memory-utilization 0.6 \
+  --gpu-memory-utilization 0.7 \
   --tensor-parallel-size 2 \
   --enable-log-requests \
   --reasoning-parser qwen3 \
