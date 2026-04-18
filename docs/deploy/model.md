@@ -794,7 +794,7 @@ qwen-asr-demo \
 
 另一种处理方式，本地使用 Google 浏览器，输入 `chrome://flags/#unsafely-treat-insecure-origin-as-secure`，找到 `Insecure origins treated as secure`，填写测试地址，多个以英文逗号分隔，选择启用后，点击底部重新启动按钮。
 
-设备是否开启成功，可以通过控制台输入以下代码进行验证
+设备是否开启成功，可以通过浏览器控制台输入以下代码进行验证
 ```js
 console.log(window.isSecureContext); // 输出 true 表示安全上下文，false 则仍被拦截
 navigator.mediaDevices.getUserMedia({audio: true})
