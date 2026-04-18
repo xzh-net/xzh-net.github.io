@@ -38,7 +38,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-4B-Instr
   --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3-4B-Instruct-2507 \
-  --gpu-memory-utilization 0.6 \
+  --gpu-memory-utilization 0.7 \
   --tensor-parallel-size 2 \
   --enable-log-requests \
   --reasoning-parser qwen3 \
@@ -159,7 +159,7 @@ CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-Embeddin
   --port 8000 \
   --trust-remote-code \
   --served-model-name Qwen3-Embedding-8B \
-  --gpu-memory-utilization 0.6 \
+  --gpu-memory-utilization 0.7 \
   --tensor-parallel-size 2 \
   --enable-log-requests
 ```
@@ -635,7 +635,7 @@ if __name__ == '__main__':
 启动服务
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 qwen-asr-serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B --gpu-memory-utilization 0.8 --host 0.0.0.0 --port 8000 --tensor-parallel-size 2 
+CUDA_VISIBLE_DEVICES=0,1 qwen-asr-serve /root/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B --gpu-memory-utilization 0.7 --host 0.0.0.0 --port 8000 --tensor-parallel-size 2 
 ```
 
 客户端测试
@@ -672,7 +672,7 @@ content = response.json()['choices'][0]['message']['content']
 print(content)
 ```
 
-2. 使用 vLLM 进行部署
+2. 使用 vLLM 部署
 
 环境安装
 
@@ -695,7 +695,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 CUDA_VISIBLE_DEVICES=0,1 VLLM_USE_MODELSCOPE=true vllm serve Qwen/Qwen3-ASR-1.7B \
   --port 8000 \
   --trust-remote-code \
-  --gpu-memory-utilization 0.6 \
+  --gpu-memory-utilization 0.7 \
   --tensor-parallel-size 2 
 ```
 
@@ -800,7 +800,7 @@ qwen-asr-demo \
 # 流式转录
 qwen-asr-demo-streaming \
   --asr-model-path Qwen/Qwen3-ASR-1.7B \
-  --gpu-memory-utilization 0.9 \
+  --gpu-memory-utilization 0.7 \
   --host 0.0.0.0 \
   --port 8000
 ```
