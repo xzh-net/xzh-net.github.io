@@ -732,7 +732,9 @@ qwen-asr-demo --help
 以下三种方式根据使用场景选择
 
 ```bash
-# 设置环境变量，使用HF镜像站加速下载
+# 设置环境变量，使用HF镜像站加速下载，并且禁止一切网络请求
+export HF_HUB_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
 export HF_ENDPOINT=https://hf-mirror.com
 
 # Transformers backend
