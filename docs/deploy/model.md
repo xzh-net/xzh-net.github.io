@@ -986,6 +986,7 @@ docker run -p 10095:10095 -it --privileged=true \
 
 ```bash
 cd FunASR/runtime
+
 nohup bash run_server_2pass.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
@@ -1007,7 +1008,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --audi
 ```
 
 
-##### 2.1.2.3 Web UI Demo
+##### 2.1.2.4 Web UI Demo
 
 一个功能完整的音频转录工具，集成了模型自动下载、多源音频获取、多种下载方法、代理支持、音频裁剪、两种 ASR 模型选择、转录结果保存与下载等功能，适合需要本地或私有部署的语音识别应用场景
 
