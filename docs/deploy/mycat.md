@@ -1,6 +1,6 @@
-# Mycat-server-1.6.7.3
+# Mycat-Server 1.6.7.3
 
-## 1. MyCat下载
+## 1. 下载
 
 下载地址: https://github.com/MyCATApache/Mycat-download
 
