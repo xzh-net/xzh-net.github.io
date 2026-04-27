@@ -1783,6 +1783,8 @@ ZooKeeper    Server    3888    /etc/zookeeper/conf/zoo.cfg中server.x=[hostname]
 
 #### Nacos 3.0.1
 
+官方网址：https://nacos.io/docs/latest/quickstart/quick-start-docker
+
 快速启动
 
 ```bash
@@ -1797,7 +1799,9 @@ docker run --name nacos-standalone-derby \
     -d nacos/nacos-server:v3.0.1
 ```
 
-访问地址：http://172.17.17.161:8080
+控制台地址
+
+http://172.17.17.161:8080
 
 高级使用
 
