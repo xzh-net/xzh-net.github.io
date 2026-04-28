@@ -372,7 +372,7 @@ end
 
 ## 2. 模块
 
-### 2.1 init_by_lua*
+### 2.1 init_by_lua
 
 该指令在每次Nginx重新加载配置时执行，可以用来完成一些耗时模块的加载，或者初始化一些全局配置。
 
@@ -384,7 +384,7 @@ init_by_lua_block{
 }
 ```
 
-### 2.2 init_worker_by_lua*
+### 2.2 init_worker_by_lua
 
 该指令用于启动一些定时任务，如心跳检查、定时拉取服务器配置等。
 
@@ -415,7 +415,7 @@ location /v2 {
 ```
 
 
-### 2.4 rewrite_by_lua*
+### 2.4 rewrite_by_lua
 
 该指令用于执行内部URL重写或者外部重定向，典型的如伪静态化URL重写，本阶段在rewrite处理阶段的最后默认执行。
 
@@ -1320,23 +1320,23 @@ close_redis(red)
 ```
 
 
-### 2.7 header_filter_by_lua*
+### 2.7 header_filter_by_lua
 
 该指令用于设置应答消息的头部信息。
 
-### 2.8 body_filter_by_lua*
+### 2.8 body_filter_by_lua
 
 该指令是对响应数据进行过滤，如截断、替换。
 
-### 2.9 log_by_lua*`
+### 2.9 log_by_lua
 
 该指令用于在log请求处理阶段，用Lua代码处理日志，但并不替换原有log处理。
 
-### 2.10 balancer_by_lua*
+### 2.10 balancer_by_lua
 
 该指令主要的作用是用来实现上游服务器的负载均衡器算法
 
-### 2.11 ssl_certificate_by_*
+### 2.11 ssl_certificate_by
 
 该指令作用在Nginx和下游服务开始一个SSL握手操作时将允许本配置项的Lua代码。
 
