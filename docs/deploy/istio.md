@@ -107,7 +107,7 @@ kubectl get po -l istio=ingressgateway -n istio-system -o jsonpath='{.items[0].s
 kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}'
 ```
 
-> 访问地址：http://192.168.2.203:31561/productpage
+访问地址：http://192.168.2.203:31561/productpage
 
 ### 2.5 流量管理
 
