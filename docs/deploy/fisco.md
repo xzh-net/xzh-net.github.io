@@ -135,7 +135,7 @@ python3 deploy.py startFront    # 启动WeBASE-Front
 python3 deploy.py stopFront     # 停止WeBASE-Front
 ```
 
-> 访问地址：http://localhost:5000 ，默认账号为 admin ，默认密码为 Abcd1234 ，密码不能包含特殊字符。
+!> 访问地址：http://localhost:5000 ，默认账号为 admin ，默认密码为 Abcd1234 ，密码不能包含特殊字符。
 
 #### 1.1.4 设置节点存储方式
 
@@ -178,7 +178,7 @@ curl -LO https://github.com/FISCO-BCOS/console/releases/download/v2.9.2/download
 tar -zxvf console.tar.gz -C /opt/fisco
 ```
 
-> 注意：默认下载的控制台内置0.4.25版本的solidity编译器，用户需要编译0.5或者0.6版本的合约时，可以通过下列命令获取内置对应编译器版本的控制台
+!> 注意：默认下载的控制台内置0.4.25版本的solidity编译器，用户需要编译0.5或者0.6版本的合约时，可以通过下列命令获取内置对应编译器版本的控制台
 
 ```bash
 # 0.5	
