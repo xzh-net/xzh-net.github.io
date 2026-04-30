@@ -481,7 +481,7 @@ systemctl start telnet.socket
 systemctl enable telnet.socket
 ```
 
-> 如果root用户默认无法登录，修改
+!> 如果 root 用户默认无法登录，修改文件
 
 ```bash
 vi /etc/securetty
