@@ -501,7 +501,7 @@ a3.sources.r1.channels = c2
 a3.sinks.k1.channel = c2
 ```
 
-> 输出的本地目录必须是已经存在的目录，如果该目录不存在，并不会创建新的目录
+!> 输出的本地目录必须是已经存在的目录，如果该目录不存在，并不会创建新的目录
 
 ```bash
 mkdir -p /opt/flume/data/flume3
