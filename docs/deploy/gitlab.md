@@ -279,6 +279,8 @@ git config --global user.name "xuzhihao"
 git config --global user.email "xuzhihao@163.com"
 git config --global credential.helper store     # 持久化
 git config --global push.autoSetupRemote true   # 自动设置远程仓库
+git config --global core.autocrlf true          # Windows 自动处理行尾符（提交时自动转 LF，检出工作区时转 CRLF）
+
 
 git config --global --list      # 查看全局配置
 git config --global --edit      # 编辑全局配置，windows按下 Win + R 键，然后输入 control keymgr.dll 来打开凭据管理器
