@@ -128,8 +128,7 @@ listeners.tcp.$name.max_connections = 1024000
 ./emqx start
 ```
 
-控制台地址：http://192.168.2.201:18083
-默认账号密码：admin/public
+控制台地址：http://192.168.2.201:18083 ，默认账号密码：admin/public
 
 #### 1.1.8 客户端测试
 
