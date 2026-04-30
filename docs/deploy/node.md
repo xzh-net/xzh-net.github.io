@@ -53,7 +53,7 @@ npm list                        # 查看当前目录下已安装的node包
 npm list parseable=true         # 以目录的形式来展现当前安装的所有node包
 ```
 
-!> 如果安装过程中依赖文件因为网络问题下载失败，可以手动下载文件后上传至缓存路径中，然后再次使用`npm install`安装。 
+> 如果安装过程中依赖文件因为网络问题下载失败，可以手动下载文件后上传至缓存路径中，然后再次使用`npm install`安装。 
 
 ```bash
 npm config get cache                    # 查看缓存路径

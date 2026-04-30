@@ -178,7 +178,7 @@ curl -LO https://github.com/FISCO-BCOS/console/releases/download/v2.9.2/download
 tar -zxvf console.tar.gz -C /opt/fisco
 ```
 
-!> 注意：默认下载的控制台内置0.4.25版本的solidity编译器，用户需要编译0.5或者0.6版本的合约时，可以通过下列命令获取内置对应编译器版本的控制台
+> 注意：默认下载的控制台内置0.4.25版本的solidity编译器，用户需要编译0.5或者0.6版本的合约时，可以通过下列命令获取内置对应编译器版本的控制台
 
 ```bash
 # 0.5	

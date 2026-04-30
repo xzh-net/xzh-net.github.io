@@ -482,7 +482,7 @@ vim exclude
 node04.xuzhihao.net
 ```
 
-!> 注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役
+> 注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役
 
 #### 2.10.2 节点刷新
 
@@ -516,7 +516,7 @@ node03                  datanode  zookeeper  journal node
 
 ### 3.2 安装zookeeper集群
 
-设置免密登录
+> 需要设置免密登录
 
 ### 3.3 上传安装包
 
@@ -671,7 +671,7 @@ vim hdfs-site.xml
 </property>
 ```
 
-!> 远程补刀需要namenode互相免密登录，同时安装psmisc
+> 远程补刀需要namenode互相免密登录，同时安装psmisc
 
 ```bash
 ssh-copy-id node01  # 在node02节点执行

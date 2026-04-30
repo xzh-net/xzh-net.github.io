@@ -264,7 +264,7 @@ make && make install
 
 Nginx高于1.20.1版本编译报错，插件源码在`ngx_tcp_ssl_module.c`文件中搜索`ngx_ssl_rsa512_key_callback`注释掉可以解决编译报错问题
 
-!> 有多级反向代理存在场景下，会遇到转义符失效的问题，解决办法推荐使用`$request_uri`保留原始URL
+> 有多级反向代理存在场景下，会遇到转义符失效的问题，解决办法推荐使用`$request_uri`保留原始URL
 
 ```nginx
 location / {
@@ -337,7 +337,7 @@ server {
 }
 ```
 
-!> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
+> 注意：/home/www是默认站点根目录，fancyindex文件夹在`/home/www`下
 
 #### 2.4.4 MD预览
 
@@ -435,7 +435,7 @@ server {
 /usr/local/bin/markdown-renderer -mode local -root /home/www/public/
 ```
 
-!> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
+> 注意：/home/www/public是默认站点根目录，应用public和fancyindex文件夹是平行关系
 
 ## 3. 高级
 
@@ -877,7 +877,7 @@ server {
 }
 ```
 
-!> `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
+> `location` 末尾有斜杠/表示转发到proxy_pass，无斜杠/表示拼接到proxy_pass，`proxy_pass` 末尾有斜杠/不拼接location的路径，无斜杠/会拼接location的路径
 
 
 #### 3.1.10 跨域

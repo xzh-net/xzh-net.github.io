@@ -297,7 +297,7 @@ VALUES
 	('emqx', 'efa1f375d76194fa51a3556a97e641e61685f914d446979da50a551a4333ffd7', NULL, false);
 ```
 
-!> 启用PostgreSQL认证后，你可以通过用户名： emqx，密码：public 连接
+> 启用PostgreSQL认证后，你可以通过用户名： emqx，密码：public 连接。
 
 加盐规则与认证SQL
 
@@ -343,7 +343,7 @@ acl_file = etc/acl.conf
 acl_deny_action = ignore
 ```
 
-!> 在 MQTT v3.1和v3.1.1协议中，发布操作被拒绝后服务器无任何报文错误返回，这是协议设计的一个缺陷。但在 MQTT v5.0协议上已经支持应答一个相应的错误报文。
+> 在 MQTT v3.1和v3.1.1协议中，发布操作被拒绝后服务器无任何报文错误返回，这是协议设计的一个缺陷。但在 MQTT v5.0协议上已经支持应答一个相应的错误报文。
 
 #### 2.3.1 内置 ACL
 
@@ -480,7 +480,7 @@ retainer.max_payload_size = 1MB
 retainer.expiry_interval = 0
 ```
 
-EMQ X Enterprise中可将保留消息存储到多种外部数据库。
+> EMQ X Enterprise中可将保留消息存储到多种外部数据库。
 
 ### 2.7 共享订阅
 

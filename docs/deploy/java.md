@@ -171,7 +171,7 @@ scp /etc/profile root@node02:/etc/
 scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 ```
 
-!> `.bashrc`和`.profile`都可以解决非root用户下配置环境变量。区别在于：`.bashrc`每次打开‌非登录shell‌（如新终端窗口、标签页）时都会执行‌，`.profile`仅在用户通过‌登录shell‌（如SSH登录、终端登录）时执行一次‌。
+> `.bashrc`和`.profile`都可以解决非root用户下配置环境变量。区别在于：`.bashrc`每次打开‌非登录shell‌（如新终端窗口、标签页）时都会执行‌，`.profile`仅在用户通过‌登录shell‌（如SSH登录、终端登录）时执行一次‌。
 
 
 ### 2.2 安装Maven

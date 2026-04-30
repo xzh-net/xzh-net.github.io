@@ -262,12 +262,11 @@ rm -rf vllm-dev
 
 #### 2.5.1 在线安装
 
-官方网址：https://repo.anaconda.com/miniconda/
+- 下载地址1：https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+- 下载地址2：https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
 ```bash
-# 使用清华镜像，速度更快
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-# 执行脚本
+# 安装
 bash Miniconda3-latest-Linux-x86_64.sh
 # 刷新配置
 source ~/.bashrc
@@ -280,12 +279,12 @@ conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 !> 访问默认的 Conda 资源库可能会比较慢。为了加快包的下载速度，可以设置国内的镜像源。
 
 ```bash
-conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main
-conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free
-conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/condaforge
-conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/msys2
-conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/bioconda
-conda config --set show_channel_urls yes
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+conda config --add channels defaults
+conda config --set show_channel_urls true
 ```
 
 删除镜像源
