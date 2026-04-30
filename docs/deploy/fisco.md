@@ -135,7 +135,7 @@ python3 deploy.py startFront    # 启动WeBASE-Front
 python3 deploy.py stopFront     # 停止WeBASE-Front
 ```
 
-!> 访问地址：http://localhost:5000 ，默认账号为 admin ，默认密码为 Abcd1234 ，密码不能包含特殊字符。
+访问地址：http://localhost:5000 ，默认账号为 admin ，默认密码为 Abcd1234 ，密码不能包含特殊字符。
 
 #### 1.1.4 设置节点存储方式
 
