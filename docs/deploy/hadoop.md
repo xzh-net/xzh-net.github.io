@@ -516,7 +516,7 @@ node03                  datanode  zookeeper  journal node
 
 ### 3.2 安装zookeeper集群
 
-> 需要设置免密登录
+设置免密登录
 
 ### 3.3 上传安装包
 
