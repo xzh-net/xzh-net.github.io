@@ -15,7 +15,7 @@ PATH
 %JAVA_HOME%\bin
 ```
 
-> cmd窗口执行 `java -version`
+CMD 窗口执行 `java -version`
 
 ### 1.2 安装Maven
 
@@ -30,7 +30,7 @@ PATH
 %MAVEN_HOME%\bin
 ```
 
-> cmd窗口执行 `mvn -v`
+CMD 窗口执行 `mvn -v`
 
 
 
@@ -48,7 +48,7 @@ PATH
 %GRADLE_HOME%\bin
 ```
 
-> cmd窗口执行 `gradle -v`
+CMD 窗口执行 `gradle -v`
 
 ### 1.4 安装Tomcat
 
@@ -171,7 +171,7 @@ scp /etc/profile root@node02:/etc/
 scp -r /usr/local/jdk1.8.0_202  root@node02:/usr/local/
 ```
 
-> `.bashrc`和`.profile`都可以解决非root用户下配置环境变量。区别在于：`.bashrc`每次打开‌非登录shell‌（如新终端窗口、标签页）时都会执行‌，`.profile`仅在用户通过‌登录shell‌（如SSH登录、终端登录）时执行一次‌。
+!> `.bashrc`和`.profile`都可以解决非root用户下配置环境变量。区别在于：`.bashrc`每次打开‌非登录shell‌（如新终端窗口、标签页）时都会执行‌，`.profile`仅在用户通过‌登录shell‌（如SSH登录、终端登录）时执行一次‌。
 
 
 ### 2.2 安装Maven
@@ -232,7 +232,7 @@ vim /opt/apache-maven-3.6.3/conf/settings.xml
 
 #### 2.2.4 配置代理 
 
-> 构建环境无法连接互联网，需要借助Nginx正向代理实现依赖下载
+场景：构建环境无法连接互联网，需要借助 Nginx 正向代理实现依赖下载
 
 Maven代理配置
 
