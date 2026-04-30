@@ -54,7 +54,7 @@ conda deactivate
 conda env remove --name swift-dev -y
 ```
 
-!> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
+> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
 
 ```bash
 # 检查当前 PyTorch 版本和 CUDA 版本
@@ -425,7 +425,7 @@ swift export \
     --output_dir /workspace/model/Qwen3-4B-Instruct-2507-xiaohuang
 ```
 
-!> 如果训练阶段设置 `--merge_lora true` ，可以直接使用 vllm 启动 `checkpoint-93-merged`
+> 如果训练阶段设置 `--merge_lora true` ，可以直接使用 vllm 启动 `checkpoint-93-merged`
 
 #### 2.4.4 vllm 启动服务
 

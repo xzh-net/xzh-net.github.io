@@ -276,7 +276,7 @@ conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 
 默认环境路径 `/root/miniconda3/envs/`
 
-!> 访问默认的 Conda 资源库可能会比较慢。为了加快包的下载速度，可以设置国内的镜像源。
+> 访问默认的 Conda 资源库可能会比较慢。为了加快包的下载速度，可以设置国内的镜像源。
 
 ```bash
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main

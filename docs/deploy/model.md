@@ -626,7 +626,7 @@ if __name__ == '__main__':
         print(r.language, r.text, r.time_stamps[0])
 ```
 
-!> 跨模型张量并行设计缺陷：主模型的计算分布在 GPU 0 和 GPU 1 上，当主模型在对齐阶段把处理结果（output_id）传给对齐模型时，这个张量可能恰好在 GPU 1 上。对齐模型内部为了做计算，又从主模型的原始输入（input_id）里取了数据，但这个数据可能还留在 GPU 0（或者CPU）上。这两个张量不在一个设备上，索引操作失败。
+> 跨模型张量并行设计缺陷：主模型的计算分布在 GPU 0 和 GPU 1 上，当主模型在对齐阶段把处理结果（output_id）传给对齐模型时，这个张量可能恰好在 GPU 1 上。对齐模型内部为了做计算，又从主模型的原始输入（input_id）里取了数据，但这个数据可能还留在 GPU 0（或者CPU）上。这两个张量不在一个设备上，索引操作失败。
 
 ##### 2.1.1.4 在线推理
 
@@ -954,7 +954,7 @@ nohup bash run_server.sh \
   --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 ```
 
-!> 如果直接启动报错，可以尝试使用 `modelscope` 手动下载模型到指定位置
+> 如果直接启动报错，可以尝试使用 `modelscope` 手动下载模型到指定位置
 ```bash
 pip install modelscope opencv-python uvicorn fastapi
 modelscope download --model iic/speech_ngram_lm_zh-cn-ai-wesp-fst --local_dir /workspace/models/iic/speech_ngram_lm_zh-cn-ai-wesp-fst
@@ -1314,7 +1314,7 @@ cd Qwen3-TTS
 pip install -r requirements.txt
 ```
 
-!> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
+> 请确保安装的 PyTorch CUDA 版本 ≤ nvidia-smi 显示的 CUDA 版本，否则可能无法正常使用
 
 ```bash
 # 检查当前 PyTorch 版本和 CUDA 版本

@@ -83,7 +83,7 @@ rpm -ql dhcp
 
 3. 修改配置
 
-!> 服务器的地址必须与仅主机模式中设置的ip网段相同
+服务器的地址必须与仅主机模式中设置的 IP 网段相同
 
 ```bash
 vim /etc/dhcp/dhcpd.conf
@@ -103,7 +103,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {    # 子网
 
 ```
 
-4. 启动服务
+1. 启动服务
 
 ```bash
 systemctl start dhcpd
@@ -842,7 +842,7 @@ timedatectl set-ntp true    # 启用同步
 timedatectl set-ntp false   # 禁止同步
 ```
 
-!> 在没有互联网或 NTP 服务器的环境中，可以使用 xinetd 提供的时间服务来同步时间。
+> 在没有互联网或 NTP 服务器的环境中，可以使用 xinetd 提供的时间服务来同步时间。
 
 1. 服务端安装
 
@@ -1469,7 +1469,7 @@ scp -r /usr/local/jdk1.8.0_202 root@192.168.3.201:/usr/local/jdk1.8.0_202
 # 批量复制
 for i in {2..3}; do scp -r flink node$i:$PWD; done
 ```
-!> scp目标文件夹不存在的时候，会创建文件夹并将源下的子文件复制到目标下。如果目标文件夹存在，则将源文件夹整个复制到目标下
+> scp目标文件夹不存在的时候，会创建文件夹并将源下的子文件复制到目标下。如果目标文件夹存在，则将源文件夹整个复制到目标下
 
 免密复制，需要安装sshpass，或者使用密钥认证
 ```bash

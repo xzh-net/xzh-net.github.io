@@ -266,7 +266,7 @@ vi /data/higress/data/configmaps/higress-config.yaml
 重启服务
 
 
-!> 使用独立运行版如果出现修改全局配置`mesh`属性无效的问题，有两种解决办法：
+> 使用独立运行版如果出现修改全局配置`mesh`属性无效的问题，有两种解决办法：
 
 - 安装之前： `/data/higress-standalone-aio-v2.2.0/compose/scripts/prepare.sh` 修改默认值。
 - 安装之后： `/data/higress-standalone-aio-v2.2.0/compose/volumes/pilot/config/mesh`
@@ -344,7 +344,7 @@ attributes:
   value_source: "response_body"
 ```
 
-!> 使用内嵌 Nacos 如果也出现修改不生效的问题，可以直接修改插件的配置文件 `volumes/nacos/tenant-config-data/higress-system/higress-system/wasmplugins.ai-statistics-1.0.0`
+> 使用内嵌 Nacos 如果也出现修改不生效的问题，可以直接修改插件的配置文件 `volumes/nacos/tenant-config-data/higress-system/higress-system/wasmplugins.ai-statistics-1.0.0`
 
 ```yaml
 spec:
@@ -674,7 +674,7 @@ curl -v -X POST console.higress.io/post \
 
 #### 3.5.8 遍历数组
 
-!> 该操作目前只能用在 replace 上，请勿在其他转换中尝试该操作，以免造成无法预知的结果
+> 该操作目前只能用在 replace 上，请勿在其他转换中尝试该操作，以免造成无法预知的结果
 
 ```json
 {

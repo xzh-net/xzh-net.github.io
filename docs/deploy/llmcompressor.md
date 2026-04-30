@@ -160,7 +160,7 @@ drwxr-xr-x 2 root root 4096  3月 28 13:27 Qwen3-4B-Instruct-2507-W4A16-awq/
 (llm-compress) root@ai185:/data/code# 
 ```
 
-!> 注意：脚本中模型 ID 本地不存在的时候，默认会去 Hugging Face Hub 下载，一种方式使用 ModelScope 下载后，将模型 ID 修改成本地绝对路径，另外一种方式使用全局变量 `HF_ENDPOINT` 替换成国内镜像站。DATASET_ID 也是同样的问题。
+> 注意：脚本中模型 ID 本地不存在的时候，默认会去 Hugging Face Hub 下载，一种方式使用 ModelScope 下载后，将模型 ID 修改成本地绝对路径，另外一种方式使用全局变量 `HF_ENDPOINT` 替换成国内镜像站。DATASET_ID 也是同样的问题。
 
 #### 1.2.2 激活量化
 

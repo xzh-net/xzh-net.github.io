@@ -348,7 +348,7 @@ location / {
 }
 ```
 
-!> Nginx 日志级别需要设置成： `error_log logs/error.log info;`。使用过程中发现，当请求体超长时，即使设置了 `client_body_buffer_size 10M`，ngx.log 也无法将内容打印完整，这个限制源于 Nginx 自身的设计。具体长度取决于你使用的是标准的 Nginx 还是 OpenResty。第一种处理方式是重新编译源码，修改默认长度（不推荐）。另一种方式将请求体写入到其他日志文件中。
+> Nginx 日志级别需要设置成： `error_log logs/error.log info;`。使用过程中发现，当请求体超长时，即使设置了 `client_body_buffer_size 10M`，ngx.log 也无法将内容打印完整，这个限制源于 Nginx 自身的设计。具体长度取决于你使用的是标准的 Nginx 还是 OpenResty。第一种处理方式是重新编译源码，修改默认长度（不推荐）。另一种方式将请求体写入到其他日志文件中。
 
 
 ```lua

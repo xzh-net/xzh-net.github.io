@@ -116,7 +116,7 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
 ![](../../assets/_images/deploy/gitlab/add_ssh.png)
 
-!> 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
+> 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
 
 ### 2.7 配置 GPG 签名（提交验证）
 
@@ -195,7 +195,7 @@ git config --global commit.gpgsign true
 
 ### 3.3 VS Code 配置（可选）
 
-!> 在使用 VS Code的 Git 功能前，需要先确保电脑上正确安装了Git客户端。
+> 在使用 VS Code的 Git 功能前，需要先确保电脑上正确安装了Git客户端。
 
 打开 VS Code，点击左侧活动栏的 "源代码管理"（Source Control）图标（一个类似小分支的图案）。如果界面正常，说明 Git 已被正确识别。
 
@@ -241,7 +241,7 @@ export GIT_USERNAME="your_username"
 export GIT_PASSWORD="your_password"
 ```
 
-!> 用户名和密码必须进行编码，否则会报错
+> 用户名和密码必须进行编码，否则会报错
 
 
 ### 3.5 常用命令
