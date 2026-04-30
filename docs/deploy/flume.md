@@ -230,7 +230,7 @@ bin/flume-ng agent --conf conf/ --name a3 --conf-file job/flume-dir-hdfs.conf
 
 #### 2.3.3 向upload文件夹中添加文件
 
-> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
+!> 在使用Spooling Directory Source时，不要在监控目录中创建并持续修改文件；上传完成的文件会以.COMPLETED 结尾；被监控文件夹每500毫秒扫描一次文件变动。
 
 ```bash
 vi /opt/words.txt
