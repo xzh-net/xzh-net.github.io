@@ -109,7 +109,7 @@ GRANT PROCESS ON *.* TO 'sonar'@'%';
 flush privileges;
 ```
 
-> 使用root给其他用户授权必须进到服务器执行
+!> 使用root给其他用户授权必须进到服务器执行
 
 2. 设置密码
 
