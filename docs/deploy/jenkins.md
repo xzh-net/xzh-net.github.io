@@ -27,7 +27,7 @@ wget https://get.jenkins.io/redhat-stable/jenkins-2.426.1-1.1.noarch.rpm
 rpm -ivh jenkins-2.426.1-1.1.noarch.rpm
 ```
 
-> 如果安装过，可以卸载
+如果安装过，执行以下命令卸载
 
 ```bash
 rpm -qa |grep jenkins
@@ -35,7 +35,7 @@ rpm -e --nodeps jenkins-2.426.1-1.1.noarch
 find / -iname jenkins | xargs -n 1000 rm -rf
 ```
 
-> 在Ubuntu 22.04上安装Jenkins时可能遇到 `Fontconfig head is null` 或者 `Could not execute systemctl：at /usr/bin/deb-systemd-invoke`，通常是由于系统缺少必要的字体或字体配置问题导致的，可以通过以下步骤解决：
+!> 在Ubuntu 22.04上安装Jenkins时可能遇到 `Fontconfig head is null` 或者 `Could not execute systemctl：at /usr/bin/deb-systemd-invoke`，通常是由于系统缺少必要的字体或字体配置问题导致的，可以通过以下步骤解决：
 
 ```bash
 sudo apt-get install -y fonts-dejavu-core fonts-freefont-ttf
@@ -423,7 +423,7 @@ vi /opt/apache-maven-3.6.3/conf/settings.xml
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mvn_build3.png)
 
-> 输入命令：mvn clean package
+输入命令：mvn clean package
 
 
 ### 1.6 Tomcat安装和配置
@@ -438,7 +438,7 @@ tar -zxf apache-tomcat-8.5.100.tar.gz -C /opt    # 解压
 /opt/apache-tomcat-8.5.100/bin/startup.sh        # 启动
 ```
 
-> 地址为：http://192.168.3.201/8080
+控制台地址：http://192.168.3.201/8080
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat.png)
 
@@ -473,7 +473,7 @@ allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
 -->
 ```
 
-> 访问： http://192.168.3.201:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
+访问地址：http://192.168.3.201:8080/manager/html ，输入tomcat和tomcat，看到以下页面代表成功
 
 ![](../../assets/_images/deploy/jenkins/jenkins_tomcat2.png)
 
@@ -770,7 +770,7 @@ HH 1,15 1-11 *
 
 轮询SCM，是指定时扫描本地代码仓库的代码是否有变更，如果代码有变更就触发项目构建。
 
-> 注意：这次构建触发器，Jenkins会定时扫描本地整个项目的代码，增大系统的开销，不建议使用
+!> 注意：这次构建触发器，Jenkins会定时扫描本地整个项目的代码，增大系统的开销，不建议使用
 
 ![](../../assets/_images/deploy/jenkins/jenkins_build_scm.png)
 
@@ -791,7 +791,7 @@ HH 1,15 1-11 *
 
 ![](../../assets/_images/deploy/jenkins/jenkins_project_webhook.png)
 
-> 注意：以下设置必须完成，否则会报错！Manage Jenkins -> System
+!> 注意：以下设置必须完成，否则会报错！Manage Jenkins -> System
 
 ![](../../assets/_images/deploy/jenkins/jenkins_plugin_gitwebhook2.png)
 
@@ -858,7 +858,7 @@ Manage Jenkins -> System -> Extended E-mail Notification
 
 ![](../../assets/_images/deploy/jenkins/jenkins_mail_admin4.png)
 
-> 邮件通知和凭证中使用的密码均为`授权码`
+!> 邮件通知和凭证中使用的密码均为`授权码`
 
 
 #### 3.4.5 设置邮件模板
@@ -1020,7 +1020,7 @@ sonar.projectName=web_demo
 sonar.java.binaries=/
 ```
 
-> 项目中如果无法添加`sonar-project.properties`文件，可以在Jenkins流水线中声明规则并添加如下代码
+!> 项目中如果无法添加`sonar-project.properties`文件，可以在Jenkins流水线中声明规则并添加如下代码
 
 ```bash
 stage('构建规则') {
@@ -1169,7 +1169,7 @@ node {
 
 #### 4.1.7 安装插件SSH Pipeline Steps
 
-> `SSH Pipeline Steps`另一款发布插件 。`Publish Over SSH`插件依赖全局SSH配置，无法使用密钥，注重于文件传输，而`SSH Pipeline Steps`插件可以配置密钥，注重于命令执行。脚本如下：
+`SSH Pipeline Steps`另一款发布插件 。`Publish Over SSH`插件依赖全局SSH配置，无法使用密钥，注重于文件传输，而`SSH Pipeline Steps`插件可以配置密钥，注重于命令执行。脚本如下：
 
 ```shell
 pipeline {
@@ -1225,7 +1225,7 @@ pipeline {
 }
 ```
 
-> 认证机制：Jenkins需要提供的能匹配目标机器上某个用户公钥的私钥，该用户对应的公钥在目标机器`~/.ssh/authorized_keys`文件中存放
+!> 认证机制：Jenkins需要提供的能匹配目标机器上某个用户公钥的私钥，该用户对应的公钥在目标机器`~/.ssh/authorized_keys`文件中存放
 - 私钥来源：目标机器上对应用户的私钥（如 ~/.ssh/id_rsa）。
 - 公钥位置：目标机器的 ~/.ssh/authorized_keys中必须有对应的公钥。
 
@@ -1342,7 +1342,7 @@ node {
 
 #### 4.2.3 密钥设置
 
-> jenkins服务器需要免密登录到目标服务器
+!> jenkins服务器需要免密登录到目标服务器
 
 1. 获取jenkins服务器公钥
 
@@ -1426,7 +1426,7 @@ pipeline {
 }
 ```
 
-> 非root用户启动服务，这个过程会出现 `/var/run/docker.sock: connect: permission denied` 没有权限的问题，需要将Jenkins用户加入Docker用户组
+!> 非root用户启动服务，这个过程会出现 `/var/run/docker.sock: connect: permission denied` 没有权限的问题，需要将Jenkins用户加入Docker用户组
 
 ```bash
 sudo usermod -aG docker jenkins
