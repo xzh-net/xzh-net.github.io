@@ -86,7 +86,7 @@ kubectl get Ingress -n bookinfo             # 查看创建绑定
 192.168.2.201 productpage.istio.qy.com
 ```
 
-> 访问地址：http://productpage.istio.qy.com:30080 k8s中将ingress的80映射为30080
+访问地址：http://productpage.istio.qy.com:30080 ，k8s中将 ingress 的 80 映射为 30080
 
 ### 2.4 通过istio的ingressgateway访问
 
