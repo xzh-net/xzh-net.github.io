@@ -862,7 +862,7 @@ db.settings.save( { _id:"chunksize", value: 1 } )
 
 同副本集处理方式一致
 
-> 如果在开启认证之前未创建管理员账号，可以登录任意路由节点本地登录，相当于后门，只能在admin下操作
+!> 如果在开启认证之前未创建管理员账号，可以登录任意路由节点本地登录，相当于后门，只能在admin下操作
 
 ```bash
 /usr/local/mongodb/bin/mongo --host 192.168.2.199 --port 27017  
