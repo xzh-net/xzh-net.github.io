@@ -1799,9 +1799,7 @@ docker run --name nacos-standalone-derby \
     -d nacos/nacos-server:v3.0.1
 ```
 
-控制台地址
-
-http://172.17.17.161:8080
+控制台地址：http://172.17.17.161:8080
 
 高级使用
 
