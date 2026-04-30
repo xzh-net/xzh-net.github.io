@@ -128,8 +128,8 @@ listeners.tcp.$name.max_connections = 1024000
 ./emqx start
 ```
 
-控制台地址：http://192.168.2.201:18083/
-默认账号密码admin/public
+控制台地址：http://192.168.2.201:18083
+默认账号密码：admin/public
 
 #### 1.1.8 客户端测试
 
@@ -298,7 +298,7 @@ VALUES
 	('emqx', 'efa1f375d76194fa51a3556a97e641e61685f914d446979da50a551a4333ffd7', NULL, false);
 ```
 
-> 启用PostgreSQL认证后，你可以通过用户名： emqx，密码：public 连接。
+!> 启用PostgreSQL认证后，你可以通过用户名： emqx，密码：public 连接
 
 加盐规则与认证SQL
 
