@@ -2,15 +2,15 @@
 
 GitLab是一个用于仓库管理系统的开源项目，使用Git作为代码管理工具，并在此基础上搭建起来的Web服务
 
-## 1. 安装
+## 1. 服务端部署
 
-### 1.1 安装依赖
+### 1.1 安装系统依赖
 
 ```bash
 yum -y install policycoreutils openssh-server openssh-clients postfix   # 安装依赖
 ```
 
-### 1.2 初始化环境
+### 1.2 配置基础环境
 
 ```bash
 systemctl enable sshd && sudo systemctl start sshd      # 启动ssh服务&设置为开机启动
@@ -28,9 +28,9 @@ wget https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7/gitlab-ce-12.4.2-ce.
 rpm -i gitlab-ce-12.4.2-ce.0.el7.x86_64.rpm --force --nodeps
 ```
 
-### 1.4 修改配置
+### 1.4 配置 GitLab
 
-1. 修改IP地址和端口
+修改IP地址和端口
 
 ```bash
 vi /etc/gitlab/gitlab.rb
@@ -39,9 +39,7 @@ external_url 'http://192.168.3.200'
 nginx['listen_port'] = 80
 ```
 
-2. 域名访问（可选）
-
-开启SSL，程序自动监听443端口
+域名访问，开启SSL，程序自动监听443端口（可选）
 
 ```bash
 vi /etc/gitlab/gitlab.rb
@@ -71,61 +69,58 @@ server {
 ```
 
 
-### 1.5 启动服务
+### 1.5 启动并应用配置
 
 ```bash
 gitlab-ctl reconfigure  # 每次修改配置需要执行
 gitlab-ctl restart
 ```
 
-## 2. 应用设置
+## 2. GitLab 初始设置
 
-### 2.1 系统登录
+### 2.1 首次访问与 root 密码重置
 
-访问地址：http://192.168.3.200 ，首次进入重置root账号密码
+访问地址：http://192.168.3.200
 
-### 2.2 添加群组
+### 2.2 创建群组
 
 ![](../../assets/_images/deploy/gitlab/create_group.png)
 
-### 2.3 创建用户
+### 2.3 创建用户并设置密码
 
 ![](../../assets/_images/deploy/gitlab/create_user.png)
 
-
 ![](../../assets/_images/deploy/gitlab/create_user2.png)
-
-### 2.4 修改密码
 
 ![](../../assets/_images/deploy/gitlab/update_user.png)
 
 
-### 2.5 用户添加到群组中
+### 2.4 将用户加入群组
 
 ![](../../assets/_images/deploy/gitlab/group_add_user.png)
 
 
-### 2.6 创建项目
+### 2.5 创建项目
 
 ![](../../assets/_images/deploy/gitlab/create_project.png)
 
-### 2.7 设置SSH密钥
+### 2.6 配置 SSH 密钥（免密推送）
 
-1. 本地生成新的密钥
+客户端生成密钥
 
 ```bash
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ```
 
-2. 添加SSH公钥到GitLab
+添加 SSH 公钥到 GitLab 
 
 ![](../../assets/_images/deploy/gitlab/add_ssh.png)
 
 > 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
 
-### 2.8 设置GPG密钥
+### 2.7 配置 GPG 签名（提交验证）
 
-1. 客户端生成密钥
+客户端生成密钥
 
 ```bash
 # 安装GPG
@@ -150,6 +145,7 @@ gpg --delete-secret-keys 8108F798EFF7AFD8
 ```
 
 密钥格式示例：
+
 ```lua
 sec   ed25519/8108F798EFF7AFD8 2025-01-24 [SC]
       5A1E8611606C4AA765F991E38108F798EFF7AFD8
@@ -157,12 +153,12 @@ uid                 [ultimate] xcg <xcg@163.com>
 ssb   cv25519/CF7625F4DE027403 2025-01-24 [E]
 ```
 
-2. 添加GPG公钥到GitLab
+添加 GPG 公钥到 GitLab
 
 ![](../../assets/_images/deploy/gitlab/add_gpg.png)
 
 
-3. 客户端配置Key
+客户端配置 Key
 
 ```bash
 # 设置提交代码时使用的Key
@@ -171,34 +167,46 @@ git config --global user.signingkey 8108F798EFF7AFD8
 git config --global commit.gpgsign true
 ```
 
-4. 设置成功后，提交记录显示已验证
+设置成功后，提交记录显示已验证
 
 ![](../../assets/_images/deploy/gitlab/gpg.png)
 
 
+## 3. 客户端使用
 
-## 3. 客户端
+### 3.1 安装 Git for Windows
 
-### 3.1 安装
+- 下载地址1：https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe
+- 下载地址2：https://git-scm.com/install/windows        
 
-下载地址：https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe
-        
+### 3.2 克隆项目
 
-### 3.2 下载项目
-
-1. 复制连接
+复制连接
 
 ![](../../assets/_images/deploy/gitlab/project_clone.png)
 
-2. 打开命令行
+打开命令行
 
 ![](../../assets/_images/deploy/gitlab/gitlab_base_cmd.png)
 
-3. 设置用户名密码
+设置用户名密码
 
 ![](../../assets/_images/deploy/gitlab/gitlab_auth.png)
 
-4. HTTP免密（可选）
+### 3.3 VS Code 配置（可选）
+
+!> 在使用 VS Code的 Git 功能前，需要先确保电脑上正确安装了Git客户端。
+
+打开 VS Code，点击左侧活动栏的 "源代码管理"（Source Control）图标（一个类似小分支的图案）。如果界面正常，说明 Git 已被正确识别。
+
+打开一个新终端（Terminal > New Terminal），输入以下命令配置全局用户名和邮箱
+
+```bash
+git config --global user.name "xuzhihao"
+git config --global user.email "xuzhihao@163.com"
+```
+
+### 3.4 HTTP 免密（可选）
 
 免密实现基于文件存储的持久化方式，将用户名和密码存储在文件中，然后在每次执行git操作时，自动读取文件中的凭证信息。
 
@@ -225,10 +233,10 @@ export GIT_USERNAME="your_username"
 export GIT_PASSWORD="your_password"
 ```
 
-> 用户名和密码必须进行编码，否则会报错
+!> 用户名和密码必须进行编码，否则会报错
 
 
-### 3.3 常用命令
+### 3.5 常用命令
 
 提交代码
 
@@ -268,7 +276,7 @@ git config --global --list      # 查看全局配置
 git config --global --edit      # 编辑全局配置，windows按下 Win + R 键，然后输入 control keymgr.dll 来打开凭据管理器
 ```
 
-代码统计
+### 3.6 代码统计
 
 ```bash
 # 统计特定时间段内、由指定作者所做的代码更改的统计数据
