@@ -1,7 +1,7 @@
 
 # 基于Nexus3快速搭建Maven私有仓库
 
-> 为什么要搭建私有仓库
+为什么要搭建私有仓库
 
 ![](../../assets/_images/deploy/nexus3/maven.png)
 
@@ -72,7 +72,7 @@ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus
 
 ![](../../assets/_images/deploy/nexus3/create_proxy2.png)
 
-> 阿里云的maven中央仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
+阿里云仓库地址：http://maven.aliyun.com/nexus/content/groups/public/
 
 ### 2.6 创建仓库组
 
