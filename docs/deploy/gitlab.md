@@ -116,7 +116,7 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
 ![](../../assets/_images/deploy/gitlab/add_ssh.png)
 
-> 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
+!> 仓库地址必须配置域名，IP下测试未通过。原因配置待查。
 
 ### 2.7 配置 GPG 签名（提交验证）
 
