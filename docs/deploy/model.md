@@ -883,7 +883,8 @@ docker rm -f qwen3-asr
 
 Fun-ASR-Nano-2512 支持低延迟实时转写，适用于实时字幕、智能语音助手、现场直播等对延迟敏感的场景。在教育、金融等垂直领域表现出色，能够精准识别专业术语与行业表达，有效应对大模型常见的"幻觉"生成和语种混淆等挑战。可通过自定义热词列表进一步提升专业术语的识别率，缓解语言混淆问题。
 
-仓库地址：https://github.com/modelscope/FunASR
+- 工具包：https://github.com/modelscope/FunASR
+- 模型：https://github.com/FunAudioLLM/Fun-ASR
 
 ##### 2.1.2.1 离线文件转写服务（CPU）
 
