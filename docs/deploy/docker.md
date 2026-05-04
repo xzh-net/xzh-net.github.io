@@ -450,9 +450,9 @@ docker network create -d bridge xzh-bridge                  # 创建新网络，
 docker network rm xzh-bridge                                # 删除指定网络
 docker network prune                                        # 删除未使用的网络
 docker network inspect xzh-bridge                           # 查看网络信息           
-docker network connect xzh-bridge  [containerid]            # 手动将某个容器加入网桥
-docker network disconnect xzh-bridge  [containerid]         # 手动将某个容器从网桥中移除
-docker port [containerid]                                   # 查看容器端口映射关系
+docker network connect xzh-bridge  [container_id]           # 手动将某个容器加入网桥
+docker network disconnect xzh-bridge  [container_id]        # 手动将某个容器从网桥中移除
+docker port [container_id]                                  # 查看容器端口映射关系
 docker run --name nginx --network xzh-bridge -p 8080:80 -d nginx:latest   # 创建容器时添加到指定网桥中
 ```
 
@@ -465,20 +465,24 @@ docker network create -d bridge --subnet=172.18.0.0/16 --gateway=172.18.0.1 xzh-
 
 ```bash
 docker volume ls
-docker volume create pgdata       # 创建卷
-docker volume inspect pgdata      # 查看卷位置
-docker volume rm $(docker volume ls -qf dangling=true)          # 删除所有dangling数据卷(即无用的volume)
-docker run -it -v /[local_path]|pgdata:/[container_path] [imageid] /bin/bash   # 挂载宿主机的一个目录/卷
+docker volume create pgdata         # 创建卷
+docker volume inspect pgdata        # 查看卷位置
+docker volume prune                 # 删除所有未使用的 volume                 
+docker volume rm -f $(docker volume ls -q)  # 强制删除所有 volume
+docker run -it -v /data:/app/data [image_id] /bin/bash                      # 挂载本地路径到容器内
+docker run -it -v pgdata:/var/lib/postgresql/data [image_id] /bin/bash      # 挂载 volume 到容器内
 ```
+
+!> docker run 中的 `[image_id]` 必须是镜像ID或镜像名称，不能是容器ID（因为那时容器还没创建）
 
 ### 2.4 镜像
 
 ```bash
-docker images                   # 查看镜像
+docker images                       # 查看镜像
 docker image inspect minio/minio:latest | grep  -i version      # 查看已下载镜像版本
-docker history [imageid]        # 查看镜像构建历史
-docker system prune -a -f       # 强制清理未使用的镜像、容器、卷和网络
-docker rmi [imageid]            # 删除指定镜像
+docker history [image_id]           # 查看镜像构建历史
+docker system prune -a -f           # 强制清理未使用的镜像、容器、卷和网络
+docker rmi [image_id]               # 删除指定镜像
 docker rmi $(docker images | grep "none" | awk '{print $3}')    # 删除none的镜像
 docker rmi $(docker images -qa)                                 # 删除所有镜像
 docker save -o mysql_5.7.44.tar mysql:5.7.44                    # 导出镜像归档文件
@@ -486,7 +490,7 @@ docker load -i mysql_5.7.44.tar                                 # 镜像导入
 # 本地安装xz工具，导出压缩镜像
 docker save mysql:5.7.44 | xz > mysql_5.7.44.tar.xz             # 镜像备份并压缩
 # 镜像分析
-docker stats [containerid]                              # 监控指定容器
+docker stats [container_id]                             # 监控指定容器
 docker stats $(docker ps -a -q)                         # 监控所有容器
 docker stats --no-stream=true $(docker ps -a -q)        # 监控所有容器
 docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest influxdb:1.8
@@ -582,35 +586,35 @@ for t in *.tar.gz; do docker load -i "$t"; done
 
 ```bash
 docker ps -a|-q|-l  
-docker start [containerid]
+docker start [container_id]
 docker start $(docker ps -a -q) 
-docker restart [containerid]
-docker kill [containerid]
-docker stop [containerid]
-docker exec -it [containerid] /bin/bash
-docker top [containerid]
+docker restart [container_id]
+docker kill [container_id]
+docker stop [container_id]
+docker exec -it [container_id] /bin/bash
+docker top [container_id]
 
-docker inspect [containerid] | grep IPAddress
-docker inspect --format '{{ .NetworkSettings.IPAddress }}' [containerid]    # 查看容器ip地址
+docker inspect [container_id] | grep IPAddress
+docker inspect --format '{{ .NetworkSettings.IPAddress }}' [container_id]       # 查看容器ip地址
 
-docker inspect [containerid] | | grep Mounts -A 20                          # 查看容器映射目录
-docker update --restart=always [container_id]                               # 修改指定容器自动启动
-docker update --restart=always $(docker ps -q -a)                           # 更新所有容器启动时自动启动
+docker inspect [container_id] | | grep Mounts -A 20                             # 查看容器映射目录
+docker update --restart=always [container_id]                                   # 修改指定容器自动启动
+docker update --restart=always $(docker ps -q -a)                               # 更新所有容器启动时自动启动
 # 删除
-docker rm [containerid]                                                     # 删除指定容器
-docker rm $(docker ps -a | awk '/[imageid]/ {print $1}')                    # 删除相同imageid的容器
-docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm                # 删除所有关闭的容器
-docker rm -f `docker ps -a -q`                                              # 强制删除所有容器
+docker rm [container_id]                                                        # 删除指定容器
+docker rm $(docker ps -a | awk '/[image_id]/ {print $1}')                       # 删除相同image_id的容器
+docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm                    # 删除所有关闭的容器
+docker rm -f `docker ps -a -q`                                                  # 强制删除所有容器
 # 日志
-docker logs -t --since="2018-02-08T13:23:37" [containerid]                  # 查看某时间之后的日志
-docker logs -f -t --since="2018-02-08" --tail=100 [containerid]             # 查看指定时间后的日志，只显示最后100行
-docker logs --since 30m [containerid]                                       # 查看最近30分钟的日志
-docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" [containerid]  # 查看某时间段日志
+docker logs -t --since="2018-02-08T13:23:37" [container_id]                     # 查看某时间之后的日志
+docker logs -f -t --since="2018-02-08" --tail=100 [container_id]                # 查看指定时间后的日志，只显示最后100行
+docker logs --since 30m [container_id]                                          # 查看最近30分钟的日志
+docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" [container_id]   # 查看某时间段日志
 # 数据拷贝
-docker cp rabbitmq:/[container_path] [local_path]   # 将容器中的文件copy至本地路径
-docker cp /etc/localtime [containerid]:/etc/        # 将主机时间到容器
-docker cp [local_path] rabbitmq:/[container_path]/  # 将主机文件copy至rabbitmq容器
-docker cp [local_path] rabbitmq:/[container_path]   # 将主机文件copy至rabbitmq容器，目录重命名为[container_path]（注意与非重命名copy的区别）
+docker cp rabbitmq:/[container_path] [local_path]       # 将容器中的文件copy至本地路径
+docker cp /etc/localtime [container_id]:/etc/           # 将主机时间到容器
+docker cp [local_path] rabbitmq:/[container_path]/      # 将主机文件copy至rabbitmq容器
+docker cp [local_path] rabbitmq:/[container_path]       # 将主机文件copy至rabbitmq容器，目录重命名为[container_path]（注意与非重命名copy的区别）
 ```
 
 ### 2.6 仓库
@@ -1051,7 +1055,7 @@ jps
    - -m :提交时的说明文字；
 
 ```bash
-docker commit  -a="xzh" -m="my container" [containerid]  container:v1.1
+docker commit  -a="xzh" -m="my container" [container_id]  container:v1.1
 ```
 
 ### 3.3 插件构建
