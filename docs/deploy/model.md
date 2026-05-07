@@ -978,7 +978,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 
 ```bash
 mkdir -p /data/funasr-runtime-resources/models
-docker run -p 10095:10095 -it --privileged=true \
+docker run -p 10095:10095 -p 9090:9090 -it --privileged=true \
   -v /data/funasr-runtime-resources/models:/workspace/models \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.13
 ```
@@ -997,6 +997,13 @@ nohup bash run_server_2pass.sh \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
   --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
+```
+
+启动实时语音识别 Web UI 
+
+```bash
+cd html5
+nohup python h5Server.py --port 9090 > log.txt 2>&1 &
 ```
 
 客户端测试
