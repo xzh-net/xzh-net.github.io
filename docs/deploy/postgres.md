@@ -188,13 +188,17 @@ ALTER USER postgres WITH PASSWORD 'postgres';
 
 ```bash
 psql -h localhost -p 5432 -U postgres -W # 使用指定用户和IP端口登陆
+
 \q                  # 退出psql命令行
 \du                 # 查看角色属性
 \l                  # 查看数据库列表
 \l *template*       # 查看包含template字符的数据库
 \c test             # 切换到test数据库
 \d                  # 查看当前schema中所有的表
-\d [schema.]table   #查看表的结构
+\d [schema.]table   # 查看表的结构
+
+# 执行命令
+\i /home/postgres/V1.1__init_core.sql
 ```
 
 ### 1.2 主备流复制
