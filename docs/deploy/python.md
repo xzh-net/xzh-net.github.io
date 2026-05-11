@@ -354,6 +354,8 @@ conda activate copaw-flash-9b
 
 Flask 是轻量级 Web 开发框架，让你用灵活代码构建后端服务与自定义前端界面
 
+官方网址：https://dormousehole.readthedocs.io/en/latest/
+
 #### 3.1.1 Hello World
 
 1. 生成requirements.txt
@@ -886,6 +888,8 @@ if __name__ == '__main__':
 ### 3.2 Gradio
 
 Gradio 是专为机器学习模型演示而生的工具，让你用极简代码生成前端界面
+
+官方网址：https://gradio.org.cn/guides/quickstart
 
 #### 3.2.1 安装依赖
 
