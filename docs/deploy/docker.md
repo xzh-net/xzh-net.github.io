@@ -723,7 +723,7 @@ ADD target/ROOT.war /usr/local/tomcat/webapps/
 CMD ["catalina.sh", "run"]
 ```
 
-#### 3.1.3 基于CentOS 7构建
+#### 3.1.3 基于 CentOS 7 构建
 
 1. 创建文件
 
@@ -765,7 +765,7 @@ docker run -dit --name tomcat8 -p 8080:8080 tomcat8
 docker exec -it tomcat8 /bin/bash
 ```
 
-#### 3.1.4 基于Ubuntu 14构建
+#### 3.1.4 基于 Ubuntu 14 构建
 
 1. 创建文件
 
@@ -853,11 +853,16 @@ sudo docker build --tag coturn .
 sudo docker run -p 3478:3478 -p 3478:3478/udp coturn
 ```
 
-#### 3.1.5 基于Ubuntu 22构建
+#### 3.1.5 基于 Ubuntu 22 构建
 
 ```yaml
 FROM ubuntu:22.04
 MAINTAINER xzh
+
+# 替换镜像源
+RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
+
 # 系统环境
 RUN apt-get update && apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping git
 
