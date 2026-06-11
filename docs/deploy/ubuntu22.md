@@ -186,6 +186,8 @@ network:
 
 ### 2.3 SSH配置
 
+允许 root 远程登录
+
 ```bash
 vi /etc/ssh/sshd_config
 
@@ -197,9 +199,11 @@ PermitRootLogin yes         # 允许远程登录
 PasswordAuthentication yes  # 开启用户名和密码来验证
 ```
 
+开机启动
+
 ```bash
-/etc/init.d/ssh restart     # 启动服务
-update-rc.d ssh enable      # 开机启动
+systemctl restart ssh
+systemctl enable ssh
 ```
 
 ### 2.4 关闭防火墙
@@ -237,9 +241,24 @@ sudo ufw limit 22   # 限制22端口连接数
 
 ### 2.5 更换软件源
 
+备份原有源配置
+
 ```bash
-vim /etc/apt/sources.list
-deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+```
+
+替换为阿里云源
+
+```bash
+sudo sed -i 's|http://.*.ubuntu.com|http://mirrors.aliyun.com|g' /etc/apt/sources.list
+sudo sed -i 's|http://security.ubuntu.com|http://mirrors.aliyun.com|g' /etc/apt/sources.list
+```
+
+替换为清华源
+
+```bash
+sudo sed -i 's|http://.*.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
+sudo sed -i 's|http://security.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
 ```
 
 更新软件包列表
@@ -274,6 +293,7 @@ sudo apt install -f && sudo apt autoremove
 apt-get install -y curl vim zip unzip xz-utils telnet lsof wget net-tools iputils-ping ntpdate
 # 执行一次时间同步
 sudo ntpdate ntp4.aliyun.com
+sudo timedatectl set-timezone Asia/Shanghai
 ```
 
 离线下载，默认的下载目录是 `/var/cache/apt/archives/`
