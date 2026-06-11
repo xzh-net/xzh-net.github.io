@@ -153,6 +153,12 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
 
+验证配置
+
+```bash
+sudo systemctl show --property=Environment docker
+```
+
 #### 1.4.5 设置容器子网
 
 ```bash
