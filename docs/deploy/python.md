@@ -270,8 +270,8 @@ rm -rf vllm-dev
 bash Miniconda3-latest-Linux-x86_64.sh
 # 刷新配置
 source ~/.bashrc
-# 首次运行需要接受条款
-conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+# 首次运行需要接受条款，否则无法创建环境
+conda tos accept
 ```
 
 默认环境路径 `/root/miniconda3/envs/`
