@@ -445,7 +445,6 @@ docker info | grep Cgroup   # 查看驱动
 docker system df            # 查看占用的磁盘空间
 docker info | grep "Docker Root Dir"    # 查看镜像位置
 docker info | grep -i proxy             # 查看代理
-
 ```
 
 ### 2.2 网络
@@ -1232,6 +1231,79 @@ use file_center;
 source /file-center.sql;
 grant all privileges on *.* to 'root' @'%' identified by '123456';
 ```
+
+#### MySQL 8.4.10
+
+创建目录
+```bash
+mkdir -p /data/mysql8.4/{data,conf,logs}
+```
+
+创建配置文件
+
+```bash
+vi /data/mysql8.4/conf/my.cnf
+```
+
+```conf
+[mysqld]
+port=3306
+user=mysql
+server-id=1
+
+# 字符集（8.4 默认 utf8mb4，显式声明更安全）
+character-set-server=utf8mb4
+collation-server=utf8mb4_0900_ai_ci
+
+# 时区
+default-time-zone='+8:00'
+
+# 连接
+max_connections=500
+
+# InnoDB
+innodb_buffer_pool_size=512M
+innodb_redo_log_capacity=512M
+
+innodb_flush_log_at_trx_commit=1
+innodb_file_per_table=1
+
+# 日志
+log-error=/var/log/mysql/error.log
+slow_query_log=1
+slow_query_log_file=/var/log/mysql/slow.log
+long_query_time=2
+
+# SQL 模式
+sql_mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+
+[client]
+default-character-set=utf8mb4
+
+[mysql]
+default-character-set=utf8mb4
+```
+
+运行容器
+```bash
+docker run --name mysql84 \
+-p 3306:3306 \
+-e TZ=Asia/Shanghai \
+-e MYSQL_ROOT_PASSWORD=123456 \
+-v /data/mysql8.4/data:/var/lib/mysql \
+-v /data/mysql8.4/conf:/etc/mysql/conf.d \
+-v /data/mysql8.4/logs:/var/log/mysql \
+-v /etc/localtime:/etc/localtime:ro \
+-d mysql:8.4.10
+```
+
+验证字符集
+```bash
+docker exec -it mysql84 mysql -uroot -p123456
+show variables like '%char%';
+create database test;
+```
+
 
 #### PostgreSQL 12.4
 
