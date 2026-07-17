@@ -253,37 +253,76 @@ ORDER BY
 
 ### 3.2 创建函数
 
+1. 使用聚合函数拼接
+
 ```sql
-CREATE FUNCTION `F_ACTUSER`(v_FLOWCID varchar(40)) RETURNS longtext CHARSET utf8
+CREATE FUNCTION `F_ACTUSER`(v_FLOWCID VARCHAR(40)) 
+RETURNS LONGTEXT CHARSET utf8
 BEGIN
     DECLARE v_STR LONGTEXT DEFAULT '';
-    DECLARE V_INDEX BIGINT DEFAULT 1;
-    DECLARE done INT DEFAULT 0;
-    DECLARE V_USERNAME VARCHAR(400);
-    DECLARE PATH_CUR CURSOR FOR (SELECT DISTINCT B.USERNAME FROM TS_FLOW_PATH_COM A
-                INNER JOIN VJSP_USERS B
-                   ON B.USERID = A.TS_MK_USERID
-                WHERE A.FLOWCID = v_FLOWCID
-                  AND C.FLOWZT NOT IN (-1, 2, 3));
-                                    
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
     
-    OPEN PATH_CUR;
-    pathLoop: LOOP
-        FETCH PATH_CUR INTO V_USERNAME;
-        IF done =1 THEN
-            LEAVE pathLoop; 
-        END IF; 
-        IF V_INDEX =1 THEN
-            SET v_STR = CONCAT(v_STR,V_USERNAME);
-            SET V_INDEX =2;
-        ELSE
-            SET v_STR = CONCAT(v_STR,',',V_USERNAME);
-        END IF;
-    END LOOP pathLoop;
-    CLOSE PATH_CUR;
+    SELECT GROUP_CONCAT(DISTINCT B.USERNAME ORDER BY B.USERNAME SEPARATOR ',')
+    INTO v_STR
+    FROM TS_FLOW_PATH_COM A
+    INNER JOIN VJSP_USERS B ON B.USERID = A.TS_MK_USERID
+    WHERE A.FLOWCID = v_FLOWCID
+      AND A.FLOWZT NOT IN (-1, 2, 3);
+      
     RETURN v_STR;
-END
+END;
+```
+
+2. 基于 Twitter Snowflake 算法实现的分布式唯一 ID 生成器
+
+```sql
+-- 1. 初始化用户变量，用于在函数调用间保持状态
+SET @last_timestamp = -1;
+SET @sequence = 0;
+
+-- 2. 删除已存在的同名函数（如果有）
+DROP FUNCTION IF EXISTS generate_snowflake_id;
+
+-- 3. 创建新的函数
+DELIMITER //
+
+CREATE FUNCTION generate_snowflake_id()
+RETURNS BIGINT
+READS SQL DATA
+BEGIN
+    DECLARE timestamp BIGINT;
+    -- 机器ID，你可以根据实际情况调整 (范围: 0-31)
+    DECLARE machine_id BIGINT DEFAULT 1;
+    -- 数据中心ID，你可以根据实际情况调整 (范围: 0-31)
+    DECLARE data_center_id BIGINT DEFAULT 0;
+    -- 起始时间戳 (2010-01-01 00:00:00 UTC)，可根据需要调整
+    DECLARE epoch BIGINT DEFAULT 1288834974657;
+
+    -- 获取当前毫秒级时间戳，并减去起始时间
+    SET timestamp = FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000) - epoch;
+
+    -- 序列号生成逻辑
+    IF timestamp = @last_timestamp THEN
+        -- 同一毫秒内，序列号加1，并确保在0-4095之间循环
+        SET @sequence = (@sequence + 1) % 4096;
+    ELSE
+        -- 新的毫秒，重置序列号
+        SET @sequence = 0;
+    END IF;
+
+    -- 更新"最后时间戳"变量
+    SET @last_timestamp = timestamp;
+
+    -- 通过位运算组合最终ID
+    -- timestamp左移22位，data_center_id左移17位，machine_id左移12位，最后与序列号进行按位或操作
+    RETURN (timestamp << 22) | (data_center_id << 17) | (machine_id << 12) | @sequence;
+END //
+
+DELIMITER ;
+```
+
+测试
+```sql
+select generate_snowflake_id()
 ```
 
 ### 3.3 创建存储过程
