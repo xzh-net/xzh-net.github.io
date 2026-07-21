@@ -1554,22 +1554,24 @@ rouate add -net 192.168.2.0/24 dev eth0         # 对一个网络添加一个新
 
 Network Mapper是一款开源免费的针对大型网络的端口扫描工具，nmap可以检测目标主机是否在线、主机端口开放情况、检测主机运行的服务类型及版本信息、检测操作系统与设备类型等信息
 
-安装
+1. 安装
 ```bash
 yum install -y nmap
 ```
 
-扫描目标主机的开放端口
+2. 扫描目标主机的开放端口
 ```bash
 nmap www.baidu.com
 nmap 192.168.1.1
+nmap -sU -p 50000-50500 192.168.1.1     # 扫描50000到50500之间的UDP端口
 ```
 
-检测在线主机
+3. 检测在线主机
 ```bash
 # 指定从enp0s3接口扫描
 sudo nmap -e enp0s3 -sn 192.168.100.0/22
 ```
+
 
 ### 2.8 数据包分析
 
@@ -1582,16 +1584,24 @@ yum install tcpdump
 ```bash
 # 监控所有，只过滤445端口（SMB），-w 保存到文件
 tcpdump -i any -nn port 445 -w smb_capture.pcap
+ 
 # 监控指定网卡，-nn（避免DNS查询）
 tcpdump -i enp0s3 -nn -c 100
+
 # 监控数据库访问，-c <数量>（避免无限输出）
 tcpdump -i enp0s3 -nn 'port 3306 and host 192.168.2.3'
+
 # 监控特定IP的HTTP流量
 tcpdump -i enp0s3 -nn 'host 192.168.2.3 and port 80' -A
+
 # 监控来自192.168.2.3的所有流量
 tcpdump -i enp0s3 -nn 'src host 192.168.2.3'   
+
 # 监控发往192.168.2.3的所有流量  
 tcpdump -i enp0s3 -nn 'dst host 192.168.2.3'
+
+# 监控HTTP、RTMP 头部、SIP 信令等文本协议
+tcpdump -i any port 15060 -n -A -vv
 ```
 
 ### 2.9 流量统计
@@ -1697,6 +1707,8 @@ nc -lk 44444                # 开启监听服务
 nc 192.168.2.100 44444      # 客户端连接
 ```
 
+离线安装
+
 ```bash
 yum install nc --downloadonly --downloaddir=/opt/
 yum localinstall *.rpm
@@ -1705,7 +1717,7 @@ yum localinstall *.rpm
 2. 端口检测
 
 ```bash
-nc -z -u -v 192.168.2.1 68      # 检测udp端口
+nc -zuv 192.168.2.1 50000       # 检测udp端口
 nc -z -v 192.168.2.100 22       # 检测tcp端口
 nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok    # 用于脚本返回值
 ```
@@ -1713,15 +1725,19 @@ nc -z -w 3 192.168.20.183 7443 && echo ok || echo not ok    # 用于脚本返回
 3. 文件传输
 
 ```bash
-nc -l 9995 >oauth_center_bak.tar            # 接收机器开启9995接收流文件到oauth_center_bak.tar
-nc 192.168.2.100 9995 < oauth_center.tar    # 传输机器通过9555上传
+# 主动连接192.168.2.100的机器的9995端口，并将本机当前目录下的 oauth_center.tar文件内容，作为输入数据流发送过去       
+nc 192.168.2.100 9995 < oauth_center.tar
+# 在本机的9995端口上开启监听（等待连接），并将从该端口接收到的所有原始数据写入到当前目录下名为 oauth_center_bak.tar 的文件中
+nc -l 9995 > oauth_center_bak.tar
 ```
 
 4. 测试网速
 
 ```bash
-nc -l 9991 >/dev/null                       # 接收机器开启9991将文件写入/dev/null
-nc 192.168.2.100 9991 </dev/zero            # 发送方把无限个0发送给A机器的9991端口
+# 在本机的9991端口开启监听，并将接收到的所有数据直接丢弃
+nc -l 9991 > /dev/null
+# 主动连接192.168.2.100机器的9991端口，并将 /dev/zero（一个永远产生无限个二进制 0（空字节）的虚拟设备）作为数据源，持续不断发送过去
+nc 192.168.2.100 9991 < /dev/zero
 ```
 
 验证，请安装`dstat`进行统计分析
