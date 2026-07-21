@@ -62,7 +62,8 @@ sudo apt update && sudo apt upgrade -y
 ### 2.3 安装常用软件
 
 ```bash
-apt install openjdk-17-jdk
+sudo apt install openjdk-8-jdk
+sudo apt install openjdk-17-jdk
 
 # 图形化安装
 dpkg -i dbeaver-ce_25.0.5_amd64.deb
