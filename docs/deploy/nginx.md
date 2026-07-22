@@ -493,7 +493,7 @@ http {
     proxy_buffer_size 1024k;                # 单个代理缓冲区空间
     proxy_busy_buffers_size 1024k;          # 设置标注“client-ready”缓冲区的最大尺寸
     proxy_max_temp_file_size 1024k;         # 当proxy_buffers放不下后端服务器的响应内容时，写入临时文件
-    proxy_temp_file_write_size 64k;         # 当缓存被代理的服务器响应到临时文件时文件写入速度
+    proxy_temp_file_write_size 1024k;       # 当缓存被代理的服务器响应到临时文件时文件写入速度
     proxy_headers_hash_max_size 51200;      # 存放http报文头的哈希表容量上限，默认为512个字符。
     proxy_headers_hash_bucket_size 6400;    # nginx服务器申请存放http报文头的哈希表容量大小。默认为64个字符。
     # 代理区处理-超时时间
