@@ -114,6 +114,7 @@
   - [Spring Boot 2.x](java/springboot2)
   - [Spring Boot 3.x](java/springboot3)
   - [Mybatis源码](java/mybatis)
+  - [MyBatis-Plus](java/mybatisplus)
   - [Netty原理和源码](java/netty)
   - [Tomcat原理和源码](java/tomcat)
   - [Dubbo源码解析](java/dubbo)
