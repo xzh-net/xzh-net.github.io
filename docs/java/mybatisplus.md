@@ -21,7 +21,6 @@ spring:
 logging:
   level:
     net.xzh: debug
-    net.xzh.generator.mapper: debug
   pattern:
     dateformat: HH:mm:ss
 
