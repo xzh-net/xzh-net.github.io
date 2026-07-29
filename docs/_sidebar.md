@@ -127,7 +127,10 @@
 - 网络基础
   - [网络协议详解](deploy/network)
   - [IP子网划分](deploy/ip)
-  
+
+- 技术方案
+  - [三级等保](scheme/l3cp)
+
 - 游戏
   - [热血传奇](game/mir2)
   - [恶魔的幻影](game/ei3)
