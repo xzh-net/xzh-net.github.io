@@ -178,12 +178,158 @@ net stop mysql
 mysqld -remove mysql
 ```
 
-### 2.3 Notepad主题
+### 2.3 Notepad 主题
 
 设置 `->` 语言格式设置
 
 ![](../../assets/_images/deploy/win10/notepad.png)
 
-### 2.4 Xshell隧道
+### 2.4 Xshell 隧道
 
 ![](../../assets/_images/deploy/win10/xshell.png)
+
+### 2.5 Nginx 控制台
+
+创建脚本文件 nginx.bat，用于启动、停止和查看Nginx状态。（文件格式：ANSI，否则乱码）
+
+```bash
+@echo off
+chcp 936 >nul
+setlocal enabledelayedexpansion
+
+:: ============================================================
+:: 请根据实际安装路径修改 NGINX_HOME 变量
+:: ============================================================
+set NGINX_HOME=D:\tools\openresty-1.27.1.2-win64
+set NGINX_EXE=%NGINX_HOME%\nginx.exe
+
+if not exist "%NGINX_EXE%" (
+    echo [错误]：未找到 nginx.exe，请检查 NGINX_HOME 路径。
+    pause
+    exit /b 1
+)
+
+cd /d "%NGINX_HOME%"
+
+:: ============================================================
+:: 交互式菜单
+:: ============================================================
+:MENU
+cls
+echo ============================================
+echo        Nginx 控制台 (OpenResty)
+echo ============================================
+echo  1. 启动 / 平滑重载配置
+echo  2. 强制停止 Nginx
+echo  3. 查看运行状态
+echo  0. 退出
+echo ============================================
+set "choice="
+set /p choice=请输入选项并按回车: 
+
+if "%choice%"=="1" goto START_OR_RELOAD
+if "%choice%"=="2" goto FORCE_STOP
+if "%choice%"=="3" goto CHECK_STATUS
+if "%choice%"=="0" exit /b 0
+echo [提示]：输入无效，请重新选择。
+timeout /t 2 >nul
+goto MENU
+
+:: ============================================================
+:: 1. 启动或平滑重载
+:: ============================================================
+:START_OR_RELOAD
+cls
+echo 正在检测 Nginx 运行状态...
+tasklist /FI "IMAGENAME eq nginx.exe" 2>NUL | find /I /N "nginx.exe" >NUL
+
+if errorlevel 1 (
+    :: 未运行，先校验配置再启动
+    echo [信息]：Nginx 未运行，正在校验配置...
+    "%NGINX_EXE%" -t >NUL 2>&1
+    if errorlevel 1 (
+        echo [错误]：配置文件存在语法错误，无法启动！
+        echo ----------------------------------------
+        "%NGINX_EXE%" -t
+        echo ----------------------------------------
+    ) else (
+        echo [信息]：配置校验通过，正在启动 Nginx...
+        start "" "%NGINX_EXE%"
+        timeout /t 2 /nobreak >nul
+        tasklist /FI "IMAGENAME eq nginx.exe" 2>NUL | find /I /N "nginx.exe" >NUL
+        if errorlevel 1 (
+            echo [错误]：启动失败，请检查 Nginx 错误日志。
+        ) else (
+            echo [成功]：Nginx 已成功启动。
+        )
+    )
+) else (
+    :: 正在运行，准备平滑重载
+    echo [信息]：Nginx 正在运行，准备重载配置...
+    
+    :: 【核心优化】重载前再次检查配置语法，防止错误配置导致服务异常
+    "%NGINX_EXE%" -t >NUL 2>&1
+    if errorlevel 1 (
+        echo [警告]：配置文件存在语法错误，已取消重载！
+        echo ----------------------------------------
+        "%NGINX_EXE%" -t
+        echo ----------------------------------------
+    ) else (
+        "%NGINX_EXE%" -s reload
+        if errorlevel 1 (
+            echo [错误]：重载失败，请检查错误日志。
+        ) else (
+            echo [成功]：配置已成功平滑重载。
+        )
+    )
+)
+echo.
+echo 按任意键返回菜单...
+pause >nul
+goto MENU
+
+:: ============================================================
+:: 2. 强制停止 (立即终止进程)
+:: ============================================================
+:FORCE_STOP
+cls
+echo 正在强制停止 Nginx...
+"%NGINX_EXE%" -s stop
+if errorlevel 1 (
+    echo [警告]：常规停止失败，尝试强制结束进程...
+    taskkill /F /IM nginx.exe >NUL 2>&1
+    if errorlevel 1 (
+        echo [信息]：未找到运行中的 Nginx 进程。
+    ) else (
+        echo [成功]：Nginx 进程已强制终止。
+    )
+) else (
+    echo [成功]：Nginx 已停止。
+)
+echo.
+echo 按任意键返回菜单...
+pause >nul
+goto MENU
+
+:: ============================================================
+:: 3. 查看运行状态
+:: ============================================================
+:CHECK_STATUS
+cls
+echo 正在检查 Nginx 运行状态...
+echo ============================================
+tasklist /FI "IMAGENAME eq nginx.exe" 2>NUL | find /I /N "nginx.exe" >NUL
+if errorlevel 1 (
+    echo [信息]：Nginx 当前未运行。
+) else (
+    echo [信息]：Nginx 正在运行中。
+    echo.
+    echo 进程列表：
+    tasklist /FI "IMAGENAME eq nginx.exe"
+)
+echo ============================================
+echo.
+echo 按任意键返回菜单...
+pause >nul
+goto MENU
+```
