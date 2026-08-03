@@ -63,132 +63,17 @@ cd C:\Program Files\Oracle\VirtualBox
 VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\centos7\centos7.vdi"
 ```
 
-### 2.2 MySQL解压版安装
-
-#### 2.2.1 下载
-
-- 下载地址：https://dev.mysql.com/downloads/mysql/
-
-#### 2.2.2 配置环境变量
-
-新建MYSQL_HOME
-```
-MYSQL_HOME
-D:\mysql-8.0.36-winx64
-```
-
-编辑PATH
-```
-PATH
-%MYSQL_HOME%\bin
-```
-
-设置成功以后使用命令`mysql`进行验证，如果提示Can't connect to MySQL server on 'localhost'则证明添加成功。如果提示mysql不是内部或外部命令，也不是可运行的程序或批处理文件则表示添加添加失败，请重新检查步骤并重试。
-
-
-
-#### 2.2.3 初始化配置
-
-在bin的同级目录下新建一个my.ini文件
-
-```ini
-[client]
-# 设置mysql客户端默认字符集
-default-character-set=utf8
-
-[mysql]
-# 设置mysql客户端默认字符集
-default-character-set=utf8mb4
-
-[mysqld]
-# 设置mysql客户端连接服务端时默认使用的端口3306
-port = 3306
-
-# 设置mysql的安装目录
-basedir = D:\\mysql-8.0.36-winx64
-
-# 设置mysql数据库的数据的存放目录
-datadir = D:\\mysql-8.0.36-winx64\\data
-
-# 允许最大连接数
-max_connections=200
-
-# 允许连接失败的次数。这是为了防止有人从该主机试图攻击数据库系统
-max_connect_errors=10
-
-# 服务端使用的字符集默认为8比特编码的latin1字符集【mysql8.0】
-character_set_server = utf8mb4
-
-# 创建新表时将使用的默认存储引擎
-default-storage-engine=INNODB
-
-# 默认使用“mysql_native_password”插件认证【mysql8.0】
-# default_authentication_plugin=mysql_native_password​​
-authentication_policy=*
-
-# 跳过安全检查,如果跳过，可能不能执行修改用户密码sql语句
-#skip-grant-tables
-
-#开启查询缓存
-#explicit_defaults_for_timestamp=true
-
-# 创建模式 NO_AUTO_CREATE_USER再MYSQL8.0中已经被移除，不能再8.0以上版本配置【mysql8.0】
-# sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
-# sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
-sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
-```
-
-以管理员身份，运行命令行窗口：
-
-```bash
-mysqld --initialize-insecure
-# 或者下面方式，生成随机密码
-mysqld --initialize --user=mysql --console
-```
-
-如果没有出现报错信息，则证明data目录初始化没有问题，此时再查看MySQL目录下已经有data目录生成。
-
-#### 2.2.4 注册服务并启动
-
-```bash
-mysqld -install     # 以管理员身份运行
-net start mysql     # 启动mysql服务
-net stop mysql      # 停止mysql服务
-```
-
-#### 2.2.5 登录MySQL
-
-修改默认密码
-
-```bash
-mysqladmin -u root password 123456
-```
-
-登录
-
-```bash
-mysql -uroot -p123456
-# mysql -u用户名 -p密码 -h要连接的mysql服务器的ip地址(默认127.0.0.1) -P端口号(默认3306)
-```
-
-#### 2.2.6 卸载MySQL
-
-```bash
-net stop mysql
-mysqld -remove mysql
-```
-
-### 2.3 Notepad 主题
+### 2.2 Notepad 主题
 
 设置 `->` 语言格式设置
 
 ![](../../assets/_images/deploy/win10/notepad.png)
 
-### 2.4 Xshell 隧道
+### 2.3 Xshell 隧道
 
 ![](../../assets/_images/deploy/win10/xshell.png)
 
-### 2.5 Nginx 控制台
+### 2.4 Nginx 控制台
 
 创建脚本文件 nginx.bat，用于启动、停止和查看Nginx状态。（文件格式：ANSI，否则乱码）
 
@@ -333,3 +218,200 @@ echo 按任意键返回菜单...
 pause >nul
 goto MENU
 ```
+
+
+### 2.5 VSCode 插件
+
+#### 2.5.1 Rest Client
+
+Postman过于笨重、启动慢，简单接口调试用REST Client插件更轻便快捷，且请求文件能像代码一样用Git管理，省去切换工具和同步的麻烦
+
+```bash
+### ============================================================================
+##  全局变量定义（可在此集中修改环境/账号，所有请求共用）
+##  使用方式：在 VS Code 安装 "REST Client" 扩展，打开本文件，
+##           点击每个请求上方的 "Send Request" 即可。
+##           先发送【登录】请求获取 token，后续业务接口自动复用 token。
+### ============================================================================
+
+@baseUrl = https://www.xuzhihao.net/gateway/api/v1
+@loginTenantId = 1
+@businessTenantId = 1
+@username = admin
+@password = 123456
+## 项目详情参数：手动指定项目 ID（项目详情二备用，调试单个项目时使用）
+@projectId = 1958518500414836737
+
+
+### ============================================================================
+##  登录接口（用 @name login 标记，自动捕获响应）
+##  发送成功后，token 会自动写入 {{login.response.body.$.data.accessToken}}
+##  后续所有业务接口直接引用该变量，无需手动复制。
+##  POST + JSON body，需要 Content-Type: application/json
+### ============================================================================
+
+# @name login
+POST {{baseUrl}}/login
+Tenant-Id: {{loginTenantId}}
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "{{password}}"
+}
+
+
+### ============================================================================
+### 我的项目（分页）
+##  响应会被捕获（@name projectInfo），供【项目详情】自动提取项目 ID
+##  POST + JSON body，需要 Content-Type: application/json
+### ============================================================================
+
+# @name projectInfo
+POST {{baseUrl}}/project/list
+Tenant-Id: {{businessTenantId}}
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{
+    "pageNo": 1,
+    "pageSize": 10
+}
+
+
+### ============================================================================
+### 项目详情，动态参数传递（推荐）
+### ============================================================================
+
+# @name landDetail
+GET {{baseUrl}}/project/{{projectInfo.response.body.$.data.list[0].id}}
+Tenant-Id: {{businessTenantId}}
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+
+
+### ============================================================================
+### 项目详情，手动参数传递
+### ============================================================================
+
+# @name landDetailManual
+GET {{baseUrl}}/project/{{projectId}}
+Tenant-Id: {{businessTenantId}}
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+```
+
+### 2.6 MySQL解压版安装
+
+#### 2.6.1 下载
+
+- 下载地址：https://dev.mysql.com/downloads/mysql/
+
+#### 2.6.2 配置环境变量
+
+新建MYSQL_HOME
+```
+MYSQL_HOME
+D:\mysql-8.0.36-winx64
+```
+
+编辑PATH
+```
+PATH
+%MYSQL_HOME%\bin
+```
+
+设置成功以后使用命令`mysql`进行验证，如果提示Can't connect to MySQL server on 'localhost'则证明添加成功。如果提示mysql不是内部或外部命令，也不是可运行的程序或批处理文件则表示添加添加失败，请重新检查步骤并重试。
+
+
+
+#### 2.6.3 初始化配置
+
+在bin的同级目录下新建一个my.ini文件
+
+```ini
+[client]
+# 设置mysql客户端默认字符集
+default-character-set=utf8
+
+[mysql]
+# 设置mysql客户端默认字符集
+default-character-set=utf8mb4
+
+[mysqld]
+# 设置mysql客户端连接服务端时默认使用的端口3306
+port = 3306
+
+# 设置mysql的安装目录
+basedir = D:\\mysql-8.0.36-winx64
+
+# 设置mysql数据库的数据的存放目录
+datadir = D:\\mysql-8.0.36-winx64\\data
+
+# 允许最大连接数
+max_connections=200
+
+# 允许连接失败的次数。这是为了防止有人从该主机试图攻击数据库系统
+max_connect_errors=10
+
+# 服务端使用的字符集默认为8比特编码的latin1字符集【mysql8.0】
+character_set_server = utf8mb4
+
+# 创建新表时将使用的默认存储引擎
+default-storage-engine=INNODB
+
+# 默认使用“mysql_native_password”插件认证【mysql8.0】
+# default_authentication_plugin=mysql_native_password​​
+authentication_policy=*
+
+# 跳过安全检查,如果跳过，可能不能执行修改用户密码sql语句
+#skip-grant-tables
+
+#开启查询缓存
+#explicit_defaults_for_timestamp=true
+
+# 创建模式 NO_AUTO_CREATE_USER再MYSQL8.0中已经被移除，不能再8.0以上版本配置【mysql8.0】
+# sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
+# sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+```
+
+以管理员身份，运行命令行窗口：
+
+```bash
+mysqld --initialize-insecure
+# 或者下面方式，生成随机密码
+mysqld --initialize --user=mysql --console
+```
+
+如果没有出现报错信息，则证明data目录初始化没有问题，此时再查看MySQL目录下已经有data目录生成。
+
+#### 2.6.4 注册服务并启动
+
+```bash
+mysqld -install     # 以管理员身份运行
+net start mysql     # 启动mysql服务
+net stop mysql      # 停止mysql服务
+```
+
+#### 2.6.5 登录MySQL
+
+修改默认密码
+
+```bash
+mysqladmin -u root password 123456
+```
+
+登录
+
+```bash
+mysql -uroot -p123456
+# mysql -u用户名 -p密码 -h要连接的mysql服务器的ip地址(默认127.0.0.1) -P端口号(默认3306)
+```
+
+#### 2.6.6 卸载MySQL
+
+```bash
+net stop mysql
+mysqld -remove mysql
+```
+
+
