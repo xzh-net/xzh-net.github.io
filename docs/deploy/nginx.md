@@ -883,7 +883,7 @@ server {
 #### 3.1.10 跨域
 
 ```nginx
-location /test {
+location /v1 {
     default_type application/json;
     
     # 方案1，不需要凭据，允许所有源
@@ -900,13 +900,16 @@ location /test {
         return 403;
     }
     if ( $query_string ~* ^(.*)name=zhangsan$ ) {
-        return 200 '{"id":1,"name":"我是个大盗贼","age":29}';
+        return 200 '{"id":1,"name":"张三","age":29}';
     }
     if ( $query_string ~* ^(.*)name=lisi$ ) {
-        return 200 '{"id":1,"name":"我们都是好孩子","age":29}';
+        return 200 '{"id":2,"name":"李四","age":29}';
     }
-
-    return 200 "没有找到用户，当前时间：$time_local";
+    if ( $query_string ~* ^(.*)name=none$ ) {
+        return 200 "没有找到用户，当前时间：$time_local";
+    }
+    
+    return 200 '{"code":"0","msg":"","data":{"list":[{"id":1,"name":"我们都是好孩子","age":29},{"id":2,"name":"我是个大盗贼","age":30}],"total":2,"totalPage":1,"pageSize":10,"pageNum":1}}';
 }
 ```
 
