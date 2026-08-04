@@ -79,6 +79,7 @@ VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\centos7\centos7.vdi"
 
 ```bash
 @echo off
+title openresty-1.27.1.2
 chcp 936 >nul
 setlocal enabledelayedexpansion
 
