@@ -1,8 +1,8 @@
-# SRS(Simple Realtime Server) 4.0
+# SRS 4.0
 
-SRS是一个采用MIT协议授权的国产简单RTMP/HLS直播服务器。最新版还支持FLV模式，同时具备了RTMP的实时性，以及HLS中属于HTTP协议对各种网络环境高度适应性，并且支持更多播放器。它的功能与nginx-rtmp-module类似, 可以实现RTMP/HLS的分发,可用于直播/录播/视频客服等多种场景，其定位是运营级的互联网直播服务器集群
+SRS（Simple Realtime Server）是一个简单高效的实时视频服务器，支持RTMP、WebRTC、HLS、HTTP-FLV、SRT等多种实时流媒体协议。
 
-
+- 官方网址：https://ossrs.net/lts/zh-cn/
 - 下载地址：https://github.com/ossrs/srs/releases/download/v4.0-r5/srs-server-4.0-r5.tar.gz
 
 
