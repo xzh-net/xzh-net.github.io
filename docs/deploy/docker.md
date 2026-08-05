@@ -3009,7 +3009,7 @@ vhost __defaultVhost__ {
 }
 ```
 
-容器内指定配置文件启动 srs
+容器内指定配置文件启动
 ```bash
 ./objs/srs -c conf/srs.test.conf
 ```
