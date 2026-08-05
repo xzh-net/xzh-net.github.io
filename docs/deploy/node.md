@@ -84,6 +84,68 @@ forever start -w app.js     # 监听文件改动
 forever start -l forever.log -o out.log -e err.log app.js   # 日志输出
 ```
 
+### 1.4 版本管理
+
+#### 1.4.1 安装 nvm-windows
+
+- 下载地址：https://github.com/coreybutler/nvm-windows/releases
+
+双击安装，安装路径不要含中文和空格。
+
+#### 1.4.2 配置镜像加速（可选但推荐）
+
+安装完成后，找到 nvm 安装目录下的 settings.txt （一般在 `C:\Users\你的用户名\AppData\Roaming\nvm\settings.txt` ），添加两行：
+
+```txt
+node_mirror: https://npmmirror.com/mirrors/node/
+npm_mirror: https://npmmirror.com/mirrors/npm/
+```
+
+#### 1.4.3 安装 Node 16 并切换
+
+打开新的 PowerShell 窗口：
+
+```powershell
+nvm install 16
+nvm use 16
+node -v
+```
+
+`node -v` 应输出 `v16.x.x`。
+
+#### 1.4.4 配置 npm 镜像
+
+```powershell
+npm config set registry https://registry.npmmirror.com
+npm config set legacy-peer-deps true    # 解决安装依赖时忽略版本冲突问题
+```
+
+#### 1.4.5 常用命令
+
+安装与卸载
+```bash
+nvm install 16.20.2        # 安装指定版本
+nvm install latest         # 安装最新版本
+nvm install lts            # 安装最新 LTS 版本
+nvm uninstall 16.20.2      # 卸载指定版本
+```
+
+查看命令
+```bash
+nvm list                   # 查看所有版本
+nvm list available         # 查看所有可用版本
+nvm current                # 查看当前版本
+nvm -v                     # 查看版本
+```
+
+切换命令
+```bash
+nvm use 16                 # 切换到当前版本的最新版本
+nvm use 16.20.2            # 切换到指定版本
+nvm use lts                # 切换到最新 LTS 版本
+nvm alias default 16.20.2  # 设置默认版本，下次打开 PowerShell 时自动切换到该版本
+```
+
 ## 2. Linux
 
 ### 2.1 安装Node.js
