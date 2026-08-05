@@ -1886,7 +1886,7 @@ docker run --name nacos-standalone-derby \
     -d nacos/nacos-server:v3.0.1
 ```
 
-控制台地址：http://172.17.17.161:8080
+控制台：http://172.17.17.161:8080
 
 高级使用
 
@@ -2346,7 +2346,7 @@ docker run --name kibana -p 5601:5601 \
 docker run -d --name activemq -p 8161:8161 -p 1883:1883 -p 61614:61614 -p 61616:61616  webcenter/activemq:5.14.3
 ```
 
-控制台地址：http://0.0.0.0:8161
+控制台：http://0.0.0.0:8161
 默认账号密码admin/admin
 
 #### RabbitMQ 3.7.15
@@ -2367,7 +2367,7 @@ rabbitmqctl set_user_tags admin administrator
 rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
 ```
 
-控制台地址：http://0.0.0.0:15672 账号密码：admin/123456
+控制台：http://0.0.0.0:15672 账号密码：admin/123456
 
 #### RocketMQ 4.4.0
 
@@ -2836,52 +2836,59 @@ docker-compose -f docker-compose-prometheus.yml up -d
 docker run -d -p 3000:3000 --name grafana grafana/grafana
 ```
 
-admin:admin
+账号密码：admin/admin
 
 ### 4.8 音视频、即时通讯
 
 #### SRS 4.0.187 
 
+默认安装
 ```bash
-# 默认安装
 docker run --rm -p 1935:1935 -p 1985:1985 -p 8080:8080 \
     -v /home/srs-4.0.187/trunk/conf/srs.conf:/usr/local/srs/conf/srs.conf \
     ossrs/srs:v4.0.187
 ```
 
+自定义安装
 ```bash
 # 创建自定义网络
 docker network create --driver bridge --subnet 172.0.0.0/16 xzh_network
 # 查看已存在网络
 docker network ls
 # 创建数据目录
-mkdir -p /home/docker/srs4
+mkdir -p /usr/local/srs/
+```
 
-# 安装并启动 srs
+启动容器
+```bash
 docker run -p 1935:1935 -p 1985:1985 -p 8080:8080 \
 --name srs \
 ossrs/srs:v4.0.187
-# 把容器中的配置文件复制出来
-docker cp -a srs:/usr/local/srs/conf /home/docker/srs4/conf
-# 把容器中的数据文件复制出来
-docker cp -a srs:/usr/local/srs/objs /home/docker/srs4/objs
-# 删除 srs 容器
-docker rm -f srs
+```
 
-# 本地配置文件启动
+把容器中的配置文件复制出来
+```bash
+docker cp -a srs:/usr/local/srs/conf /usr/local/srs/conf
+docker cp -a srs:/usr/local/srs/objs /usr/local/srs/objs
+docker rm -f srs
+```
+
+本地配置文件启动
+```bash
 docker run -p 1935:1935 -p 1985:1985 -p 8080:8080 \
 --name srs \
 --network xzh_network \
 --ip 172.0.0.35 \
 --restart=always \
--v /home/docker/srs4/conf/:/usr/local/srs/conf/ \
--v /home/docker/srs4/objs/:/usr/local/srs/objs/ \
+-v /usr/local/srs/conf/:/usr/local/srs/conf/ \
+-v /usr/local/srs/objs/:/usr/local/srs/objs/ \
 ossrs/srs:v4.0.187 
 ```
 
-http://服务器IP地址:8080
-
-SRS自定义参考配置
+编辑配置文件
+```bash
+/usr/local/srs/conf/srs.conf
+```
 
 ```conf
 listen              1935;
@@ -3000,14 +3007,14 @@ vhost __defaultVhost__ {
         on_hls_notify   http://127.0.0.1:8085/api/v1/hls/[app]/[stream]/[ts_url][param];
     }
 }
-
-
 ```
 
-指定配置文件启动 srs
+容器内指定配置文件启动 srs
 ```bash
-./objs/srs -c conf/srs.woniu.conf
+./objs/srs -c conf/srs.test.conf
 ```
+
+控制台：http://192.168.1.201:8080
 
 #### Openfire 4.4.4
 
