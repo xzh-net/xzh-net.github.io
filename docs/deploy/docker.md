@@ -670,14 +670,14 @@ ONBUILD     # 设置在构建时需要自动执行的命令
 
 #### 3.1.1 基于编译环境构建
 
-1. 创建文件
+1. 创建文件目录并编写 Dockerfile 文件
 
 ```bash
 cd /data/apps
 vi Dockerfile
 ```
 
-```bash
+```Dockerfile
 FROM maven:3-jdk-8-alpine
 
 WORKDIR /usr/src/app
@@ -690,24 +690,28 @@ EXPOSE $PORT
 CMD [ "sh", "-c", "mvn -Dserver.port=${PORT} spring-boot:run" ]
 ```
 
->`maven:3-jdk-8-alpine`集成了编译环境和运行环境，所以体积较大。没有梯子的情况下`mvn package`执行时间较长。这里将外部配置文件`settings.xml`复制到镜像中（根据环境可选），可以配置国内镜像源，加快编译速度。3.3章节中基于插件构建使用到了`openjdk:8-jre-alpine`，体积较小，但编译环境需要单独配置，比较麻烦。具体编辑环境在主机还是在容器内，可以根据项目情况选择。
-
 2. 构建镜像
 
 ```bash
 docker build -f Dockerfile -t app-server .
 ```
 
-3. 运行
+3. 运行容器
 
 ```bash
 docker run -dit --name app-server -p 5000:5000 app-server
-docker exec -it app-server /bin/ash      # 进入容器
+docker exec -it app-server /bin/ash         # 进入容器
 cat /etc/issue                              # 查看操作系统
 uname -a                                    # 查看内核
 ```
 
+因为 maven:3-jdk-8-alpine 把编译和运行环境都打包了，所以镜像会比较大。而且如果没有梯子，跑 mvn package 会非常慢。解决办法就是把外部的 settings.xml 复制到镜像里，配上国内的镜像源，这样编译速度就能快很多。
+
+
 #### 3.1.2 基于运行环境构建
+
+采用轻量级 openjdk:8-jre-alpine 基础镜像，体积小巧。通过 JVM 参数固定堆内存（初始/最大 128M）并设置 -Djava.security.egd 优化随机数生成性能，直接运行打包好的可执行 JAR 包，适用于资源受限的微服务部署场景
+
 
 ```bash
 FROM openjdk:8-jre-alpine
@@ -715,6 +719,8 @@ COPY target/*.jar /app.jar
 EXPOSE 8080
 ENTRYPOINT ["sh","-c","java -Xms128m -Xmx128m -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
 ```
+
+使用官方 tomcat:8-jre8 镜像，将打包好的 ROOT.war 添加到 webapps 目录，由 Tomcat 自动解压部署。通过 catalina.sh run 在前台启动容器，适合传统的 WAR 包 Web 应用
 
 ```bash
 FROM tomcat:8-jre8
@@ -877,7 +883,7 @@ RUN mv /usr/local/node-v14.21.3-linux-x64 /usr/local/node
 ENV NODE_HOME /usr/local/node
 ENV PATH $PATH:$NODE_HOME/bin
 
-# maven3.6.3
+# maven 3.6.3
 ADD apache-maven-3.6.3-bin.tar.gz /usr/local/
 RUN mv /usr/local/apache-maven-3.6.3 /usr/local/maven && ln -s /usr/local/maven/bin/mvn /usr/bin/mvn
 ENV MAVEN_VERSION 3.6.3
