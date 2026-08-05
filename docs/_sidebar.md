@@ -43,7 +43,7 @@
   - [Zookeeper](deploy/zookeeper)
   - [Etcd](deploy/etcd)
   - [Seata](deploy/seata)
-  - [Simple RTMP Server](deploy/srs)
+  - [SRS](deploy/srs)
   - [Turnserver](deploy/turnserver)
   - [Nps](deploy/nps)
   - [RabbitMQ](deploy/rabbitmq)
