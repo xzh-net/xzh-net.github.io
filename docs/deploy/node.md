@@ -94,7 +94,7 @@ forever start -l forever.log -o out.log -e err.log app.js   # 日志输出
 
 #### 1.4.2 配置镜像加速（可选但推荐）
 
-安装完成后，找到 nvm 安装目录下的 settings.txt （一般在 `C:\Users\你的用户名\AppData\Roaming\nvm\settings.txt` ），添加两行：
+安装完成后，找到 nvm 安装目录下的 settings.txt （一般在 `C:\Users\你的用户名\AppData\Local\nvm\settings.txt` ），添加两行：
 
 ```txt
 node_mirror: https://npmmirror.com/mirrors/node/
