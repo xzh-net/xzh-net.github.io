@@ -466,7 +466,7 @@ http {
         '~^(?<ymd>\d{4}-\d{2}-\d{2})' $ymd;
         default    'date-not-found';
     }
-    access_log logs/ip_access_$logdate.log access;
+    access_log logs/ip_access_$logdate.log main;
 
     # 其他参数
     server_tokens   off;                    # 关闭错误页面中版本号
