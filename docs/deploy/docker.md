@@ -3058,8 +3058,37 @@ code-server --bind-addr=0.0.0.0:8080 --user-data-dir=/data/code-server/user-data
 
 #### draw.io 29.0.3
 
+1. 创建目录
+
 ```bash
-docker run -dit --name=draw -p 8080:8080 -p 8443:8443 jgraph/drawio:29.0.3
+mkdir -p /data/drawio/data
+cd /data/drawio
+```
+
+2. 创建 docker-compose.yml
+
+```bash
+version: "3"
+
+services:
+  drawio:
+    image: jgraph/drawio:latest
+    container_name: drawio
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - DRAWIO_BASE_URL=http://localhost:8080
+    volumes:
+      - /data/drawio/data:/var/lib/drawio
+```
+
+3. 启动
+
+```bash
+docker compose up -d
+# 关闭
+docker compose down
 ```
 
 离线请求地址：http://127.0.0.1:8080/draw?offline=1
