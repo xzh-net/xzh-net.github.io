@@ -62,6 +62,7 @@
   - [模型库](deploy/model)
   - [Dify](deploy/dify)
   - [Higress](deploy/higress)
+  - [OpenCode](deploy/opencode)
 
 - 区块链
   - [Fisco Bcos](deploy/fisco)
