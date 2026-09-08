@@ -272,6 +272,7 @@ git merge new-feature           # 将指定分支合并到当前分支
 git branch -d new-feature       # 删除一个已经合并的本地分支
 git branch -D new-feature       # 强制删除一个本地分支（未合并的）	
 git push origin --delete new-feature    # 删除远端分支
+git reset --hard origin/new-feature     # 将当前本地分支强制重置为远程分支
 ```
 
 全局
