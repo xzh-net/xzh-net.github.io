@@ -1420,7 +1420,7 @@ echo '/dev/sdb1 /data ext4 defaults 0 0' >> /etc/fstab  # 自动挂载
 cat /etc/fstab          # 查看写入分区信息
 ```
 
-### 2.4 编译GCC
+### 2.4 开发工具链
 
 ```bash
 # 1. 更新系统
@@ -1446,7 +1446,7 @@ gcc --version
 echo "source /opt/rh/devtoolset-9/enable" >> /etc/profile
 ```
 
-### 2.5 文件
+### 2.5 文件操作
 
 1. 拷贝
 
@@ -1550,7 +1550,7 @@ route add -host 192.168.3.1 gw 192.168.1.110    # 对一个具体的ip添加路�
 rouate add -net 192.168.2.0/24 dev eth0         # 对一个网络添加一个新的路由（另一个网段）
 ```
 
-### 2.7 网络探测
+### 2.7 端口扫描（Nmap）
 
 Network Mapper是一款开源免费的针对大型网络的端口扫描工具，nmap可以检测目标主机是否在线、主机端口开放情况、检测主机运行的服务类型及版本信息、检测操作系统与设备类型等信息
 
@@ -1573,7 +1573,7 @@ sudo nmap -e enp0s3 -sn 192.168.100.0/22
 ```
 
 
-### 2.8 数据包分析
+### 2.8 网络抓包（Tcpdump）
 
 tcpdump 是一款命令行网络数据包分析器，用于捕获、分析和显示网络流量
 
@@ -1645,7 +1645,7 @@ ifstat -i eth0,eth1
 ifstat -i eth0 -t 1
 ```
 
-### 2.10 综合监控
+### 2.10 系统监控（Dstat）
 
 dstat 是一款功能强大的实时系统监控工具，它结合了 vmstat、iostat、netstat 等多个传统工具的功能，并提供了更友好、更灵活的显示方式
 
@@ -1928,6 +1928,25 @@ nohup python -m SimpleHTTPServer 9000 > t1.log 2>&1 &
 
 # python3
 nohup python3 -m http.server 9000 > t1.log 2>&1 &
+```
+
+### 2.14 磁盘IO监控（Iotop）
+
+iotop 是一款实时监控磁盘IO的工具，可以查看每个进程的读写情况。
+
+```bash
+yum install -y iotop
+iotop -o -P    # 只显示有IO活动的进程，按进程显示
+```
+
+参数说明
+```lua
+-o：只显示有IO活动的进程
+-P：按进程显示（而非线程）
+-b：批量模式，非交互式
+-d N：刷新间隔N秒
+-p PID：只监控指定PID
+-u USER：只监控指定用户
 ```
 
 ## 3. 初始化
