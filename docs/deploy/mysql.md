@@ -161,14 +161,78 @@ service mysql restart
 
 ### 2.3 慢查询日志
 
-```bash
-set global slow_query_log = on      # 临时开启慢查询日志
-set global slow_query_log = off     # 临时关闭
-set long_query_time = 1             # 临时设置查询临界点
-set globle log_output = file        # 设置慢查询存储的方式
-show variables like '%quer%'        # 开启状态和慢查询日志储存的位置
+MySQL 的慢查询日志用于记录执行时间超过指定阈值（`long_query_time`）的 SQL 语句，是定位和优化慢 SQL 的重要依据。
 
-cat -n  /data/mysql/mysql-slow.log  # 查看示例
+#### 2.3.1 开启慢查询日志
+
+1. 临时开启（重启失效）
+
+```sql
+set global slow_query_log = 'ON';   -- 开启慢查询日志
+set global long_query_time = 1;     -- 查询临界点，单位秒（1表示>1s记录）
+set global log_output = 'FILE';     -- 日志输出方式：FILE / TABLE
+```
+
+2. 永久开启（修改配置文件）
+
+```bash
+vim /etc/my.cnf
+
+slow_query_log = ON                  # 开启慢查询日志
+slow_query_log_file = /data/mysql/mysql-slow.log   # 日志存放路径（需确保目录存在且有写权限）
+long_query_time = 1                  # SQL执行时间超过1秒即记录
+log_queries_not_using_indexes = ON   # 记录未使用索引的查询（可选）
+log_output = FILE                    # 输出方式：FILE / TABLE
+```
+
+修改后重启服务生效：
+
+```bash
+systemctl restart mysqld
+```
+
+3. 查看当前配置
+
+```sql
+show variables like 'slow_query_log%';
+show variables like 'long_query_time';
+show variables like 'log_output';
+show variables like '%quer%';   -- 查看开启状态和日志存储位置
+```
+
+#### 2.3.2 查看慢查询日志
+
+1. 查看日志文件
+
+```bash
+cat -n /data/mysql/mysql-slow.log   # 查看慢查询日志内容
+tail -f /data/mysql/mysql-slow.log  # 实时跟踪日志
+```
+
+2. 使用 mysqldumpslow 分析
+
+```bash
+# 按执行次数排序，输出前10条
+mysqldumpslow -s c -t 10 /data/mysql/mysql-slow.log
+
+# 按平均查询时间排序
+mysqldumpslow -s at -t 10 /data/mysql/mysql-slow.log
+
+# 按总时间排序
+mysqldumpslow -s t -t 10 /data/mysql/mysql-slow.log
+```
+
+3. 当日志输出方式为 TABLE 时，可通过表查询
+
+```sql
+select * from mysql.slow_log order by start_time desc limit 10;
+```
+
+#### 2.3.3 关闭慢查询日志
+
+```sql
+set global slow_query_log = 'OFF';  -- 临时关闭
+flush slow_logs;                    -- 关闭后刷新日志
 ```
 
 ### 2.4 审计日志
