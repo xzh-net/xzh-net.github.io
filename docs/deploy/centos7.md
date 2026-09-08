@@ -1766,8 +1766,27 @@ fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=7
 ```
 
 
+### 2.13 磁盘IO监控（Iotop）
 
-### 2.13 Shell脚本
+iotop 是一款实时监控磁盘IO的工具，可以查看每个进程的读写情况。
+
+```bash
+yum install -y iotop
+iotop -o -P    # 只显示有IO活动的进程，按进程显示
+```
+
+参数说明
+```lua
+-o：只显示有IO活动的进程
+-P：按进程显示（而非线程）
+-b：批量模式，非交互式
+-d N：刷新间隔N秒
+-p PID：只监控指定PID
+-u USER：只监控指定用户
+```
+
+
+### 2.134 Shell脚本
 
 1. Tomcat一键启动脚本
 
@@ -1930,24 +1949,7 @@ nohup python -m SimpleHTTPServer 9000 > t1.log 2>&1 &
 nohup python3 -m http.server 9000 > t1.log 2>&1 &
 ```
 
-### 2.14 磁盘IO监控（Iotop）
 
-iotop 是一款实时监控磁盘IO的工具，可以查看每个进程的读写情况。
-
-```bash
-yum install -y iotop
-iotop -o -P    # 只显示有IO活动的进程，按进程显示
-```
-
-参数说明
-```lua
--o：只显示有IO活动的进程
--P：按进程显示（而非线程）
--b：批量模式，非交互式
--d N：刷新间隔N秒
--p PID：只监控指定PID
--u USER：只监控指定用户
-```
 
 ## 3. 初始化
 
