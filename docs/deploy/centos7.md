@@ -1766,7 +1766,9 @@ fio -filename=/tmp/fiotest  -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=7
 ```
 
 
-### 2.13 磁盘IO监控（Iotop）
+### 2.13 磁盘IO监控
+
+#### 2.13.1 Iotop
 
 iotop 是一款实时监控磁盘IO的工具，可以查看每个进程的读写情况。
 
@@ -1783,6 +1785,108 @@ iotop -o -P    # 只显示有IO活动的进程，按进程显示
 -d N：刷新间隔N秒
 -p PID：只监控指定PID
 -u USER：只监控指定用户
+```
+
+> iotop 是交互式工具，无法自动记录日志。如果需要持续监控并记录日志，建议使用 iostat + pidstat 组合
+
+#### 2.13.2 Iostat
+
+iostat 用于查看磁盘设备级别的IO统计，pidstat 用于查看每个进程的IO使用情况。两者都支持非交互式输出，适合持续监控和日志记录。
+
+1. 设备级IO监控
+
+```bash
+yum install -y sysstat
+iostat -dx 1 3    # 每1秒刷新一次，共显示3次
+```
+
+参数说明
+```lua
+-d：只显示设备利用率统计
+-x：显示扩展统计信息（推荐）
+-k：以KB为单位显示
+-t：显示时间戳
+1：刷新间隔（秒）
+3：刷新次数
+```
+
+输出字段说明
+```lua
+r/s：每秒读请求数
+w/s：每秒写请求数
+rkB/s：每秒读取KB数
+wkB/s：每秒写入KB数
+rrqm/s：每秒读合并请求数
+wrqm/s：每秒写合并请求数
+%rrqm：读合并百分比
+%wrqm：写合并百分比
+r_await：平均读等待时间（毫秒）
+w_await：平均写等待时间（毫秒）
+aqu-sz：平均队列长度
+rareq-sz：平均读请求大小（KB）
+wareq-sz：平均写请求大小（KB）
+svctm：平均服务时间（毫秒）（已废弃，仅供参考）
+%util：磁盘利用率（超过80%可能成为瓶颈）
+```
+
+2. 进程级IO监控
+
+```bash
+yum install -y sysstat
+pidstat -d 1 3     # 每1秒刷新一次，共显示3次
+```
+
+参数说明
+```lua
+-d：显示IO统计
+-u：显示CPU使用（默认）
+-r：显示内存使用
+-t：显示线程级别
+-p PID：指定进程
+1：刷新间隔（秒）
+3：刷新次数
+```
+
+输出字段说明
+```lua
+kB_rd/s：每秒读取KB数
+kB_wr/s：每秒写入KB数
+kB_ccwr/s：每秒取消写入KB数（写入后被取消的页面）
+iodelay：IO延迟（时钟周期）
+Command：进程名称
+```
+
+3. 持续监控脚本
+
+```bash
+#!/bin/bash
+LOG_FILE="./io_test.log"
+
+while true
+do
+    {
+        echo ""
+        echo "=================================================="
+        echo "TIME: $(date '+%F %T')"
+        echo "=================================================="
+
+        echo ""
+        echo "[IOSTAT]"
+        iostat -dx 1 2
+
+        echo ""
+        echo "[PIDSTAT]"
+        pidstat -d 1 2
+
+    } >> "${LOG_FILE}" 2>&1
+
+done
+```
+
+如果需要持续记录日志，使用脚本后台运行
+
+```bash
+nohup bash monitor.sh &
 ```
 
 
