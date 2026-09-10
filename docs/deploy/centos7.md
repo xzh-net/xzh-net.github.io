@@ -1860,10 +1860,28 @@ Command：进程名称
 
 ```bash
 #!/bin/bash
-LOG_FILE="./io_test.log"
+
+LOG_DIR="./io_logs"
+
+# 创建日志目录
+mkdir -p "${LOG_DIR}"
 
 while true
 do
+    # 获取当前日期和时间
+    DATE=$(date '+%Y%m%d')
+    HOUR=$(date '+%H')
+    MINUTE=$(date '+%M')
+
+    # 按半小时划分日志
+    if [ "${MINUTE}" -lt 30 ]; then
+        PERIOD="00"
+    else
+        PERIOD="30"
+    fi
+
+    LOG_FILE="${LOG_DIR}/io_${DATE}_${HOUR}${PERIOD}.log"
+
     {
         echo ""
         echo "=================================================="
