@@ -141,7 +141,7 @@
 - 路由器
   - [K2P](router/k2p)
   - [Newifi D2](router/newife)
-  - [小米路由器MINI](router/mini)
+  - [小米路由器MINI](router/xiaomi)
 
 - 网络游戏
   - [热血传奇](game/mir2)
