@@ -132,6 +132,17 @@
 - 技术方案
   - [三级等保](scheme/l3cp)
 
-- 游戏
+- 电视盒子
+  - [百事通](router/k2p)
+  - [数码视讯](router/k2p)
+  - [魔百盒](router/k2p)
+  - [PHICOMM N1](router/k2p)
+
+- 路由器
+  - [K2P](router/k2p)
+  - [Newifi D2](router/newife)
+  - [小米路由器MINI](router/mini)
+
+- 网络游戏
   - [热血传奇](game/mir2)
   - [恶魔的幻影](game/ei3)
