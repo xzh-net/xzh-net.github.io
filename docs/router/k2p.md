@@ -40,10 +40,32 @@
 
 ### 2.3 V22.7.8.2 及之后
 
-1. 如果当前固件是 V22.7.8.2 版本及之后，需要使用 `RoutAckProV1B2` 工具激活 Telnet
+如果当前固件是 V22.7.8.2 版本及之后，需要使用 `RoutAckProV1B2` 工具激活 Telnet
 
-断开路由器电源，按住 Reset 键不放，然后插上电源，按住10秒后放开，此时已恢复出厂设置。等两分钟后指示灯变黄，登录 192.168.2.1，，账号密码：admin/admin，能进入说明ip没问题。
+1. 断开路由器电源，按住 Reset 键不放，然后插上电源，按住10秒后放开，此时已恢复出厂设置。等两分钟后指示灯变黄，登录 192.168.2.1，，账号密码：admin/admin，能进入说明ip没问题。
 
-先点击 `打开Telent`，框内显示成功，再点击 `设置永久标志`
+2. 打开 RoutAckProV1B2 ,先点击 `打开Telent`，框内显示成功。再点击 `设置永久标志`
 
 ![](../../assets/_images/router/k2p/telnet.png)
+
+3. 刷入 breed.bin，在 Telnet 中操作
+
+```bash
+cd /tmp
+# 下载
+wget http://192.168.2.100/breed.bin -O mtd1.bin
+# 解除分区保护
+mtd unlock Bootloader
+# 写入Bootloader分区并重启
+mtd -r write mtd1.bin Bootloader
+```
+
+breed 下载地址根据本地hfs服务地址替换
+
+![](../../assets/_images/router/k2p/hfs.png)
+
+4. 刷入成功以后，断开路由器电源，按住 Reset 键不放，然后插上电源。等待约 5-10 秒，观察到电源指示灯闪烁后松开 Reset 键。电脑访问 192.168.1.1 即可进入 Breed Web 界面
+
+5. 在 Breed 后台选择之前下载好的固件，上传固件即可，注意闪存布局
+
+![](../../assets/_images/router/k2p/layout.png)
