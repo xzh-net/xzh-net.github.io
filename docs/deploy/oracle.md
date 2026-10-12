@@ -1151,7 +1151,7 @@ input datafile copy RECID=4 STAMP=1158452021 file name=/u01/app/oracle/oradata/o
 Finished Duplicate Db at 17-JAN-24
 ```
 
-8. 登陆备库并查看数据库当前状态
+8. 登录备库并查看数据库当前状态
 
 ```bash
 sqlplus / as sysdba

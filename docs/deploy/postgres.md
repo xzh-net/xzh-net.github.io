@@ -187,7 +187,7 @@ ALTER USER postgres WITH PASSWORD 'postgres';
 ```
 
 ```bash
-psql -h localhost -p 5432 -U postgres -W # 使用指定用户和IP端口登陆
+psql -h localhost -p 5432 -U postgres -W # 使用指定用户和IP端口登录
 \q                  # 退出psql命令行
 \du                 # 查看角色属性
 \l                  # 查看数据库列表

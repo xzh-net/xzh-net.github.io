@@ -563,7 +563,7 @@ xferlog_file=/var/log/vsftpd.log
 #ascii_upload_enable=YES
 #设定支持ASCII模式的下载功能
 #ascii_download_enable=YES
-#设定Vsftpd的登陆标语
+#设定Vsftpd的登录标语
 #ftpd_banner=WelcometoAweiFTPservers
 #禁止本地用户登出自己的FTP主目录
 chroot_local_user=YES
@@ -593,7 +593,7 @@ max_per_ip=20000
 idle_session_timeout=600
 #含义与listen指令相同，只是在IPv6套接字上进行监听,该指令与listen是互斥的，不能同时使用
 listen_ipv6=NO
-#是否禁止userlist_file文件中的用户登陆。设为NO则根本无视该文件。
+#是否禁止userlist_file文件中的用户登录。设为NO则根本无视该文件。
 userlist_enable=YES
 #是否通过tcp_wrappers对进入连接进行访问控制。仅在编译了tcp_wrappers支持的时候有效
 #	tcp_wrappers可以针对每个单独的IP进行设置。
@@ -608,7 +608,7 @@ pasv_address=39.105.58.136
 pasv_min_port=50000
 #允许为PASV风格的数据连接使用的最大端口号,默认"0"表示不限
 pasv_max_port=50010
-#解决无法登陆的问题
+#解决无法登录的问题
 allow_writeable_chroot=YES
 #使用户不能离开主目录
 #chroot_list_enable=YES

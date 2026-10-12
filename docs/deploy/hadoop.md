@@ -658,7 +658,7 @@ vim hdfs-site.xml
     <value>sshfence</value>
 </property>
 
-<!-- 使用sshfence隔离机制时需要ssh免登陆 -->
+<!-- 使用sshfence隔离机制时需要ssh免登录 -->
 <property>
     <name>dfs.ha.fencing.ssh.private-key-files</name>
     <value>/root/.ssh/id_rsa</value>

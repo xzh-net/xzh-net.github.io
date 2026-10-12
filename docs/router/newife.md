@@ -27,9 +27,9 @@ Newifi D2 又称新路由3（Newifi3），是一款采用联发科平台的双�
 
 ## 4. 刷入 Breed 引导系统
 
-1. 使用 winscp 登陆路由器，将 `newifi-d2-jail-break.ko` 上传到路由器的/tmp目录下
+1. 使用 winscp 登录路由器，将 `newifi-d2-jail-break.ko` 上传到路由器的/tmp目录下
 
-2. 使用 putty 登陆路由器，执行 `insmod newifi-d2-jail-break.ko`, 两分钟左右路由器会自动重启
+2. 使用 putty 登录路由器，执行 `insmod newifi-d2-jail-break.ko`, 两分钟左右路由器会自动重启
 
 3. 断开路由器电源，按住 Reset 键不放，然后插上电源。等待约 5-10 秒，观察到电源指示灯闪烁后松开 Reset 键。电脑访问 192.168.1.1 即可进入 Breed Web 界面
 
@@ -49,7 +49,7 @@ Newifi D2 又称新路由3（Newifi3），是一款采用联发科平台的双�
 
 固件开发者在编译时，虽然集成了 SSR Plus 功能，但为了防止固件因包含特定插件而被"和谐"或导致下载链接失效，默认将这个插件的设置页面隐藏了起来。
 
-使用 putty 登陆路由器，执行以下命令
+使用 putty 登录路由器，执行以下命令
 
 ```bash
 echo  0xDEADBEEF > /etc/config/google_fu_mode

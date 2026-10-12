@@ -20,7 +20,7 @@
 ## 2. 获取 SSH 密码
 
 1. 下载 [小米路由器客户端](https://www1.miwifi.com/miwifi_download.html)，登录小米账号，会自动提示您绑定路由器。
-2. 登陆 [小米官网](http://d.miwifi.com/rom/ssh) 获取 SSH 密码。
+2. 登录 [小米官网](http://d.miwifi.com/rom/ssh) 获取 SSH 密码。
 3. 下载工具包，按使用方法引导操作。
 
 ![](../../assets/_images/router/xiaomi/ssh.png)
@@ -47,7 +47,7 @@
 
 原厂固件下用 `dd` 备份，是救砖或者回到原厂系统的最后手段。（我没有备份）
 
-1. 使用putty登陆路由器，主机名称192.168.31.1 端口号22 连接类型ssh，登陆时有提示就点击"是"
+1. 使用putty登录路由器，主机名称192.168.31.1 端口号22 连接类型ssh，登录时有提示就点击"是"
 ![](../../assets/_images/router/xiaomi/bakup_1.png)
 
 2. 用户名是你在小米的SSH页面获取的root，密码是后面的数字
@@ -79,9 +79,9 @@ dd if=/dev/mtd10 of=/extdisks/sdb1/10-Bdata.bin
 
 ## 6. 刷入 Breed 引导系统
 
-1. 使用 winscp 登陆路由器，将 `小米路由器Mini-R1CM-breed.bin` 改名为 `breed.bin` 并上传到路由器的/tmp目录下
+1. 使用 winscp 登录路由器，将 `小米路由器Mini-R1CM-breed.bin` 改名为 `breed.bin` 并上传到路由器的/tmp目录下
 
-2. 使用 putty 登陆路由器，执行 `mtd -r write /tmp/breed.bin Bootloader`, 两分钟左右路由器会自动重启
+2. 使用 putty 登录路由器，执行 `mtd -r write /tmp/breed.bin Bootloader`, 两分钟左右路由器会自动重启
 
 ![](../../assets/_images/router/xiaomi/breed_1.png)
 

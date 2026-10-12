@@ -270,7 +270,7 @@ INSERT INTO TB_TEST(ID,TITLE) VALUES(10000001,'goods10000001');
 | 属性                      | 取值       | 含义                                                         |
 | ------------------------- | ---------- | ------------------------------------------------------------ |
 | charset                   | utf8       | 设置Mycat的字符集, 字符集需要与MySQL的字符集保持一致         |
-| nonePasswordLogin         | 0,1        | 0为需要密码登陆、1为不需要密码登陆 ,默认为0，设置为1则需要指定默认账户 |
+| nonePasswordLogin         | 0,1        | 0为需要密码登录、1为不需要密码登录 ,默认为0，设置为1则需要指定默认账户 |
 | useHandshakeV10           | 0,1        | 使用该选项主要的目的是为了能够兼容高版本的jdbc驱动, 是否采用HandshakeV10Packet来与client进行通信, 1:是, 0:否 |
 | useSqlStat                | 0,1        | 开启SQL实时统计, 1 为开启 , 0 为关闭 ;<br />开启之后, MyCat会自动统计SQL语句的执行情况 ;<br />mysql -h 127.0.0.1 -P 9066 -u root -p<br />查看MyCat执行的SQL, 执行效率比较低的SQL , SQL的整体执行情况、读写比例等 ;<br />show @@sql ; show @@sql.slow ; show @@sql.sum ; |
 | useGlobleTableCheck       | 0,1        | 是否开启全局表的一致性检测。1为开启 ，0为关闭 。             |

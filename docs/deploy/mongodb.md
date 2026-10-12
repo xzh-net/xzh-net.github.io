@@ -810,7 +810,7 @@ use articledb
 for(var i=1;i<=1000;i++){db.comment.insert({_id:i+"",nickname:"xzh"+i})}
 ```
 
-分别登陆两个副本集的主节点，统计文档数量
+分别登录两个副本集的主节点，统计文档数量
 
 ```bash
 /usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017  
@@ -835,7 +835,7 @@ use articledb
 for(var i=1;i<=20000;i++){db.author.save({"name":"xzhhhhhhhhh"+i,"age":NumberInt(i%120)})}
 ```
 
-分别登陆两个副本集的主节点，统计文档数量
+分别登录两个副本集的主节点，统计文档数量
 
 ```bash
 /usr/local/mongodb/bin/mongo --host 192.168.2.201 --port 27017  
