@@ -55,4 +55,4 @@ Newifi D2 又称新路由3（Newifi3），是一款采用联发科平台的双�
 echo  0xDEADBEEF > /etc/config/google_fu_mode
 ```
 
-执行完毕后，刷新路由器管理后台的网页。在"服务"菜单下出现"ShadowSocksR Plus+"选项。
+执行完毕后，刷新路由器管理后台的网页，在"服务"菜单下出现"ShadowSocksR Plus+"选项。
