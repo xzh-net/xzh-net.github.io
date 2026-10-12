@@ -77,15 +77,15 @@ dd if=/dev/mtd10 of=/extdisks/sdb1/10-Bdata.bin
 
 ![](../../assets/_images/router/xiaomi/bakup_5.png)
 
-## 6. 刷入 breed
+## 6. 刷入 Breed 引导系统
 
 1. 使用 winscp 登陆路由器，将 `小米路由器Mini-R1CM-breed.bin` 改名为 `breed.bin` 并上传到路由器的/tmp目录下
 
-2. 使用 putty 登陆路由器，执行 `mtd -r write /tmp/breed.bin Bootloader`, 机器会重启
+2. 使用 putty 登陆路由器，执行 `mtd -r write /tmp/breed.bin Bootloader`, 两分钟左右路由器会自动重启
 
 ![](../../assets/_images/router/xiaomi/breed_1.png)
 
-3. 刷完breed，拔掉电源，按住reset键后再给路由器通电，等到路由器灯闪的时候（大概3秒即可），松开reset键，电脑上在浏览器中输入192.168.1.1，就进入breed控制台了
+3. 断开路由器电源，按住 Reset 键不放，然后插上电源。等待约 5-10 秒，观察到电源指示灯闪烁后松开 Reset 键。电脑访问 192.168.1.1 即可进入 Breed Web 界面
 
 4. 刷入第三方固件，刷入前请先备份【EEPROM】和【编程器固件】
 ![](../../assets/_images/router/xiaomi/breed_2.png)
@@ -96,3 +96,5 @@ dd if=/dev/mtd10 of=/extdisks/sdb1/10-Bdata.bin
 ![](../../assets/_images/router/xiaomi/breed_4.png)
 ![](../../assets/_images/router/xiaomi/breed_5.png)
 ![](../../assets/_images/router/xiaomi/breed_6.png)
+
+如果刷入的固件不满意，只需再次通过"按住 Reset 键上电"的方法进入 Breed 控制台，重新刷写其他固件即可。
