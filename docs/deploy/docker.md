@@ -111,6 +111,9 @@ sudo tee /etc/docker/daemon.json <<EOF
 EOF
 ```
 
+> 不需要访问 HTTP 或未信任自签名证书的私有仓库时，可以不设置 `insecure-registries` 选项
+
+
 #### 1.4.2 开启远程管理（可选）
 
 允许你从远程机器上通过HTTP协议与Docker守护进程进行通信。但这是一个不安全的行为，生产环境不要使用。
@@ -2596,7 +2599,6 @@ mkdir /opt/softwarte
 tar -zxvf harbor-offline-installer-v2.0.1.tgz -C /opt/
 ```
 
-
 2. 修改配置
 
 ```bash
@@ -2646,7 +2648,7 @@ docker-compose down     # 停止
 
 帐号：admin，密码：Harbor12345
 
-> 通过IP访问私有仓库需要在客户端配置`/etc/docker/daemon.json`的`insecure-registries`，如果使用域名访问，并配置了证书，客户端可以直接访问。
+> 如果 Harbor 以 IP + HTTP 方式提供服务，客户端必须在 `/etc/docker/daemon.json` 配置 `insecure-registries` 才能访问；若希望客户端免配置直接拉取镜像，需改用域名 + HTTPS 方式对外提供服务。
 
 
 #### SonarQube 7.8
