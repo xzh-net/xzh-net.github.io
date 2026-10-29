@@ -1908,9 +1908,11 @@ nohup bash monitor.sh &
 ```
 
 
-### 2.134 Shell脚本
+### 2.14 案例脚本
 
-1. Tomcat一键启动脚本
+#### 2.14.1 Tomcat 一键重启与虚拟主机部署
+
+1. 新建启动文件
 
 ```bash
 vi run_tomcat_web.sh
@@ -1938,7 +1940,7 @@ start
 ps -aux |grep ${appname}
 ```
 
-虚拟主机配置示例
+2. Tomcat虚拟主机配置示例
 
 ```conf
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1991,7 +1993,7 @@ ps -aux |grep ${appname}
 </Server>
 ```
 
-Nginx修改对应配置
+3. Nginx修改对应配置
 
 ```conf
 server {
@@ -2011,14 +2013,15 @@ server {
 }
 ```
 
-客户端设置Hosts
+4. 客户端设置Hosts
 
 ```bash
 vi /etc/hosts
 192.168.2.200 www.xzh.com
 ```
 
-2. Java应用一键启动
+
+#### 2.14.2 Java应用一键重启与包内容检索
 
 ```bash
 #!/bin/bash
@@ -2043,9 +2046,15 @@ start
 ps -aux |grep ${appname}
 ```
 
-3. 设置用户密码
+> 把 jar（zip）包内所有文件解压到标准输出，并统计其中`包含指定字符串的行数`
 
-在 `JumpServer` 堡垒机中，无法操作关键字命令，使用脚本可以执行。
+```bash
+unzip -p app.jar | grep -ac 'keywords'
+```
+
+#### 2.14.3 堡垒机环境下批量重置用户密码
+
+通过 JumpServer 堡垒机登录目标服务器后，在交互式命令行中执行包含特定关键字的命令会被拦截，但通过脚本方式仍可执行相同操作
 
 ```bash
 #!/bin/bash
@@ -2061,7 +2070,7 @@ echo "用户 $username 的密码已修改"
 ```
 
 
-4. Python HTTP服务
+#### 2.14.4 Python 快速搭建临时文件服务器
 
 ```bash
 # python2
