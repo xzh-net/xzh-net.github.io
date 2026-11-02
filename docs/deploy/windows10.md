@@ -56,13 +56,6 @@
 
 ## 2. 软件工具
 
-### 2.1 VirtualBox重置UUID
-
-```bash
-cd C:\Program Files\Oracle\VirtualBox
-VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\centos7\centos7.vdi"
-```
-
 ### 2.2 Notepad 主题
 
 设置 `->` 语言格式设置
@@ -419,3 +412,27 @@ mysqld -remove mysql
 ```
 
 
+## 3. 常见问题
+
+### 3.1 目录嵌套过深无法删除问题
+
+Windows 10 对文件路径长度有 260 个字符的限制，某些程序生成了极深的文件夹结构，导致嵌套过深，就会出现无法删除的情况
+
+解决办法，使用 PowerShell 强制删除
+
+```bash
+Remove-Item -LiteralPath "D:\BadFolder" -Recurse -Force
+```
+
+### 3.2 VirtualBox 虚拟硬盘 UUID 冲突问题
+
+VirtualBox 会给每个虚拟硬盘文件分配一个唯一的 UUID 标识符。当你遇到以下场景时，就会出现 UUID 冲突
+- 直接复制了虚拟硬盘文件（比如把 centos7.vdi 拷贝了一份）
+- 克隆虚拟机后，新旧磁盘 UUID 相同
+- 从别处导入/移动了虚拟机磁盘文件，而原磁盘仍被 VirtualBox 注册着
+
+解决办法，为虚拟文件重新生成一个新的 UUID
+```bash
+cd C:\Program Files\Oracle\VirtualBox
+VBoxManage internalcommands sethduuid "D:\VirtualBox VMs\centos7\centos7.vdi"
+```
