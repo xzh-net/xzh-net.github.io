@@ -1,6 +1,6 @@
-# OpenCode 1.18.27
+# OpenCode 2.3.2
 
-OpenCode 是一个开源的 AI 编码助手，运行在终端中，可以帮助你阅读代码、编写功能、执行重构等。它支持任意 LLM 提供商，并支持扩展规则、自定义命令（提示词）、MCP 服务器和 Skill。
+OpenCode 是一个开源的 AI 编码助手，可以帮助你阅读代码、编写功能、执行重构等。它支持任意 LLM 提供商，并支持扩展规则、自定义命令（提示词）、MCP 服务器和 Skill。
 
 - 官方文档：https://opencode.ai/docs
 - 下载地址：https://opencode.ai/zh/download
@@ -55,8 +55,9 @@ opencode --version
   },
 
   // 插件列表
-  "plugin": [
-    "codex-search-opencode"
+  "plugins": [
+    "codex-search-opencode",
+    "C://Users//admin//.config//opencode//node_modules//superpowers"
   ]
 }
 ```
@@ -205,7 +206,7 @@ opencode mcp logout sentry
 - MCP 工具会占用上下文，不要启用太多
 - 也可以在 `tools` 中按前缀禁用某个 MCP：`"db-analyzer_*": false`
 
-### 3.4 Skills
+### 3.4 技能
 
 Skills 是可供模型按需加载的复用指令集，通过内置 `skill` 工具读取，目录结构为固定的 `SKILL.md`。
 
@@ -239,9 +240,39 @@ description: 创建规范的版本发布与变更日志，用于准备发布 tag
 - 可选：`license`、`compatibility`、`metadata`
 
 **排查 Skill 不生效**：
+
 1. 文件名必须是大写的 `SKILL.md`
 2. frontmatter 必须包含 `name` 和 `description`
 3. 所有位置的 skill 名称必须唯一
 4. 被 `deny` 的 skill 对模型不可见
 
 > 所有的规则、命令、MCP、Skill 修改后，都需要重启 OpenCode 才能生效。
+
+### 3.5 插件
+
+插件是用 JavaScript / TypeScript 编写的扩展模块，**运行在 OpenCode 进程内部**，通过监听和介入会话生命周期事件（如会话启动、消息发送、工具调用前后）来改变 OpenCode 的行为。它不像规则那样只是一段写进上下文的文字，而是**真正的代码**——可以动态修改配置、注入额外上下文、拦截或改写提示词、在工具执行前后挂钩子、响应各类事件。
+
+OpenCode 启动时会加载 `plugins` 列表里声明的插件（也支持放在 `~/.config/opencode/plugins/` 或项目 `.opencode/plugins/*.ts` 下的插件文件）。Superpowers 正是以插件形式接入 OpenCode 的：它注册一个会话启动钩子，把引导技能（`using-superpowers`）的强制约束注入上下文，从而驱动后续的技能流程。
+
+**第一步：用系统 npm 本地安装**
+
+打开 **PowerShell**，执行：
+
+```bash
+npm install superpowers@git+https://github.com/obra/superpowers.git --prefix "$HOME\.config\opencode"
+```
+
+**第二步：在 opencode.json 中配置插件路径**
+
+找到 OpenCode 配置文件 `opencode.jsonc`，填入本地安装的**绝对路径**：
+
+```bash
+"plugins": [
+	"C://Users//admin//.config//opencode//node_modules//superpowers"
+]
+```
+
+判定生效依据，比如：`给我开发一个图书管理系统`
+
+> 关键判据：第一句是不是"调用某技能"+ 是不是先问不先写。两者都满足，说明 Hook 注入的引导话术和 HARD-GATE 都生效了。若它上来就写代码，是 Hook 没跑或没重启。
+
