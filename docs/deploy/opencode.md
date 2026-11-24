@@ -252,7 +252,7 @@ description: 创建规范的版本发布与变更日志，用于准备发布 tag
 
 插件是用 JavaScript / TypeScript 编写的扩展模块，**运行在 OpenCode 进程内部**，通过监听和介入会话生命周期事件（如会话启动、消息发送、工具调用前后）来改变 OpenCode 的行为。它不像规则那样只是一段写进上下文的文字，而是**真正的代码**——可以动态修改配置、注入额外上下文、拦截或改写提示词、在工具执行前后挂钩子、响应各类事件。
 
-OpenCode 启动时会加载 `plugins` 列表里声明的插件（也支持放在 `~/.config/opencode/plugins/` 或项目 `.opencode/plugins/*.ts` 下的插件文件）。Superpowers 正是以插件形式接入 OpenCode 的：它注册一个会话启动钩子，把引导技能（`using-superpowers`）的强制约束注入上下文，从而驱动后续的技能流程。
+[superpowers](https://github.com/obra/superpowers)一个开源技能框架，它通过强制实施“先规划、再测试、后编码”的严谨工程化工作流，将 AI 从**凭感觉编程的实习生**训练成**守纪律的资深工程师**。
 
 **第一步：用系统 npm 本地安装**
 
